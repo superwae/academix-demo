@@ -1,0 +1,273 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\D.Abedalrhman\\Downloads\\academix-demo\\backend\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{DC657B3F-0EC0-4B91-93E1-09BD80F3FDA6}|AcademixLMS.Application\\AcademixLMS.Application.csproj|c:\\users\\d.abedalrhman\\downloads\\academix-demo\\backend\\academixlms.application\\dtos\\auth\\loginrequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DC657B3F-0EC0-4B91-93E1-09BD80F3FDA6}|AcademixLMS.Application\\AcademixLMS.Application.csproj|solutionrelative:academixlms.application\\dtos\\auth\\loginrequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4A717E26-23AC-4B73-8C50-6AF0957C5CA7}|AcademixLMS.API\\AcademixLMS.API.csproj|c:\\users\\d.abedalrhman\\downloads\\academix-demo\\backend\\academixlms.api\\controllers\\assignmentscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4A717E26-23AC-4B73-8C50-6AF0957C5CA7}|AcademixLMS.API\\AcademixLMS.API.csproj|solutionrelative:academixlms.api\\controllers\\assignmentscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{ABB35305-485B-4924-A970-C3C291A036D8}|AcademixLMS.Domain\\AcademixLMS.Domain.csproj|c:\\users\\d.abedalrhman\\downloads\\academix-demo\\backend\\academixlms.domain\\entities\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{ABB35305-485B-4924-A970-C3C291A036D8}|AcademixLMS.Domain\\AcademixLMS.Domain.csproj|solutionrelative:academixlms.domain\\entities\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EA845015-BEB4-4389-9E5F-EB7CCC9E497C}|AcademixLMS.Infrastructure\\AcademixLMS.Infrastructure.csproj|c:\\users\\d.abedalrhman\\downloads\\academix-demo\\backend\\academixlms.infrastructure\\services\\jwtservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EA845015-BEB4-4389-9E5F-EB7CCC9E497C}|AcademixLMS.Infrastructure\\AcademixLMS.Infrastructure.csproj|solutionrelative:academixlms.infrastructure\\services\\jwtservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EA845015-BEB4-4389-9E5F-EB7CCC9E497C}|AcademixLMS.Infrastructure\\AcademixLMS.Infrastructure.csproj|c:\\users\\d.abedalrhman\\downloads\\academix-demo\\backend\\academixlms.infrastructure\\migrations\\20251224201306_initialcreate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EA845015-BEB4-4389-9E5F-EB7CCC9E497C}|AcademixLMS.Infrastructure\\AcademixLMS.Infrastructure.csproj|solutionrelative:academixlms.infrastructure\\migrations\\20251224201306_initialcreate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DC657B3F-0EC0-4B91-93E1-09BD80F3FDA6}|AcademixLMS.Application\\AcademixLMS.Application.csproj|c:\\users\\d.abedalrhman\\downloads\\academix-demo\\backend\\academixlms.application\\services\\authservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DC657B3F-0EC0-4B91-93E1-09BD80F3FDA6}|AcademixLMS.Application\\AcademixLMS.Application.csproj|solutionrelative:academixlms.application\\services\\authservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4A717E26-23AC-4B73-8C50-6AF0957C5CA7}|AcademixLMS.API\\AcademixLMS.API.csproj|c:\\users\\d.abedalrhman\\downloads\\academix-demo\\backend\\academixlms.api\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4A717E26-23AC-4B73-8C50-6AF0957C5CA7}|AcademixLMS.API\\AcademixLMS.API.csproj|solutionrelative:academixlms.api\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DC657B3F-0EC0-4B91-93E1-09BD80F3FDA6}|AcademixLMS.Application\\AcademixLMS.Application.csproj|c:\\users\\d.abedalrhman\\downloads\\academix-demo\\backend\\academixlms.application\\interfaces\\iassignmentservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DC657B3F-0EC0-4B91-93E1-09BD80F3FDA6}|AcademixLMS.Application\\AcademixLMS.Application.csproj|solutionrelative:academixlms.application\\interfaces\\iassignmentservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{ABB35305-485B-4924-A970-C3C291A036D8}|AcademixLMS.Domain\\AcademixLMS.Domain.csproj|c:\\users\\d.abedalrhman\\downloads\\academix-demo\\backend\\academixlms.domain\\entities\\enrollment.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{ABB35305-485B-4924-A970-C3C291A036D8}|AcademixLMS.Domain\\AcademixLMS.Domain.csproj|solutionrelative:academixlms.domain\\entities\\enrollment.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DC657B3F-0EC0-4B91-93E1-09BD80F3FDA6}|AcademixLMS.Application\\AcademixLMS.Application.csproj|c:\\users\\d.abedalrhman\\downloads\\academix-demo\\backend\\academixlms.application\\dtos\\message\\messagedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DC657B3F-0EC0-4B91-93E1-09BD80F3FDA6}|AcademixLMS.Application\\AcademixLMS.Application.csproj|solutionrelative:academixlms.application\\dtos\\message\\messagedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{ABB35305-485B-4924-A970-C3C291A036D8}|AcademixLMS.Domain\\AcademixLMS.Domain.csproj|c:\\users\\d.abedalrhman\\downloads\\academix-demo\\backend\\academixlms.domain\\entities\\assignment.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{ABB35305-485B-4924-A970-C3C291A036D8}|AcademixLMS.Domain\\AcademixLMS.Domain.csproj|solutionrelative:academixlms.domain\\entities\\assignment.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{ABB35305-485B-4924-A970-C3C291A036D8}|AcademixLMS.Domain\\AcademixLMS.Domain.csproj|c:\\users\\d.abedalrhman\\downloads\\academix-demo\\backend\\academixlms.domain\\common\\baseentity.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{ABB35305-485B-4924-A970-C3C291A036D8}|AcademixLMS.Domain\\AcademixLMS.Domain.csproj|solutionrelative:academixlms.domain\\common\\baseentity.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4A717E26-23AC-4B73-8C50-6AF0957C5CA7}|AcademixLMS.API\\AcademixLMS.API.csproj|c:\\users\\d.abedalrhman\\downloads\\academix-demo\\backend\\academixlms.api\\controllers\\enrollmentscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4A717E26-23AC-4B73-8C50-6AF0957C5CA7}|AcademixLMS.API\\AcademixLMS.API.csproj|solutionrelative:academixlms.api\\controllers\\enrollmentscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4A717E26-23AC-4B73-8C50-6AF0957C5CA7}|AcademixLMS.API\\AcademixLMS.API.csproj|c:\\users\\d.abedalrhman\\downloads\\academix-demo\\backend\\academixlms.api\\controllers\\examscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4A717E26-23AC-4B73-8C50-6AF0957C5CA7}|AcademixLMS.API\\AcademixLMS.API.csproj|solutionrelative:academixlms.api\\controllers\\examscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EA845015-BEB4-4389-9E5F-EB7CCC9E497C}|AcademixLMS.Infrastructure\\AcademixLMS.Infrastructure.csproj|c:\\users\\d.abedalrhman\\downloads\\academix-demo\\backend\\academixlms.infrastructure\\data\\configurations\\assignmentconfiguration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EA845015-BEB4-4389-9E5F-EB7CCC9E497C}|AcademixLMS.Infrastructure\\AcademixLMS.Infrastructure.csproj|solutionrelative:academixlms.infrastructure\\data\\configurations\\assignmentconfiguration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 16,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:13:0:{2456bd12-ecf7-4988-a4a6-67d49173f565}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:17:0:{2456bd12-ecf7-4988-a4a6-67d49173f565}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:18:0:{2456bd12-ecf7-4988-a4a6-67d49173f565}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "User.cs",
+              "DocumentMoniker": "C:\\Users\\D.Abedalrhman\\Downloads\\academix-demo\\backend\\AcademixLMS.Domain\\Entities\\User.cs",
+              "RelativeDocumentMoniker": "AcademixLMS.Domain\\Entities\\User.cs",
+              "ToolTip": "C:\\Users\\D.Abedalrhman\\Downloads\\academix-demo\\backend\\AcademixLMS.Domain\\Entities\\User.cs",
+              "RelativeToolTip": "AcademixLMS.Domain\\Entities\\User.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABgAAABQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-10T21:52:24.78Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "AuthController.cs",
+              "DocumentMoniker": "C:\\Users\\D.Abedalrhman\\Downloads\\academix-demo\\backend\\AcademixLMS.API\\Controllers\\AuthController.cs",
+              "RelativeDocumentMoniker": "AcademixLMS.API\\Controllers\\AuthController.cs",
+              "ToolTip": "C:\\Users\\D.Abedalrhman\\Downloads\\academix-demo\\backend\\AcademixLMS.API\\Controllers\\AuthController.cs",
+              "RelativeToolTip": "AcademixLMS.API\\Controllers\\AuthController.cs",
+              "ViewState": "AgIAAA4AAAAAAAAAAAAQwBcAAAAuAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-10T21:48:38.327Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "Assignment.cs",
+              "DocumentMoniker": "C:\\Users\\D.Abedalrhman\\Downloads\\academix-demo\\backend\\AcademixLMS.Domain\\Entities\\Assignment.cs",
+              "RelativeDocumentMoniker": "AcademixLMS.Domain\\Entities\\Assignment.cs",
+              "ToolTip": "C:\\Users\\D.Abedalrhman\\Downloads\\academix-demo\\backend\\AcademixLMS.Domain\\Entities\\Assignment.cs",
+              "RelativeToolTip": "AcademixLMS.Domain\\Entities\\Assignment.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-02T12:19:26.056Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "BaseEntity.cs",
+              "DocumentMoniker": "C:\\Users\\D.Abedalrhman\\Downloads\\academix-demo\\backend\\AcademixLMS.Domain\\Common\\BaseEntity.cs",
+              "RelativeDocumentMoniker": "AcademixLMS.Domain\\Common\\BaseEntity.cs",
+              "ToolTip": "C:\\Users\\D.Abedalrhman\\Downloads\\academix-demo\\backend\\AcademixLMS.Domain\\Common\\BaseEntity.cs",
+              "RelativeToolTip": "AcademixLMS.Domain\\Common\\BaseEntity.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-02T12:19:15.758Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "EnrollmentsController.cs",
+              "DocumentMoniker": "C:\\Users\\D.Abedalrhman\\Downloads\\academix-demo\\backend\\AcademixLMS.API\\Controllers\\EnrollmentsController.cs",
+              "RelativeDocumentMoniker": "AcademixLMS.API\\Controllers\\EnrollmentsController.cs",
+              "ToolTip": "C:\\Users\\D.Abedalrhman\\Downloads\\academix-demo\\backend\\AcademixLMS.API\\Controllers\\EnrollmentsController.cs",
+              "RelativeToolTip": "AcademixLMS.API\\Controllers\\EnrollmentsController.cs",
+              "ViewState": "AgIAAK0AAAAAAAAAAAAAwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-31T10:21:20.056Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "ExamsController.cs",
+              "DocumentMoniker": "C:\\Users\\D.Abedalrhman\\Downloads\\academix-demo\\backend\\AcademixLMS.API\\Controllers\\ExamsController.cs",
+              "RelativeDocumentMoniker": "AcademixLMS.API\\Controllers\\ExamsController.cs",
+              "ToolTip": "C:\\Users\\D.Abedalrhman\\Downloads\\academix-demo\\backend\\AcademixLMS.API\\Controllers\\ExamsController.cs",
+              "RelativeToolTip": "AcademixLMS.API\\Controllers\\ExamsController.cs",
+              "ViewState": "AgIAACEAAAAAAAAAAAAQwCIAAAAIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-31T08:19:11.093Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "IAssignmentService.cs",
+              "DocumentMoniker": "C:\\Users\\D.Abedalrhman\\Downloads\\academix-demo\\backend\\AcademixLMS.Application\\Interfaces\\IAssignmentService.cs",
+              "RelativeDocumentMoniker": "AcademixLMS.Application\\Interfaces\\IAssignmentService.cs",
+              "ToolTip": "C:\\Users\\D.Abedalrhman\\Downloads\\academix-demo\\backend\\AcademixLMS.Application\\Interfaces\\IAssignmentService.cs",
+              "RelativeToolTip": "AcademixLMS.Application\\Interfaces\\IAssignmentService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAqwAcAAAAgAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-31T06:15:32.297Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "AssignmentsController.cs",
+              "DocumentMoniker": "C:\\Users\\D.Abedalrhman\\Downloads\\academix-demo\\backend\\AcademixLMS.API\\Controllers\\AssignmentsController.cs",
+              "RelativeDocumentMoniker": "AcademixLMS.API\\Controllers\\AssignmentsController.cs",
+              "ToolTip": "C:\\Users\\D.Abedalrhman\\Downloads\\academix-demo\\backend\\AcademixLMS.API\\Controllers\\AssignmentsController.cs",
+              "RelativeToolTip": "AcademixLMS.API\\Controllers\\AssignmentsController.cs",
+              "ViewState": "AgIAACIAAAAAAAAAAAAowC0AAABXAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-31T06:15:27.363Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "20251224201306_InitialCreate.cs",
+              "DocumentMoniker": "C:\\Users\\D.Abedalrhman\\Downloads\\academix-demo\\backend\\AcademixLMS.Infrastructure\\Migrations\\20251224201306_InitialCreate.cs",
+              "RelativeDocumentMoniker": "AcademixLMS.Infrastructure\\Migrations\\20251224201306_InitialCreate.cs",
+              "ToolTip": "C:\\Users\\D.Abedalrhman\\Downloads\\academix-demo\\backend\\AcademixLMS.Infrastructure\\Migrations\\20251224201306_InitialCreate.cs",
+              "RelativeToolTip": "AcademixLMS.Infrastructure\\Migrations\\20251224201306_InitialCreate.cs",
+              "ViewState": "AgIAAM0BAAAAAAAAAAAuwN4BAAAaAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-24T20:43:59.939Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "JwtService.cs",
+              "DocumentMoniker": "C:\\Users\\D.Abedalrhman\\Downloads\\academix-demo\\backend\\AcademixLMS.Infrastructure\\Services\\JwtService.cs",
+              "RelativeDocumentMoniker": "AcademixLMS.Infrastructure\\Services\\JwtService.cs",
+              "ToolTip": "C:\\Users\\D.Abedalrhman\\Downloads\\academix-demo\\backend\\AcademixLMS.Infrastructure\\Services\\JwtService.cs",
+              "RelativeToolTip": "AcademixLMS.Infrastructure\\Services\\JwtService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACkAAAA5AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-02T12:20:09.11Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "Enrollment.cs",
+              "DocumentMoniker": "C:\\Users\\D.Abedalrhman\\Downloads\\academix-demo\\backend\\AcademixLMS.Domain\\Entities\\Enrollment.cs",
+              "RelativeDocumentMoniker": "AcademixLMS.Domain\\Entities\\Enrollment.cs",
+              "ToolTip": "C:\\Users\\D.Abedalrhman\\Downloads\\academix-demo\\backend\\AcademixLMS.Domain\\Entities\\Enrollment.cs",
+              "RelativeToolTip": "AcademixLMS.Domain\\Entities\\Enrollment.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-09T18:59:57.401Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "AssignmentConfiguration.cs",
+              "DocumentMoniker": "C:\\Users\\D.Abedalrhman\\Downloads\\academix-demo\\backend\\AcademixLMS.Infrastructure\\Data\\Configurations\\AssignmentConfiguration.cs",
+              "RelativeDocumentMoniker": "AcademixLMS.Infrastructure\\Data\\Configurations\\AssignmentConfiguration.cs",
+              "ToolTip": "C:\\Users\\D.Abedalrhman\\Downloads\\academix-demo\\backend\\AcademixLMS.Infrastructure\\Data\\Configurations\\AssignmentConfiguration.cs",
+              "RelativeToolTip": "AcademixLMS.Infrastructure\\Data\\Configurations\\AssignmentConfiguration.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-31T06:15:00.615Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "MessageDto.cs",
+              "DocumentMoniker": "C:\\Users\\D.Abedalrhman\\Downloads\\academix-demo\\backend\\AcademixLMS.Application\\DTOs\\Message\\MessageDto.cs",
+              "RelativeDocumentMoniker": "AcademixLMS.Application\\DTOs\\Message\\MessageDto.cs",
+              "ToolTip": "C:\\Users\\D.Abedalrhman\\Downloads\\academix-demo\\backend\\AcademixLMS.Application\\DTOs\\Message\\MessageDto.cs",
+              "RelativeToolTip": "AcademixLMS.Application\\DTOs\\Message\\MessageDto.cs",
+              "ViewState": "AgIAAA4AAAAAAAAAAAA7wBQAAAAPAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-31T06:13:31.921Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "LoginRequest.cs",
+              "DocumentMoniker": "C:\\Users\\D.Abedalrhman\\Downloads\\academix-demo\\backend\\AcademixLMS.Application\\DTOs\\Auth\\LoginRequest.cs",
+              "RelativeDocumentMoniker": "AcademixLMS.Application\\DTOs\\Auth\\LoginRequest.cs",
+              "ToolTip": "C:\\Users\\D.Abedalrhman\\Downloads\\academix-demo\\backend\\AcademixLMS.Application\\DTOs\\Auth\\LoginRequest.cs",
+              "RelativeToolTip": "AcademixLMS.Application\\DTOs\\Auth\\LoginRequest.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACYAAAAOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-24T20:45:38.193Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "AuthService.cs",
+              "DocumentMoniker": "C:\\Users\\D.Abedalrhman\\Downloads\\academix-demo\\backend\\AcademixLMS.Application\\Services\\AuthService.cs",
+              "RelativeDocumentMoniker": "AcademixLMS.Application\\Services\\AuthService.cs",
+              "ToolTip": "C:\\Users\\D.Abedalrhman\\Downloads\\academix-demo\\backend\\AcademixLMS.Application\\Services\\AuthService.cs",
+              "RelativeToolTip": "AcademixLMS.Application\\Services\\AuthService.cs",
+              "ViewState": "AgIAADYAAAAAAAAAAAAowEoAAAAVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-24T20:45:19.841Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

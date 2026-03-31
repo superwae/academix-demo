@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AcademiX LMS - العرض الفني التفصيلي للمستثمر</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #7c3aed;
+      --primary-dark: #6d28d9;
+      --accent: #10b981;
+      --dark: #1e293b;
+      --gray: #475569;
+      --light: #f8fafc;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Cairo', sans-serif;
+      color: var(--dark);
+      line-height: 1.8;
+      background: #fff;
+    }
+    .en { direction: ltr; text-align: left; font-family: 'Inter', sans-serif; }
+
+    /* Cover */
+    .cover {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4c1d95 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 2rem;
+      color: #fff;
+    }
+    .cover h1 { font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; margin-bottom: 0.5rem; }
+    .cover .subtitle { font-size: 1.25rem; opacity: 0.95; margin-bottom: 1rem; }
+    .cover .date { margin-top: 3rem; opacity: 0.6; font-size: 0.9rem; }
+
+    /* Sections */
+    section {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 4rem 2rem;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    section h2 {
+      font-size: 2rem;
+      color: var(--primary);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    section h2::before { content: ''; width: 6px; height: 2rem; background: var(--primary); border-radius: 3px; }
+    section h3 { font-size: 1.35rem; color: var(--dark); margin: 1.5rem 0 1rem; }
+    section ul, section ol { margin: 0.75rem 0 0 1.5rem; }
+    section li { margin-bottom: 0.5rem; }
+    .badge {
+      display: inline-block;
+      background: var(--primary);
+      color: white;
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-left: 0.5rem;
+    }
+    .badge-green { background: var(--accent); }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1rem 0; }
+    @media (max-width: 700px) { .grid-2 { grid-template-columns: 1fr; } }
+    .card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin: 0.75rem 0;
+    }
+    .card h4 { color: var(--primary); margin-bottom: 0.5rem; }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+    th, td { padding: 0.75rem; text-align: right; border-bottom: 1px solid #e2e8f0; }
+    th { background: #f1f5f9; font-weight: 600; color: var(--dark); }
+    .tech-stack { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0; }
+    .tech-tag { background: #e9d5ff; color: #6b21a8; padding: 0.35rem 0.75rem; border-radius: 8px; font-size: 0.9rem; }
+    .tech-tag.backend { background: #dbeafe; color: #1d4ed8; }
+    .tech-tag.db { background: #d1fae5; color: #065f46; }
+    code { background: #f1f5f9; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.9em; }
+  </style>
+</head>
+<body>
+
+  <!-- الغلاف -->
+  <div class="cover">
+    <h1>AcademiX LMS</h1>
+    <p class="subtitle">العرض الفني التفصيلي للمنصة</p>
+    <p>عرض شامل للميزات، الذكاء الاصطناعي، التحليلات، والمعمارية التقنية</p>
+    <p class="date">مارس 2025</p>
+  </div>
+
+  <!-- نظرة عامة -->
+  <section id="overview">
+    <h2>نظرة عامة على المنصة</h2>
+    <p>AcademiX منصة تعليمية متكاملة (LMS) مصممة لإدارة التعلم الإلكتروني بثلاث بوابات رئيسية: <strong>الطالب</strong>، <strong>المدرّس</strong>، و<strong>المسؤول</strong>. المنصة مبنية على معمارية حديثة وواجهة مستخدم قابلة للتخصيص بالكامل.</p>
+    <ul>
+      <li><strong>للطالب:</strong> لوحة تحكم، كتالوج الدورات، الفصول، الدروس، التقويم، الواجبات، الاختبارات، الرسائل، الملف الشخصي</li>
+      <li><strong>للمدرّس:</strong> لوحة تحكم، إدارة الدورات والدروس، الواجبات والاختبارات، قائمة الطلاب المعرضين للخطر، الرسائل</li>
+      <li><strong>للمسؤول:</strong> لوحة تحكم شاملة، إدارة المستخدمين والدورات، التقارير والرسوم البيانية، سجلات التدقيق، المالية (المعاملات، المدفوعات، توزيع الإيرادات)</li>
+    </ul>
+  </section>
+
+  <!-- الذكاء الاصطناعي والتحليلات -->
+  <section id="ai">
+    <h2>الذكاء الاصطناعي والتحليلات <span class="badge">محرك رئيسي</span></h2>
+
+    <h3>١. نظام التوصيات الذكي (Recommendation Engine)</h3>
+    <p>نظام توصيات يعتمد على خوارزميات <strong>التصفية التعاونية</strong> (Collaborative Filtering) و<strong>التصفية المعتمدة على المحتوى</strong> (Content-Based Filtering) — جميع العمليات داخلية بدون اعتماد على APIs خارجية.</p>
+    <ul>
+      <li><strong>توصيات شخصية:</strong> بناءً على تاريخ التسجيل، التصنيفات، والأهداف التعليمية</li>
+      <li><strong>دورات مشابهة:</strong> لدورة معينة بناءً على التصنيف والوسوم</li>
+      <li><strong>الدورات الرائجة:</strong> حسب معدل التسجيل والشعبية</li>
+      <li><strong>واصل التعلم:</strong> استكمال الدورات قيد التقدم</li>
+      <li><strong>خرائط التصنيفات:</strong> ربط اهتمامات المستخدم من الـ onboarding مع تصنيفات الدورات (مثل Technology → Programming, Cloud, DevOps)</li>
+    </ul>
+
+    <h3>٢. تحليلات الأداء والتنبؤ (Analytics & Predictions)</h3>
+    <p>خدمة تحليلات متقدمة تعتمد على <strong>القواعد الإحصائية والتنبؤية</strong> — دون الحاجة لـ ML APIs خارجية:</p>
+    <ul>
+      <li><strong>درجة المخاطر (Risk Score):</strong> تحديد الطلاب المعرضين للخطر بناءً على: عدم النشاط (7 أيام تحذير، 14 يوم خطر)، التقدم المنخفض (&lt;25%)، الدرجات المنخفضة (&lt;60%)، انسحاب الدورات</li>
+      <li><strong>التنبؤ بالدرجة النهائية (Predicted Final Grade):</strong> حساب تنبئي يعتمد على متوسط الدرجات، درجة المشاركة، ونسبة الإكمال</li>
+      <li><strong>درجة المشاركة (Engagement Score):</strong> قياس تفاعل الطالب مع المحتوى والواجبات والاختبارات</li>
+      <li><strong>توصيات نصية تلقائية:</strong> نصائح وإجراءات مقترحة لكل طالب حسب وضعه (مثل: "راجع الدروس الأخيرة"، "حسّن حضورك")</li>
+      <li><strong>تقارير إحصائية للدورات:</strong> معدل الإكمال، معدل الرسوب، متوسط التقدم، معدل تسليم الواجبات</li>
+    </ul>
+
+    <h3>٣. التقارير والرسوم البيانية (Admin Reports)</h3>
+    <ul>
+      <li>رسوم بيانية للتسجيلات، النشاط، اتجاهات الإكمال، أداء الدورات</li>
+      <li>قسم الطلاب المعرضين للخطر مع تصدير CSV</li>
+      <li>لوحة مالية مع KPIs ومقاييس الإيرادات</li>
+    </ul>
+  </section>
+
+  <!-- الألوان والثيمات -->
+  <section id="themes">
+    <h2>الألوان والأنماط القابلة للتخصيص</h2>
+    <p>نظام ثيمات متقدم يعتمد على <strong>متغيرات CSS</strong> و<strong>Tailwind</strong> — يسمح بالتحكم الكامل بالمظهر دون تغيير الكود:</p>
+
+    <h3>الثيمات الجاهزة (14 ثيم)</h3>
+    <table>
+      <tr><th>الثيم</th><th>الوصف</th></tr>
+      <tr><td>Light</td><td>وضع فاتح افتراضي</td></tr>
+      <tr><td>Dark</td><td>وضع داكن</td></tr>
+      <tr><td>Purple</td><td>بنفسجي عميق</td></tr>
+      <tr><td>Sky Blue</td><td>أزرق سماوي</td></tr>
+      <tr><td>Sky & Purple</td><td>مزيج أزرق سماوي وبنفسجي</td></tr>
+      <tr><td>Green, Emerald</td><td>أخضر، زمردي</td></tr>
+      <tr><td>Orange, Amber</td><td>برتقالي، عنبر</td></tr>
+      <tr><td>Red, Rose, Pink</td><td>أحمر، وردي، وردي فاتح</td></tr>
+      <tr><td>Indigo</td><td>نيلي</td></tr>
+      <tr><td>Custom</td><td>ثيم مخصص بتدرجات HSL</td></tr>
+    </table>
+
+    <h3>ثيمات التدرجات (Mix Themes)</h3>
+    <ul>
+      <li><strong>Red & Blue</strong> — أحمر وأزرق</li>
+      <li><strong>White & Black</strong> — أبيض وأسود</li>
+      <li><strong>Sky Blue & Purple</strong> — سماوي وبنفسجي</li>
+      <li><strong>Black & Gold</strong> — أسود وذهبي</li>
+    </ul>
+
+    <h3>متغيرات التخصيص</h3>
+    <p>كل ثيم يتحكم بـ: <code>--background</code>, <code>--foreground</code>, <code>--primary</code>, <code>--card</code>, <code>--border</code>, <code>--ring</code>, <code>--muted</code>, <code>--gradient-primary</code>, <code>--gradient-card</code>, <code>--radius</code> (حجم الزوايا: 16px)</p>
+
+    <p><strong>الحفظ:</strong> الثيم المحفوظ يُحمّل تلقائياً عند فتح المنصة عبر Zustand + localStorage (<code>academix.data.v1</code>)</p>
+
+    <h3>إعدادات إقليمية (Admin)</h3>
+    <ul>
+      <li><strong>اللغة:</strong> English، العربية، Español، Français</li>
+      <li><strong>العملة:</strong> USD، EUR، GBP، AED (د.إ)، وغيرها</li>
+    </ul>
+  </section>
+
+  <!-- المحادثة والملاحظات والإشعارات -->
+  <section id="messaging">
+    <h2>المحادثة والملاحظات والإشعارات</h2>
+
+    <h3>١. نظام المحادثة (Messaging)</h3>
+    <div class="card">
+      <h4>تقنية SignalR — اتصال فوري (Real-time)</h4>
+      <ul>
+        <li>محادثات <strong>مستخدم لمستخدم</strong> (User-to-User) — ليست بوت ذكاء اصطناعي</li>
+        <li>Hub: <code>/hubs/messaging</code></li>
+        <li>نقل LongPolling في التطوير لتجنب مشاكل WebSocket مع الـ proxy</li>
+        <li>إعادة اتصال تلقائي: [0, 2s, 5s, 10s]</li>
+        <li>Timeout السيرفر: 30 ثانية</li>
+      </ul>
+    </div>
+
+    <h3>٢. الملاحظات (Notes)</h3>
+    <div class="card">
+      <h4>ملاحظات مزامنة مع توقيت الفيديو</h4>
+      <ul>
+        <li><strong>أثناء الدرس:</strong> إضافة ملاحظات مرتبطة بوقت معين في الفيديو (timestamp)</li>
+        <li><strong>النقر على الملاحظة:</strong> ينقل الفيديو تلقائياً إلى نفس التوقيت</li>
+        <li><strong>التخزين:</strong> localStorage (<code>academix_lesson_notes</code>)</li>
+        <li><strong>البحث:</strong> بحث في محتوى الملاحظات حسب الدورة</li>
+        <li><strong>ترتيب:</strong> حسب التوقيت داخل الدرس، أو حسب تاريخ التحديث ضمن الدورة</li>
+      </ul>
+    </div>
+
+    <h3>٣. الإشعارات (Notifications)</h3>
+    <div class="card">
+      <h4>أنواع الإشعارات</h4>
+      <ul>
+        <li><code>assignment</code> — واجب</li>
+        <li><code>exam</code> — اختبار</li>
+        <li><code>announcement</code> — إعلان</li>
+        <li><code>grade</code> — درجة</li>
+        <li><code>message</code> — رسالة</li>
+        <li><code>deadline</code> — موعد نهائي</li>
+      </ul>
+      <p><strong>الميزات:</strong> مزامنة مع API عند المصادقة، Fallback على localStorage للعمل غير المتصل، حد أقصى 100 إشعار محفوظ، واجهة NotificationBell</p>
+    </div>
+  </section>
+
+  <!-- المعمارية التقنية -->
+  <section id="architecture">
+    <h2>المعمارية التقنية</h2>
+
+    <h3>نموذج التصميم</h3>
+    <p><strong>Monolith Modular</strong> — API واحد قابل للنشر، مع حدود نظيفة بين الطبقات. ليس Microservices.</p>
+
+    <h3>الهيكل المعماري للـ Backend</h3>
+    <p>معمارية Clean Architecture بأربع طبقات واضحة:</p>
+
+    <div class="card">
+      <h4>١. Domain (النطاق)</h4>
+      <p><strong>الدور:</strong> قلب المنطق — الكيانات والثوابت فقط، بدون اعتماد على أي طبقة خارجية.</p>
+      <ul>
+        <li><strong>BaseEntity:</strong> أساس مشترك (Id, CreatedAt, UpdatedAt, IsDeleted, DeletedAt) — تدقيق وتليين الحذف</li>
+        <li><strong>Enums:</strong> CourseLevel, Modality, CourseStatus, EnrollmentStatus, AssignmentStatus, QuestionType, ConversationType</li>
+        <li><strong>الكيانات:</strong> User, Role, Course, Enrollment, Lesson, Assignment, Exam, Conversation, Message, Notification, Tag, Review, UserInterest, RefreshToken</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h4>٢. Application (التطبيق)</h4>
+      <p><strong>الدور:</strong> حالات الاستخدام، المنطق التجاري، والتعريفات (Interfaces).</p>
+      <ul>
+        <li><strong>Interfaces:</strong> IApplicationDbContext, IAuthService, ICourseService, IRecommendationService, IAnalyticsService, IEmailService, IStorageService...</li>
+        <li><strong>Services:</strong> AuthService, CourseService, EnrollmentService, RecommendationService, AnalyticsService, NotificationService, ExamService, ConversationService...</li>
+        <li><strong>DTOs:</strong> نقل البيانات بين الطبقات (LoginRequest, CourseDto, AnalyticsDto...)</li>
+        <li><strong>Common:</strong> Result&lt;T&gt;, PagedResult&lt;T&gt; — نمط النتائج بدون استثناءات</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h4>٣. API (واجهة البرمجة)</h4>
+      <p><strong>الدور:</strong> استقبال الطلبات، التوجيه، المصادقة، والتشغيل (Hosting).</p>
+      <ul>
+        <li><strong>Controllers:</strong> Auth, Users, Courses, Enrollments, Assignments, Exams, Lessons, Analytics, Recommendations, Notifications, Export, Health</li>
+        <li><strong>Middleware:</strong> GlobalExceptionHandler، RequestLogging، SecurityHeaders</li>
+        <li><strong>SignalR Hub:</strong> MessagingHub — المحادثات الفورية</li>
+        <li><strong>التكوين:</strong> JWT، CORS، Swagger، Rate Limiting، Health Checks</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h4>٤. Infrastructure (البنية التحتية)</h4>
+      <p><strong>الدور:</strong> تنفيذ التفاصيل التقنية — قاعدة البيانات والخدمات الخارجية.</p>
+      <ul>
+        <li><strong>ApplicationDbContext:</strong> EF Core + PostgreSQL — تنفيذ IApplicationDbContext</li>
+        <li><strong>Migrations & Configurations:</strong> إعدادات الجداول والعلاقات (UserConfiguration, CourseConfiguration...)</li>
+        <li><strong>الخدمات:</strong> JwtService، MailjetEmailService، LocalStorageService</li>
+        <li><strong>DatabaseSeeder:</strong> بيانات تجريبية عند التشغيل</li>
+      </ul>
+    </div>
+
+    <p style="margin-top: 1rem;"><strong>تبعيات الطبقات:</strong> Domain مستقلة ← Application تعتمد على Domain ← Infrastructure تنفذ واجهات Application ← API تستضيف وتجمع كل الطبقات</p>
+
+    <div class="grid-2">
+      <div class="card">
+        <h4>الواجهة الأمامية (Frontend)</h4>
+        <ul>
+          <li>React 19 + TypeScript</li>
+          <li>Vite 7 — أداة بناء سريعة</li>
+          <li>React Router DOM 7</li>
+          <li>Zustand — إدارة الحالة</li>
+          <li>SPA — تطبيق صفحة واحدة</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>الواجهة الخلفية (Backend)</h4>
+        <ul>
+          <li>ASP.NET Core 8 Web API</li>
+          <li>معمارية الطبقات: API → Application → Domain ← Infrastructure</li>
+          <li>JWT + Refresh Tokens</li>
+          <li>SignalR للمحادثات الفورية</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>بنية الـ API</h3>
+    <p>REST مُنسّق: <code>api/v{version}/[controller]</code> — النسخة الافتراضية v1</p>
+    <ul>
+      <li><code>api/v1/courses</code> — الدورات</li>
+      <li><code>api/v1/analytics/...</code> — التحليلات</li>
+      <li><code>api/v1/recommendations</code> — التوصيات</li>
+      <li><code>api/v1/notifications</code> — الإشعارات</li>
+      <li><code>/hubs/messaging</code> — Hub المحادثات</li>
+    </ul>
+  </section>
+
+  <!-- التقنيات المستخدمة -->
+  <section id="tech-stack">
+    <h2>التقنيات المستخدمة</h2>
+
+    <h3>Frontend</h3>
+    <div class="tech-stack">
+      <span class="tech-tag">React 19</span>
+      <span class="tech-tag">TypeScript</span>
+      <span class="tech-tag">Vite 7</span>
+      <span class="tech-tag">React Router 7</span>
+      <span class="tech-tag">Zustand</span>
+      <span class="tech-tag">Tailwind CSS 3</span>
+      <span class="tech-tag">Radix UI</span>
+      <span class="tech-tag">Framer Motion</span>
+      <span class="tech-tag">Recharts</span>
+      <span class="tech-tag">FullCalendar</span>
+      <span class="tech-tag">@microsoft/signalr</span>
+      <span class="tech-tag">Lucide Icons</span>
+      <span class="tech-tag">Sonner (Toasts)</span>
+    </div>
+
+    <h3>Backend</h3>
+    <div class="tech-stack">
+      <span class="tech-tag backend">ASP.NET Core 8</span>
+      <span class="tech-tag backend">Entity Framework Core 8</span>
+      <span class="tech-tag backend">JWT Authentication</span>
+      <span class="tech-tag backend">Swagger / OpenAPI</span>
+      <span class="tech-tag backend">Serilog</span>
+      <span class="tech-tag backend">AspNetCoreRateLimit</span>
+      <span class="tech-tag backend">SignalR</span>
+    </div>
+
+    <h3>قاعدة البيانات والخدمات</h3>
+    <div class="tech-stack">
+      <span class="tech-tag db">PostgreSQL (Npgsql)</span>
+      <span class="tech-tag">Mailjet (Email)</span>
+      <span class="tech-tag">Local Storage</span>
+    </div>
+  </section>
+
+  <!-- ملخص للمستثمر -->
+  <section id="summary">
+    <h2>الملخص التنفيذي للمستثمر</h2>
+    <div class="card">
+      <p><strong>AcademiX Demo</strong> منصة تعليمية متكاملة full-stack تجمع:</p>
+      <ul>
+        <li><strong>واجهة حديثة:</strong> React SPA مع ثيمات متعددة وتخصيص كامل</li>
+        <li><strong>Backend قوي:</strong> .NET 8 API على PostgreSQL</li>
+        <li><strong>أمان:</strong> JWT، Rate Limiting، Refresh Tokens</li>
+        <li><strong>ذكاء داخلي:</strong> توصيات (Collaborative + Content-Based)، تحليلات مخاطر، تنبؤ بالدرجات، توصيات نصية — كل ذلك بدون اعتماد على AI خارجي</li>
+        <li><strong>فوري:</strong> محادثات عبر SignalR</li>
+        <li><strong>تقارير وإيرادات:</strong> رسوم بيانية، تصدير، لوحة مالية</li>
+        <li><strong>قابلية التوسع:</strong> معمارية نظيفة، إصدارات API، health checks</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer style="text-align: center; padding: 3rem 2rem; color: var(--gray); font-size: 0.9rem;">
+    AcademiX LMS — العرض الفني التفصيلي — مارس 2025
+  </footer>
+
+</body>
+</html>

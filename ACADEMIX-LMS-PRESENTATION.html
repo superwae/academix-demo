@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AcademiX LMS - عرض توضيحي للنظام</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #7c3aed;
+      --primary-dark: #6d28d9;
+      --accent: #10b981;
+      --dark: #1e293b;
+      --gray: #475569;
+      --light: #f8fafc;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Cairo', 'Inter', sans-serif;
+      color: var(--dark);
+      line-height: 1.7;
+      background: #fff;
+    }
+    .en { direction: ltr; text-align: left; font-family: 'Inter', sans-serif; }
+    
+    /* Cover */
+    .cover {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4c1d95 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 2rem;
+      color: #fff;
+    }
+    .cover h1 {
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+    .cover .subtitle {
+      font-size: 1.25rem;
+      opacity: 0.9;
+      margin-bottom: 2rem;
+    }
+    .cover .tagline {
+      font-size: 1rem;
+      opacity: 0.7;
+      max-width: 500px;
+    }
+    .cover .date { margin-top: 3rem; opacity: 0.6; font-size: 0.9rem; }
+    
+    /* Nav */
+    .nav-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.97);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid #e9e5ff;
+      padding: 0.75rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .nav-bar a {
+      color: var(--dark);
+      text-decoration: none;
+      font-weight: 600;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+    .nav-bar a:hover { background: #f5f3ff; color: var(--primary); }
+    
+    /* Sections */
+    section {
+      padding: 4rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    section:nth-child(even) { background: #faf5ff; }
+    h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      color: var(--dark);
+      border-bottom: 3px solid var(--primary);
+      padding-bottom: 0.5rem;
+      display: inline-block;
+    }
+    h3 {
+      font-size: 1.35rem;
+      font-weight: 600;
+      margin: 2rem 0 1rem;
+      color: var(--primary-dark);
+    }
+    p { margin-bottom: 1rem; color: var(--gray); }
+    
+    /* TOC */
+    .toc {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    .toc-item {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 1.25rem;
+      text-decoration: none;
+      color: var(--dark);
+      transition: all 0.2s;
+      display: block;
+    }
+    .toc-item:hover {
+      border-color: var(--primary);
+      box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
+      transform: translateY(-2px);
+    }
+    .toc-item .num { color: var(--primary); font-weight: 700; margin-left: 0.5rem; }
+    
+    /* Page mockups */
+    .page-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+    .page-card {
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      border: 1px solid #e2e8f0;
+      transition: all 0.3s;
+    }
+    .page-card:hover { box-shadow: 0 8px 30px rgba(124, 58, 237, 0.25); transform: translateY(-4px); }
+    .page-mockup {
+      height: 220px;
+      background: linear-gradient(145deg, #f1f5f9 0%, #e2e8f0 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .page-mockup::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 28px;
+      background: #e2e8f0;
+      border-bottom: 1px solid #cbd5e1;
+    }
+    .page-mockup .browser-dots {
+      position: absolute;
+      top: 6px;
+      right: 12px;
+      display: flex;
+      gap: 6px;
+    }
+    .page-mockup .browser-dots span {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #94a3b8;
+    }
+    .page-mockup .browser-dots span:nth-child(1) { background: #ef4444; }
+    .page-mockup .browser-dots span:nth-child(2) { background: #eab308; }
+    .page-mockup .browser-dots span:nth-child(3) { background: #22c55e; }
+    .page-mockup .placeholder-text {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #64748b;
+      text-align: center;
+      padding: 0 1rem;
+    }
+    .page-mockup img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .page-card .info {
+      padding: 1.25rem;
+    }
+    .page-card .info h4 { font-size: 1.1rem; margin-bottom: 0.5rem; color: var(--dark); }
+    .page-card .info p { font-size: 0.9rem; margin: 0; color: var(--gray); }
+    .page-card .route { font-size: 0.75rem; color: var(--primary); font-family: monospace; margin-top: 0.5rem; }
+    
+    /* Role badges */
+    .role-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-left: 0.5rem;
+    }
+    .role-student { background: #e0e7ff; color: #4338ca; }
+    .role-teacher { background: #d1fae5; color: #047857; }
+    .role-admin { background: #fef3c7; color: #b45309; }
+    .role-public { background: #ede9fe; color: #6d28d9; }
+    
+    /* Tech stack */
+    .tech-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+    .tech-tag {
+      background: #f1f5f9;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--dark);
+    }
+    
+    /* Footer */
+    footer {
+      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+      color: #fff;
+      text-align: center;
+      padding: 3rem 2rem;
+      margin-top: 4rem;
+    }
+    footer h3 { color: #fff; border: none; margin-bottom: 1rem; }
+    footer p { color: #94a3b8; margin: 0; }
+    
+    @media print {
+      .nav-bar { display: none; }
+      .cover { min-height: 80vh; page-break-after: always; }
+      section { page-break-inside: avoid; }
+      .page-card { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav-bar">
+    <a href="#cover">AcademiX LMS</a>
+    <div>
+      <a href="#toc">المحتويات</a>
+      <a href="#overview">نظرة عامة</a>
+      <a href="#public">الواجهة العامة</a>
+      <a href="#student">بوابة الطالب</a>
+      <a href="#teacher">بوابة المعلم</a>
+      <a href="#admin">بوابة الإدارة</a>
+      <a href="#tech">التقنيات</a>
+    </div>
+  </nav>
+
+  <!-- Cover -->
+  <section id="cover" class="cover">
+    <h1>AcademiX LMS</h1>
+    <p class="subtitle">نظام إدارة التعلم الإلكتروني المتكامل</p>
+    <p class="tagline">عرض توضيحي احترافي للنظام — منصة تعليمية شاملة تجمع الطلاب والمعلمين والإداريين في بيئة واحدة</p>
+    <p class="date en">Professional Company Presentation | 2025</p>
+  </section>
+
+  <!-- Table of Contents -->
+  <section id="toc">
+    <h2>المحتويات</h2>
+    <div class="toc">
+      <a href="#overview" class="toc-item"><span class="num">1</span> نظرة عامة على النظام</a>
+      <a href="#public" class="toc-item"><span class="num">2</span> الواجهة العامة والترويج</a>
+      <a href="#student" class="toc-item"><span class="num">3</span> بوابة الطالب</a>
+      <a href="#teacher" class="toc-item"><span class="num">4</span> بوابة المعلم</a>
+      <a href="#admin" class="toc-item"><span class="num">5</span> بوابة الإدارة</a>
+      <a href="#tech" class="toc-item"><span class="num">6</span> التقنيات المستخدمة</a>
+    </div>
+  </section>
+
+  <!-- Overview -->
+  <section id="overview">
+    <h2>نظرة عامة على النظام</h2>
+    <p>AcademiX LMS منصة تعليمية متكاملة تدعم ثلاثة أدوار رئيسية: <strong>الطالب</strong> و<strong>المعلم</strong> و<strong>مدير النظام</strong>. يوفر النظام تجربة موحدة مع واجهات مخصصة لكل دور.</p>
+    <div class="page-grid">
+      <div class="page-card">
+        <div class="page-mockup"><img src="presentation-screenshots/home.png" alt="الصفحة الرئيسية"></div>
+        <div class="info">
+          <h4><span class="role-badge role-public">عام</span> الصفحة الرئيسية</h4>
+          <p>واجهة ترحيبية مع إحصائيات، دورات مميزة، وخطوات التسجيل</p>
+          <div class="route">/</div>
+        </div>
+      </div>
+      <div class="page-card">
+        <div class="page-mockup"><img src="presentation-screenshots/login.png" alt="تسجيل الدخول"></div>
+        <div class="info">
+          <h4><span class="role-badge role-public">عام</span> تسجيل الدخول</h4>
+          <p>نموذج دخول آمن مع دعم استعادة كلمة المرور</p>
+          <div class="route">/login</div>
+        </div>
+      </div>
+      <div class="page-card">
+        <div class="page-mockup"><img src="presentation-screenshots/register.png" alt="التسجيل"></div>
+        <div class="info">
+          <h4><span class="role-badge role-public">عام</span> إنشاء حساب جديد</h4>
+          <p>تسجيل المستخدمين الجدد مع التحقق من البريد الإلكتروني</p>
+          <div class="route">/register</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Public Pages -->
+  <section id="public">
+    <h2>الواجهة العامة</h2>
+    <p>صفحات متاحة للجميع قبل تسجيل الدخول: الصفحة الرئيسية، كتالوج الدورات، تفاصيل الدورة، والتوثيق.</p>
+    <div class="page-grid">
+      <div class="page-card">
+        <div class="page-mockup"><img src="presentation-screenshots/courses.png" alt="كتالوج الدورات"></div>
+        <div class="info"><h4>كتالوج الدورات العامة</h4><p>تصفح وفilter الدورات حسب التصنيف والمستوى</p><div class="route">/courses</div></div>
+      </div>
+      <div class="page-card">
+        <div class="page-mockup"><img src="presentation-screenshots/course-details.png" alt="تفاصيل الدورة"></div>
+        <div class="info"><h4>صفحة تفاصيل الدورة</h4><p>معلومات الدورة، الأقسام، التقييمات، والالتحاق</p><div class="route">/courses/:id</div></div>
+      </div>
+      <div class="page-card">
+        <div class="page-mockup"><img src="presentation-screenshots/forgot-password.png" alt="استعادة كلمة المرور"></div>
+        <div class="info"><h4>استعادة كلمة المرور</h4><p>طلب إعادة تعيين كلمة المرور عبر البريد</p><div class="route">/forgot-password</div></div>
+      </div>
+      <div class="page-card">
+        <div class="page-mockup"><img src="presentation-screenshots/login.png" alt="التحقق من البريد"></div>
+        <div class="info"><h4>التحقق من البريد الإلكتروني</h4><p>تفعيل الحساب بعد التسجيل</p><div class="route">/verify-email</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Student Portal -->
+  <section id="student">
+    <h2>بوابة الطالب <span class="role-badge role-student">Student</span></h2>
+    <p>واجهة مخصصة للطلاب: لوحة تحكم، كتالوج الدورات، دروسي، التقويم، الواجبات، الامتحانات، والرسائل.</p>
+    <div class="page-grid">
+      <div class="page-card">
+        <div class="page-mockup"><img src="presentation-screenshots/student-dashboard.png" alt="لوحة تحكم الطالب"></div>
+        <div class="info"><h4>لوحة التحكم</h4><p>نظرة عامة: الالتحاقات، الواجبات القادمة، التوصيات</p><div class="route">/student/dashboard</div></div>
+      </div>
+      <div class="page-card">
+        <div class="page-mockup"><img src="presentation-screenshots/student-catalog.png" alt="كتالوج الدورات"></div>
+        <div class="info"><h4>كتالوج الدورات</h4><p>تصفح والالتحاق بالدورات المتاحة</p><div class="route">/student/catalog</div></div>
+      </div>
+      <div class="page-card">
+        <div class="page-mockup"><img src="presentation-screenshots/student-my-classes.png" alt="دروسي"></div>
+        <div class="info"><h4>دروسي</h4><p>الدورات المسجلة مع التقدم والإحصائيات</p><div class="route">/student/my-classes</div></div>
+      </div>
+      <div class="page-card">
+        <div class="page-mockup"><img src="presentation-screenshots/student-course-lessons.png" alt="دروس الدورة"></div>
+        <div class="info"><h4>دروس الدورة</h4><p>قائمة الدروس مع التقدم لكل درس</p><div class="route">/student/my-classes/:courseId/lessons</div></div>
+      </div>
+      <div class="page-card">
+        <div class="page-mockup"><img src="presentation-screenshots/student-course-lessons.png" alt="مشاهدة الدرس"></div>
+        <div class="info"><h4>مشاهدة الدرس</h4><p>مشغل فيديو، ملاحظات، ومناقشات</p><div class="route">/student/my-classes/:courseId/lessons/:lessonId</div></div>
+      </div>
+      <div class="page-card">
+        <div class="page-mockup"><img src="presentation-screenshots/student-calendar.png" alt="التقويم"></div>
+        <div class="info"><h4>التقويم</h4><p>جدول الحصص والمواعيد</p><div class="route">/student/calendar</div></div>
+      </div>
+      <div class="page-card">
+        <div class="page-mockup"><img src="presentation-screenshots/student-assignments.png" alt="الواجبات"></div>
+        <div class="info"><h4>الواجبات</h4><p>قائمة الواجبات وتقديم الإجابات</p><div class="route">/student/assignments</div></div>
+      </div>
+      <div class="page-card">
+        <div class="page-mockup"><img src="presentation-screenshots/student-exams.png" alt="الامتحانات"></div>
+        <div class="info"><h4>الامتحانات</h4><p>الامتحانات والنتائج والمحاولات</p><div class="route">/student/exams</div></div>
+      </div>
+      <div class="page-card">
+        <div class="page-mockup"><img src="presentation-screenshots/student-messages.png" alt="الرسائل"></div>
+        <div class="info"><h4>الرسائل</h4><p>محادثات فورية مع المعلمين والطلاب</p><div class="route">/student/messages</div></div>
+      </div>
+      <div class="page-card">
+        <div class="page-mockup"><img src="presentation-screenshots/student-profile.png" alt="الملف الشخصي"></div>
+        <div class="info"><h4>الملف الشخصي</h4><p>معلومات المستخدم والإنجازات</p><div class="route">/student/profile</div></div>
+      </div>
+      <div class="page-card">
+        <div class="page-mockup"><img src="presentation-screenshots/student-settings.png" alt="الإعدادات"></div>
+        <div class="info"><h4>الإعدادات</h4><p>تخصيص الحساب والإشعارات</p><div class="route">/student/settings</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Teacher Portal -->
+  <section id="teacher">
+    <h2>بوابة المعلم <span class="role-badge role-teacher">Teacher</span></h2>
+    <p>واجهة المعلمين: إدارة الدورات، الدروس، الواجبات، الامتحانات، الطلاب، والتقويم.</p>
+    <div class="page-grid">
+      <div class="page-card">
+        <div class="page-mockup"><img src="presentation-screenshots/teacher-dashboard.png" alt="لوحة تحكم المعلم"></div>
+        <div class="info"><h4>لوحة التحكم</h4><p>إحصائيات، حصص اليوم، الطلاب المعرضون للخطر</p><div class="route">/teacher/dashboard</div></div>
+      </div>
+      <div class="page-card">
+        <div class="page-mockup"><img src="presentation-screenshots/teacher-courses.png" alt="دوراتي"></div>
+        <div class="info"><h4>دوراتي</h4><p>إدارة الدورات المسندة للمعلم</p><div class="route">/teacher/courses</div></div>
+      </div>
+      <div class="page-card">
+        <div class="page-mockup"><img src="presentation-screenshots/teacher-create-course.png" alt="إنشاء دورة"></div>
+        <div class="info"><h4>إنشاء دورة</h4><p>إضافة دورة جديدة بالتفاصيل والأقسام</p><div class="route">/teacher/create-course</div></div>
+      </div>
+      <div class="page-card">
+        <div class="page-mockup"><img src="presentation-screenshots/teacher-courses.png" alt="تعديل الدورة"></div>
+        <div class="info"><h4>تعديل الدورة</h4><p>تحديث معلومات الدورة</p><div class="route">/teacher/courses/:id/edit</div></div>
+      </div>
+      <div class="page-card">
+        <div class="page-mockup"><img src="presentation-screenshots/teacher-courses.png" alt="إدارة الدروس"></div>
+        <div class="info"><h4>إدارة دروس الدورة</h4><p>إضافة وتحرير الدروس والمحتوى</p><div class="route">/teacher/courses/:id/lessons</div></div>
+      </div>
+      <div class="page-card">
+        <div class="page-mockup"><img src="presentation-screenshots/teacher-students.png" alt="طلاب الدورة"></div>
+        <div class="info"><h4>طلاب الدورة</h4><p>قائمة الطلاب المسجلين في الدورة</p><div class="route">/teacher/courses/:id/students</div></div>
+      </div>
+      <div class="page-card">
+        <div class="page-mockup"><img src="presentation-screenshots/teacher-assignments.png" alt="الواجبات"></div>
+        <div class="info"><h4>الواجبات</h4><p>إنشاء وإدارة الواجبات</p><div class="route">/teacher/assignments</div></div>
+      </div>
+      <div class="page-card">
+        <div class="page-mockup"><img src="presentation-screenshots/teacher-assignments-create.png" alt="إنشاء واجب"></div>
+        <div class="info"><h4>إنشاء واجب</h4><p>إضافة واجب جديد للدورة</p><div class="route">/teacher/assignments/create</div></div>
+      </div>
+      <div class="page-card">
+        <div class="page-mockup"><img src="presentation-screenshots/teacher-exams.png" alt="الامتحانات"></div>
+        <div class="info"><h4>الامتحانات</h4><p>إدارة الامتحانات والنتائج</p><div class="route">/teacher/exams</div></div>
+      </div>
+      <div class="page-card">
+        <div class="page-mockup"><img src="presentation-screenshots/teacher-exams.png" alt="إنشاء امتحان"></div>
+        <div class="info"><h4>إنشاء امتحان</h4><p>إضافة امتحان مع الأسئلة</p><div class="route">/teacher/exams/create</div></div>
+      </div>
+      <div class="page-card">
+        <div class="page-mockup"><img src="presentation-screenshots/teacher-exams.png" alt="تفاصيل الامتحان"></div>
+        <div class="info"><h4>تفاصيل الامتحان</h4><p>عرض وتصحيح محاولات الطلاب</p><div class="route">/teacher/exams/:id</div></div>
+      </div>
+      <div class="page-card">
+        <div class="page-mockup"><img src="presentation-screenshots/teacher-calendar.png" alt="التقويم"></div>
+        <div class="info"><h4>التقويم</h4><p>جدول الحصص والامتحانات</p><div class="route">/teacher/calendar</div></div>
+      </div>
+      <div class="page-card">
+        <div class="page-mockup"><img src="presentation-screenshots/teacher-students.png" alt="الطلاب"></div>
+        <div class="info"><h4>جميع الطلاب</h4><p>قائمة الطلاب في المنصة</p><div class="route">/teacher/students</div></div>
+      </div>
+      <div class="page-card">
+        <div class="page-mockup"><img src="presentation-screenshots/teacher-at-risk-students.png" alt="الطلاب المعرضون للخطر"></div>
+        <div class="info"><h4>الطلاب المعرضون للخطر</h4><p>متابعة الطلاب الذين يحتاجون دعمًا</p><div class="route">/teacher/at-risk-students</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Admin Portal -->
+  <section id="admin">
+    <h2>بوابة الإدارة <span class="role-badge role-admin">Admin</span></h2>
+    <p>لوحة تحكم إدارية: تحليلات، إدارة المستخدمين والدورات، المالية، التقارير، وسجلات التدقيق.</p>
+    <div class="page-grid">
+      <div class="page-card">
+        <div class="page-mockup"><img src="presentation-screenshots/admin-dashboard.png" alt="لوحة تحكم الإدارة"></div>
+        <div class="info"><h4>لوحة التحكم</h4><p>تحليلات، رسوم بيانية، صحة النظام</p><div class="route">/admin/dashboard</div></div>
+      </div>
+      <div class="page-card">
+        <div class="page-mockup"><img src="presentation-screenshots/admin-users.png" alt="المستخدمين"></div>
+        <div class="info"><h4>إدارة المستخدمين</h4><p>إضافة وتعديل وحذف المستخدمين</p><div class="route">/admin/users</div></div>
+      </div>
+      <div class="page-card">
+        <div class="page-mockup"><img src="presentation-screenshots/admin-courses.png" alt="الدورات"></div>
+        <div class="info"><h4>إدارة الدورات</h4><p>مراجعة ونشر الدورات</p><div class="route">/admin/courses</div></div>
+      </div>
+      <div class="page-card">
+        <div class="page-mockup"><img src="presentation-screenshots/admin-finance.png" alt="نظرة المالية"></div>
+        <div class="info"><h4>نظرة عامة مالية</h4><p>الإيرادات والمصروفات والمؤشرات</p><div class="route">/admin/finance</div></div>
+      </div>
+      <div class="page-card">
+        <div class="page-mockup"><img src="presentation-screenshots/admin-finance-transactions.png" alt="المعاملات المالية"></div>
+        <div class="info"><h4>المعاملات المالية</h4><p>سجل المعاملات والمدفوعات</p><div class="route">/admin/finance/transactions</div></div>
+      </div>
+      <div class="page-card">
+        <div class="page-mockup"><img src="presentation-screenshots/admin-finance-payouts.png" alt="المدفوعات للمعلمين"></div>
+        <div class="info"><h4>المدفوعات للمعلمين</h4><p>إدارة مدفوعات المعلمين</p><div class="route">/admin/finance/payouts</div></div>
+      </div>
+      <div class="page-card">
+        <div class="page-mockup"><img src="presentation-screenshots/admin-finance-revenue-split.png" alt="تقسيم الإيرادات"></div>
+        <div class="info"><h4>تقسيم الإيرادات</h4><p>نسب الإيرادات بين المنصة والمعلمين</p><div class="route">/admin/finance/revenue-split</div></div>
+      </div>
+      <div class="page-card">
+        <div class="page-mockup"><img src="presentation-screenshots/admin-reports.png" alt="التقارير"></div>
+        <div class="info"><h4>التقارير</h4><p>تقارير شاملة عن المنصة</p><div class="route">/admin/reports</div></div>
+      </div>
+      <div class="page-card">
+        <div class="page-mockup"><img src="presentation-screenshots/admin-audit-logs.png" alt="سجلات التدقيق"></div>
+        <div class="info"><h4>سجلات التدقيق</h4><p>تتبع نشاط المستخدمين والإجراءات</p><div class="route">/admin/audit-logs</div></div>
+      </div>
+      <div class="page-card">
+        <div class="page-mockup"><img src="presentation-screenshots/admin-settings.png" alt="إعدادات النظام"></div>
+        <div class="info"><h4>إعدادات النظام</h4><p>إعدادات عامة للمنصة</p><div class="route">/admin/settings</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tech Stack -->
+  <section id="tech">
+    <h2>التقنيات المستخدمة</h2>
+    <p>النظام مبني بتقنيات حديثة وموثوقة لضمان الأداء والأمان وسهولة التطوير.</p>
+    <h3>الواجهة الأمامية (Frontend)</h3>
+    <div class="tech-grid">
+      <span class="tech-tag">React 19</span>
+      <span class="tech-tag">TypeScript</span>
+      <span class="tech-tag">Vite 7</span>
+      <span class="tech-tag">Tailwind CSS</span>
+      <span class="tech-tag">React Router 7</span>
+      <span class="tech-tag">Framer Motion</span>
+      <span class="tech-tag">Zustand</span>
+      <span class="tech-tag">Recharts</span>
+      <span class="tech-tag">Radix UI</span>
+      <span class="tech-tag">FullCalendar</span>
+    </div>
+    <h3>الخلفية (Backend)</h3>
+    <div class="tech-grid">
+      <span class="tech-tag">.NET 8</span>
+      <span class="tech-tag">ASP.NET Core</span>
+      <span class="tech-tag">Entity Framework Core</span>
+      <span class="tech-tag">PostgreSQL</span>
+      <span class="tech-tag">JWT Authentication</span>
+      <span class="tech-tag">SignalR</span>
+    </div>
+    <h3>المميزات</h3>
+    <ul style="margin-top: 1rem; padding-right: 1.5rem; color: var(--gray);">
+      <li>تصميم متجاوب يعمل على جميع الأجهزة</li>
+      <li>رسائل فورية (Real-time) عبر SignalR</li>
+      <li>حماية الصلاحيات حسب الدور (RBAC)</li>
+      <li>دعم ثيمات متعددة (فاتح/داكن/ملون)</li>
+      <li>واجهة برمجية موثقة (Swagger)</li>
+    </ul>
+  </section>
+
+  <footer>
+    <h3>AcademiX LMS</h3>
+    <p>نظام إدارة التعلم الإلكتروني المتكامل</p>
+    <p style="margin-top: 1rem; font-size: 0.9rem;">عرض تقديمي احترافي — جاهز للتقديم للشركات والمؤسسات</p>
+  </footer>
+</body>
+</html>

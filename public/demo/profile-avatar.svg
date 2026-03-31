@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#e2e8f0"/>
+      <stop offset="100%" style="stop-color:#cbd5e1"/>
+    </linearGradient>
+    <linearGradient id="shirt" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1"/>
+      <stop offset="100%" style="stop-color:#4f46e5"/>
+    </linearGradient>
+  </defs>
+  <rect width="200" height="200" fill="url(#bg)" rx="24"/>
+  <!-- Head -->
+  <circle cx="100" cy="72" r="38" fill="#f1f5f9"/>
+  <!-- Shoulders/body -->
+  <path d="M40 200 L40 130 Q40 110 100 110 Q160 110 160 130 L160 200 Z" fill="url(#shirt)"/>
+  <!-- Face -->
+  <ellipse cx="82" cy="68" rx="5" ry="6" fill="#64748b"/>
+  <ellipse cx="118" cy="68" rx="5" ry="6" fill="#64748b"/>
+  <path d="M88 88 Q100 98 112 88" stroke="#94a3b8" stroke-width="3" stroke-linecap="round" fill="none"/>
+</svg>
