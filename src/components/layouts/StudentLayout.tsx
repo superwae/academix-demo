@@ -792,12 +792,12 @@ export function StudentLayout() {
         </aside>
 
         {/* Main Content Area */}
-        <main id="main-content" className="min-w-0" role="main" tabIndex={-1}>
+        <main id="main-content" className="min-w-0 overflow-y-auto" role="main" tabIndex={-1}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="glass-strong min-w-0 overflow-y-auto rounded-2xl border border-border/60 p-4 shadow-xl sm:p-6 md:p-8"
+            className="glass-strong min-w-0 rounded-2xl border border-border/60 p-4 pb-24 shadow-xl sm:p-6 sm:pb-24 md:p-8 md:pb-28"
           >
             <Outlet />
           </motion.div>

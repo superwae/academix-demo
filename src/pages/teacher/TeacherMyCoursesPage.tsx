@@ -6,12 +6,12 @@ import { Button } from '../../components/ui/button'
 import { Progress } from '../../components/ui/progress'
 import { courseService, type CourseDto } from '../../services/courseService'
 import { teacherService } from '../../services/teacherService'
-import { 
-  BookOpen, 
-  Users, 
-  Settings, 
-  Eye, 
-  Edit, 
+import {
+  BookOpen,
+  Users,
+  Settings,
+  Eye,
+  Edit,
   MoreVertical,
   PlusCircle,
   TrendingUp,
@@ -22,7 +22,8 @@ import {
   Trash2,
   X,
   MapPin,
-  Link as LinkIcon
+  Link as LinkIcon,
+  Tag,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
@@ -456,6 +457,12 @@ export function TeacherMyCoursesPage() {
                             <Link to={`/teacher/courses/${course.id}/students`}>
                               <Users className="h-4 w-4 mr-2" />
                               View Students
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link to={`/teacher/courses/${course.id}/discounts`}>
+                              <Tag className="h-4 w-4 mr-2" />
+                              Discounts
                             </Link>
                           </DropdownMenuItem>
                         </DropdownMenuContent>

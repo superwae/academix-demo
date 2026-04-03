@@ -55,7 +55,7 @@ public class SubscriptionPlansController : ControllerBase
     }
 
     /// <summary>
-    /// Create a new subscription plan (SuperAdmin only)
+    /// Create a new subscription plan (Admin or SuperAdmin)
     /// </summary>
     [HttpPost]
     [Authorize(Policy = "RequireAdmin")]
@@ -64,20 +64,28 @@ public class SubscriptionPlansController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> CreatePlan([FromBody] CreateSubscriptionPlanRequest request, CancellationToken cancellationToken)
     {
-        if (!User.HasRole("SuperAdmin"))
-            return Forbid("Only SuperAdmin can create subscription plans.");
+        if (!User.IsInRole("SuperAdmin") && !User.IsInRole("Admin"))
+            return StatusCode(StatusCodes.Status403Forbidden, new { error = "Insufficient permissions to create subscription plans." });
 
-        var userId = User.GetRequiredUserId();
-        var result = await _subscriptionPlanService.CreatePlanAsync(request, userId, cancellationToken);
+        try
+        {
+            var userId = User.GetRequiredUserId();
+            var result = await _subscriptionPlanService.CreatePlanAsync(request, userId, cancellationToken);
 
-        if (!result.IsSuccess || result.Value == null)
-            return BadRequest(result.Error);
+            if (!result.IsSuccess || result.Value == null)
+                return BadRequest(new { error = result.Error ?? "Failed to create subscription plan." });
 
-        return CreatedAtAction(nameof(GetPlan), new { id = result.Value.Id }, result.Value);
+            return CreatedAtAction(nameof(GetPlan), new { id = result.Value.Id }, result.Value);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating subscription plan.");
+            return StatusCode(StatusCodes.Status500InternalServerError, new { error = "An unexpected error occurred." });
+        }
     }
 
     /// <summary>
-    /// Update a subscription plan (SuperAdmin only)
+    /// Update a subscription plan (Admin or SuperAdmin)
     /// </summary>
     [HttpPut("{id}")]
     [Authorize(Policy = "RequireAdmin")]
@@ -87,24 +95,32 @@ public class SubscriptionPlansController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdatePlan(Guid id, [FromBody] UpdateSubscriptionPlanRequest request, CancellationToken cancellationToken)
     {
-        if (!User.HasRole("SuperAdmin"))
-            return Forbid("Only SuperAdmin can update subscription plans.");
+        if (!User.IsInRole("SuperAdmin") && !User.IsInRole("Admin"))
+            return StatusCode(StatusCodes.Status403Forbidden, new { error = "Insufficient permissions to update subscription plans." });
 
-        var userId = User.GetRequiredUserId();
-        var result = await _subscriptionPlanService.UpdatePlanAsync(id, request, userId, cancellationToken);
-
-        if (!result.IsSuccess || result.Value == null)
+        try
         {
-            if (result.Error?.Contains("not found") == true)
-                return NotFound(result.Error);
-            return BadRequest(result.Error);
-        }
+            var userId = User.GetRequiredUserId();
+            var result = await _subscriptionPlanService.UpdatePlanAsync(id, request, userId, cancellationToken);
 
-        return Ok(result.Value);
+            if (!result.IsSuccess || result.Value == null)
+            {
+                if (result.Error?.Contains("not found") == true)
+                    return NotFound(new { error = result.Error });
+                return BadRequest(new { error = result.Error ?? "Failed to update subscription plan." });
+            }
+
+            return Ok(result.Value);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating subscription plan {PlanId}.", id);
+            return StatusCode(StatusCodes.Status500InternalServerError, new { error = "An unexpected error occurred." });
+        }
     }
 
     /// <summary>
-    /// Delete a subscription plan (SuperAdmin only)
+    /// Delete a subscription plan (Admin or SuperAdmin)
     /// </summary>
     [HttpDelete("{id}")]
     [Authorize(Policy = "RequireAdmin")]
@@ -113,19 +129,27 @@ public class SubscriptionPlansController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeletePlan(Guid id, CancellationToken cancellationToken)
     {
-        if (!User.HasRole("SuperAdmin"))
-            return Forbid("Only SuperAdmin can delete subscription plans.");
+        if (!User.IsInRole("SuperAdmin") && !User.IsInRole("Admin"))
+            return StatusCode(StatusCodes.Status403Forbidden, new { error = "Insufficient permissions to delete subscription plans." });
 
-        var userId = User.GetRequiredUserId();
-        var result = await _subscriptionPlanService.DeletePlanAsync(id, userId, cancellationToken);
-
-        if (!result.IsSuccess)
+        try
         {
-            if (result.Error?.Contains("not found") == true)
-                return NotFound(result.Error);
-            return BadRequest(result.Error);
-        }
+            var userId = User.GetRequiredUserId();
+            var result = await _subscriptionPlanService.DeletePlanAsync(id, userId, cancellationToken);
 
-        return NoContent();
+            if (!result.IsSuccess)
+            {
+                if (result.Error?.Contains("not found") == true)
+                    return NotFound(new { error = result.Error });
+                return BadRequest(new { error = result.Error ?? "Failed to delete subscription plan." });
+            }
+
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting subscription plan {PlanId}.", id);
+            return StatusCode(StatusCodes.Status500InternalServerError, new { error = "An unexpected error occurred." });
+        }
     }
 }

@@ -1,5 +1,4 @@
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
-import { AnimatePresence, motion } from 'framer-motion'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import { StudentLayout } from './components/layouts/StudentLayout'
 import { TeacherLayout } from './components/layouts/TeacherLayout'
 import { AdminLayout } from './components/layouts/AdminLayout'
@@ -94,20 +93,9 @@ import { StaffSettingsPage } from './pages/staff/StaffSettingsPage'
 import { MessagesPage as StaffMessagesPage } from './pages/student/MessagesPage'
 
 export default function App() {
-  const location = useLocation()
-
   return (
     <ErrorBoundary>
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={location.pathname}
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -6 }}
-          transition={{ duration: 0.18, ease: 'easeOut' }}
-          className="min-h-dvh"
-        >
-          <Routes location={location}>
+      <Routes>
             {/* Public Routes */}
             <Route element={<PublicLayout />}>
               <Route path="/" element={<HomePage />} />
@@ -204,6 +192,7 @@ export default function App() {
               <Route path="finance/payouts" element={<FinancePayoutsPage />} />
               <Route path="finance/revenue-split" element={<FinanceRevenueSplitPage />} />
               
+              <Route path="transactions" element={<Navigate to="/admin/finance/transactions" replace />} />
               <Route path="reports" element={<AdminReportsPage />} />
               <Route path="audit-logs" element={<AdminAuditLogsPage />} />
               <Route path="settings" element={<AdminSettingsPage />} />
@@ -263,9 +252,7 @@ export default function App() {
 
             {/* 404 */}
             <Route path="*" element={<NotFoundPage />} />
-          </Routes>
-        </motion.div>
-      </AnimatePresence>
+      </Routes>
       <Toaster />
     </ErrorBoundary>
   )

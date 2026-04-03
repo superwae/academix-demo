@@ -41,6 +41,11 @@ public static class ServiceCollectionExtensions
             {
                 options.Filters.Add<ActionLoggingFilter>();
             })
+            .AddJsonOptions(jsonOptions =>
+            {
+                jsonOptions.JsonSerializerOptions.Converters.Add(
+                    new System.Text.Json.Serialization.JsonStringEnumConverter());
+            })
             .ConfigureApiBehaviorOptions(options =>
             {
                 options.InvalidModelStateResponseFactory = context =>

@@ -9,7 +9,7 @@ export default defineConfig({
     port: 5174, // 5173 used by EDB Postgres; email links use FrontendBaseUrl in appsettings
     strictPort: false,
     // localhost + Cloudflare Quick Tunnel (*.trycloudflare.com) for demos without DNS
-    allowedHosts: ['localhost', '.trycloudflare.com'],
+    allowedHosts: ['localhost', '.trycloudflare.com', '.ngrok-free.app'],
     // Proxy /api and /health to backend
     proxy: {
       '/api': {

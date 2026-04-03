@@ -241,15 +241,15 @@ export function SubscriptionPage() {
                   <ul className="space-y-2 text-sm">
                     <li className="flex items-center gap-2">
                       <CheckCircle className="h-4 w-4 text-emerald-500" />
-                      Up to {plan.maxCourses} courses
+                      {plan.maxCourses != null ? `Up to ${plan.maxCourses} courses` : "Unlimited courses"}
                     </li>
                     <li className="flex items-center gap-2">
                       <CheckCircle className="h-4 w-4 text-emerald-500" />
-                      {plan.maxSeatsPerCourse} seats per course
+                      {plan.maxSeatsPerCourse != null ? `${plan.maxSeatsPerCourse} seats per course` : "Unlimited seats per course"}
                     </li>
                     <li className="flex items-center gap-2">
                       <CheckCircle className="h-4 w-4 text-emerald-500" />
-                      {plan.maxTotalSeats} total seats
+                      {plan.maxTotalSeats != null ? `${plan.maxTotalSeats} total seats` : "Unlimited total seats"}
                     </li>
                   </ul>
 

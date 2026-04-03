@@ -14,6 +14,9 @@ public static class DevAccountsSeeder
     private static readonly (string Email, string FirstName, string LastName, string RoleName)[] Accounts =
     [
         ("student@academix.com", "Student", "Demo", "Student"),
+        ("student01@academix.com", "Student01", "Demo", "Student"),
+        ("student02@academix.com", "Student02", "Demo", "Student"),
+        ("student03@academix.com", "Student03", "Demo", "Student"),
         ("teacher@academix.com", "Teacher", "Demo", "Instructor"),
         ("admin@academix.com", "Admin", "Demo", "Admin"),
         ("accountant@academix.com", "Accountant", "Demo", "Accountant"),
