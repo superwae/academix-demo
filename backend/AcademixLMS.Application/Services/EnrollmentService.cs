@@ -580,5 +580,54 @@ public class EnrollmentService : IEnrollmentService
             CompletedAt = enrollment.CompletedAt
         };
     }
+
+    public async Task<Result> EnrollAfterPaymentAsync(Guid userId, Guid courseId, Guid paymentId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            // Check if already enrolled
+            var existingEnrollment = await _context.Enrollments
+                .FirstOrDefaultAsync(e => e.UserId == userId && e.CourseId == courseId && !e.IsDeleted, cancellationToken);
+
+            if (existingEnrollment != null)
+            {
+                _logger.LogInformation("User {UserId} is already enrolled in course {CourseId}, skipping post-payment enrollment", userId, courseId);
+                return Result.Success();
+            }
+
+            // Get the course with its first section
+            var course = await _context.Courses
+                .Include(c => c.Sections)
+                .FirstOrDefaultAsync(c => c.Id == courseId && !c.IsDeleted, cancellationToken);
+
+            if (course == null)
+                return Result.Failure("Course not found.");
+
+            var firstSection = course.Sections?.OrderBy(s => s.Name).FirstOrDefault();
+            if (firstSection == null)
+                return Result.Failure("Course has no sections available for enrollment.");
+
+            var enrollment = new Enrollment
+            {
+                UserId = userId,
+                CourseId = courseId,
+                SectionId = firstSection.Id,
+                EnrolledAt = DateTime.UtcNow,
+                Status = EnrollmentStatus.Active,
+                ProgressPercentage = 0
+            };
+
+            _context.Enrollments.Add(enrollment);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Auto-enrolled user {UserId} in course {CourseId} after payment {PaymentId}", userId, courseId, paymentId);
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to auto-enroll user {UserId} in course {CourseId} after payment {PaymentId}", userId, courseId, paymentId);
+            return Result.Failure($"Auto-enrollment failed: {ex.Message}");
+        }
+    }
 }
 

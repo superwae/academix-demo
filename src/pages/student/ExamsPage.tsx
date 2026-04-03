@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useCallback } from 'react'
 import { format } from 'date-fns'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../../components/ui/card'
 import { Badge } from '../../components/ui/badge'
@@ -9,6 +9,7 @@ import { courseService, type CourseDto } from '../../services/courseService'
 import { toast } from 'sonner'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '../../components/ui/accordion'
+import { ConfirmDialog } from '../../components/ui/confirm-dialog'
 import { CheckCircle2, XCircle, FileText, ChevronRight, Award, Clock } from 'lucide-react'
 
 type RunningExam = {
@@ -37,6 +38,7 @@ export function ExamsPage() {
   const [examResult, setExamResult] = useState<import('../../services/examService').ExamResultDto | null>(null)
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [loadingResults, setLoadingResults] = useState(false)
+  const [showExitConfirm, setShowExitConfirm] = useState(false)
   /** When in summary: did we come from post-submit (score) or from attempt list (details) */
   const [summaryFrom, setSummaryFrom] = useState<'score' | 'attempts'>(`score`)
 
@@ -598,11 +600,7 @@ export function ExamsPage() {
                   <div className="flex items-center justify-between gap-2">
                     <Button
                       variant="outline"
-                      onClick={() => {
-                        if (confirm('Are you sure you want to exit? Your progress will be saved.')) {
-                          setOpenId(null)
-                        }
-                      }}
+                      onClick={() => setShowExitConfirm(true)}
                       className="flex-shrink-0"
                     >
                       Exit
@@ -871,6 +869,18 @@ setSummaryFrom('score')
           )}
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog
+        open={showExitConfirm}
+        onOpenChange={setShowExitConfirm}
+        title="Exit Exam"
+        description="Are you sure you want to exit? Your progress will be saved."
+        confirmLabel="Exit"
+        variant="default"
+        onConfirm={() => {
+          setOpenId(null)
+        }}
+      />
     </div>
   )
 }

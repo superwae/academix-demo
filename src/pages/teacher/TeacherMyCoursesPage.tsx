@@ -51,6 +51,7 @@ import {
 } from '../../components/ui/select'
 import { apiClient } from '../../lib/api'
 import { enrollmentService } from '../../services/enrollmentService'
+import { ConfirmDialog } from '../../components/ui/confirm-dialog'
 import type { CourseSectionDto, MeetingTimeDto } from '../../services/courseService'
 
 /** Active + completed enrollments only — used for class size and average progress. */
@@ -92,6 +93,7 @@ export function TeacherMyCoursesPage() {
   const [showSectionsDialog, setShowSectionsDialog] = useState(false)
   const [sectionsLoading, setSectionsLoading] = useState(false)
   const [editingSection, setEditingSection] = useState<SectionFormData | null>(null)
+  const [deleteSectionId, setDeleteSectionId] = useState<string | null>(null)
 
   useEffect(() => {
     const loadCourses = async () => {
@@ -287,7 +289,6 @@ export function TeacherMyCoursesPage() {
 
   const handleDeleteSection = async (sectionId: string) => {
     if (!selectedCourse) return
-    if (!confirm('Are you sure you want to delete this section?')) return
 
     try {
       setSectionsLoading(true)
@@ -735,7 +736,7 @@ export function TeacherMyCoursesPage() {
                           <Button
                             variant="destructive"
                             size="sm"
-                            onClick={() => handleDeleteSection(section.id)}
+                            onClick={() => setDeleteSectionId(section.id)}
                             disabled={sectionsLoading}
                           >
                             <Trash2 className="h-3 w-3" />
@@ -750,8 +751,18 @@ export function TeacherMyCoursesPage() {
           )}
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog
+        open={deleteSectionId !== null}
+        onOpenChange={(open) => { if (!open) setDeleteSectionId(null) }}
+        title="Delete Section"
+        description="Are you sure you want to delete this section?"
+        confirmLabel="Delete"
+        variant="destructive"
+        onConfirm={() => {
+          if (deleteSectionId) return handleDeleteSection(deleteSectionId)
+        }}
+      />
     </motion.div>
   )
 }
-
-

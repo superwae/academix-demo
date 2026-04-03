@@ -153,6 +153,22 @@ export class ApiClient {
       }
       
       if (!response.ok) {
+        // When using mock auth and backend is unavailable (5xx), return an empty
+        // mock response so the UI degrades gracefully for demos.
+        if (response.status >= 500 && this.accessToken?.startsWith('mock-')) {
+          console.warn(`[API] Backend unavailable (${response.status}), returning empty mock for: ${endpoint}`);
+          // Return an array with PagedResult properties so it works for both
+          // array endpoints (response.map()) and paginated endpoints (response.items).
+          const empty: any = [];
+          empty.items = [];
+          empty.totalCount = 0;
+          empty.pageNumber = 1;
+          empty.pageSize = 20;
+          empty.totalPages = 0;
+          empty.hasNextPage = false;
+          empty.hasPreviousPage = false;
+          return empty as T;
+        }
         return this.handleErrorResponse<T>(response, url);
           }
 

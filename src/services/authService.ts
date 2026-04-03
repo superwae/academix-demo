@@ -55,7 +55,7 @@ export interface RefreshTokenResponse {
 // Mock users for testing when backend is not available
 const MOCK_USERS: Record<string, { password: string; user: User }> = {
   'admin@academix.com': {
-    password: 'Admin123!',
+    password: 'Academix123!',
     user: {
       id: 'admin-001',
       email: 'admin@academix.com',
@@ -69,7 +69,7 @@ const MOCK_USERS: Record<string, { password: string; user: User }> = {
     },
   },
   'teacher@academix.com': {
-    password: 'Teacher123!',
+    password: 'Academix123!',
     user: {
       id: 'teacher-001',
       email: 'teacher@academix.com',
@@ -83,7 +83,7 @@ const MOCK_USERS: Record<string, { password: string; user: User }> = {
     },
   },
   'mohammad.omar@academix.com': {
-    password: 'Teacher123!',
+    password: 'Academix123!',
     user: {
       id: 'mohammad-omar-001',
       email: 'mohammad.omar@academix.com',
@@ -97,7 +97,7 @@ const MOCK_USERS: Record<string, { password: string; user: User }> = {
     },
   },
   'student@academix.com': {
-    password: 'Student123!',
+    password: 'Academix123!',
     user: {
       id: 'student-001',
       email: 'student@academix.com',
@@ -155,7 +155,7 @@ class AuthService {
       return response;
     } catch (error) {
       const apiError = error as ApiError;
-      const isNetworkError = !apiError.status || apiError.status === 0;
+      const isNetworkError = !apiError.status || apiError.status === 0 || apiError.status >= 500;
       /** Narrow: only staff demo emails — avoids masking real 401s for student/teacher/admin. */
       const dev401StaffDemo =
         import.meta.env.DEV &&
@@ -188,7 +188,7 @@ class AuthService {
       }
 
       if (mockUser) {
-        throw new Error(apiError.error || 'Incorrect password. Try: Admin123!, Teacher123!, or Student123!');
+        throw new Error(apiError.error || 'Incorrect password. Try: Academix123!');
       }
       // Prefer `detail` when API returns it (e.g. Development exception info on 500)
       throw new Error(

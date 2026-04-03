@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
+import { ConfirmDialog } from './ui/confirm-dialog';
 import { MessageSquare, ThumbsUp, Reply, Edit, Trash2, Send, X } from 'lucide-react';
 import { discussionService, type DiscussionPost } from '../services/discussionService';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -25,6 +26,7 @@ export function CourseDiscussion({ courseId, lessonId, title }: CourseDiscussion
   const [replyContent, setReplyContent] = useState('');
   const [editingPostId, setEditingPostId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState('');
+  const [deletePostId, setDeletePostId] = useState<string | null>(null);
 
   useEffect(() => {
     loadDiscussions();
@@ -113,13 +115,11 @@ export function CourseDiscussion({ courseId, lessonId, title }: CourseDiscussion
       return;
     }
 
-    if (confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
-      if (discussionService.deletePost(postId, courseId, lessonId)) {
-        loadDiscussions();
-        toast.success('Post deleted successfully');
-      } else {
-        toast.error('Failed to delete post. You can only delete your own posts.');
-      }
+    if (discussionService.deletePost(postId, courseId, lessonId)) {
+      loadDiscussions();
+      toast.success('Post deleted successfully');
+    } else {
+      toast.error('Failed to delete post. You can only delete your own posts.');
     }
   };
 
@@ -252,7 +252,7 @@ export function CourseDiscussion({ courseId, lessonId, title }: CourseDiscussion
                   Edit
                 </button>
                 <button
-                  onClick={() => handleDelete(post.id)}
+                  onClick={() => setDeletePostId(post.id)}
                   className="flex items-center gap-1 text-muted-foreground hover:text-destructive transition-colors"
                   title="Delete your post"
                 >
@@ -360,6 +360,17 @@ export function CourseDiscussion({ courseId, lessonId, title }: CourseDiscussion
           )}
         </ScrollArea>
       </CardContent>
+      <ConfirmDialog
+        open={deletePostId !== null}
+        onOpenChange={(open) => { if (!open) setDeletePostId(null); }}
+        title="Delete Post"
+        description="Are you sure you want to delete this post? This action cannot be undone."
+        confirmLabel="Delete"
+        variant="destructive"
+        onConfirm={() => {
+          if (deletePostId) handleDelete(deletePostId);
+        }}
+      />
     </Card>
   );
 }

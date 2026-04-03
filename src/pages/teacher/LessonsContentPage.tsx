@@ -51,6 +51,7 @@ import {
 import type { CourseDto } from '../../services/courseService'
 import { teacherService } from '../../services/teacherService'
 import { lessonService, type LessonDto, type CourseSectionDto } from '../../services/lessonService'
+import { ConfirmDialog } from '../../components/ui/confirm-dialog'
 import { cn } from '../../lib/cn'
 
 /** Keeps drag movement vertical so rows cannot be pulled sideways out of the list. */
@@ -138,6 +139,7 @@ export function LessonsContentPage() {
   const [loading, setLoading] = useState(false)
   const [showAddSectionDialog, setShowAddSectionDialog] = useState(false)
   const [newSectionName, setNewSectionName] = useState('')
+  const [deleteLessonId, setDeleteLessonId] = useState<string | null>(null)
 
   const lessonsSorted = useMemo(
     () => [...lessons].sort((a, b) => a.order - b.order),
@@ -305,10 +307,6 @@ export function LessonsContentPage() {
   }
 
   const handleDeleteLesson = async (id: string) => {
-    if (!confirm('Delete this lesson? This action cannot be undone.')) {
-      return
-    }
-
     try {
       setLoading(true)
       await lessonService.deleteLesson(id)
@@ -687,10 +685,7 @@ export function LessonsContentPage() {
                   <Button
                     variant="destructive"
                     size="sm"
-                    onClick={() => {
-                      handleDeleteLesson(editingLesson.id)
-                      setEditingLesson(null)
-                    }}
+                    onClick={() => setDeleteLessonId(editingLesson.id)}
                     disabled={loading}
                     className="ml-auto"
                   >
@@ -726,6 +721,21 @@ export function LessonsContentPage() {
           </CardContent>
         </Card>
       </div>
+
+      <ConfirmDialog
+        open={deleteLessonId !== null}
+        onOpenChange={(open) => { if (!open) setDeleteLessonId(null) }}
+        title="Delete Lesson"
+        description="Delete this lesson? This action cannot be undone."
+        confirmLabel="Delete"
+        variant="destructive"
+        onConfirm={async () => {
+          if (deleteLessonId) {
+            await handleDeleteLesson(deleteLessonId)
+            setEditingLesson(null)
+          }
+        }}
+      />
 
       {/* Add Section Dialog */}
       <Dialog open={showAddSectionDialog} onOpenChange={setShowAddSectionDialog}>

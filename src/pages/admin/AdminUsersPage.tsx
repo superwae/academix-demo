@@ -33,6 +33,7 @@ import {
 } from "../../components/ui/dropdown-menu";
 import { cn } from "../../lib/cn";
 import { adminService, type AdminUserDto } from "../../services/adminService";
+import { ConfirmDialog } from '../../components/ui/confirm-dialog';
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
@@ -50,6 +51,7 @@ export function AdminUsersPage() {
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [deleteUser, setDeleteUser] = useState<AdminUserDto | null>(null);
   const pageSize = 10;
 
   // Fetch users from API
@@ -139,10 +141,6 @@ export function AdminUsersPage() {
   };
 
   const handleDelete = async (user: AdminUserDto) => {
-    if (!confirm(`Are you sure you want to delete ${user.fullName}? This action cannot be undone.`)) {
-      return;
-    }
-
     try {
       setActionLoading(user.id);
       await adminService.deleteUser(user.id);
@@ -361,7 +359,7 @@ export function AdminUsersPage() {
                                 </>
                               )}
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleDelete(user)} className="text-destructive">
+                            <DropdownMenuItem onClick={() => setDeleteUser(user)} className="text-destructive">
                               <UserX className="mr-2 h-4 w-4" />
                               Delete User
                             </DropdownMenuItem>
@@ -450,6 +448,18 @@ export function AdminUsersPage() {
           )}
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog
+        open={deleteUser !== null}
+        onOpenChange={(open) => { if (!open) setDeleteUser(null); }}
+        title="Delete User"
+        description={`Are you sure you want to delete ${deleteUser?.fullName}? This action cannot be undone.`}
+        confirmLabel="Delete"
+        variant="destructive"
+        onConfirm={() => {
+          if (deleteUser) return handleDelete(deleteUser);
+        }}
+      />
 
       {/* Edit Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>

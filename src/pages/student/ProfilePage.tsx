@@ -27,6 +27,7 @@ import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
 import { cn } from '../../lib/cn'
+import { fileService } from '../../services/fileService'
 
 const MOCK_BIO =
   'Experienced educator with a passion for student success. I focus on practical, project-based learning and believe every student can excel with the right support. I’ve designed courses in machine learning, data science, and cloud computing—always with an emphasis on real-world applications.'
@@ -90,6 +91,36 @@ export function ProfilePage() {
   })
   const [passwordFormOpen, setPasswordFormOpen] = useState(false)
   const [changingPassword, setChangingPassword] = useState(false)
+  const [uploadingPhoto, setUploadingPhoto] = useState(false)
+
+  const handlePhotoUpload = async () => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = 'image/png,image/jpeg,image/gif'
+    input.onchange = async () => {
+      const file = input.files?.[0]
+      if (!file) return
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Image must be under 5 MB')
+        return
+      }
+      try {
+        setUploadingPhoto(true)
+        const result = await fileService.uploadFile(file, 'profile-photos')
+        await userService.updateCurrentUser({ profilePictureUrl: result.fileUrl })
+        setPhotoUrl(result.fileUrl)
+        setAvatarImageError('none')
+        toast.success('Profile photo updated')
+      } catch (error) {
+        toast.error('Failed to upload photo', {
+          description: error instanceof Error ? error.message : undefined,
+        })
+      } finally {
+        setUploadingPhoto(false)
+      }
+    }
+    input.click()
+  }
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -245,7 +276,8 @@ export function ProfilePage() {
               <button
                 type="button"
                 className="absolute -bottom-1 -right-1 flex h-9 w-9 items-center justify-center rounded-xl border-2 border-background bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-colors"
-                onClick={() => toast.info('Profile photo upload coming soon')}
+                onClick={handlePhotoUpload}
+                disabled={uploadingPhoto}
                 aria-label="Change profile photo"
               >
                 <Camera className="h-4 w-4" />

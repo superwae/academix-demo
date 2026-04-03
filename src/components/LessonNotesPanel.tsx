@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
+import { ConfirmDialog } from './ui/confirm-dialog';
 import { StickyNote, Plus, Trash2, Clock } from 'lucide-react';
 import { notesService, type LessonNote } from '../services/notesService';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -19,6 +20,7 @@ export function LessonNotesPanel({ lessonId, courseId, currentTime, onSeekToTime
   const [notes, setNotes] = useState<LessonNote[]>([]);
   const [isAddingNote, setIsAddingNote] = useState(false);
   const [noteContent, setNoteContent] = useState('');
+  const [deleteNoteId, setDeleteNoteId] = useState<string | null>(null);
   const currentTimeRef = useRef(currentTime);
 
   useEffect(() => {
@@ -48,11 +50,9 @@ export function LessonNotesPanel({ lessonId, courseId, currentTime, onSeekToTime
   };
 
   const handleDeleteNote = (noteId: string) => {
-    if (confirm('Delete this note?')) {
-      notesService.deleteNote(noteId);
-      loadNotes();
-      toast.success('Note deleted');
-    }
+    notesService.deleteNote(noteId);
+    loadNotes();
+    toast.success('Note deleted');
   };
 
   const formatTimestamp = (seconds: number): string => {
@@ -148,7 +148,7 @@ export function LessonNotesPanel({ lessonId, courseId, currentTime, onSeekToTime
                     variant="ghost"
                     size="icon"
                     className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={() => handleDeleteNote(note.id)}
+                    onClick={() => setDeleteNoteId(note.id)}
                   >
                     <Trash2 className="h-4 w-4 text-destructive" />
                   </Button>
@@ -158,6 +158,17 @@ export function LessonNotesPanel({ lessonId, courseId, currentTime, onSeekToTime
           </div>
         )}
       </CardContent>
+      <ConfirmDialog
+        open={deleteNoteId !== null}
+        onOpenChange={(open) => { if (!open) setDeleteNoteId(null); }}
+        title="Delete Note"
+        description="Delete this note?"
+        confirmLabel="Delete"
+        variant="destructive"
+        onConfirm={() => {
+          if (deleteNoteId) handleDeleteNote(deleteNoteId);
+        }}
+      />
     </Card>
   );
 }
