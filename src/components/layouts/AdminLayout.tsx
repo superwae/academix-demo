@@ -19,6 +19,7 @@ import {
   Wallet,
   PieChart,
   MessageSquare,
+  Crown,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "../../lib/cn";
@@ -88,6 +89,13 @@ const ADMIN_NAV_SECTIONS: NavSection[] = [
       { to: "/admin/finance/transactions", label: "Transactions", icon: CreditCard },
       { to: "/admin/finance/payouts", label: "Payouts", icon: Wallet },
       { to: "/admin/finance/revenue-split", label: "Revenue Split", icon: PieChart },
+    ],
+  },
+  {
+    title: "Subscriptions",
+    items: [
+      { to: "/admin/subscription-plans", label: "Subscription Plans", icon: Crown },
+      { to: "/admin/subscription", label: "Subscription", icon: CreditCard },
     ],
   },
   {

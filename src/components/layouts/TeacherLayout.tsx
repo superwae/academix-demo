@@ -20,6 +20,7 @@ import {
   FileText,
   Users,
   Video,
+  Crown,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "../../lib/cn";
@@ -72,6 +73,7 @@ const TEACHER_NAV: NavItem[] = [
   { to: "/teacher/assignments", label: "Assignments", icon: ClipboardList },
   { to: "/teacher/exams", label: "Exams & Quizzes", icon: FileText },
   { to: "/teacher/students", label: "Students", icon: Users },
+  { to: "/teacher/subscription", label: "Subscription", icon: Crown },
   { to: "/teacher/messages", label: "Messages", icon: Inbox },
   { to: "/teacher/profile", label: "Profile", icon: User },
   { to: "/teacher/settings", label: "Settings", icon: Settings },
@@ -287,7 +289,7 @@ export function TeacherLayout() {
                   <DialogTitle className="text-xl">AcademiX</DialogTitle>
                 </DialogHeader>
                 <div className="max-h-[min(70dvh,520px)] overflow-y-auto px-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))] pt-2">
-                  <TeacherNavList onNavigate={() => setMobileOpen(false)} unreadMessages={unreadMessages} />
+                  <TeacherNavList onNavigate={() => setMobileOpen(false)} unreadMessages={unreadMessages} hideSubscription={showTeacherPortalHint} />
                 </div>
               </DialogContent>
             </Dialog>
@@ -692,7 +694,7 @@ export function TeacherLayout() {
             </motion.div>
 
             {/* Navigation */}
-            <TeacherNavList unreadMessages={unreadMessages} />
+            <TeacherNavList unreadMessages={unreadMessages} hideSubscription={showTeacherPortalHint} />
           </motion.div>
         </aside>
 
@@ -712,10 +714,14 @@ export function TeacherLayout() {
   );
 }
 
-function TeacherNavList({ onNavigate, unreadMessages = 0 }: { onNavigate?: () => void; unreadMessages?: number }) {
+function TeacherNavList({ onNavigate, unreadMessages = 0, hideSubscription = false }: { onNavigate?: () => void; unreadMessages?: number; hideSubscription?: boolean }) {
+  const navItems = hideSubscription
+    ? TEACHER_NAV.filter((item) => item.to !== "/teacher/subscription")
+    : TEACHER_NAV;
+
   return (
     <nav className="flex flex-col gap-1.5" aria-label="Main navigation">
-      {TEACHER_NAV.map((item) => {
+      {navItems.map((item) => {
         const isMessages = item.to === "/teacher/messages";
         const showBadge = isMessages && unreadMessages > 0;
         

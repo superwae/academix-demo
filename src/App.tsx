@@ -53,6 +53,15 @@ import { MessagesPage as TeacherMessagesPage } from './pages/student/MessagesPag
 import { ProfilePage as TeacherProfilePage } from './pages/student/ProfilePage'
 import { SettingsPage as TeacherSettingsPage } from './pages/student/SettingsPage'
 
+// Subscription & Payment pages
+import { SubscriptionPlansPage } from './pages/admin/SubscriptionPlansPage'
+import { SubscriptionPage as AdminSubscriptionPage } from './pages/admin/SubscriptionPage'
+import { TeacherSubscriptionPage } from './pages/teacher/SubscriptionPage'
+import { CourseDiscountsPage } from './pages/teacher/CourseDiscountsPage'
+import { PaymentHistoryPage } from './pages/student/PaymentHistoryPage'
+import { CheckoutPage } from './pages/student/CheckoutPage'
+import { PaymentCallbackPage } from './pages/student/PaymentCallbackPage'
+
 import { Toaster } from './components/Toaster'
 import { ErrorBoundary } from './components/ErrorBoundary'
 
@@ -133,6 +142,9 @@ export default function App() {
               <Route path="messages" element={<StudentMessagesPage />} />
               <Route path="profile" element={<StudentProfilePage />} />
               <Route path="settings" element={<StudentSettingsPage />} />
+              <Route path="payments" element={<PaymentHistoryPage />} />
+              <Route path="checkout/:courseId" element={<CheckoutPage />} />
+              <Route path="payment/callback" element={<PaymentCallbackPage />} />
             </Route>
 
             {/* Teacher Portal - /teacher/* */}
@@ -166,6 +178,8 @@ export default function App() {
               <Route path="messages" element={<TeacherMessagesPage />} />
               <Route path="profile" element={<TeacherProfilePage />} />
               <Route path="settings" element={<TeacherSettingsPage />} />
+              <Route path="subscription" element={<TeacherSubscriptionPage />} />
+              <Route path="courses/:id/discounts" element={<CourseDiscountsPage />} />
             </Route>
 
             {/* Admin Portal - /admin/* */}
@@ -192,6 +206,8 @@ export default function App() {
               <Route path="reports" element={<AdminReportsPage />} />
               <Route path="audit-logs" element={<AdminAuditLogsPage />} />
               <Route path="settings" element={<AdminSettingsPage />} />
+              <Route path="subscription-plans" element={<SubscriptionPlansPage />} />
+              <Route path="subscription" element={<AdminSubscriptionPage />} />
             </Route>
 
             {/* Accountant portal */}
