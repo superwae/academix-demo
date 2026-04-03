@@ -12,6 +12,15 @@ import './utils/sendNotification' // Make sendNotification available globally
 
 initThemeFromStorage()
 
+// Ensure framer-motion animations complete even in constrained environments
+// (tunnels, throttled browsers). This adds a safety-net style that forces
+// opacity to 1 on main content areas after a brief delay.
+requestAnimationFrame(() => {
+  const style = document.createElement('style')
+  style.textContent = 'main > *, [class*="min-h"] > * { opacity: 1 !important; }'
+  document.head.appendChild(style)
+})
+
 // Initialize auth store
 useAuthStore.getState().initialize()
 

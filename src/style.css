@@ -4,16 +4,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Force all page-level content to be visible. Framer-motion sets inline
-   opacity:0 on mount then animates to 1, but in some environments (tunnels,
-   throttled browsers) the animation never completes. This override ensures
-   content is always readable while preserving other transform animations. */
-.min-h-dvh > *,
-.min-h-\\[calc\\(100vh-5rem\\)\\] > *,
-main > * {
-  opacity: 1 !important;
-}
-
 /* Theme tokens with dramatic differences */
 
 @layer base {
