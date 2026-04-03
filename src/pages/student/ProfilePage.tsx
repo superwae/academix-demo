@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Textarea } from '../../components/ui/textarea'
 import { Badge } from '../../components/ui/badge'
@@ -92,34 +92,35 @@ export function ProfilePage() {
   const [passwordFormOpen, setPasswordFormOpen] = useState(false)
   const [changingPassword, setChangingPassword] = useState(false)
   const [uploadingPhoto, setUploadingPhoto] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const handlePhotoUpload = async () => {
-    const input = document.createElement('input')
-    input.type = 'file'
-    input.accept = 'image/png,image/jpeg,image/gif'
-    input.onchange = async () => {
-      const file = input.files?.[0]
-      if (!file) return
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error('Image must be under 5 MB')
-        return
-      }
-      try {
-        setUploadingPhoto(true)
-        const result = await fileService.uploadFile(file, 'profile-photos')
-        await userService.updateCurrentUser({ profilePictureUrl: result.fileUrl })
-        setPhotoUrl(result.fileUrl)
-        setAvatarImageError('none')
-        toast.success('Profile photo updated')
-      } catch (error) {
-        toast.error('Failed to upload photo', {
-          description: error instanceof Error ? error.message : undefined,
-        })
-      } finally {
-        setUploadingPhoto(false)
-      }
+  const handlePhotoUpload = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image must be under 5 MB')
+      return
     }
-    input.click()
+    try {
+      setUploadingPhoto(true)
+      const result = await fileService.uploadFile(file, 'profile-photos')
+      await userService.updateCurrentUser({ profilePictureUrl: result.fileUrl })
+      setPhotoUrl(result.fileUrl)
+      setAvatarImageError('none')
+      toast.success('Profile photo updated')
+    } catch (error) {
+      toast.error('Failed to upload photo', {
+        description: error instanceof Error ? error.message : undefined,
+      })
+    } finally {
+      setUploadingPhoto(false)
+      // Reset so the same file can be selected again
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    }
   }
 
   useEffect(() => {
@@ -211,6 +212,14 @@ export function ProfilePage() {
 
   return (
     <div className="space-y-8 pb-20">
+      {/* Hidden file input for profile photo upload */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/png,image/jpeg,image/gif"
+        className="hidden"
+        onChange={handleFileSelected}
+      />
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Profile</h1>
         <p className="text-sm text-muted-foreground mt-0.5">Your profile</p>

@@ -81,9 +81,9 @@ public class PaymentService : IPaymentService
                 {
                     finalAmount = originalAmount - (long)(originalAmount * discount.Value / 100m);
                 }
-                else // FixedAmount
+                else // FixedAmount — value is in dollars, convert to cents
                 {
-                    finalAmount = Math.Max(0, originalAmount - (long)discount.Value);
+                    finalAmount = Math.Max(0, originalAmount - (long)(discount.Value * 100));
                 }
 
                 // Increment usage count

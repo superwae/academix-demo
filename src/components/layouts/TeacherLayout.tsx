@@ -257,7 +257,7 @@ export function TeacherLayout() {
   const showTeacherPortalHint = isPlatformAdminAccount(user?.roles);
 
   return (
-    <div className="relative min-h-dvh bg-background text-foreground">
+    <div className="relative h-dvh overflow-hidden bg-background text-foreground flex flex-col">
       <AnimatedBackground />
 
       {/* Skip to content link for accessibility */}
@@ -267,7 +267,7 @@ export function TeacherLayout() {
 
       {/* Premium Header */}
       <header
-        className="sticky top-0 z-50 border-b border-border/50 glass-strong pt-[env(safe-area-inset-top,0px)]"
+        className="shrink-0 z-50 border-b border-border/50 glass-strong pt-[env(safe-area-inset-top,0px)]"
         role="banner"
       >
         <div className="mx-auto flex h-16 max-w-[1920px] items-center gap-2 px-3 sm:h-20 sm:gap-4 sm:px-6">
@@ -628,14 +628,14 @@ export function TeacherLayout() {
       </header>
 
       {/* Main Layout Grid */}
-      <div className="mx-auto grid max-w-[1920px] grid-cols-1 gap-4 px-3 py-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:gap-6 sm:px-6 sm:py-6 lg:grid-cols-[280px_1fr] lg:gap-8 lg:px-6 lg:py-8">
+      <div className="mx-auto grid max-w-[1920px] grid-cols-1 gap-4 px-3 py-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:gap-6 sm:px-6 sm:py-6 lg:grid-cols-[280px_1fr] lg:gap-8 lg:px-6 lg:py-8 flex-1 overflow-y-auto">
         {/* Premium Sidebar */}
         <aside className="hidden lg:block" role="complementary" aria-label="Navigation sidebar">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.3 }}
-            className="sticky top-28 glass-strong rounded-2xl border border-border/60 p-4 shadow-xl"
+            className="sticky top-0 glass-strong rounded-2xl border border-border/60 p-4 shadow-xl"
           >
             {/* User Profile Card */}
             <motion.div
@@ -699,7 +699,7 @@ export function TeacherLayout() {
         </aside>
 
         {/* Main Content Area */}
-        <main id="main-content" className="min-w-0 overflow-y-auto" role="main" tabIndex={-1}>
+        <main id="main-content" className="min-w-0" role="main" tabIndex={-1}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
