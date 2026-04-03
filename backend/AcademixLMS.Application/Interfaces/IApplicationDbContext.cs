@@ -50,6 +50,12 @@ public interface IApplicationDbContext
     DbSet<LessonRating> LessonRatings { get; }
     DbSet<MeetingTimeRating> MeetingTimeRatings { get; }
 
+    // Subscription & Payment System
+    DbSet<SubscriptionPlan> SubscriptionPlans { get; }
+    DbSet<Subscription> Subscriptions { get; }
+    DbSet<Payment> Payments { get; }
+    DbSet<Discount> Discounts { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     int SaveChanges();
 }

@@ -214,11 +214,9 @@ export function PublicCoursesPage() {
                       </div>
                       <Badge variant="secondary">{course.level}</Badge>
                     </div>
-                    {course.price && (
-                      <div className="text-lg font-bold">
-                        ${course.price.toFixed(2)}
-                      </div>
-                    )}
+                    <div className="text-lg font-bold">
+                      {course.price ? `$${course.price.toFixed(2)}` : <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-500/30">Free</Badge>}
+                    </div>
                   </CardContent>
                 </Link>
               </Card>

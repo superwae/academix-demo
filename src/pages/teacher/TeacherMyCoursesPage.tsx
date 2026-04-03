@@ -6,12 +6,12 @@ import { Button } from '../../components/ui/button'
 import { Progress } from '../../components/ui/progress'
 import { courseService, type CourseDto } from '../../services/courseService'
 import { teacherService } from '../../services/teacherService'
-import { 
-  BookOpen, 
-  Users, 
-  Settings, 
-  Eye, 
-  Edit, 
+import {
+  BookOpen,
+  Users,
+  Settings,
+  Eye,
+  Edit,
   MoreVertical,
   PlusCircle,
   TrendingUp,
@@ -22,7 +22,8 @@ import {
   Trash2,
   X,
   MapPin,
-  Link as LinkIcon
+  Link as LinkIcon,
+  Tag,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
@@ -51,6 +52,7 @@ import {
 } from '../../components/ui/select'
 import { apiClient } from '../../lib/api'
 import { enrollmentService } from '../../services/enrollmentService'
+import { ConfirmDialog } from '../../components/ui/confirm-dialog'
 import type { CourseSectionDto, MeetingTimeDto } from '../../services/courseService'
 
 /** Active + completed enrollments only — used for class size and average progress. */
@@ -92,6 +94,7 @@ export function TeacherMyCoursesPage() {
   const [showSectionsDialog, setShowSectionsDialog] = useState(false)
   const [sectionsLoading, setSectionsLoading] = useState(false)
   const [editingSection, setEditingSection] = useState<SectionFormData | null>(null)
+  const [deleteSectionId, setDeleteSectionId] = useState<string | null>(null)
 
   useEffect(() => {
     const loadCourses = async () => {
@@ -287,7 +290,6 @@ export function TeacherMyCoursesPage() {
 
   const handleDeleteSection = async (sectionId: string) => {
     if (!selectedCourse) return
-    if (!confirm('Are you sure you want to delete this section?')) return
 
     try {
       setSectionsLoading(true)
@@ -455,6 +457,12 @@ export function TeacherMyCoursesPage() {
                             <Link to={`/teacher/courses/${course.id}/students`}>
                               <Users className="h-4 w-4 mr-2" />
                               View Students
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link to={`/teacher/courses/${course.id}/discounts`}>
+                              <Tag className="h-4 w-4 mr-2" />
+                              Discounts
                             </Link>
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -735,7 +743,7 @@ export function TeacherMyCoursesPage() {
                           <Button
                             variant="destructive"
                             size="sm"
-                            onClick={() => handleDeleteSection(section.id)}
+                            onClick={() => setDeleteSectionId(section.id)}
                             disabled={sectionsLoading}
                           >
                             <Trash2 className="h-3 w-3" />
@@ -750,8 +758,18 @@ export function TeacherMyCoursesPage() {
           )}
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog
+        open={deleteSectionId !== null}
+        onOpenChange={(open) => { if (!open) setDeleteSectionId(null) }}
+        title="Delete Section"
+        description="Are you sure you want to delete this section?"
+        confirmLabel="Delete"
+        variant="destructive"
+        onConfirm={() => {
+          if (deleteSectionId) return handleDeleteSection(deleteSectionId)
+        }}
+      />
     </motion.div>
   )
 }
-
-

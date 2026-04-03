@@ -58,7 +58,7 @@ public static class DemoFacultyBulkSeeder
         "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80",
         "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=800&q=80",
         "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=800&q=80",
         "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=800&q=80",
         "https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=800&q=80",
         "https://images.unsplash.com/photo-1532619675605-1ede6c778ed1?auto=format&fit=crop&w=800&q=80",
@@ -231,8 +231,7 @@ public static class DemoFacultyBulkSeeder
                 {
                     Title = title,
                     Description =
-                        $"Comprehensive {title} course. Includes lectures, labs, assignments, and a proctored exam. " +
-                        "(Demo data seed for AcademiX.)",
+                        $"Comprehensive {title} course. Includes lectures, labs, assignments, and a proctored exam.",
                     Category = category,
                     Level = CourseLevel.Intermediate,
                     Modality = Modality.Hybrid,

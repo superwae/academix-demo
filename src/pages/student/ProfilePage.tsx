@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Textarea } from '../../components/ui/textarea'
 import { Badge } from '../../components/ui/badge'
@@ -27,38 +27,39 @@ import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
 import { cn } from '../../lib/cn'
+import { fileService } from '../../services/fileService'
 
 const MOCK_BIO =
-  'Experienced educator with a passion for student success. I focus on practical, project-based learning and believe every student can excel with the right support. I’ve designed courses in machine learning, data science, and cloud computing—always with an emphasis on real-world applications.'
+  'Passionate learner exploring technology and science. Currently focusing on programming, data analysis, and building real-world projects.'
 const MOCK_CERTIFICATES = [
   {
     id: '1',
-    name: 'AWS Certified Solutions Architect',
-    issuer: 'Amazon Web Services',
-    date: 'Jun 2023',
-    credentialId: 'AWS-SAA-2847',
+    name: 'Introduction to Python',
+    issuer: 'AcademiX',
+    date: 'Sep 2024',
+    credentialId: 'AX-PY101-7821',
   },
   {
     id: '2',
-    name: 'Google Certified Educator Level 2',
-    issuer: 'Google for Education',
-    date: 'Mar 2022',
-    credentialId: 'GCE-L2-9921',
+    name: 'Data Analysis Fundamentals',
+    issuer: 'AcademiX',
+    date: 'Jan 2025',
+    credentialId: 'AX-DA200-3345',
   },
   {
     id: '3',
-    name: 'Microsoft Certified: Azure Fundamentals',
-    issuer: 'Microsoft',
-    date: 'Nov 2021',
-    credentialId: 'AZ-900-5543',
+    name: 'Web Development Basics',
+    issuer: 'AcademiX',
+    date: 'Mar 2025',
+    credentialId: 'AX-WD100-5510',
   },
 ]
 const MOCK_MAJORS = [
-  { name: 'Computer Science', years: '8+ years' },
-  { name: 'Data Science', years: '5+ years' },
-  { name: 'Machine Learning', years: '4+ years' },
+  { name: 'Programming', years: '2 years' },
+  { name: 'Data Science', years: '1 year' },
+  { name: 'Web Development', years: '1 year' },
 ]
-const MOCK_STATS = { courses: 12, certifications: 3, memberSince: '2020' }
+const MOCK_STATS = { courses: 5, certifications: 3, memberSince: '2024' }
 // Demo images: cover PNG (place your image at public/demo/profile-cover.png); fallback is SVG
 const DEMO_COVER_IMAGE = '/demo/profile-cover.png'
 const DEMO_COVER_IMAGE_FALLBACK = '/demo/profile-cover.svg'
@@ -66,11 +67,11 @@ const DEMO_AVATAR_IMAGE = '/demo/profile-avatar.svg'
 const DEMO_REAL_PERSON_AVATAR = 'https://i.pravatar.cc/400?img=33'
 
 const MOCK_BADGES = [
-  { id: '1', name: 'First course', description: 'Created your first course', icon: Star, color: 'text-amber-500', bg: 'bg-amber-500/10', earnedAt: 'Jan 2021' },
-  { id: '2', name: 'Top instructor', description: 'Rated 4.8+ by students', icon: Trophy, color: 'text-primary', bg: 'bg-primary/10', earnedAt: 'Mar 2022' },
-  { id: '3', name: 'Quick grader', description: 'Graded 50+ assignments in a week', icon: Zap, color: 'text-emerald-600', bg: 'bg-emerald-500/10', earnedAt: 'Nov 2022' },
-  { id: '4', name: 'Certified educator', description: 'Earned 3 platform certifications', icon: Medal, color: 'text-violet-600', bg: 'bg-violet-500/10', earnedAt: 'Jun 2023' },
-  { id: '5', name: 'Goal setter', description: 'Completed 10 course goals', icon: Target, color: 'text-sky-600', bg: 'bg-sky-500/10', earnedAt: 'Sep 2023' },
+  { id: '1', name: 'First Course', description: 'Completed first course', icon: Star, color: 'text-amber-500', bg: 'bg-amber-500/10', earnedAt: 'Oct 2024' },
+  { id: '2', name: 'Quick Learner', description: 'Finished 3 lessons in a day', icon: Zap, color: 'text-emerald-600', bg: 'bg-emerald-500/10', earnedAt: 'Nov 2024' },
+  { id: '3', name: 'Perfect Score', description: '100% on an exam', icon: Trophy, color: 'text-primary', bg: 'bg-primary/10', earnedAt: 'Dec 2024' },
+  { id: '4', name: 'Bookworm', description: 'Read all course materials', icon: Medal, color: 'text-violet-600', bg: 'bg-violet-500/10', earnedAt: 'Jan 2025' },
+  { id: '5', name: 'Streak Master', description: '7-day login streak', icon: Target, color: 'text-sky-600', bg: 'bg-sky-500/10', earnedAt: 'Feb 2025' },
 ]
 
 export function ProfilePage() {
@@ -90,6 +91,37 @@ export function ProfilePage() {
   })
   const [passwordFormOpen, setPasswordFormOpen] = useState(false)
   const [changingPassword, setChangingPassword] = useState(false)
+  const [uploadingPhoto, setUploadingPhoto] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handlePhotoUpload = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image must be under 5 MB')
+      return
+    }
+    try {
+      setUploadingPhoto(true)
+      const result = await fileService.uploadFile(file, 'profile-photos')
+      await userService.updateCurrentUser({ profilePictureUrl: result.fileUrl })
+      setPhotoUrl(result.fileUrl)
+      setAvatarImageError('none')
+      toast.success('Profile photo updated')
+    } catch (error) {
+      toast.error('Failed to upload photo', {
+        description: error instanceof Error ? error.message : undefined,
+      })
+    } finally {
+      setUploadingPhoto(false)
+      // Reset so the same file can be selected again
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+  }
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -179,7 +211,15 @@ export function ProfilePage() {
   const memberYear = user.createdAt ? new Date(user.createdAt).getFullYear() : MOCK_STATS.memberSince
 
   return (
-    <div className="space-y-8 pb-8">
+    <div className="space-y-8 pb-20">
+      {/* Hidden file input for profile photo upload */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/png,image/jpeg,image/gif"
+        className="hidden"
+        onChange={handleFileSelected}
+      />
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Profile</h1>
         <p className="text-sm text-muted-foreground mt-0.5">Your profile</p>
@@ -245,7 +285,8 @@ export function ProfilePage() {
               <button
                 type="button"
                 className="absolute -bottom-1 -right-1 flex h-9 w-9 items-center justify-center rounded-xl border-2 border-background bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-colors"
-                onClick={() => toast.info('Profile photo upload coming soon')}
+                onClick={handlePhotoUpload}
+                disabled={uploadingPhoto}
                 aria-label="Change profile photo"
               >
                 <Camera className="h-4 w-4" />
@@ -290,7 +331,7 @@ export function ProfilePage() {
                 <Sparkles className="h-5 w-5 text-primary" />
                 About
               </CardTitle>
-              <CardDescription>Your bio and teaching focus</CardDescription>
+              <CardDescription>Your bio and learning interests</CardDescription>
             </CardHeader>
             <CardContent>
               <Textarea
@@ -407,7 +448,7 @@ export function ProfilePage() {
                 <GraduationCap className="h-5 w-5 text-primary" />
                 Focus areas
               </CardTitle>
-              <CardDescription>Majors and specializations</CardDescription>
+              <CardDescription>Areas of study</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid gap-3 sm:grid-cols-2">

@@ -8,6 +8,7 @@ import { Input } from '../../components/ui/input'
 import { toast } from 'sonner'
 import { userService, type UserDto } from '../../services/userService'
 import { authService } from '../../services/authService'
+import { ConfirmDialog } from '../../components/ui/confirm-dialog'
 
 export function SettingsPage() {
   const navigate = useNavigate()
@@ -20,10 +21,12 @@ export function SettingsPage() {
   const [user, setUser] = useState<UserDto | null>(null)
   const [loadingUser, setLoadingUser] = useState(true)
   const [name, setName] = useState('')
+  const [currentPassword, setCurrentPassword] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
 
   useEffect(() => {
     const load = async () => {
@@ -70,8 +73,17 @@ export function SettingsPage() {
         firstName: updated.firstName,
         lastName: updated.lastName,
       }
-      if (password) toast.info('Password change will be available soon')
-      else toast.success('Profile updated')
+      if (password) {
+        if (!currentPassword) {
+          toast.error('Please enter your current password')
+          return
+        }
+        await userService.changePassword(currentPassword, password)
+        toast.success('Password updated')
+      } else {
+        toast.success('Profile updated')
+      }
+      setCurrentPassword('')
       setPassword('')
       setConfirmPassword('')
     } catch (error) {
@@ -83,7 +95,6 @@ export function SettingsPage() {
 
   const handleDeleteAccount = async () => {
     if (!user) return
-    if (!confirm('Are you sure you want to delete your account? This cannot be undone.')) return
     try {
       setDeleting(true)
       try {
@@ -132,12 +143,20 @@ export function SettingsPage() {
                   <p className="text-[11px] text-muted-foreground">Email cannot be changed</p>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">New password</label>
+                  <label className="text-sm font-medium">Change password</label>
+                  <Input
+                    type="password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    placeholder="Current password"
+                    className="h-9"
+                    autoComplete="current-password"
+                  />
                   <Input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Leave blank to keep current"
+                    placeholder="New password"
                     className="h-9"
                   />
                   {password && (
@@ -155,7 +174,7 @@ export function SettingsPage() {
                   <Button onClick={handleSave} disabled={saving}>
                     {saving ? 'Saving…' : 'Save changes'}
                   </Button>
-                  <Button variant="destructive" onClick={handleDeleteAccount} disabled={deleting}>
+                  <Button variant="destructive" onClick={() => setDeleteDialogOpen(true)} disabled={deleting}>
                     {deleting ? 'Deleting…' : 'Delete account'}
                   </Button>
                 </div>
@@ -219,6 +238,17 @@ export function SettingsPage() {
           </CardContent>
         </Card>
       </div>
+
+      <ConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title="Delete account"
+        description="Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently removed."
+        confirmLabel="Delete my account"
+        variant="destructive"
+        loading={deleting}
+        onConfirm={handleDeleteAccount}
+      />
     </div>
   )
 }

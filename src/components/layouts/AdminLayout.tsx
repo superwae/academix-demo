@@ -19,6 +19,7 @@ import {
   Wallet,
   PieChart,
   MessageSquare,
+  Crown,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "../../lib/cn";
@@ -88,6 +89,13 @@ const ADMIN_NAV_SECTIONS: NavSection[] = [
       { to: "/admin/finance/transactions", label: "Transactions", icon: CreditCard },
       { to: "/admin/finance/payouts", label: "Payouts", icon: Wallet },
       { to: "/admin/finance/revenue-split", label: "Revenue Split", icon: PieChart },
+    ],
+  },
+  {
+    title: "Subscriptions",
+    items: [
+      { to: "/admin/subscription-plans", label: "Subscription Plans", icon: Crown },
+      { to: "/admin/subscription", label: "Subscription", icon: CreditCard },
     ],
   },
   {
@@ -440,7 +448,7 @@ export function AdminLayout() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="glass-strong min-w-0 rounded-2xl border border-border/60 p-4 shadow-xl sm:p-6 md:p-8"
+            className="min-w-0 rounded-2xl border border-border/60 bg-card p-4 shadow-xl sm:p-6 md:p-8"
           >
             <Outlet />
           </motion.div>

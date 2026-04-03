@@ -27,6 +27,7 @@ import {
   DialogTitle,
 } from '../../components/ui/dialog'
 import { countWords, MAX_CERTIFICATE_WORDS } from '../../lib/certificateText'
+import { ConfirmDialog } from '../../components/ui/confirm-dialog'
 
 export function EditCoursePage() {
   const { id } = useParams<{ id: string }>()
@@ -48,6 +49,7 @@ export function EditCoursePage() {
     meetingTimes: { day: string; startTime: string; endTime: string }[]
   } | null>(null)
   const [sectionsSaving, setSectionsSaving] = useState(false)
+  const [deleteSectionId, setDeleteSectionId] = useState<string | null>(null)
   const [course, setCourse] = useState<CourseDto | null>(null)
   const [formData, setFormData] = useState({
     title: '',
@@ -313,7 +315,6 @@ export function EditCoursePage() {
 
   const handleDeleteSection = async (sectionId: string) => {
     if (!id) return
-    if (!confirm('Are you sure you want to delete this section?')) return
     setSectionsSaving(true)
     try {
       await courseService.deleteSection(id, sectionId)
@@ -1143,7 +1144,7 @@ export function EditCoursePage() {
                           <Button
                             variant="destructive"
                             size="sm"
-                            onClick={() => handleDeleteSection(section.id)}
+                            onClick={() => setDeleteSectionId(section.id)}
                             disabled={sectionsSaving}
                           >
                             <Trash2 className="h-3 w-3" />
@@ -1196,6 +1197,18 @@ export function EditCoursePage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog
+        open={deleteSectionId !== null}
+        onOpenChange={(open) => { if (!open) setDeleteSectionId(null) }}
+        title="Delete Section"
+        description="Are you sure you want to delete this section?"
+        confirmLabel="Delete"
+        variant="destructive"
+        onConfirm={() => {
+          if (deleteSectionId) return handleDeleteSection(deleteSectionId)
+        }}
+      />
     </motion.div>
   )
 }

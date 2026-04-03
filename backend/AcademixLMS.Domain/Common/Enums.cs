@@ -103,3 +103,55 @@ public enum ConversationRequestStatus
     Accepted = 2,
     Rejected = 3
 }
+
+/// <summary>
+/// Billing interval for subscription plans
+/// </summary>
+public enum BillingInterval
+{
+    Monthly = 1,
+    Yearly = 2
+}
+
+/// <summary>
+/// Subscription status
+/// </summary>
+public enum SubscriptionStatus
+{
+    Active = 1,
+    PastDue = 2,
+    Cancelled = 3,
+    Expired = 4,
+    Trialing = 5
+}
+
+/// <summary>
+/// Payment status
+/// </summary>
+public enum PaymentStatus
+{
+    Pending = 1,
+    Completed = 2,
+    Failed = 3,
+    Refunded = 4,
+    PartiallyRefunded = 5
+}
+
+/// <summary>
+/// Payment type
+/// </summary>
+public enum PaymentType
+{
+    CoursePurchase = 1,
+    Subscription = 2,
+    Refund = 3
+}
+
+/// <summary>
+/// Discount type
+/// </summary>
+public enum DiscountType
+{
+    Percentage = 1,
+    FixedAmount = 2
+}

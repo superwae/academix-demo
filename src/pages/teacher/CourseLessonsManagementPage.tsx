@@ -39,6 +39,7 @@ import { lessonService, type LessonDto } from '../../services/lessonService'
 import { courseExtrasService, type CourseMaterialDto, type LessonRatingSummaryDto, type MeetingTimeRatingSummaryDto } from '../../services/courseExtrasService'
 import { fileService } from '../../services/fileService'
 import { formatMeetingSlot } from '../../lib/meetingTimeFormat'
+import { ConfirmDialog } from '../../components/ui/confirm-dialog'
 
 export function CourseLessonsManagementPage() {
   const { id } = useParams<{ id: string }>()
@@ -60,6 +61,7 @@ export function CourseLessonsManagementPage() {
   const [materialKind, setMaterialKind] = useState<0 | 1>(0)
   const [materialFile, setMaterialFile] = useState<File | null>(null)
   const [materialsBusy, setMaterialsBusy] = useState(false)
+  const [deleteLessonId, setDeleteLessonId] = useState<string | null>(null)
 
   useEffect(() => {
     const loadCourse = async () => {
@@ -251,8 +253,6 @@ export function CourseLessonsManagementPage() {
   }
 
   const handleDeleteLesson = async (lessonId: string) => {
-    if (!confirm('Are you sure you want to delete this lesson?')) return
-
     try {
       setLoading(true)
       await lessonService.deleteLesson(lessonId)
@@ -555,7 +555,7 @@ export function CourseLessonsManagementPage() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => handleDeleteLesson(lesson.id)}
+                      onClick={() => setDeleteLessonId(lesson.id)}
                     >
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
@@ -672,6 +672,18 @@ export function CourseLessonsManagementPage() {
           )}
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog
+        open={deleteLessonId !== null}
+        onOpenChange={(open) => { if (!open) setDeleteLessonId(null) }}
+        title="Delete Lesson"
+        description="Are you sure you want to delete this lesson?"
+        confirmLabel="Delete"
+        variant="destructive"
+        onConfirm={() => {
+          if (deleteLessonId) return handleDeleteLesson(deleteLessonId)
+        }}
+      />
     </motion.div>
   )
 }

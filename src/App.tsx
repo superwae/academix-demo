@@ -1,5 +1,4 @@
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
-import { AnimatePresence, motion } from 'framer-motion'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import { StudentLayout } from './components/layouts/StudentLayout'
 import { TeacherLayout } from './components/layouts/TeacherLayout'
 import { AdminLayout } from './components/layouts/AdminLayout'
@@ -53,6 +52,15 @@ import { MessagesPage as TeacherMessagesPage } from './pages/student/MessagesPag
 import { ProfilePage as TeacherProfilePage } from './pages/student/ProfilePage'
 import { SettingsPage as TeacherSettingsPage } from './pages/student/SettingsPage'
 
+// Subscription & Payment pages
+import { SubscriptionPlansPage } from './pages/admin/SubscriptionPlansPage'
+import { SubscriptionPage as AdminSubscriptionPage } from './pages/admin/SubscriptionPage'
+import { TeacherSubscriptionPage } from './pages/teacher/SubscriptionPage'
+import { CourseDiscountsPage } from './pages/teacher/CourseDiscountsPage'
+import { PaymentHistoryPage } from './pages/student/PaymentHistoryPage'
+import { CheckoutPage } from './pages/student/CheckoutPage'
+import { PaymentCallbackPage } from './pages/student/PaymentCallbackPage'
+
 import { Toaster } from './components/Toaster'
 import { ErrorBoundary } from './components/ErrorBoundary'
 
@@ -85,20 +93,9 @@ import { StaffSettingsPage } from './pages/staff/StaffSettingsPage'
 import { MessagesPage as StaffMessagesPage } from './pages/student/MessagesPage'
 
 export default function App() {
-  const location = useLocation()
-
   return (
     <ErrorBoundary>
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={location.pathname}
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -6 }}
-          transition={{ duration: 0.18, ease: 'easeOut' }}
-          className="min-h-dvh"
-        >
-          <Routes location={location}>
+      <Routes>
             {/* Public Routes */}
             <Route element={<PublicLayout />}>
               <Route path="/" element={<HomePage />} />
@@ -133,6 +130,9 @@ export default function App() {
               <Route path="messages" element={<StudentMessagesPage />} />
               <Route path="profile" element={<StudentProfilePage />} />
               <Route path="settings" element={<StudentSettingsPage />} />
+              <Route path="payments" element={<PaymentHistoryPage />} />
+              <Route path="checkout/:courseId" element={<CheckoutPage />} />
+              <Route path="payment/callback" element={<PaymentCallbackPage />} />
             </Route>
 
             {/* Teacher Portal - /teacher/* */}
@@ -147,6 +147,7 @@ export default function App() {
               <Route index element={<Navigate to="/teacher/dashboard" replace />} />
               <Route path="dashboard" element={<TeacherDashboardPage />} />
               <Route path="courses" element={<TeacherMyCoursesPage />} />
+              <Route path="courses/:id" element={<Navigate to="edit" replace />} />
               <Route path="courses/:id/edit" element={<EditCoursePage />} />
               <Route path="courses/:id/lessons" element={<CourseLessonsManagementPage />} />
               <Route path="courses/:id/students" element={<CourseStudentsPage />} />
@@ -166,6 +167,8 @@ export default function App() {
               <Route path="messages" element={<TeacherMessagesPage />} />
               <Route path="profile" element={<TeacherProfilePage />} />
               <Route path="settings" element={<TeacherSettingsPage />} />
+              <Route path="subscription" element={<TeacherSubscriptionPage />} />
+              <Route path="courses/:id/discounts" element={<CourseDiscountsPage />} />
             </Route>
 
             {/* Admin Portal - /admin/* */}
@@ -189,9 +192,12 @@ export default function App() {
               <Route path="finance/payouts" element={<FinancePayoutsPage />} />
               <Route path="finance/revenue-split" element={<FinanceRevenueSplitPage />} />
               
+              <Route path="transactions" element={<Navigate to="/admin/finance/transactions" replace />} />
               <Route path="reports" element={<AdminReportsPage />} />
               <Route path="audit-logs" element={<AdminAuditLogsPage />} />
               <Route path="settings" element={<AdminSettingsPage />} />
+              <Route path="subscription-plans" element={<SubscriptionPlansPage />} />
+              <Route path="subscription" element={<AdminSubscriptionPage />} />
             </Route>
 
             {/* Accountant portal */}
@@ -246,9 +252,7 @@ export default function App() {
 
             {/* 404 */}
             <Route path="*" element={<NotFoundPage />} />
-          </Routes>
-        </motion.div>
-      </AnimatePresence>
+      </Routes>
       <Toaster />
     </ErrorBoundary>
   )

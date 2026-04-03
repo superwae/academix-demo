@@ -133,9 +133,11 @@ public class OnboardingController : ControllerBase
     }
 
     /// <summary>
-    /// DEBUG: Get user interests and enrollments by email (for debugging recommendation issues)
+    /// DEBUG: Get user interests and enrollments by email (for debugging recommendation issues).
+    /// Only available in Development and restricted to Admin/SuperAdmin.
     /// </summary>
     [HttpGet("debug/interests/{email}")]
+    [Authorize(Policy = "RequireAdmin")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DebugGetUserInterests(string email, CancellationToken cancellationToken = default)
@@ -197,9 +199,11 @@ public class OnboardingController : ControllerBase
     }
 
     /// <summary>
-    /// DEBUG: Clear all demo enrollments for a user (for testing recommendation based on interests only)
+    /// DEBUG: Clear all demo enrollments for a user (for testing recommendation based on interests only).
+    /// Only available in Development and restricted to Admin/SuperAdmin.
     /// </summary>
     [HttpDelete("debug/enrollments/{email}")]
+    [Authorize(Policy = "RequireAdmin")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DebugClearEnrollments(string email, CancellationToken cancellationToken = default)

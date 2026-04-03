@@ -171,11 +171,9 @@ export function CourseDetailsPage() {
                 </div>
                 <Badge variant="secondary">{course.level}</Badge>
                 <Badge variant="outline">{course.modality}</Badge>
-                {course.price && (
-                  <Badge variant="default" className="text-lg">
-                    ${course.price.toFixed(2)}
-                  </Badge>
-                )}
+                <Badge variant="default" className={course.price ? "text-lg" : "text-lg bg-emerald-500/15 text-emerald-600 border-emerald-500/30"}>
+                  {course.price ? `$${course.price.toFixed(2)}` : 'Free'}
+                </Badge>
               </div>
             </CardContent>
           </Card>
@@ -335,12 +333,10 @@ export function CourseDetailsPage() {
                 <div className="text-sm font-medium text-muted-foreground">Modality</div>
                 <Badge variant="outline">{course.modality}</Badge>
               </div>
-              {course.price && (
-                <div className="space-y-2">
-                  <div className="text-sm font-medium text-muted-foreground">Price</div>
-                  <div className="text-2xl font-bold">${course.price.toFixed(2)}</div>
-                </div>
-              )}
+              <div className="space-y-2">
+                <div className="text-sm font-medium text-muted-foreground">Price</div>
+                <div className="text-2xl font-bold">{course.price ? `$${course.price.toFixed(2)}` : <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-500/30 text-base">Free</Badge>}</div>
+              </div>
             </CardContent>
           </Card>
 

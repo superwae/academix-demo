@@ -94,6 +94,21 @@ export const useAuthStore = create<AuthState>()(
           isAuthenticated: false,
           isLoading: false,
         });
+        // Reset theme to default so custom themes don't persist on public pages
+        void import('../theme/applyTheme').then(({ applyTheme }) => {
+          applyTheme('light');
+        });
+        // Reset the app store theme back to light
+        void import('./useAppStore').then(({ useAppStore }) => {
+          useAppStore.setState((s) => ({
+            data: {
+              ...s.data,
+              theme: 'light' as const,
+              customThemeColor: undefined,
+              mixTheme: undefined,
+            },
+          }));
+        });
       },
 
       refreshToken: async () => {

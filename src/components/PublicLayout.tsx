@@ -1,9 +1,11 @@
 import { Outlet, Link, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import { GraduationCap, Menu } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from './ui/button';
 import { useAuthStore } from '../store/useAuthStore';
 import { useAppStore } from '../store/useAppStore';
+import { applyTheme } from '../theme/applyTheme';
 import { AnimatedBackground } from './AnimatedBackground';
 import {
   Dialog,
@@ -17,6 +19,14 @@ export function PublicLayout() {
   const { isAuthenticated, user } = useAuthStore();
   const navigate = useNavigate();
   const mixTheme = useAppStore((s) => s.data.mixTheme);
+
+  // Reset theme to default on public pages so a previous user's custom theme
+  // doesn't bleed into login/register/etc.
+  useEffect(() => {
+    if (!isAuthenticated) {
+      applyTheme('light');
+    }
+  }, [isAuthenticated]);
 
   const handleDashboardClick = () => {
     const isInstructor = user?.roles?.includes('Instructor') || user?.roles?.includes('instructor');
