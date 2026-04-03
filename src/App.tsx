@@ -159,6 +159,7 @@ export default function App() {
               <Route index element={<Navigate to="/teacher/dashboard" replace />} />
               <Route path="dashboard" element={<TeacherDashboardPage />} />
               <Route path="courses" element={<TeacherMyCoursesPage />} />
+              <Route path="courses/:id" element={<Navigate to="edit" replace />} />
               <Route path="courses/:id/edit" element={<EditCoursePage />} />
               <Route path="courses/:id/lessons" element={<CourseLessonsManagementPage />} />
               <Route path="courses/:id/students" element={<CourseStudentsPage />} />

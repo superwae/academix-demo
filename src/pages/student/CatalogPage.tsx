@@ -523,11 +523,9 @@ export function CatalogPage() {
                 <CardFooter className="flex flex-col gap-2">
                   <div className="flex items-center justify-between w-full">
                     <div className="text-xs text-muted-foreground">⭐ {c.rating.toFixed(1)}</div>
-                    {c.price && (
-                      <div className="text-sm font-semibold">
-                        {c.price === 0 ? 'Free' : `$${c.price.toFixed(2)}`}
-                      </div>
-                    )}
+                    <div className="text-sm font-semibold">
+                      {c.price ? `$${c.price.toFixed(2)}` : <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-500/30">Free</Badge>}
+                    </div>
                   </div>
                   <div className="flex gap-2 w-full">
                     <Button

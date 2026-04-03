@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, Navigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -19,8 +19,18 @@ export function LoginPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-  const { login } = useAuthStore();
+  const { login, user, isAuthenticated } = useAuthStore();
   const navigate = useNavigate();
+
+  // Redirect if already authenticated
+  if (isAuthenticated && user) {
+    const roles = user.roles?.map(r => r.toLowerCase()) || [];
+    if (roles.includes('admin') || roles.includes('superadmin')) return <Navigate to="/admin/dashboard" replace />;
+    if (roles.includes('instructor') || roles.includes('teacher')) return <Navigate to="/teacher/dashboard" replace />;
+    if (roles.includes('accountant')) return <Navigate to="/accountant/dashboard" replace />;
+    if (roles.includes('secretary')) return <Navigate to="/secretary/dashboard" replace />;
+    return <Navigate to="/student/dashboard" replace />;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -151,6 +161,7 @@ export function LoginPage() {
                   <Link
                     to="/forgot-password"
                     className="text-sm text-primary hover:underline"
+                    tabIndex={-1}
                   >
                     Forgot password?
                   </Link>
@@ -181,11 +192,6 @@ export function LoginPage() {
                   'Sign In'
                 )}
               </Button>
-              <div className="text-center">
-                <Link to="/forgot-password" className="text-sm text-primary hover:underline">
-                  Forgot password?
-                </Link>
-              </div>
             </form>
             <div className="mt-6 text-center text-sm">
               <span className="text-muted-foreground">Don't have an account? </span>

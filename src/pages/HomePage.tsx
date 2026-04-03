@@ -1112,13 +1112,19 @@ export function HomePage() {
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3].map((i) => (
-                <Card key={i} className="animate-pulse">
+                <Card key={i} className="animate-pulse overflow-hidden">
+                  <div className="h-48 bg-muted" />
                   <CardHeader>
-                    <div className="h-4 bg-muted rounded w-3/4 mb-2" />
-                    <div className="h-3 bg-muted rounded w-1/2" />
+                    <div className="h-5 bg-muted rounded w-3/4 mb-2" />
+                    <div className="h-4 bg-muted rounded w-1/2" />
                   </CardHeader>
-                  <CardContent>
-                    <div className="h-20 bg-muted rounded" />
+                  <CardContent className="space-y-3">
+                    <div className="h-4 bg-muted rounded w-full" />
+                    <div className="h-4 bg-muted rounded w-2/3" />
+                    <div className="flex justify-between">
+                      <div className="h-4 bg-muted rounded w-16" />
+                      <div className="h-4 bg-muted rounded w-12" />
+                    </div>
                   </CardContent>
                 </Card>
               ))}
@@ -1140,14 +1146,23 @@ export function HomePage() {
                     <Link to={`/courses/${course.id}`}>
                       <div className="relative h-48 w-full overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5">
                         {course.thumbnailUrl ? (
-                          <img
-                            src={course.thumbnailUrl}
-                            alt={course.title}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).style.display = 'none';
-                            }}
-                          />
+                          <>
+                            <img
+                              src={course.thumbnailUrl}
+                              alt={course.title}
+                              loading="lazy"
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                              onError={(e) => {
+                                const el = e.target as HTMLImageElement;
+                                el.style.display = 'none';
+                                const next = el.nextElementSibling as HTMLElement;
+                                if (next) next.style.display = 'flex';
+                              }}
+                            />
+                            <div className="w-full h-full items-center justify-center bg-gradient-to-br from-primary/30 to-primary/10" style={{ display: 'none' }}>
+                              <BookOpen className="h-16 w-16 text-primary/40" />
+                            </div>
+                          </>
                         ) : (
                           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/30 to-primary/10">
                             <BookOpen className="h-16 w-16 text-primary/40" />
@@ -1178,8 +1193,10 @@ export function HomePage() {
                           </div>
                           <div className="flex items-center gap-2">
                             <Badge variant="secondary">{course.level}</Badge>
-                            {course.price != null && (
+                            {course.price ? (
                               <span className="text-sm font-bold text-primary">${course.price.toFixed(2)}</span>
+                            ) : (
+                              <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-500/30">Free</Badge>
                             )}
                           </div>
                         </div>
@@ -1226,13 +1243,19 @@ export function HomePage() {
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3].map((i) => (
-                <Card key={i} className="animate-pulse">
+                <Card key={i} className="animate-pulse overflow-hidden">
+                  <div className="h-48 bg-muted" />
                   <CardHeader>
-                    <div className="h-4 bg-muted rounded w-3/4 mb-2" />
-                    <div className="h-3 bg-muted rounded w-1/2" />
+                    <div className="h-5 bg-muted rounded w-3/4 mb-2" />
+                    <div className="h-4 bg-muted rounded w-1/2" />
                   </CardHeader>
-                  <CardContent>
-                    <div className="h-20 bg-muted rounded" />
+                  <CardContent className="space-y-3">
+                    <div className="h-4 bg-muted rounded w-full" />
+                    <div className="h-4 bg-muted rounded w-2/3" />
+                    <div className="flex justify-between">
+                      <div className="h-4 bg-muted rounded w-16" />
+                      <div className="h-4 bg-muted rounded w-12" />
+                    </div>
                   </CardContent>
                 </Card>
               ))}
@@ -1254,14 +1277,23 @@ export function HomePage() {
                     <Link to={`/courses/${course.id}`}>
                       <div className="relative h-48 w-full overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5">
                         {course.thumbnailUrl ? (
-                          <img
-                            src={course.thumbnailUrl}
-                            alt={course.title}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).style.display = 'none';
-                            }}
-                          />
+                          <>
+                            <img
+                              src={course.thumbnailUrl}
+                              alt={course.title}
+                              loading="lazy"
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                              onError={(e) => {
+                                const el = e.target as HTMLImageElement;
+                                el.style.display = 'none';
+                                const next = el.nextElementSibling as HTMLElement;
+                                if (next) next.style.display = 'flex';
+                              }}
+                            />
+                            <div className="w-full h-full items-center justify-center bg-gradient-to-br from-primary/30 to-primary/10" style={{ display: 'none' }}>
+                              <BookOpen className="h-16 w-16 text-primary/40" />
+                            </div>
+                          </>
                         ) : (
                           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/30 to-primary/10">
                             <BookOpen className="h-16 w-16 text-primary/40" />
@@ -1289,8 +1321,10 @@ export function HomePage() {
                           </div>
                           <div className="flex items-center gap-2">
                             <Badge variant="secondary">{course.level}</Badge>
-                            {course.price != null && (
+                            {course.price ? (
                               <span className="text-sm font-bold text-primary">${course.price.toFixed(2)}</span>
+                            ) : (
+                              <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-500/30">Free</Badge>
                             )}
                           </div>
                         </div>

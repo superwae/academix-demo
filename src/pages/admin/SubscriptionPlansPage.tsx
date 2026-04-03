@@ -44,23 +44,30 @@ export function SubscriptionPlansPage() {
   const [formData, setFormData] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
 
-  const fetchPlans = async () => {
+  const fetchPlans = async (signal?: AbortSignal) => {
     try {
       setLoading(true);
       const result = await subscriptionPlanService.getPlans();
+      // Guard against setting state after unmount or stale fetch
+      if (signal?.aborted) return;
       setPlans(result);
     } catch (error) {
+      if (signal?.aborted) return;
       console.error("Failed to fetch plans:", error);
       toast.error("Failed to load subscription plans", {
         description: error instanceof Error ? error.message : "An error occurred",
       });
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) {
+        setLoading(false);
+      }
     }
   };
 
   useEffect(() => {
-    fetchPlans();
+    const controller = new AbortController();
+    fetchPlans(controller.signal);
+    return () => controller.abort();
   }, []);
 
   const openCreateDialog = () => {
@@ -191,9 +198,9 @@ export function SubscriptionPlansPage() {
                     </td>
                     <td className="px-4 py-3 text-sm">${plan.monthlyPrice}/mo</td>
                     <td className="px-4 py-3 text-sm">${plan.yearlyPrice}/yr</td>
-                    <td className="px-4 py-3 text-sm">{plan.maxCourses}</td>
-                    <td className="px-4 py-3 text-sm">{plan.maxSeatsPerCourse}</td>
-                    <td className="px-4 py-3 text-sm">{plan.maxTotalSeats}</td>
+                    <td className="px-4 py-3 text-sm">{plan.maxCourses != null && plan.maxCourses > 0 ? plan.maxCourses : <span className="text-muted-foreground italic">Unlimited</span>}</td>
+                    <td className="px-4 py-3 text-sm">{plan.maxSeatsPerCourse != null && plan.maxSeatsPerCourse > 0 ? plan.maxSeatsPerCourse : <span className="text-muted-foreground italic">Unlimited</span>}</td>
+                    <td className="px-4 py-3 text-sm">{plan.maxTotalSeats != null && plan.maxTotalSeats > 0 ? plan.maxTotalSeats : <span className="text-muted-foreground italic">Unlimited</span>}</td>
                     <td className="px-4 py-3">
                       <span
                         className={cn(

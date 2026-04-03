@@ -30,36 +30,36 @@ import { cn } from '../../lib/cn'
 import { fileService } from '../../services/fileService'
 
 const MOCK_BIO =
-  'Experienced educator with a passion for student success. I focus on practical, project-based learning and believe every student can excel with the right support. I’ve designed courses in machine learning, data science, and cloud computing—always with an emphasis on real-world applications.'
+  'Passionate learner exploring technology and science. Currently focusing on programming, data analysis, and building real-world projects.'
 const MOCK_CERTIFICATES = [
   {
     id: '1',
-    name: 'AWS Certified Solutions Architect',
-    issuer: 'Amazon Web Services',
-    date: 'Jun 2023',
-    credentialId: 'AWS-SAA-2847',
+    name: 'Introduction to Python',
+    issuer: 'AcademiX',
+    date: 'Sep 2024',
+    credentialId: 'AX-PY101-7821',
   },
   {
     id: '2',
-    name: 'Google Certified Educator Level 2',
-    issuer: 'Google for Education',
-    date: 'Mar 2022',
-    credentialId: 'GCE-L2-9921',
+    name: 'Data Analysis Fundamentals',
+    issuer: 'AcademiX',
+    date: 'Jan 2025',
+    credentialId: 'AX-DA200-3345',
   },
   {
     id: '3',
-    name: 'Microsoft Certified: Azure Fundamentals',
-    issuer: 'Microsoft',
-    date: 'Nov 2021',
-    credentialId: 'AZ-900-5543',
+    name: 'Web Development Basics',
+    issuer: 'AcademiX',
+    date: 'Mar 2025',
+    credentialId: 'AX-WD100-5510',
   },
 ]
 const MOCK_MAJORS = [
-  { name: 'Computer Science', years: '8+ years' },
-  { name: 'Data Science', years: '5+ years' },
-  { name: 'Machine Learning', years: '4+ years' },
+  { name: 'Programming', years: '2 years' },
+  { name: 'Data Science', years: '1 year' },
+  { name: 'Web Development', years: '1 year' },
 ]
-const MOCK_STATS = { courses: 12, certifications: 3, memberSince: '2020' }
+const MOCK_STATS = { courses: 5, certifications: 3, memberSince: '2024' }
 // Demo images: cover PNG (place your image at public/demo/profile-cover.png); fallback is SVG
 const DEMO_COVER_IMAGE = '/demo/profile-cover.png'
 const DEMO_COVER_IMAGE_FALLBACK = '/demo/profile-cover.svg'
@@ -67,11 +67,11 @@ const DEMO_AVATAR_IMAGE = '/demo/profile-avatar.svg'
 const DEMO_REAL_PERSON_AVATAR = 'https://i.pravatar.cc/400?img=33'
 
 const MOCK_BADGES = [
-  { id: '1', name: 'First course', description: 'Created your first course', icon: Star, color: 'text-amber-500', bg: 'bg-amber-500/10', earnedAt: 'Jan 2021' },
-  { id: '2', name: 'Top instructor', description: 'Rated 4.8+ by students', icon: Trophy, color: 'text-primary', bg: 'bg-primary/10', earnedAt: 'Mar 2022' },
-  { id: '3', name: 'Quick grader', description: 'Graded 50+ assignments in a week', icon: Zap, color: 'text-emerald-600', bg: 'bg-emerald-500/10', earnedAt: 'Nov 2022' },
-  { id: '4', name: 'Certified educator', description: 'Earned 3 platform certifications', icon: Medal, color: 'text-violet-600', bg: 'bg-violet-500/10', earnedAt: 'Jun 2023' },
-  { id: '5', name: 'Goal setter', description: 'Completed 10 course goals', icon: Target, color: 'text-sky-600', bg: 'bg-sky-500/10', earnedAt: 'Sep 2023' },
+  { id: '1', name: 'First Course', description: 'Completed first course', icon: Star, color: 'text-amber-500', bg: 'bg-amber-500/10', earnedAt: 'Oct 2024' },
+  { id: '2', name: 'Quick Learner', description: 'Finished 3 lessons in a day', icon: Zap, color: 'text-emerald-600', bg: 'bg-emerald-500/10', earnedAt: 'Nov 2024' },
+  { id: '3', name: 'Perfect Score', description: '100% on an exam', icon: Trophy, color: 'text-primary', bg: 'bg-primary/10', earnedAt: 'Dec 2024' },
+  { id: '4', name: 'Bookworm', description: 'Read all course materials', icon: Medal, color: 'text-violet-600', bg: 'bg-violet-500/10', earnedAt: 'Jan 2025' },
+  { id: '5', name: 'Streak Master', description: '7-day login streak', icon: Target, color: 'text-sky-600', bg: 'bg-sky-500/10', earnedAt: 'Feb 2025' },
 ]
 
 export function ProfilePage() {
@@ -210,7 +210,7 @@ export function ProfilePage() {
   const memberYear = user.createdAt ? new Date(user.createdAt).getFullYear() : MOCK_STATS.memberSince
 
   return (
-    <div className="space-y-8 pb-8">
+    <div className="space-y-8 pb-20">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Profile</h1>
         <p className="text-sm text-muted-foreground mt-0.5">Your profile</p>
@@ -322,7 +322,7 @@ export function ProfilePage() {
                 <Sparkles className="h-5 w-5 text-primary" />
                 About
               </CardTitle>
-              <CardDescription>Your bio and teaching focus</CardDescription>
+              <CardDescription>Your bio and learning interests</CardDescription>
             </CardHeader>
             <CardContent>
               <Textarea
@@ -439,7 +439,7 @@ export function ProfilePage() {
                 <GraduationCap className="h-5 w-5 text-primary" />
                 Focus areas
               </CardTitle>
-              <CardDescription>Majors and specializations</CardDescription>
+              <CardDescription>Areas of study</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid gap-3 sm:grid-cols-2">
