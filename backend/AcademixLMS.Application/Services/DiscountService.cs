@@ -217,17 +217,18 @@ public class DiscountService : IDiscountService
             });
         }
 
-        // Calculate discounted price
-        var originalPrice = course.Price.HasValue ? (long)(course.Price.Value * 100) : 0;
-        long discountedPrice;
+        // Calculate discounted price in dollars (same unit as course.Price)
+        var originalPrice = course.Price ?? 0m;
+        decimal discountedPrice;
 
         if (discount.Type == DiscountType.Percentage)
         {
-            discountedPrice = originalPrice - (long)(originalPrice * discount.Value / 100m);
+            discountedPrice = originalPrice - (originalPrice * discount.Value / 100m);
         }
         else
         {
-            discountedPrice = Math.Max(0, originalPrice - (long)discount.Value);
+            // FixedAmount value is stored in dollars
+            discountedPrice = Math.Max(0, originalPrice - discount.Value);
         }
 
         return Result<ValidateDiscountResponse>.Success(new ValidateDiscountResponse

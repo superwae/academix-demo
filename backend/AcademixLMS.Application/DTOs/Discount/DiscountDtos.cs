@@ -65,6 +65,6 @@ public class ValidateDiscountResponse
     public string? Message { get; set; }
     public string? DiscountType { get; set; }
     public decimal? DiscountValue { get; set; }
-    public long? OriginalPrice { get; set; }
-    public long? DiscountedPrice { get; set; }
+    public decimal? OriginalPrice { get; set; }
+    public decimal? DiscountedPrice { get; set; }
 }

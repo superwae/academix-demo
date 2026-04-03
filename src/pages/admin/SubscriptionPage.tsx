@@ -139,7 +139,7 @@ export function SubscriptionPage() {
                   <div>
                     <p className="text-sm text-muted-foreground">Max Courses</p>
                     <p className="font-semibold">
-                      {subscription.plan.maxCourses ?? "Unlimited"}
+                      {subscription.plan?.maxCourses ?? "Unlimited"}
                     </p>
                   </div>
                 </div>
@@ -151,7 +151,7 @@ export function SubscriptionPage() {
                   <div>
                     <p className="text-sm text-muted-foreground">Max Total Seats</p>
                     <p className="font-semibold">
-                      {subscription.plan.maxTotalSeats ?? "Unlimited"}
+                      {subscription.plan?.maxTotalSeats ?? "Unlimited"}
                     </p>
                   </div>
                 </div>
@@ -161,15 +161,15 @@ export function SubscriptionPage() {
               <div className="space-y-3">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Max Courses</span>
-                  <span className="font-medium">{subscription.plan.maxCourses ?? "Unlimited"}</span>
+                  <span className="font-medium">{subscription.plan?.maxCourses ?? "Unlimited"}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Max Seats Per Course</span>
-                  <span className="font-medium">{subscription.plan.maxSeatsPerCourse ?? "Unlimited"}</span>
+                  <span className="font-medium">{subscription.plan?.maxSeatsPerCourse ?? "Unlimited"}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Max Total Seats</span>
-                  <span className="font-medium">{subscription.plan.maxTotalSeats ?? "Unlimited"}</span>
+                  <span className="font-medium">{subscription.plan?.maxTotalSeats ?? "Unlimited"}</span>
                 </div>
               </div>
 

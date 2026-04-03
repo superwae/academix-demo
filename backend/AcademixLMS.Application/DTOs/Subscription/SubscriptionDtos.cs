@@ -68,6 +68,7 @@ public class SubscriptionDto
     public DateTime? CancelledAt { get; set; }
     public DateTime? TrialEndsAt { get; set; }
     public DateTime CreatedAt { get; set; }
+    public SubscriptionPlanDto? Plan { get; set; }
 }
 
 /// <summary>

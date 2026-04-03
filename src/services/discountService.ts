@@ -28,8 +28,10 @@ export interface UpdateDiscountRequest extends Partial<CreateDiscountRequest> {
 }
 
 export interface ValidateDiscountResponse {
-  valid: boolean;
-  discount?: DiscountDto;
+  isValid: boolean;
+  discountType?: string;
+  discountValue?: number;
+  originalPrice?: number;
   discountedPrice?: number;
   message?: string;
 }

@@ -228,6 +228,20 @@ public class SubscriptionService : ISubscriptionService
         CurrentPeriodEnd = subscription.CurrentPeriodEnd,
         CancelledAt = subscription.CancelledAt,
         TrialEndsAt = subscription.TrialEndsAt,
-        CreatedAt = subscription.CreatedAt
+        CreatedAt = subscription.CreatedAt,
+        Plan = new SubscriptionPlanDto
+        {
+            Id = subscription.Plan.Id,
+            Name = subscription.Plan.Name,
+            Description = subscription.Plan.Description,
+            MonthlyPrice = subscription.Plan.MonthlyPrice,
+            YearlyPrice = subscription.Plan.YearlyPrice,
+            MaxCourses = subscription.Plan.MaxCourses,
+            MaxSeatsPerCourse = subscription.Plan.MaxSeatsPerCourse,
+            MaxTotalSeats = subscription.Plan.MaxTotalSeats,
+            FeaturesJson = subscription.Plan.FeaturesJson,
+            IsActive = subscription.Plan.IsActive,
+            SortOrder = subscription.Plan.SortOrder,
+        }
     };
 }

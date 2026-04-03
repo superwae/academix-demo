@@ -109,7 +109,7 @@ public static class SubscriptionPlanSeeder
                         CourseId = paidCourse.Id,
                         Code = "SAVE10",
                         Type = DiscountType.FixedAmount,
-                        Value = 1000, // $10.00 in cents
+                        Value = 10, // $10.00
                         IsActive = true,
                     },
                 };

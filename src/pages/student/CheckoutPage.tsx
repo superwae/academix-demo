@@ -55,6 +55,13 @@ export function CheckoutPage() {
     try {
       setValidating(true);
       const result = await discountService.validateDiscount(courseId, discountCode.trim());
+      if (!result.isValid) {
+        toast.error("Invalid discount code", {
+          description: result.message || "The code is not valid or has expired",
+        });
+        setDiscountApplied(null);
+        return;
+      }
       const discountedPrice = result.discountedPrice ?? originalPrice;
       const discountAmt = originalPrice - discountedPrice;
       setDiscountApplied({
@@ -66,8 +73,8 @@ export function CheckoutPage() {
         description: `You saved $${discountAmt.toFixed(2)}`,
       });
     } catch (error) {
-      toast.error("Invalid discount code", {
-        description: error instanceof Error ? error.message : "The code is not valid or has expired",
+      toast.error("Failed to validate discount", {
+        description: error instanceof Error ? error.message : "An error occurred",
       });
       setDiscountApplied(null);
     } finally {
