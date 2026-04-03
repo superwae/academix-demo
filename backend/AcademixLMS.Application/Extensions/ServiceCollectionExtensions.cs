@@ -26,6 +26,13 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IMeetingTimeRatingService, Services.MeetingTimeRatingService>();
         services.AddScoped<ICertificateService, Services.CertificateService>();
 
+        // Subscription & Payment Services
+        services.AddScoped<ISubscriptionPlanService, Services.SubscriptionPlanService>();
+        services.AddScoped<ISubscriptionService, Services.SubscriptionService>();
+        services.AddScoped<IPaymentService, Services.PaymentService>();
+        services.AddScoped<IDiscountService, Services.DiscountService>();
+        services.AddScoped<ILahzaService, Services.LahzaService>();
+
         // AI Services
         services.AddScoped<IRecommendationService, Services.RecommendationService>();
         services.AddScoped<IAnalyticsService, Services.AnalyticsService>();
