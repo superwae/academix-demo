@@ -57,6 +57,12 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<LessonRating> LessonRatings { get; set; }
     public DbSet<MeetingTimeRating> MeetingTimeRatings { get; set; }
 
+    // Subscription & Payment System
+    public DbSet<SubscriptionPlan> SubscriptionPlans { get; set; }
+    public DbSet<Subscription> Subscriptions { get; set; }
+    public DbSet<Payment> Payments { get; set; }
+    public DbSet<Discount> Discounts { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
