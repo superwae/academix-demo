@@ -354,9 +354,17 @@ export function AdminLayout() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="gap-2 h-9 px-2">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/70 text-primary-foreground text-xs font-bold">
-                    {user?.firstName?.[0]}{user?.lastName?.[0]}
-                  </div>
+                  {user?.profilePictureUrl ? (
+                    <img
+                      src={user.profilePictureUrl}
+                      alt=""
+                      className="h-7 w-7 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/70 text-primary-foreground text-xs font-bold">
+                      {user?.firstName?.[0]}{user?.lastName?.[0]}
+                    </div>
+                  )}
                   <div className="hidden lg:block text-left">
                     <p className="text-sm font-medium leading-none">
                       {user?.firstName} {user?.lastName}

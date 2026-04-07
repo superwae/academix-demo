@@ -25,6 +25,12 @@ public class User : BaseEntity
     public DateTime? PasswordResetTokenExpiresAt { get; set; }
     public DateTime? LastLoginAt { get; set; }
 
+    /// <summary>Short biography / about text.</summary>
+    public string? Bio { get; set; }
+
+    /// <summary>Cover/banner image URL for the profile page.</summary>
+    public string? CoverImageUrl { get; set; }
+
     /// <summary>JSON blob for UI preferences (theme, colors). Synced across devices.</summary>
     public string? UiPreferencesJson { get; set; }
     

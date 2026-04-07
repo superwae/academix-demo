@@ -79,9 +79,12 @@ export function ProfilePage() {
   const [user, setUser] = useState<UserDto | null>(null)
   const [loading, setLoading] = useState(true)
 
-  const [bio, setBio] = useState(MOCK_BIO)
+  const [bio, setBio] = useState('')
+  const [bioSaving, setBioSaving] = useState(false)
   const [photoUrl, setPhotoUrl] = useState<string | null>(null)
   const [coverImageUrl, setCoverImageUrl] = useState<string | null>(DEMO_COVER_IMAGE)
+  const [uploadingCover, setUploadingCover] = useState(false)
+  const coverInputRef = useRef<HTMLInputElement>(null)
   const [avatarImageError, setAvatarImageError] = useState<'none' | 'real' | 'both'>('none')
 
   const [passwordForm, setPasswordForm] = useState({
@@ -123,6 +126,43 @@ export function ProfilePage() {
     }
   }
 
+  const handleSaveBio = async () => {
+    try {
+      setBioSaving(true)
+      await userService.updateCurrentUser({ bio })
+      toast.success('Bio updated')
+    } catch (error) {
+      toast.error('Failed to save bio', { description: error instanceof Error ? error.message : undefined })
+    } finally {
+      setBioSaving(false)
+    }
+  }
+
+  const handleCoverUpload = () => {
+    coverInputRef.current?.click()
+  }
+
+  const handleCoverSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image must be under 5 MB')
+      return
+    }
+    try {
+      setUploadingCover(true)
+      const result = await fileService.uploadFile(file, 'cover-images')
+      await userService.updateCurrentUser({ coverImageUrl: result.fileUrl })
+      setCoverImageUrl(result.fileUrl)
+      toast.success('Cover image updated')
+    } catch (error) {
+      toast.error('Failed to upload cover image', { description: error instanceof Error ? error.message : undefined })
+    } finally {
+      setUploadingCover(false)
+      if (coverInputRef.current) coverInputRef.current.value = ''
+    }
+  }
+
   useEffect(() => {
     const loadProfile = async () => {
       if (!authUser) {
@@ -134,6 +174,8 @@ export function ProfilePage() {
         const userData = await userService.getCurrentUser()
         setUser(userData)
         setPhotoUrl(userData.profilePictureUrl || null)
+        setBio(userData.bio || MOCK_BIO)
+        if (userData.coverImageUrl) setCoverImageUrl(userData.coverImageUrl)
         setAvatarImageError('none')
       } catch (error) {
         toast.error('Failed to load profile', {
@@ -212,14 +254,9 @@ export function ProfilePage() {
 
   return (
     <div className="space-y-8 pb-20">
-      {/* Hidden file input for profile photo upload */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/png,image/jpeg,image/gif"
-        className="hidden"
-        onChange={handleFileSelected}
-      />
+      {/* Hidden file inputs for uploads */}
+      <input ref={fileInputRef} type="file" accept="image/png,image/jpeg,image/gif" className="hidden" onChange={handleFileSelected} />
+      <input ref={coverInputRef} type="file" accept="image/png,image/jpeg,image/gif" className="hidden" onChange={handleCoverSelected} />
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Profile</h1>
         <p className="text-sm text-muted-foreground mt-0.5">Your profile</p>
@@ -251,7 +288,8 @@ export function ProfilePage() {
           <button
             type="button"
             className="absolute top-3 right-3 flex items-center gap-2 rounded-lg border border-white/30 bg-black/40 px-3 py-2 text-sm font-medium text-white backdrop-blur-sm opacity-0 transition-opacity group-hover/cover:opacity-100 focus:opacity-100 hover:bg-black/50"
-            onClick={() => toast.info('Cover image upload coming soon')}
+            onClick={handleCoverUpload}
+            disabled={uploadingCover}
             aria-label="Change cover image"
           >
             <ImagePlus className="h-4 w-4" />
@@ -341,6 +379,11 @@ export function ProfilePage() {
                 rows={5}
                 className="resize-y min-h-[120px] text-[15px] leading-relaxed"
               />
+              <div className="flex justify-end pt-2">
+                <Button size="sm" onClick={handleSaveBio} disabled={bioSaving}>
+                  {bioSaving ? 'Saving…' : 'Save bio'}
+                </Button>
+              </div>
             </CardContent>
           </Card>
 

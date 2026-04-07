@@ -444,6 +444,8 @@ public class AuthService : IAuthService
             FullName = user.FullName,
             PhoneNumber = user.PhoneNumber,
             ProfilePictureUrl = user.ProfilePictureUrl,
+            Bio = user.Bio,
+            CoverImageUrl = user.CoverImageUrl,
             IsActive = user.IsActive,
             IsEmailVerified = user.IsEmailVerified,
             CreatedAt = user.CreatedAt,

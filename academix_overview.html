@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AcademIX - Platform Overview</title>
+<style>
+  @page { size: A4; margin: 0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #1e293b;
+    background: #fff;
+    width: 210mm;
+    margin: 0 auto;
+  }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%);
+    color: #fff;
+    padding: 36px 40px 30px;
+    text-align: center;
+  }
+  .header h1 {
+    font-size: 36px; font-weight: 800; letter-spacing: 3px;
+    background: linear-gradient(90deg, #38bdf8, #818cf8, #38bdf8);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .header .subtitle {
+    font-size: 13px; color: #94a3b8; margin-top: 6px; letter-spacing: 1px;
+  }
+  .header .tagline {
+    font-size: 11px; color: #64748b; margin-top: 10px;
+    font-style: italic; max-width: 480px; margin-left: auto; margin-right: auto;
+    line-height: 1.5;
+  }
+
+  /* Content */
+  .content { padding: 24px 36px 20px; }
+
+  .section { margin-bottom: 20px; }
+  .section-title {
+    font-size: 13px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 2px; color: #0f172a;
+    border-left: 4px solid #3b82f6; padding-left: 10px;
+    margin-bottom: 10px;
+  }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 20px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+  .card {
+    background: #f8fafc; border: 1px solid #e2e8f0;
+    border-radius: 8px; padding: 12px 14px;
+  }
+  .card h3 {
+    font-size: 11px; font-weight: 700; color: #1e293b; margin-bottom: 5px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .card h3 .icon { font-size: 14px; }
+  .card p, .card li {
+    font-size: 9.5px; color: #475569; line-height: 1.55;
+  }
+  .card ul { list-style: none; }
+  .card ul li { padding-left: 10px; position: relative; margin-bottom: 2px; }
+  .card ul li::before {
+    content: "\2022"; position: absolute; left: 0; color: #3b82f6;
+  }
+
+  .tech-stack {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px;
+  }
+  .tech-tag {
+    font-size: 9px; font-weight: 600; padding: 3px 8px;
+    border-radius: 4px; display: inline-block;
+  }
+  .tech-tag.backend { background: #dbeafe; color: #1d4ed8; }
+  .tech-tag.frontend { background: #fce7f3; color: #be185d; }
+  .tech-tag.db { background: #d1fae5; color: #065f46; }
+  .tech-tag.infra { background: #fef3c7; color: #92400e; }
+  .tech-tag.realtime { background: #ede9fe; color: #5b21b6; }
+
+  .role-badge {
+    display: inline-block; font-size: 9px; font-weight: 700;
+    padding: 2px 8px; border-radius: 10px; margin: 2px;
+  }
+  .role-badge.student { background: #dbeafe; color: #1d4ed8; }
+  .role-badge.teacher { background: #d1fae5; color: #065f46; }
+  .role-badge.admin { background: #fee2e2; color: #991b1b; }
+  .role-badge.accountant { background: #fef3c7; color: #92400e; }
+  .role-badge.secretary { background: #ede9fe; color: #5b21b6; }
+
+  .arch-flow {
+    display: flex; align-items: center; justify-content: center;
+    gap: 4px; margin: 8px 0;
+  }
+  .arch-box {
+    background: linear-gradient(135deg, #1e293b, #334155);
+    color: #e2e8f0; font-size: 9px; font-weight: 600;
+    padding: 6px 10px; border-radius: 6px; text-align: center;
+    min-width: 80px;
+  }
+  .arch-arrow { color: #3b82f6; font-size: 14px; font-weight: 700; }
+
+  .stat-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 8px; }
+  .stat-box {
+    text-align: center; background: linear-gradient(135deg, #eff6ff, #f0f9ff);
+    border: 1px solid #bfdbfe; border-radius: 8px; padding: 8px 4px;
+  }
+  .stat-num { font-size: 20px; font-weight: 800; color: #2563eb; }
+  .stat-label { font-size: 8px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .security-list {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px 12px;
+    font-size: 9.5px; color: #475569;
+  }
+  .security-list li {
+    list-style: none; padding-left: 14px; position: relative;
+  }
+  .security-list li::before {
+    content: "\2713"; position: absolute; left: 0; color: #16a34a; font-weight: 700;
+  }
+
+  .footer {
+    background: #0f172a; color: #64748b; text-align: center;
+    padding: 14px; font-size: 9px; letter-spacing: 0.5px;
+  }
+
+  /* Page 2 */
+  .page-break { page-break-before: always; padding-top: 28px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <h1>ACADEMIX</h1>
+  <div class="subtitle">Enterprise Learning Management System</div>
+  <div class="tagline">
+    A production-grade, full-stack educational platform built with ASP.NET Core 8 and React 19 &mdash;
+    featuring AI-powered recommendations, real-time communication, payment processing, and multi-role dashboards.
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- Stats -->
+  <div class="stat-grid">
+    <div class="stat-box"><div class="stat-num">25+</div><div class="stat-label">API Endpoints</div></div>
+    <div class="stat-box"><div class="stat-num">5</div><div class="stat-label">User Roles</div></div>
+    <div class="stat-box"><div class="stat-num">22+</div><div class="stat-label">DB Entities</div></div>
+    <div class="stat-box"><div class="stat-num">18</div><div class="stat-label">Themes</div></div>
+    <div class="stat-box"><div class="stat-num">4</div><div class="stat-label">Architecture Layers</div></div>
+  </div>
+
+  <!-- Architecture -->
+  <div class="section">
+    <div class="section-title">Architecture</div>
+    <p style="font-size:10px; color:#475569; margin-bottom:8px;">
+      Clean Architecture with strict dependency flow &mdash; each layer only depends on the one directly below it.
+    </p>
+    <div class="arch-flow">
+      <div class="arch-box">API Layer<br><span style="font-size:7.5px;color:#94a3b8;">Controllers, Hubs,<br>Middleware</span></div>
+      <div class="arch-arrow">&rarr;</div>
+      <div class="arch-box">Infrastructure<br><span style="font-size:7.5px;color:#94a3b8;">EF Core, Email,<br>Payments</span></div>
+      <div class="arch-arrow">&rarr;</div>
+      <div class="arch-box">Application<br><span style="font-size:7.5px;color:#94a3b8;">Services, DTOs,<br>Interfaces</span></div>
+      <div class="arch-arrow">&rarr;</div>
+      <div class="arch-box">Domain<br><span style="font-size:7.5px;color:#94a3b8;">Entities, Enums,<br>Core Logic</span></div>
+    </div>
+  </div>
+
+  <!-- Tech Stack -->
+  <div class="section">
+    <div class="section-title">Technology Stack</div>
+    <div class="two-col">
+      <div class="card">
+        <h3><span class="icon">&#9881;</span> Backend</h3>
+        <div class="tech-stack">
+          <span class="tech-tag backend">ASP.NET Core 8</span>
+          <span class="tech-tag backend">C#</span>
+          <span class="tech-tag backend">Entity Framework Core 8</span>
+          <span class="tech-tag backend">JWT Authentication</span>
+          <span class="tech-tag backend">BCrypt</span>
+          <span class="tech-tag backend">Serilog</span>
+          <span class="tech-tag backend">Swagger / OpenAPI</span>
+          <span class="tech-tag backend">API Versioning</span>
+          <span class="tech-tag backend">Rate Limiting</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3><span class="icon">&#9889;</span> Frontend</h3>
+        <div class="tech-stack">
+          <span class="tech-tag frontend">React 19</span>
+          <span class="tech-tag frontend">TypeScript</span>
+          <span class="tech-tag frontend">Vite 7</span>
+          <span class="tech-tag frontend">Tailwind CSS</span>
+          <span class="tech-tag frontend">Zustand</span>
+          <span class="tech-tag frontend">Radix UI</span>
+          <span class="tech-tag frontend">Framer Motion</span>
+          <span class="tech-tag frontend">Recharts</span>
+          <span class="tech-tag frontend">FullCalendar</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3><span class="icon">&#128278;</span> Real-time &amp; Integrations</h3>
+        <div class="tech-stack">
+          <span class="tech-tag realtime">Microsoft SignalR</span>
+          <span class="tech-tag realtime">WebSockets</span>
+          <span class="tech-tag infra">Lahza Payments</span>
+          <span class="tech-tag infra">Mailjet Email</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3><span class="icon">&#128450;</span> Database &amp; DevOps</h3>
+        <div class="tech-stack">
+          <span class="tech-tag db">PostgreSQL</span>
+          <span class="tech-tag db">EF Core Migrations</span>
+          <span class="tech-tag infra">Docker</span>
+          <span class="tech-tag infra">ngrok</span>
+          <span class="tech-tag infra">Git</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Roles -->
+  <div class="section">
+    <div class="section-title">Multi-Role System</div>
+    <div style="margin-bottom:8px;">
+      <span class="role-badge student">Student</span>
+      <span class="role-badge teacher">Teacher</span>
+      <span class="role-badge admin">Admin</span>
+      <span class="role-badge accountant">Accountant</span>
+      <span class="role-badge secretary">Secretary</span>
+    </div>
+    <div class="three-col">
+      <div class="card">
+        <h3>Student Portal</h3>
+        <ul>
+          <li>Personalized dashboard &amp; stats</li>
+          <li>Course catalog with smart filtering</li>
+          <li>Video lessons with timestamped notes</li>
+          <li>Assignments &amp; exam submissions</li>
+          <li>Calendar &amp; progress tracking</li>
+          <li>Certificate download (PDF)</li>
+          <li>Payment history &amp; subscriptions</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Teacher Portal</h3>
+        <ul>
+          <li>Course creation &amp; management</li>
+          <li>Lesson content builder</li>
+          <li>Assignment grading &amp; feedback</li>
+          <li>Exam &amp; question bank management</li>
+          <li>At-risk student detection</li>
+          <li>Discount &amp; subscription plans</li>
+          <li>Real-time messaging with students</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Admin &amp; Staff</h3>
+        <ul>
+          <li>User management (CRUD)</li>
+          <li>Course moderation</li>
+          <li>System settings &amp; audit logs</li>
+          <li>Finance: transactions &amp; payouts</li>
+          <li>Revenue split management</li>
+          <li>Enrollment bulk operations</li>
+          <li>Reports &amp; analytics exports</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Core Features -->
+  <div class="section">
+    <div class="section-title">Core Features</div>
+    <div class="two-col">
+      <div class="card">
+        <h3><span class="icon">&#129302;</span> AI-Powered Recommendations</h3>
+        <ul>
+          <li>Hybrid algorithm: collaborative + content-based filtering</li>
+          <li>Personalized "For You" based on enrollment history</li>
+          <li>Trending courses by popularity metrics</li>
+          <li>"Continue Learning" &amp; similar course suggestions</li>
+          <li>6 onboarding interest categories</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3><span class="icon">&#128172;</span> Real-time Communication</h3>
+        <ul>
+          <li>SignalR WebSocket-based messaging</li>
+          <li>Direct user-to-user &amp; course-wide chats</li>
+          <li>Conversation approval workflow</li>
+          <li>Message persistence &amp; delivery indicators</li>
+          <li>User blocking &amp; reporting</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3><span class="icon">&#128202;</span> Advanced Analytics</h3>
+        <ul>
+          <li>At-risk student detection (inactivity, low grades)</li>
+          <li>Engagement &amp; risk scoring algorithms</li>
+          <li>Predicted final grade calculation</li>
+          <li>Auto-generated improvement recommendations</li>
+          <li>CSV export for reports</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3><span class="icon">&#128179;</span> Payments &amp; Subscriptions</h3>
+        <ul>
+          <li>Lahza gateway integration with webhooks</li>
+          <li>One-time course purchases</li>
+          <li>Recurring subscription billing (Monthly/Yearly)</li>
+          <li>Discount codes (percentage &amp; fixed)</li>
+          <li>Refund &amp; partial refund support</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Security -->
+  <div class="section">
+    <div class="section-title">Security &amp; Infrastructure</div>
+    <ul class="security-list">
+      <li>JWT + Refresh Tokens</li>
+      <li>Role-Based Access Control</li>
+      <li>BCrypt Password Hashing</li>
+      <li>CORS Policies</li>
+      <li>Rate Limiting (IP-based)</li>
+      <li>Security Headers Middleware</li>
+      <li>Email Verification</li>
+      <li>Global Exception Handling</li>
+      <li>Structured Logging (Serilog)</li>
+      <li>Soft Deletes + Audit Trail</li>
+      <li>Request Correlation IDs</li>
+      <li>EF Core Migrations</li>
+    </ul>
+  </div>
+
+  <!-- Additional Features -->
+  <div class="section">
+    <div class="section-title">Additional Highlights</div>
+    <div class="three-col">
+      <div class="card">
+        <h3>&#127912; Theme Engine</h3>
+        <p>18 built-in themes (14 solid + 4 gradient) plus full custom theme support via CSS variables and HSL color picker. Persisted with Zustand + localStorage.</p>
+      </div>
+      <div class="card">
+        <h3>&#128218; Course System</h3>
+        <p>Full lifecycle: Draft &rarr; Published &rarr; Archived. Supports video lessons, materials, sections, multiple modalities (Online/In-Person/Hybrid), and auto-certificates on completion.</p>
+      </div>
+      <div class="card">
+        <h3>&#128221; Assessment Engine</h3>
+        <p>Assignments with multi-attempt submissions &amp; file uploads. Exams with MCQ, True/False questions, timed attempts, and automated scoring with attempt history.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  ACADEMIX &mdash; Built with ASP.NET Core 8 &bull; React 19 &bull; TypeScript &bull; PostgreSQL &bull; SignalR &bull; Clean Architecture
+</div>
+
+</body>
+</html>

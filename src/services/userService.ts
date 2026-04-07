@@ -14,6 +14,8 @@ export interface UserDto {
   fullName: string;
   phoneNumber?: string;
   profilePictureUrl?: string;
+  bio?: string;
+  coverImageUrl?: string;
   isActive: boolean;
   isEmailVerified: boolean;
   createdAt: string;
@@ -26,6 +28,8 @@ export interface UpdateUserRequest {
   lastName?: string;
   phoneNumber?: string;
   profilePictureUrl?: string;
+  bio?: string;
+  coverImageUrl?: string;
   isActive?: boolean;
 }
 

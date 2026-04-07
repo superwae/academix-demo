@@ -188,6 +188,12 @@ public class UserService : IUserService
         if (request.ProfilePictureUrl != null)
             user.ProfilePictureUrl = request.ProfilePictureUrl;
 
+        if (request.Bio != null)
+            user.Bio = request.Bio;
+
+        if (request.CoverImageUrl != null)
+            user.CoverImageUrl = request.CoverImageUrl;
+
         if (request.IsActive.HasValue)
             user.IsActive = request.IsActive.Value;
 
@@ -390,6 +396,8 @@ public class UserService : IUserService
             FullName = user.FullName,
             PhoneNumber = user.PhoneNumber,
             ProfilePictureUrl = user.ProfilePictureUrl,
+            Bio = user.Bio,
+            CoverImageUrl = user.CoverImageUrl,
             IsActive = user.IsActive,
             IsEmailVerified = user.IsEmailVerified,
             CreatedAt = user.CreatedAt,

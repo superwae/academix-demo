@@ -14,6 +14,8 @@ public class UserDto
     public string FullName { get; set; } = string.Empty;
     public string? PhoneNumber { get; set; }
     public string? ProfilePictureUrl { get; set; }
+    public string? Bio { get; set; }
+    public string? CoverImageUrl { get; set; }
     public bool IsActive { get; set; }
     public bool IsEmailVerified { get; set; }
     public DateTime CreatedAt { get; set; }
@@ -69,6 +71,12 @@ public class UpdateUserRequest
 
     [MaxLength(500)]
     public string? ProfilePictureUrl { get; set; }
+
+    [MaxLength(1000)]
+    public string? Bio { get; set; }
+
+    [MaxLength(500)]
+    public string? CoverImageUrl { get; set; }
 
     public bool? IsActive { get; set; }
 }
