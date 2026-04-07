@@ -813,6 +813,236 @@ public class CourseService : ICourseService
         return Result.Success();
     }
 
+    public async Task<Result<CourseDto>> CloneAsync(Guid courseId, CloneCourseRequest request, Guid instructorId, CancellationToken cancellationToken = default)
+    {
+        // Load the original course with ALL related data
+        var original = await _context.Courses
+            .Include(c => c.Instructor)
+            .Include(c => c.Sections.Where(s => !s.IsDeleted))
+                .ThenInclude(s => s.MeetingTimes.Where(mt => !mt.IsDeleted))
+            .Include(c => c.CourseTags.Where(ct => !ct.IsDeleted))
+                .ThenInclude(ct => ct.Tag)
+            .Include(c => c.LessonSections.Where(ls => !ls.IsDeleted))
+            .Include(c => c.Lessons.Where(l => !l.IsDeleted))
+            .Include(c => c.Assignments.Where(a => !a.IsDeleted))
+            .Include(c => c.Exams.Where(e => !e.IsDeleted))
+                .ThenInclude(e => e.Questions.Where(q => !q.IsDeleted))
+            .FirstOrDefaultAsync(c => c.Id == courseId && !c.IsDeleted, cancellationToken);
+
+        if (original == null)
+        {
+            return Result<CourseDto>.Failure("Course not found.");
+        }
+
+        // Validate dates if both provided
+        if (request.CourseStartDate.HasValue && request.CourseEndDate.HasValue &&
+            NormalizeUtcDateOnly(request.CourseEndDate) < NormalizeUtcDateOnly(request.CourseStartDate))
+        {
+            return Result<CourseDto>.Failure("Course end date must be on or after start date.");
+        }
+
+        // Create the new course entity
+        var newCourse = new Course
+        {
+            Title = !string.IsNullOrWhiteSpace(request.Title) ? request.Title : $"{original.Title} (New Batch)",
+            Description = original.Description,
+            Category = original.Category,
+            Level = original.Level,
+            Modality = original.Modality,
+            ProviderType = original.ProviderType,
+            ProviderName = original.ProviderName,
+            InstructorId = instructorId,
+            Price = original.Price,
+            ThumbnailUrl = original.ThumbnailUrl,
+            ExpectedDurationHours = original.ExpectedDurationHours,
+            CourseStartDate = NormalizeUtcDateOnly(request.CourseStartDate),
+            CourseEndDate = NormalizeUtcDateOnly(request.CourseEndDate),
+            IssueCertificates = original.IssueCertificates,
+            CertificateSummary = original.CertificateSummary,
+            CertificateDisplayHours = original.CertificateDisplayHours,
+            Status = CourseStatus.Draft,
+            Rating = 0,
+            RatingCount = 0,
+            IsFeatured = false,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        _context.Courses.Add(newCourse);
+        await _context.SaveChangesAsync(cancellationToken);
+
+        // Copy tags
+        foreach (var ct in original.CourseTags.Where(ct => !ct.IsDeleted))
+        {
+            _context.CourseTags.Add(new CourseTag
+            {
+                CourseId = newCourse.Id,
+                TagId = ct.TagId
+            });
+        }
+        await _context.SaveChangesAsync(cancellationToken);
+
+        // Clone sections with meeting times
+        if (request.CopySections)
+        {
+            foreach (var section in original.Sections.Where(s => !s.IsDeleted))
+            {
+                var newSection = new CourseSection
+                {
+                    CourseId = newCourse.Id,
+                    Name = section.Name,
+                    LocationLabel = section.LocationLabel,
+                    JoinUrl = section.JoinUrl,
+                    MaxSeats = section.MaxSeats,
+                    SeatsRemaining = section.MaxSeats,
+                    IsActive = section.IsActive,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                _context.CourseSections.Add(newSection);
+                await _context.SaveChangesAsync(cancellationToken);
+
+                foreach (var mt in section.MeetingTimes.Where(mt => !mt.IsDeleted))
+                {
+                    _context.SectionMeetingTimes.Add(new SectionMeetingTime
+                    {
+                        SectionId = newSection.Id,
+                        Day = mt.Day,
+                        StartMinutes = mt.StartMinutes,
+                        EndMinutes = mt.EndMinutes,
+                        CreatedAt = DateTime.UtcNow
+                    });
+                }
+            }
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
+        // Clone lesson sections and lessons
+        if (request.CopyLessons)
+        {
+            // Build a map from old LessonSection ID -> new LessonSection ID
+            var lessonSectionMap = new Dictionary<Guid, Guid>();
+
+            foreach (var ls in original.LessonSections.Where(ls => !ls.IsDeleted).OrderBy(ls => ls.Order))
+            {
+                var newLs = new LessonSection
+                {
+                    CourseId = newCourse.Id,
+                    Title = ls.Title,
+                    Description = ls.Description,
+                    Order = ls.Order,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                _context.LessonSections.Add(newLs);
+                await _context.SaveChangesAsync(cancellationToken);
+
+                lessonSectionMap[ls.Id] = newLs.Id;
+            }
+
+            foreach (var lesson in original.Lessons.Where(l => !l.IsDeleted).OrderBy(l => l.Order))
+            {
+                var newLesson = new Lesson
+                {
+                    CourseId = newCourse.Id,
+                    SectionId = lesson.SectionId.HasValue && lessonSectionMap.ContainsKey(lesson.SectionId.Value)
+                        ? lessonSectionMap[lesson.SectionId.Value]
+                        : null,
+                    Title = lesson.Title,
+                    Description = lesson.Description,
+                    VideoUrl = lesson.VideoUrl,
+                    DurationMinutes = lesson.DurationMinutes,
+                    Order = lesson.Order,
+                    IsPreview = lesson.IsPreview,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                _context.Lessons.Add(newLesson);
+            }
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
+        // Clone assignments
+        if (request.CopyAssignments)
+        {
+            foreach (var assignment in original.Assignments.Where(a => !a.IsDeleted))
+            {
+                var newAssignment = new Assignment
+                {
+                    CourseId = newCourse.Id,
+                    Title = assignment.Title,
+                    Prompt = assignment.Prompt,
+                    MaxScore = assignment.MaxScore,
+                    Weight = assignment.Weight,
+                    AllowLateSubmission = assignment.AllowLateSubmission,
+                    LatePenaltyPercent = assignment.LatePenaltyPercent,
+                    Status = AssignmentStatus.Draft,
+                    DueAt = default, // Teacher sets new due dates
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                _context.Assignments.Add(newAssignment);
+            }
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
+        // Clone exams with questions
+        if (request.CopyExams)
+        {
+            foreach (var exam in original.Exams.Where(e => !e.IsDeleted))
+            {
+                var newExam = new Exam
+                {
+                    CourseId = newCourse.Id,
+                    Title = exam.Title,
+                    Description = exam.Description,
+                    DurationMinutes = exam.DurationMinutes,
+                    IsActive = false,
+                    AllowRetake = exam.AllowRetake,
+                    MaxAttempts = exam.MaxAttempts,
+                    StartsAt = default, // Teacher sets new start time
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                _context.Exams.Add(newExam);
+                await _context.SaveChangesAsync(cancellationToken);
+
+                foreach (var question in exam.Questions.Where(q => !q.IsDeleted).OrderBy(q => q.Order))
+                {
+                    _context.ExamQuestions.Add(new ExamQuestion
+                    {
+                        ExamId = newExam.Id,
+                        Prompt = question.Prompt,
+                        Type = question.Type,
+                        ChoicesJson = question.ChoicesJson,
+                        AnswerIndex = question.AnswerIndex,
+                        Points = question.Points,
+                        Order = question.Order,
+                        CreatedAt = DateTime.UtcNow
+                    });
+                }
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+        }
+
+        // Reload the new course with all relations for the DTO
+        var createdCourse = await _context.Courses
+            .Include(c => c.Instructor)
+            .Include(c => c.Sections)
+                .ThenInclude(s => s.MeetingTimes)
+            .Include(c => c.CourseTags)
+                .ThenInclude(ct => ct.Tag)
+            .FirstAsync(c => c.Id == newCourse.Id, cancellationToken);
+
+        var sectionIds = createdCourse.Sections.Where(s => !s.IsDeleted).Select(s => s.Id).ToList();
+        var enrollmentCounts = await GetEnrollmentCountsBySectionAsync(sectionIds, cancellationToken);
+        var courseDto = MapToCourseDto(createdCourse, enrollmentCounts);
+
+        _logger.LogInformation("Course {OriginalCourseId} cloned to {NewCourseId} by instructor {InstructorId}.",
+            courseId, newCourse.Id, instructorId);
+
+        return Result<CourseDto>.Success(courseDto);
+    }
+
     private static bool IntervalsOverlap(int startA, int endA, int startB, int endB) =>
         startA < endB && startB < endA;
 

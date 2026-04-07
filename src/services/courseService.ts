@@ -87,6 +87,16 @@ export interface PagedResult<T> {
   totalPages: number;
 }
 
+export interface CloneCourseRequest {
+  title?: string;
+  courseStartDate?: string;
+  courseEndDate?: string;
+  copyLessons?: boolean;
+  copyAssignments?: boolean;
+  copyExams?: boolean;
+  copySections?: boolean;
+}
+
 class CourseService {
   async getCourses(request: PagedRequest = {}): Promise<PagedResult<CourseDto>> {
     try {
@@ -270,6 +280,17 @@ class CourseService {
     } catch (error) {
       const apiError = error as ApiError;
       const errorMessage = apiError.error || apiError.detail || apiError.title || 'Failed to delete section';
+      throw new Error(errorMessage);
+    }
+  }
+
+  async cloneCourse(courseId: string, request: CloneCourseRequest = {}): Promise<CourseDto> {
+    try {
+      const response = await apiClient.post<CourseDto>(`/courses/${courseId}/clone`, request);
+      return response;
+    } catch (error) {
+      const apiError = error as ApiError;
+      const errorMessage = apiError.error || apiError.detail || apiError.title || 'Failed to clone course';
       throw new Error(errorMessage);
     }
   }

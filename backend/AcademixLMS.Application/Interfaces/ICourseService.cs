@@ -18,6 +18,7 @@ public interface ICourseService
     Task<Result<CourseSectionDto>> AddSectionAsync(Guid courseId, CreateSectionRequest request, Guid? currentUserId = null, bool isAdmin = false, CancellationToken cancellationToken = default);
     Task<Result> UpdateSectionAsync(Guid courseId, Guid sectionId, CreateSectionRequest request, Guid? currentUserId = null, bool isAdmin = false, CancellationToken cancellationToken = default);
     Task<Result> DeleteSectionAsync(Guid courseId, Guid sectionId, Guid? currentUserId = null, bool isAdmin = false, CancellationToken cancellationToken = default);
+    Task<Result<CourseDto>> CloneAsync(Guid courseId, CloneCourseRequest request, Guid instructorId, CancellationToken cancellationToken = default);
 }
 
 

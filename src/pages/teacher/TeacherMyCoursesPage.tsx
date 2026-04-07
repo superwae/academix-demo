@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Badge } from '../../components/ui/badge'
 import { Button } from '../../components/ui/button'
 import { Progress } from '../../components/ui/progress'
-import { courseService, type CourseDto } from '../../services/courseService'
+import { courseService, type CourseDto, type CloneCourseRequest } from '../../services/courseService'
 import { teacherService } from '../../services/teacherService'
 import {
   BookOpen,
@@ -24,6 +24,7 @@ import {
   MapPin,
   Link as LinkIcon,
   Tag,
+  Copy,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
@@ -38,11 +39,13 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '../../components/ui/dialog'
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
+import { Switch } from '../../components/ui/switch'
 import {
   SelectRoot,
   SelectContent,
@@ -95,6 +98,21 @@ export function TeacherMyCoursesPage() {
   const [sectionsLoading, setSectionsLoading] = useState(false)
   const [editingSection, setEditingSection] = useState<SectionFormData | null>(null)
   const [deleteSectionId, setDeleteSectionId] = useState<string | null>(null)
+
+  // Clone / Start New Batch state
+  const navigate = useNavigate()
+  const [cloneCourse, setCloneCourse] = useState<CourseDto | null>(null)
+  const [showCloneDialog, setShowCloneDialog] = useState(false)
+  const [cloneForm, setCloneForm] = useState({
+    title: '',
+    courseStartDate: '',
+    courseEndDate: '',
+    copyLessons: true,
+    copyAssignments: true,
+    copyExams: true,
+    copySections: true,
+  })
+  const [cloneLoading, setCloneLoading] = useState(false)
 
   useEffect(() => {
     const loadCourses = async () => {
@@ -334,6 +352,46 @@ export function TeacherMyCoursesPage() {
     setEditingSection({ ...editingSection, meetingTimes: newMeetingTimes })
   }
 
+  const openCloneDialog = (course: CourseDto) => {
+    setCloneCourse(course)
+    setCloneForm({
+      title: `${course.title} (New Batch)`,
+      courseStartDate: '',
+      courseEndDate: '',
+      copyLessons: true,
+      copyAssignments: true,
+      copyExams: true,
+      copySections: true,
+    })
+    setShowCloneDialog(true)
+  }
+
+  const handleCloneCourse = async () => {
+    if (!cloneCourse) return
+    try {
+      setCloneLoading(true)
+      const request: CloneCourseRequest = {
+        title: cloneForm.title || undefined,
+        courseStartDate: cloneForm.courseStartDate || undefined,
+        courseEndDate: cloneForm.courseEndDate || undefined,
+        copyLessons: cloneForm.copyLessons,
+        copyAssignments: cloneForm.copyAssignments,
+        copyExams: cloneForm.copyExams,
+        copySections: cloneForm.copySections,
+      }
+      const newCourse = await courseService.cloneCourse(cloneCourse.id, request)
+      toast.success('New batch created!')
+      setShowCloneDialog(false)
+      navigate(`/teacher/courses/${newCourse.id}/edit`)
+    } catch (error) {
+      toast.error('Failed to create new batch', {
+        description: error instanceof Error ? error.message : 'Please try again later',
+      })
+    } finally {
+      setCloneLoading(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="space-y-3">
@@ -464,6 +522,10 @@ export function TeacherMyCoursesPage() {
                               <Tag className="h-4 w-4 mr-2" />
                               Discounts
                             </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => openCloneDialog(course)}>
+                            <Copy className="h-4 w-4 mr-2" />
+                            Start New Batch
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -770,6 +832,98 @@ export function TeacherMyCoursesPage() {
           if (deleteSectionId) return handleDeleteSection(deleteSectionId)
         }}
       />
+
+      {/* Start New Batch / Clone Course Dialog */}
+      <Dialog open={showCloneDialog} onOpenChange={setShowCloneDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Start New Batch</DialogTitle>
+            <DialogDescription>
+              Create a fresh copy of this course with new dates and zero enrollments. All lessons, assignments, and exams will be copied.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="clone-title">Title</Label>
+              <Input
+                id="clone-title"
+                value={cloneForm.title}
+                onChange={(e) => setCloneForm({ ...cloneForm, title: e.target.value })}
+                placeholder="New course title"
+              />
+            </div>
+
+            <div className="grid gap-3 grid-cols-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="clone-start-date">Start Date</Label>
+                <Input
+                  id="clone-start-date"
+                  type="date"
+                  value={cloneForm.courseStartDate}
+                  onChange={(e) => setCloneForm({ ...cloneForm, courseStartDate: e.target.value })}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="clone-end-date">End Date</Label>
+                <Input
+                  id="clone-end-date"
+                  type="date"
+                  value={cloneForm.courseEndDate}
+                  onChange={(e) => setCloneForm({ ...cloneForm, courseEndDate: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <Label>Content to Copy</Label>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="clone-lessons" className="font-normal cursor-pointer">Copy Lessons</Label>
+                  <Switch
+                    id="clone-lessons"
+                    checked={cloneForm.copyLessons}
+                    onCheckedChange={(checked) => setCloneForm({ ...cloneForm, copyLessons: checked })}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="clone-assignments" className="font-normal cursor-pointer">Copy Assignments</Label>
+                  <Switch
+                    id="clone-assignments"
+                    checked={cloneForm.copyAssignments}
+                    onCheckedChange={(checked) => setCloneForm({ ...cloneForm, copyAssignments: checked })}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="clone-exams" className="font-normal cursor-pointer">Copy Exams</Label>
+                  <Switch
+                    id="clone-exams"
+                    checked={cloneForm.copyExams}
+                    onCheckedChange={(checked) => setCloneForm({ ...cloneForm, copyExams: checked })}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="clone-sections" className="font-normal cursor-pointer">Copy Sections</Label>
+                  <Switch
+                    id="clone-sections"
+                    checked={cloneForm.copySections}
+                    onCheckedChange={(checked) => setCloneForm({ ...cloneForm, copySections: checked })}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCloneDialog(false)} disabled={cloneLoading}>
+              Cancel
+            </Button>
+            <Button variant="gradient" onClick={handleCloneCourse} disabled={cloneLoading}>
+              {cloneLoading ? 'Creating...' : 'Create New Batch'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   )
 }

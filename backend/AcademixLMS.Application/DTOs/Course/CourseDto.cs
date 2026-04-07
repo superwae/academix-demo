@@ -130,4 +130,13 @@ public class CreateMeetingTimeRequest
     public int EndMinutes { get; set; }
 }
 
-
+public class CloneCourseRequest
+{
+    public string? Title { get; set; } // Optional override, defaults to "{original} (New Batch)"
+    public DateTime? CourseStartDate { get; set; }
+    public DateTime? CourseEndDate { get; set; }
+    public bool CopyLessons { get; set; } = true;
+    public bool CopyAssignments { get; set; } = true;
+    public bool CopyExams { get; set; } = true;
+    public bool CopySections { get; set; } = true;
+}

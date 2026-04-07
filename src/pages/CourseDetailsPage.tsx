@@ -5,7 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { courseService, type CourseDto } from '../services/courseService';
-import { enrollmentService } from '../services/enrollmentService';
+import { enrollmentService, type EnrollmentDto } from '../services/enrollmentService';
+import { ConfirmDialog } from '../components/ui/confirm-dialog';
 import { toast } from 'sonner';
 import { Star, ArrowLeft, User, BookOpen, Clock, MapPin, Calendar, AlertCircle } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
@@ -29,6 +30,8 @@ export function CourseDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [enrollingSectionId, setEnrollingSectionId] = useState<string | null>(null);
   const [enrollmentError, setEnrollmentError] = useState<string | null>(null);
+  const [existingEnrollment, setExistingEnrollment] = useState<EnrollmentDto | null>(null);
+  const [reEnrollConfirm, setReEnrollConfirm] = useState<{ sectionId: string; sectionName: string } | null>(null);
 
   useEffect(() => {
     const loadCourse = async () => {
@@ -41,6 +44,14 @@ export function CourseDetailsPage() {
         setLoading(true);
         const data = await courseService.getCourseById(id);
         setCourse(data);
+        // Check if user has an existing enrollment in this course
+        if (isAuthenticated) {
+          try {
+            const myEnrollments = await enrollmentService.getMyEnrollments({ pageSize: 100 });
+            const existing = myEnrollments.items?.find((e: EnrollmentDto) => e.courseId === id);
+            if (existing) setExistingEnrollment(existing);
+          } catch { /* not enrolled, fine */ }
+        }
       } catch (error) {
         toast.error('Failed to load course', {
           description: error instanceof Error ? error.message : 'Please try again later',
@@ -68,15 +79,33 @@ export function CourseDetailsPage() {
 
   const handleEnroll = async (sectionId: string, sectionName: string) => {
     if (!course || !id) return;
-    
+
     if (enrollingSectionId === sectionId) {
       return; // Prevent double-click
     }
 
+    // If student already completed this course, ask for confirmation before re-enrolling
+    if (existingEnrollment && existingEnrollment.status === 'Completed') {
+      setReEnrollConfirm({ sectionId, sectionName });
+      return;
+    }
+
+    await doEnroll(sectionId, sectionName);
+  };
+
+  const doEnroll = async (sectionId: string, sectionName: string) => {
+    if (!course || !id) return;
     setEnrollmentError(null);
     try {
       setEnrollingSectionId(sectionId);
-      
+
+      // If re-enrolling after completion, unenroll from old section first
+      if (existingEnrollment) {
+        try {
+          await enrollmentService.unenroll(existingEnrollment.id);
+        } catch { /* may already be unenrolled */ }
+      }
+
       await enrollmentService.enroll({
         courseId: id,
         sectionId: sectionId,
@@ -100,6 +129,7 @@ export function CourseDetailsPage() {
       // Reload course to update seat counts
       const updatedCourse = await courseService.getCourseById(id);
       setCourse(updatedCourse);
+      setExistingEnrollment(null); // Reset so we don't show re-enroll dialog again
     } catch (error) {
       const raw = error instanceof Error ? error.message : 'Please try again later';
       setEnrollmentError(formatEnrollmentError(raw));
@@ -354,6 +384,21 @@ export function CourseDetailsPage() {
           </Card>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={!!reEnrollConfirm}
+        onOpenChange={(open) => { if (!open) setReEnrollConfirm(null); }}
+        title="Re-enroll in this course?"
+        description={`You've already completed "${course?.title}". Your previous progress and grades will be preserved in your history. Would you like to enroll again in the "${reEnrollConfirm?.sectionName}" section?`}
+        confirmLabel="Yes, enroll again"
+        variant="default"
+        onConfirm={async () => {
+          if (reEnrollConfirm) {
+            await doEnroll(reEnrollConfirm.sectionId, reEnrollConfirm.sectionName);
+            setReEnrollConfirm(null);
+          }
+        }}
+      />
     </div>
   );
 }

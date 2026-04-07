@@ -233,6 +233,42 @@ public class CoursesController : ControllerBase
     }
 
     /// <summary>
+    /// Clone a course to start a new batch (copies content, resets enrollments/progress)
+    /// </summary>
+    [HttpPost("{id}/clone")]
+    [Authorize(Policy = "RequireInstructor")]
+    [ProducesResponseType(typeof(CourseDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> CloneCourse(Guid id, [FromBody] CloneCourseRequest request, CancellationToken cancellationToken)
+    {
+        var currentUserId = User.GetRequiredUserId();
+        var isAdmin = User.HasRole("Admin") || User.HasRole("SuperAdmin");
+
+        // Verify the requesting user is the course instructor or an admin
+        if (!isAdmin)
+        {
+            var courseCheck = await _courseService.GetByIdAsync(id, cancellationToken);
+            if (!courseCheck.IsSuccess || courseCheck.Value == null)
+                return NotFound(courseCheck.Error);
+
+            if (courseCheck.Value.InstructorId != currentUserId)
+                return Forbid("You can only clone courses you own.");
+        }
+
+        var result = await _courseService.CloneAsync(id, request, currentUserId, cancellationToken);
+
+        if (!result.IsSuccess || result.Value == null)
+        {
+            if (result.Error.Contains("not found"))
+                return NotFound(result.Error);
+            return BadRequest(result.Error);
+        }
+
+        return CreatedAtAction(nameof(GetCourse), new { id = result.Value.Id }, result.Value);
+    }
+
+    /// <summary>
     /// Add section to course - Instructor (owner) or Admin
     /// </summary>
     [HttpPost("{id}/sections")]
