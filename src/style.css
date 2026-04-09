@@ -398,6 +398,15 @@
     box-shadow: 0 20px 40px -10px hsl(var(--primary) / 0.15), 0 0 20px hsl(var(--primary) / 0.1);
   }
 
+  /* Hidden scrollbar utility — content still scrolls but bar is invisible */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
   /* Fancy scrollbar - thin, rounded, theme-aware */
   .scroll-fancy {
     scrollbar-width: thin;

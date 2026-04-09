@@ -662,7 +662,8 @@ export function TeacherLayout() {
       </header>
 
       {/* Main Layout Grid */}
-      <div className="mx-auto grid max-w-[1920px] grid-cols-1 gap-4 px-3 py-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:gap-6 sm:px-6 sm:py-6 lg:grid-cols-[280px_1fr] lg:gap-8 lg:px-6 lg:py-8 flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto scrollbar-hide">
+      <div className="mx-auto grid w-full max-w-[1920px] grid-cols-1 gap-4 px-3 py-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:gap-6 sm:px-6 sm:py-6 lg:grid-cols-[280px_1fr] lg:gap-8 lg:px-6 lg:py-8">
         {/* Premium Sidebar */}
         <aside className="hidden lg:block" role="complementary" aria-label="Navigation sidebar">
           <motion.div
@@ -743,6 +744,7 @@ export function TeacherLayout() {
             <Outlet />
           </motion.div>
         </main>
+      </div>
       </div>
     </div>
   );
