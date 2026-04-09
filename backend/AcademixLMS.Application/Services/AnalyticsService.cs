@@ -750,6 +750,162 @@ public class AnalyticsService : IAnalyticsService
         }
     }
 
+    public async Task<Result<StudentInstructorCoursesDto>> GetStudentInstructorCoursesAsync(
+        Guid studentId,
+        Guid instructorId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var student = await _context.Users
+                .FirstOrDefaultAsync(u => u.Id == studentId && !u.IsDeleted, cancellationToken);
+
+            if (student == null)
+            {
+                return Result<StudentInstructorCoursesDto>.Failure("Student not found.");
+            }
+
+            // All enrollments for this student in courses owned by the requesting instructor
+            var enrollments = await _context.Enrollments
+                .Include(e => e.Course)
+                .Include(e => e.Section)
+                .Where(e => e.UserId == studentId
+                            && e.Course.InstructorId == instructorId
+                            && !e.IsDeleted
+                            && !e.Course.IsDeleted)
+                .OrderByDescending(e => e.EnrolledAt)
+                .ToListAsync(cancellationToken);
+
+            var result = new StudentInstructorCoursesDto
+            {
+                StudentId = student.Id,
+                StudentName = student.FullName,
+                Email = student.Email,
+                ProfilePictureUrl = student.ProfilePictureUrl,
+                Bio = student.Bio,
+            };
+
+            foreach (var enrollment in enrollments)
+            {
+                var courseId = enrollment.CourseId;
+
+                // Lessons
+                var totalLessons = await _context.Lessons
+                    .CountAsync(l => l.CourseId == courseId && !l.IsDeleted, cancellationToken);
+
+                var lessonsCompleted = await _context.LessonProgresses
+                    .CountAsync(lp => lp.UserId == studentId
+                                      && lp.CourseId == courseId
+                                      && lp.IsCompleted
+                                      && !lp.IsDeleted, cancellationToken);
+
+                // Assignments
+                var totalAssignments = await _context.Assignments
+                    .CountAsync(a => a.CourseId == courseId && !a.IsDeleted, cancellationToken);
+
+                var assignmentSubmissions = await _context.AssignmentSubmissions
+                    .Include(s => s.Assignment)
+                    .Where(s => s.UserId == studentId
+                                && s.Assignment.CourseId == courseId
+                                && !s.IsDeleted)
+                    .ToListAsync(cancellationToken);
+
+                var assignmentsSubmitted = assignmentSubmissions.Count;
+                double? avgAssignmentScore = null;
+                var gradedAssignments = assignmentSubmissions.Where(s => s.Score.HasValue).ToList();
+                if (gradedAssignments.Any())
+                {
+                    avgAssignmentScore = gradedAssignments.Average(s => (double)s.Score!.Value);
+                }
+
+                // Exams
+                var totalExams = await _context.Exams
+                    .CountAsync(e => e.CourseId == courseId && !e.IsDeleted, cancellationToken);
+
+                var examAttempts = await _context.ExamAttempts
+                    .Include(ea => ea.Exam)
+                    .Where(ea => ea.UserId == studentId
+                                 && ea.Exam.CourseId == courseId
+                                 && !ea.IsDeleted)
+                    .ToListAsync(cancellationToken);
+
+                var examsTaken = examAttempts.Count(ea => ea.SubmittedAt.HasValue);
+                double? avgExamScore = null;
+                var submittedExams = examAttempts.Where(ea => ea.SubmittedAt.HasValue && ea.Total > 0).ToList();
+                if (submittedExams.Any())
+                {
+                    avgExamScore = (double)submittedExams.Average(ea => ea.Percentage);
+                }
+
+                // Overall grade — average of available assignment + exam scores
+                double? overallGrade = null;
+                var allScores = new List<double>();
+                if (avgAssignmentScore.HasValue) allScores.Add(avgAssignmentScore.Value);
+                if (avgExamScore.HasValue) allScores.Add(avgExamScore.Value);
+                if (allScores.Any()) overallGrade = allScores.Average();
+
+                // Last activity
+                DateTime? lastActivityAt = null;
+                var lessonLastActivity = await _context.LessonProgresses
+                    .Where(lp => lp.UserId == studentId && lp.CourseId == courseId && !lp.IsDeleted)
+                    .MaxAsync(lp => (DateTime?)lp.LastWatchedAt, cancellationToken);
+                if (lessonLastActivity.HasValue) lastActivityAt = lessonLastActivity;
+
+                if (assignmentSubmissions.Any())
+                {
+                    var lastSubmission = assignmentSubmissions.Max(s => s.SubmittedAt);
+                    if (!lastActivityAt.HasValue || lastSubmission > lastActivityAt) lastActivityAt = lastSubmission;
+                }
+
+                if (examAttempts.Any())
+                {
+                    var lastAttempt = examAttempts.Max(ea => ea.StartedAt);
+                    if (!lastActivityAt.HasValue || lastAttempt > lastActivityAt) lastActivityAt = lastAttempt;
+                }
+
+                var stats = new StudentCourseStatsDto
+                {
+                    EnrollmentId = enrollment.Id,
+                    CourseId = enrollment.CourseId,
+                    CourseTitle = enrollment.Course.Title,
+                    CourseThumbnailUrl = enrollment.Course.ThumbnailUrl,
+                    SectionId = enrollment.SectionId,
+                    SectionName = enrollment.Section?.Name ?? "—",
+                    Status = enrollment.Status.ToString(),
+                    EnrolledAt = enrollment.EnrolledAt,
+                    CompletedAt = enrollment.CompletedAt,
+                    ProgressPercentage = (double)enrollment.ProgressPercentage,
+                    LessonsCompleted = lessonsCompleted,
+                    TotalLessons = totalLessons,
+                    AssignmentsSubmitted = assignmentsSubmitted,
+                    TotalAssignments = totalAssignments,
+                    AverageAssignmentScore = avgAssignmentScore,
+                    ExamsTaken = examsTaken,
+                    TotalExams = totalExams,
+                    AverageExamScore = avgExamScore,
+                    OverallGrade = overallGrade,
+                    LastActivityAt = lastActivityAt,
+                };
+
+                if (enrollment.Status == EnrollmentStatus.Completed)
+                {
+                    result.CompletedCourses.Add(stats);
+                }
+                else
+                {
+                    result.ActiveCourses.Add(stats);
+                }
+            }
+
+            return Result<StudentInstructorCoursesDto>.Success(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching student instructor courses for student {StudentId}, instructor {InstructorId}", studentId, instructorId);
+            return Result<StudentInstructorCoursesDto>.Failure("Failed to load student data.");
+        }
+    }
+
     #region Private Helper Methods
 
     private double CalculateEngagementScore(

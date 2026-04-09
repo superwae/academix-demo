@@ -47,4 +47,11 @@ public interface IAnalyticsService
     /// Predict final grade for a student in a course
     /// </summary>
     Task<Result<double>> PredictStudentGradeAsync(Guid studentId, Guid courseId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Get a student's enrollments and per-course stats for ALL courses owned by the
+    /// requesting instructor. Splits results into Active vs Completed courses so the
+    /// teacher can see current and past students cleanly.
+    /// </summary>
+    Task<Result<StudentInstructorCoursesDto>> GetStudentInstructorCoursesAsync(Guid studentId, Guid instructorId, CancellationToken cancellationToken = default);
 }

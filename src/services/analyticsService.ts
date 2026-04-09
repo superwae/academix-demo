@@ -108,12 +108,54 @@ export interface InstructorAnalytics {
   courseAnalytics: CourseAnalytics[];
 }
 
+// Per-course stats for a student in a single course owned by the requesting teacher
+export interface StudentCourseStats {
+  enrollmentId: string;
+  courseId: string;
+  courseTitle: string;
+  courseThumbnailUrl?: string;
+  sectionId: string;
+  sectionName: string;
+  status: string; // Active, Completed, Dropped, etc.
+  enrolledAt: string;
+  completedAt?: string;
+  progressPercentage: number;
+  lessonsCompleted: number;
+  totalLessons: number;
+  assignmentsSubmitted: number;
+  totalAssignments: number;
+  averageAssignmentScore?: number;
+  examsTaken: number;
+  totalExams: number;
+  averageExamScore?: number;
+  overallGrade?: number;
+  lastActivityAt?: string;
+}
+
+export interface StudentInstructorCourses {
+  studentId: string;
+  studentName: string;
+  email: string;
+  profilePictureUrl?: string;
+  bio?: string;
+  activeCourses: StudentCourseStats[];
+  completedCourses: StudentCourseStats[];
+}
+
 class AnalyticsService {
   /**
    * Get analytics for a specific student (instructor view)
    */
   async getStudentAnalytics(studentId: string): Promise<StudentAnalytics> {
     return apiClient.get<StudentAnalytics>(`/analytics/students/${studentId}`);
+  }
+
+  /**
+   * Get a student's enrollments and per-course stats only for courses owned by
+   * the current instructor. Splits results into active vs completed.
+   */
+  async getStudentInstructorCourses(studentId: string): Promise<StudentInstructorCourses> {
+    return apiClient.get<StudentInstructorCourses>(`/analytics/students/${studentId}/my-courses`);
   }
 
   /**

@@ -65,6 +65,30 @@ public class AnalyticsController : ControllerBase
     }
 
     /// <summary>
+    /// Get a student's enrollments + per-course stats only for courses owned by
+    /// the requesting instructor. Splits results into Active vs Completed.
+    /// </summary>
+    [HttpGet("students/{studentId:guid}/my-courses")]
+    [Authorize(Policy = "RequireInstructor")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> GetStudentInstructorCourses(Guid studentId, CancellationToken cancellationToken = default)
+    {
+        var userId = User.GetUserId();
+        if (userId == null) return Unauthorized();
+
+        var result = await _analyticsService.GetStudentInstructorCoursesAsync(studentId, userId.Value, cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            return NotFound(new { message = result.Error });
+        }
+
+        return Ok(result.Value);
+    }
+
+    /// <summary>
     /// Get analytics for the current user (student self-view)
     /// </summary>
     [HttpGet("me")]

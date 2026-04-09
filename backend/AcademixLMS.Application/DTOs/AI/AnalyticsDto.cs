@@ -208,3 +208,57 @@ public class InstructorAnalyticsDto
 
     public List<CourseAnalyticsDto> CourseAnalytics { get; set; } = new();
 }
+
+/// <summary>
+/// A student's enrollment + per-course stats inside a single course owned by the
+/// requesting teacher. Used by the teacher's "view student" page.
+/// </summary>
+public class StudentCourseStatsDto
+{
+    public Guid EnrollmentId { get; set; }
+    public Guid CourseId { get; set; }
+    public string CourseTitle { get; set; } = string.Empty;
+    public string? CourseThumbnailUrl { get; set; }
+    public Guid SectionId { get; set; }
+    public string SectionName { get; set; } = string.Empty;
+
+    public string Status { get; set; } = string.Empty; // Active, Completed, Dropped, etc.
+    public DateTime EnrolledAt { get; set; }
+    public DateTime? CompletedAt { get; set; }
+
+    public double ProgressPercentage { get; set; }
+
+    // Lessons
+    public int LessonsCompleted { get; set; }
+    public int TotalLessons { get; set; }
+
+    // Assignments
+    public int AssignmentsSubmitted { get; set; }
+    public int TotalAssignments { get; set; }
+    public double? AverageAssignmentScore { get; set; }
+
+    // Exams
+    public int ExamsTaken { get; set; }
+    public int TotalExams { get; set; }
+    public double? AverageExamScore { get; set; }
+
+    public double? OverallGrade { get; set; }
+    public DateTime? LastActivityAt { get; set; }
+}
+
+/// <summary>
+/// Response wrapping a student's enrollments split into active vs completed
+/// for the requesting teacher's courses.
+/// </summary>
+public class StudentInstructorCoursesDto
+{
+    public Guid StudentId { get; set; }
+    public string StudentName { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string? ProfilePictureUrl { get; set; }
+    public string? Bio { get; set; }
+
+    public List<StudentCourseStatsDto> ActiveCourses { get; set; } = new();
+    public List<StudentCourseStatsDto> CompletedCourses { get; set; } = new();
+}
+
