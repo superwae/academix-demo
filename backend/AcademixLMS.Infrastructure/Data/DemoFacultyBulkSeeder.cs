@@ -250,9 +250,14 @@ public static class DemoFacultyBulkSeeder
                 context.Courses.Add(course);
                 await context.SaveChangesAsync(cancellationToken);
 
-                // 3 sections per course
-                foreach (var (secName, loc) in SectionTemplates)
+                // 3 sections per course — each gets a unique slot so the instructor's
+                // calendar doesn't show 15 events stacked on the same time.
+                // Day is determined by course index (0..4 → Mon..Fri).
+                // Time is determined by section index (0=morning, 1=afternoon, 2=evening).
+                var courseDay = (DomainDay)((ci % 5) + 1); // Monday=1, Friday=5
+                for (var si = 0; si < SectionTemplates.Length; si++)
                 {
+                    var (secName, loc) = SectionTemplates[si];
                     var section = new CourseSection
                     {
                         CourseId = course.Id,
@@ -266,20 +271,20 @@ public static class DemoFacultyBulkSeeder
                     context.CourseSections.Add(section);
                     await context.SaveChangesAsync(cancellationToken);
 
+                    // Section index → time of day matching the section name
+                    var (startHour, endHour) = si switch
+                    {
+                        0 => (8, 10),   // Morning
+                        1 => (13, 15),  // Afternoon
+                        _ => (17, 19),  // Evening
+                    };
+
                     context.SectionMeetingTimes.Add(new SectionMeetingTime
                     {
                         SectionId = section.Id,
-                        Day = DomainDay.Monday,
-                        StartMinutes = 9 * 60,
-                        EndMinutes = 11 * 60,
-                        CreatedAt = now
-                    });
-                    context.SectionMeetingTimes.Add(new SectionMeetingTime
-                    {
-                        SectionId = section.Id,
-                        Day = DomainDay.Wednesday,
-                        StartMinutes = 14 * 60,
-                        EndMinutes = 16 * 60,
+                        Day = courseDay,
+                        StartMinutes = startHour * 60,
+                        EndMinutes = endHour * 60,
                         CreatedAt = now
                     });
                 }
