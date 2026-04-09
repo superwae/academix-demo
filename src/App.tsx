@@ -48,6 +48,7 @@ import { TeacherCalendarPage } from './pages/teacher/TeacherCalendarPage'
 import { TeacherStudentsPage } from './pages/teacher/TeacherStudentsPage'
 import { TeacherAtRiskStudentsPage } from './pages/teacher/TeacherAtRiskStudentsPage'
 import { CourseStudentsPage } from './pages/teacher/CourseStudentsPage'
+import { StudentDetailPage } from './pages/teacher/StudentDetailPage'
 import { MessagesPage as TeacherMessagesPage } from './pages/student/MessagesPage'
 import { ProfilePage as TeacherProfilePage } from './pages/student/ProfilePage'
 import { SettingsPage as TeacherSettingsPage } from './pages/student/SettingsPage'
@@ -165,6 +166,7 @@ export default function App() {
               <Route path="exams/:id" element={<TeacherExamDetailPage />} />
               <Route path="calendar" element={<TeacherCalendarPage />} />
               <Route path="students" element={<TeacherStudentsPage />} />
+              <Route path="students/:id" element={<StudentDetailPage />} />
               <Route path="at-risk-students" element={<TeacherAtRiskStudentsPage />} />
               <Route path="messages" element={<TeacherMessagesPage />} />
               <Route path="profile" element={<TeacherProfilePage />} />
