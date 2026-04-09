@@ -48,4 +48,5 @@ public class LahzaVerifyResponse
     public string? Channel { get; set; }
     public string? AuthorizationCode { get; set; }
     public DateTime? PaidAt { get; set; }
+    public Dictionary<string, string>? Metadata { get; set; }
 }

@@ -34,6 +34,15 @@ public class InitializePaymentRequest
 }
 
 /// <summary>
+/// Request to initialize a subscription payment via Lahza.
+/// </summary>
+public class InitializeSubscriptionPaymentRequest
+{
+    public Guid PlanId { get; set; }
+    public string BillingInterval { get; set; } = "Monthly";
+}
+
+/// <summary>
 /// Response after initializing a payment with Lahza.
 /// </summary>
 public class InitializePaymentResponse

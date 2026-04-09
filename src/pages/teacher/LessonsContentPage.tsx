@@ -524,7 +524,9 @@ export function LessonsContentPage() {
                     </SelectItem>
                   ))}
                   {sections.length === 0 && selectedCourse && (
-                    <div className="px-3 py-2 text-sm text-muted-foreground">No sections available</div>
+                    <div className="px-3 py-2 text-sm text-muted-foreground">
+                      No sections yet. Click "Add Section" above to create one.
+                    </div>
                   )}
                 </SelectContent>
               </SelectRoot>

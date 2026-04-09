@@ -15,6 +15,7 @@ import { cn } from "../../lib/cn";
 import { toast } from "sonner";
 import { subscriptionService, type SubscriptionDto } from "../../services/subscriptionService";
 import { subscriptionPlanService, type SubscriptionPlanDto } from "../../services/subscriptionPlanService";
+import { paymentService } from "../../services/paymentService";
 
 export function TeacherSubscriptionPage() {
   const [loading, setLoading] = useState(true);
@@ -50,12 +51,20 @@ export function TeacherSubscriptionPage() {
   const handleSubscribe = async (planId: string) => {
     try {
       setSubscribing(planId);
-      await subscriptionService.subscribe({ planId, billingInterval });
-      toast.success("Subscribed successfully");
-      const sub = await subscriptionService.getMySubscription();
-      setSubscription(sub);
+      // Initialize payment via Lahza, then redirect to checkout page
+      const result = await paymentService.initializeSubscriptionPayment({
+        planId,
+        billingInterval,
+      });
+      if (result.authorizationUrl) {
+        window.location.href = result.authorizationUrl;
+      } else {
+        toast.error("Failed to start payment", {
+          description: "No checkout URL received from payment provider",
+        });
+      }
     } catch (error) {
-      toast.error("Failed to subscribe", {
+      toast.error("Failed to start subscription payment", {
         description: error instanceof Error ? error.message : "An error occurred",
       });
     } finally {

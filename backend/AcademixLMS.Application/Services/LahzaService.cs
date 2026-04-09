@@ -44,11 +44,11 @@ public class LahzaService : ILahzaService
     {
         try
         {
-            // Build callback URL
+            // Build callback URL — points to the public frontend callback page so it works for any role
             var callbackBaseUrl = _configuration["Lahza:CallbackBaseUrl"] ?? "";
             if (!string.IsNullOrWhiteSpace(callbackBaseUrl) && string.IsNullOrWhiteSpace(request.CallbackUrl))
             {
-                request.CallbackUrl = $"{callbackBaseUrl.TrimEnd('/')}/api/payments/verify";
+                request.CallbackUrl = $"{callbackBaseUrl.TrimEnd('/')}/payment/callback";
             }
 
             // Use configured currency if not set
@@ -126,7 +126,8 @@ public class LahzaService : ILahzaService
                 Currency = result.Data?.Currency ?? string.Empty,
                 Channel = result.Data?.Channel,
                 AuthorizationCode = result.Data?.Authorization?.AuthorizationCode,
-                PaidAt = result.Data?.PaidAt
+                PaidAt = result.Data?.PaidAt,
+                Metadata = result.Data?.Metadata
             });
         }
         catch (Exception ex)
@@ -214,6 +215,9 @@ public class LahzaService : ILahzaService
 
         [JsonPropertyName("authorization")]
         public LahzaAuthorizationData? Authorization { get; set; }
+
+        [JsonPropertyName("metadata")]
+        public Dictionary<string, string>? Metadata { get; set; }
     }
 
     private class LahzaAuthorizationData

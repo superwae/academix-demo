@@ -84,23 +84,31 @@ export function CourseDetailsPage() {
       return; // Prevent double-click
     }
 
+    // Block re-enrollment if student is currently active in this course
+    if (existingEnrollment && existingEnrollment.status === 'Active') {
+      toast.error('Already enrolled', {
+        description: `You are currently enrolled in this course (${existingEnrollment.sectionName || 'a section'}). Complete or unenroll from your current section first.`,
+      });
+      return;
+    }
+
     // If student already completed this course, ask for confirmation before re-enrolling
     if (existingEnrollment && existingEnrollment.status === 'Completed') {
       setReEnrollConfirm({ sectionId, sectionName });
       return;
     }
 
-    await doEnroll(sectionId, sectionName);
+    await doEnroll(sectionId, sectionName, false);
   };
 
-  const doEnroll = async (sectionId: string, sectionName: string) => {
+  const doEnroll = async (sectionId: string, sectionName: string, isReEnrollment: boolean) => {
     if (!course || !id) return;
     setEnrollmentError(null);
     try {
       setEnrollingSectionId(sectionId);
 
-      // If re-enrolling after completion, unenroll from old section first
-      if (existingEnrollment) {
+      // Only unenroll if explicitly re-enrolling after completion (confirmed via dialog)
+      if (isReEnrollment && existingEnrollment) {
         try {
           await enrollmentService.unenroll(existingEnrollment.id);
         } catch { /* may already be unenrolled */ }
@@ -394,7 +402,7 @@ export function CourseDetailsPage() {
         variant="default"
         onConfirm={async () => {
           if (reEnrollConfirm) {
-            await doEnroll(reEnrollConfirm.sectionId, reEnrollConfirm.sectionName);
+            await doEnroll(reEnrollConfirm.sectionId, reEnrollConfirm.sectionName, true);
             setReEnrollConfirm(null);
           }
         }}

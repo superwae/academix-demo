@@ -106,6 +106,8 @@ export default function App() {
               <Route path="/verify-email" element={<VerifyEmailPage />} />
               <Route path="/courses" element={<PublicCoursesPage />} />
               <Route path="/courses/:id" element={<CourseDetailsPage />} />
+              {/* Payment callback (public so it works for any role after Lahza redirect) */}
+              <Route path="/payment/callback" element={<PaymentCallbackPage />} />
             </Route>
 
             {/* Student Portal - /student/* */}
@@ -168,6 +170,7 @@ export default function App() {
               <Route path="profile" element={<TeacherProfilePage />} />
               <Route path="settings" element={<TeacherSettingsPage />} />
               <Route path="subscription" element={<TeacherSubscriptionPage />} />
+              <Route path="payment/callback" element={<PaymentCallbackPage />} />
               <Route path="courses/:id/discounts" element={<CourseDiscountsPage />} />
             </Route>
 
@@ -197,6 +200,7 @@ export default function App() {
               <Route path="audit-logs" element={<AdminAuditLogsPage />} />
               <Route path="settings" element={<AdminSettingsPage />} />
               <Route path="subscription-plans" element={<SubscriptionPlansPage />} />
+              <Route path="payment/callback" element={<PaymentCallbackPage />} />
               <Route path="subscription" element={<AdminSubscriptionPage />} />
             </Route>
 

@@ -54,6 +54,24 @@ public class PaymentsController : ControllerBase
     }
 
     /// <summary>
+    /// Initialize subscription payment via Lahza
+    /// </summary>
+    [HttpPost("initialize/subscription")]
+    [Authorize]
+    [ProducesResponseType(typeof(InitializePaymentResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> InitializeSubscriptionPayment([FromBody] InitializeSubscriptionPaymentRequest request, CancellationToken cancellationToken)
+    {
+        var userId = User.GetRequiredUserId();
+        var result = await _paymentService.InitializeSubscriptionPaymentAsync(userId, request.PlanId, request.BillingInterval, cancellationToken);
+
+        if (!result.IsSuccess || result.Value == null)
+            return BadRequest(result.Error);
+
+        return Ok(result.Value);
+    }
+
+    /// <summary>
     /// Verify payment after Lahza redirect
     /// </summary>
     [HttpGet("verify/{reference}")]

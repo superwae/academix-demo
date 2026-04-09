@@ -153,6 +153,106 @@ public class PaymentService : IPaymentService
         });
     }
 
+    public async Task<Result<InitializePaymentResponse>> InitializeSubscriptionPaymentAsync(Guid userId, Guid planId, string billingInterval, CancellationToken cancellationToken = default)
+    {
+        // Check user does not already have an active subscription
+        var existing = await _context.Subscriptions
+            .AnyAsync(s => s.UserId == userId && s.Status == SubscriptionStatus.Active && !s.IsDeleted, cancellationToken);
+
+        if (existing)
+        {
+            return Result<InitializePaymentResponse>.Failure("You already have an active subscription. Cancel it before subscribing to a new plan.");
+        }
+
+        // Load plan
+        var plan = await _context.SubscriptionPlans
+            .FirstOrDefaultAsync(p => p.Id == planId && p.IsActive && !p.IsDeleted, cancellationToken);
+
+        if (plan == null)
+        {
+            return Result<InitializePaymentResponse>.Failure("Subscription plan not found or inactive.");
+        }
+
+        // Parse billing interval (case-insensitive)
+        if (!Enum.TryParse<BillingInterval>(billingInterval, true, out var interval))
+        {
+            return Result<InitializePaymentResponse>.Failure("Invalid billing interval. Must be 'Monthly' or 'Yearly'.");
+        }
+
+        // Determine price based on interval
+        var price = interval == BillingInterval.Monthly ? plan.MonthlyPrice : plan.YearlyPrice;
+        if (price <= 0)
+        {
+            return Result<InitializePaymentResponse>.Failure("This plan has no price configured.");
+        }
+
+        // Load user
+        var user = await _context.Users
+            .FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted, cancellationToken);
+
+        if (user == null)
+        {
+            return Result<InitializePaymentResponse>.Failure("User not found.");
+        }
+
+        var amountInSmallestUnit = (long)(price * 100);
+
+        // Create Payment record (no SubscriptionId yet — created on verify)
+        var payment = new Payment
+        {
+            UserId = userId,
+            Type = PaymentType.Subscription,
+            Status = PaymentStatus.Pending,
+            Amount = amountInSmallestUnit,
+            Currency = "ILS",
+            CreatedBy = userId
+        };
+
+        _context.Payments.Add(payment);
+        await _context.SaveChangesAsync(cancellationToken);
+
+        // Call Lahza
+        var lahzaRequest = new LahzaInitializeRequest
+        {
+            Email = user.Email,
+            Mobile = user.PhoneNumber,
+            Amount = amountInSmallestUnit,
+            Currency = payment.Currency,
+            Reference = payment.Id.ToString(),
+            Metadata = new Dictionary<string, string>
+            {
+                { "payment_id", payment.Id.ToString() },
+                { "plan_id", planId.ToString() },
+                { "billing_interval", interval.ToString() },
+                { "user_id", userId.ToString() }
+            }
+        };
+
+        var lahzaResult = await _lahzaService.InitializeTransactionAsync(lahzaRequest, cancellationToken);
+        if (!lahzaResult.IsSuccess)
+        {
+            payment.Status = PaymentStatus.Failed;
+            payment.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync(cancellationToken);
+
+            _logger.LogWarning("Lahza initialization failed for subscription payment {PaymentId}: {Error}", payment.Id, lahzaResult.Error);
+            return Result<InitializePaymentResponse>.Failure($"Payment initialization failed: {lahzaResult.Error}");
+        }
+
+        payment.LahzaReference = lahzaResult.Value!.Reference;
+        payment.UpdatedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation("Subscription payment initialized for user {UserId}, plan {PlanId}, amount {Amount}.", userId, planId, amountInSmallestUnit);
+
+        return Result<InitializePaymentResponse>.Success(new InitializePaymentResponse
+        {
+            PaymentId = payment.Id,
+            AuthorizationUrl = lahzaResult.Value!.AuthorizationUrl,
+            Reference = lahzaResult.Value!.Reference
+        });
+    }
+
     public async Task<Result<PaymentDto>> VerifyPaymentAsync(string lahzaReference, CancellationToken cancellationToken = default)
     {
         var payment = await _context.Payments
@@ -185,6 +285,33 @@ public class PaymentService : IPaymentService
             payment.PaidAt = verification.PaidAt ?? DateTime.UtcNow;
             payment.LahzaAuthorizationCode = verification.AuthorizationCode;
             payment.LahzaChannel = verification.Channel;
+
+            // If this is a subscription payment, create the subscription record
+            if (payment.Type == PaymentType.Subscription && verification.Metadata != null)
+            {
+                if (verification.Metadata.TryGetValue("plan_id", out var planIdStr) &&
+                    Guid.TryParse(planIdStr, out var planId) &&
+                    verification.Metadata.TryGetValue("billing_interval", out var intervalStr) &&
+                    Enum.TryParse<BillingInterval>(intervalStr, out var interval))
+                {
+                    var now = DateTime.UtcNow;
+                    var subscription = new Subscription
+                    {
+                        UserId = payment.UserId,
+                        PlanId = planId,
+                        BillingInterval = interval,
+                        Status = SubscriptionStatus.Active,
+                        CurrentPeriodStart = now,
+                        CurrentPeriodEnd = interval == BillingInterval.Monthly ? now.AddMonths(1) : now.AddYears(1),
+                        CreatedBy = payment.UserId
+                    };
+                    _context.Subscriptions.Add(subscription);
+                    await _context.SaveChangesAsync(cancellationToken);
+
+                    payment.SubscriptionId = subscription.Id;
+                    _logger.LogInformation("Subscription {SubscriptionId} created from payment {PaymentId}", subscription.Id, payment.Id);
+                }
+            }
         }
         else
         {

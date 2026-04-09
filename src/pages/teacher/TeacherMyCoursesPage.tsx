@@ -367,7 +367,7 @@ export function TeacherMyCoursesPage() {
   }
 
   const handleCloneCourse = async () => {
-    if (!cloneCourse) return
+    if (!cloneCourse || cloneLoading) return // Guard against double-fire
     try {
       setCloneLoading(true)
       const request: CloneCourseRequest = {
@@ -380,9 +380,11 @@ export function TeacherMyCoursesPage() {
         copySections: cloneForm.copySections,
       }
       const newCourse = await courseService.cloneCourse(cloneCourse.id, request)
-      toast.success('New batch created!')
       setShowCloneDialog(false)
-      navigate(`/teacher/courses/${newCourse.id}/edit`)
+      // Navigate first, then show toast on the destination page so it isn't unmounted
+      navigate(`/teacher/courses/${newCourse.id}/edit`, {
+        state: { successMessage: `New batch "${newCourse.title}" created!` },
+      })
     } catch (error) {
       toast.error('Failed to create new batch', {
         description: error instanceof Error ? error.message : 'Please try again later',

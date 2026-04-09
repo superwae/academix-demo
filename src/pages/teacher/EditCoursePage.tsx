@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
@@ -32,7 +32,20 @@ import { ConfirmDialog } from '../../components/ui/confirm-dialog'
 export function EditCoursePage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const location = useLocation()
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Show success toast passed via navigation state (e.g. from Start New Batch)
+  useEffect(() => {
+    const state = location.state as { successMessage?: string } | null
+    if (state?.successMessage) {
+      toast.success(state.successMessage)
+      // Clear the state so the toast doesn't reappear on refresh/back nav
+      window.history.replaceState({}, '')
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const [loading, setLoading] = useState(false)
   const [loadingCourse, setLoadingCourse] = useState(true)
   const [uploadingImage, setUploadingImage] = useState(false)

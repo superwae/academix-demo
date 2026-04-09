@@ -23,6 +23,11 @@ export interface InitializeCoursePaymentRequest {
   discountCode?: string;
 }
 
+export interface InitializeSubscriptionPaymentRequest {
+  planId: string;
+  billingInterval: 'Monthly' | 'Yearly';
+}
+
 export interface InitializeCoursePaymentResponse {
   authorizationUrl: string;
   reference: string;
@@ -52,6 +57,17 @@ class PaymentService {
     } catch (error) {
       const apiError = error as ApiError;
       const errorMessage = apiError.error || apiError.detail || apiError.title || 'Failed to initialize payment';
+      throw new Error(errorMessage);
+    }
+  }
+
+  async initializeSubscriptionPayment(request: InitializeSubscriptionPaymentRequest): Promise<InitializeCoursePaymentResponse> {
+    try {
+      const response = await apiClient.post<InitializeCoursePaymentResponse>('/payments/initialize/subscription', request);
+      return response;
+    } catch (error) {
+      const apiError = error as ApiError;
+      const errorMessage = apiError.error || apiError.detail || apiError.title || 'Failed to initialize subscription payment';
       throw new Error(errorMessage);
     }
   }
