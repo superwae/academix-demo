@@ -21,6 +21,7 @@ import {
   Users,
   Video,
   Crown,
+  Radio,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "../../lib/cn";
@@ -69,6 +70,7 @@ const TEACHER_NAV: NavItem[] = [
   { to: "/teacher/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/teacher/courses", label: "My Courses", icon: BookOpen },
   { to: "/teacher/calendar", label: "My Schedule", icon: CalendarDays },
+  { to: "/teacher/live-sessions", label: "Live Sessions", icon: Radio },
   { to: "/teacher/create-course", label: "Create Course", icon: PlusCircle },
   { to: "/teacher/lessons", label: "Lessons & Content", icon: Video },
   { to: "/teacher/assignments", label: "Assignments", icon: ClipboardList },

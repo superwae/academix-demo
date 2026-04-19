@@ -17,6 +17,7 @@ import {
   Moon,
   Sun,
   CreditCard,
+  Radio,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "../../lib/cn";
@@ -73,6 +74,7 @@ const STUDENT_NAV: NavItem[] = [
   { to: "/student/catalog", label: "Course Catalog", icon: BookOpen },
   { to: "/student/my-classes", label: "My Classes", icon: GraduationCap },
   { to: "/student/calendar", label: "Calendar", icon: CalendarDays },
+  { to: "/student/live-sessions", label: "Live Classes", icon: Radio },
   { to: "/student/assignments", label: "Assignments", icon: ClipboardList },
   { to: "/student/exams", label: "Exams", icon: ClipboardList },
   { to: "/student/payments", label: "Payments", icon: CreditCard },

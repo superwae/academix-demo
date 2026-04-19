@@ -23,6 +23,7 @@ import { CourseLessonsPage } from './pages/student/CourseLessonsPage'
 import { LessonViewerPage } from './pages/student/LessonViewerPage'
 import { CourseCertificatePage } from './pages/student/CourseCertificatePage'
 import { CalendarPage } from './pages/student/CalendarPage'
+import { LiveSessionsPage as StudentLiveSessionsPage } from './pages/student/LiveSessionsPage'
 import { AssignmentsPage } from './pages/student/AssignmentsPage'
 import { ExamsPage } from './pages/student/ExamsPage'
 import { MessagesPage as StudentMessagesPage } from './pages/student/MessagesPage'
@@ -45,6 +46,7 @@ import { TeacherExamsPage } from './pages/teacher/TeacherExamsPage'
 import { CreateExamPage } from './pages/teacher/CreateExamPage'
 import { TeacherExamDetailPage } from './pages/teacher/TeacherExamDetailPage'
 import { TeacherCalendarPage } from './pages/teacher/TeacherCalendarPage'
+import { TeacherLiveSessionsPage } from './pages/teacher/TeacherLiveSessionsPage'
 import { TeacherStudentsPage } from './pages/teacher/TeacherStudentsPage'
 import { TeacherAtRiskStudentsPage } from './pages/teacher/TeacherAtRiskStudentsPage'
 import { CourseStudentsPage } from './pages/teacher/CourseStudentsPage'
@@ -128,6 +130,7 @@ export default function App() {
               <Route path="my-classes/:courseId/lessons/:lessonId" element={<LessonViewerPage />} />
               <Route path="my-classes/:courseId/certificate" element={<CourseCertificatePage />} />
               <Route path="calendar" element={<CalendarPage />} />
+              <Route path="live-sessions" element={<StudentLiveSessionsPage />} />
               <Route path="assignments" element={<AssignmentsPage />} />
               <Route path="exams" element={<ExamsPage />} />
               <Route path="messages" element={<StudentMessagesPage />} />
@@ -165,6 +168,7 @@ export default function App() {
               <Route path="exams/create" element={<CreateExamPage />} />
               <Route path="exams/:id" element={<TeacherExamDetailPage />} />
               <Route path="calendar" element={<TeacherCalendarPage />} />
+              <Route path="live-sessions" element={<TeacherLiveSessionsPage />} />
               <Route path="students" element={<TeacherStudentsPage />} />
               <Route path="students/:id" element={<StudentDetailPage />} />
               <Route path="at-risk-students" element={<TeacherAtRiskStudentsPage />} />
