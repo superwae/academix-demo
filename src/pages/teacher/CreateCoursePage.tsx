@@ -15,7 +15,7 @@ import {
 } from '../../components/ui/select'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
-import { Save, Eye, Upload, X, Plus, MapPin } from 'lucide-react'
+import { Save, Eye, Upload, X, Plus, MapPin, Clock, ChevronDown, ChevronUp } from 'lucide-react'
 import { Badge } from '../../components/ui/badge'
 import { countWords, MAX_CERTIFICATE_WORDS } from '../../lib/certificateText'
 
@@ -42,8 +42,20 @@ export function CreateCoursePage() {
     expectedDurationHours: '',
     courseStartDate: '',
     courseEndDate: '',
-    sections: [] as { name: string; locationLabel: string; maxSeats: number }[],
+    sections: [] as {
+      name: string
+      locationLabel: string
+      maxSeats: number
+      meetingTimes: { day: string; startTime: string; endTime: string }[]
+    }[],
   })
+  const [expandedSection, setExpandedSection] = useState<string | null>(null)
+
+  const timeToMinutes = (timeStr: string): number => {
+    if (!timeStr) return 0
+    const [h, m] = timeStr.split(':').map(Number)
+    return (h || 0) * 60 + (m || 0)
+  }
 
   const sectionPresets = [
     { name: 'Online', locationLabel: 'Online' },
@@ -59,14 +71,69 @@ export function CreateCoursePage() {
     if (formData.sections.some((s) => s.name === preset.name)) return
     setFormData({
       ...formData,
-      sections: [...formData.sections, { ...preset, maxSeats: 999 }],
+      sections: [...formData.sections, { ...preset, maxSeats: 999, meetingTimes: [] }],
     })
+    setExpandedSection(preset.name)
   }
 
   const removeSection = (name: string) => {
     setFormData({
       ...formData,
       sections: formData.sections.filter((s) => s.name !== name),
+    })
+    if (expandedSection === name) setExpandedSection(null)
+  }
+
+  const addMeetingTime = (sectionName: string) => {
+    setFormData({
+      ...formData,
+      sections: formData.sections.map((s) =>
+        s.name !== sectionName
+          ? s
+          : {
+              ...s,
+              meetingTimes: [
+                ...s.meetingTimes,
+                { day: 'Monday', startTime: '09:00', endTime: '10:00' },
+              ],
+            },
+      ),
+    })
+  }
+
+  const updateMeetingTime = (
+    sectionName: string,
+    index: number,
+    updates: Partial<{ day: string; startTime: string; endTime: string }>,
+  ) => {
+    setFormData({
+      ...formData,
+      sections: formData.sections.map((s) => {
+        if (s.name !== sectionName) return s
+        const mts = [...s.meetingTimes]
+        mts[index] = { ...mts[index], ...updates }
+        return { ...s, meetingTimes: mts }
+      }),
+    })
+  }
+
+  const removeMeetingTime = (sectionName: string, index: number) => {
+    setFormData({
+      ...formData,
+      sections: formData.sections.map((s) =>
+        s.name !== sectionName
+          ? s
+          : { ...s, meetingTimes: s.meetingTimes.filter((_, i) => i !== index) },
+      ),
+    })
+  }
+
+  const updateSectionMaxSeats = (sectionName: string, maxSeats: number) => {
+    setFormData({
+      ...formData,
+      sections: formData.sections.map((s) =>
+        s.name !== sectionName ? s : { ...s, maxSeats },
+      ),
     })
   }
 
@@ -179,7 +246,18 @@ export function CreateCoursePage() {
                 name: s.name,
                 locationLabel: s.locationLabel,
                 maxSeats: s.maxSeats,
-                meetingTimes: [],
+                meetingTimes: s.meetingTimes
+                  .filter(
+                    (mt) =>
+                      mt.startTime &&
+                      mt.endTime &&
+                      timeToMinutes(mt.startTime) < timeToMinutes(mt.endTime),
+                  )
+                  .map((mt) => ({
+                    day: mt.day,
+                    startMinutes: timeToMinutes(mt.startTime),
+                    endMinutes: timeToMinutes(mt.endTime),
+                  })),
               }))
             : [{ name: 'Default', locationLabel: 'Online', maxSeats: 999, meetingTimes: [] }],
       })
@@ -486,31 +564,162 @@ export function CreateCoursePage() {
                   ))}
                 </div>
                 {formData.sections.length > 0 && (
-                  <div className="space-y-1.5">
-                    <p className="text-xs font-medium text-muted-foreground">Added sections ({formData.sections.length})</p>
-                    <ul className="space-y-1">
-                      {formData.sections.map((s) => (
-                        <li
-                          key={s.name}
-                          className="flex items-center justify-between rounded-lg border border-border/60 bg-muted/20 px-3 py-2 text-sm"
-                        >
-                          <span className="flex items-center gap-2">
-                            <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
-                            <strong>{s.name}</strong>
-                            <span className="text-muted-foreground">— {s.locationLabel}</span>
-                          </span>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7 shrink-0"
-                            onClick={() => removeSection(s.name)}
-                            aria-label={`Remove ${s.name}`}
+                  <div className="space-y-2">
+                    <p className="text-xs font-medium text-muted-foreground">
+                      Added sections ({formData.sections.length}) — click to set seats and meeting times
+                    </p>
+                    <ul className="space-y-2">
+                      {formData.sections.map((s) => {
+                        const isExpanded = expandedSection === s.name
+                        return (
+                          <li
+                            key={s.name}
+                            className="rounded-lg border border-border/60 bg-muted/20 overflow-hidden"
                           >
-                            <X className="h-3.5 w-3.5" />
-                          </Button>
-                        </li>
-                      ))}
+                            <div className="flex items-center justify-between gap-2 px-3 py-2 text-sm">
+                              <button
+                                type="button"
+                                className="flex flex-1 items-center gap-2 text-left"
+                                onClick={() => setExpandedSection(isExpanded ? null : s.name)}
+                              >
+                                <MapPin className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                                <strong>{s.name}</strong>
+                                <span className="text-muted-foreground truncate">— {s.locationLabel}</span>
+                                {s.meetingTimes.length > 0 && (
+                                  <Badge variant="subtle" className="text-xs ml-auto mr-2">
+                                    <Clock className="h-3 w-3 mr-1" />
+                                    {s.meetingTimes.length}{' '}
+                                    {s.meetingTimes.length === 1 ? 'time' : 'times'}
+                                  </Badge>
+                                )}
+                                {isExpanded ? (
+                                  <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                                ) : (
+                                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                                )}
+                              </button>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 shrink-0"
+                                onClick={() => removeSection(s.name)}
+                                aria-label={`Remove ${s.name}`}
+                              >
+                                <X className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
+
+                            {isExpanded && (
+                              <div className="border-t border-border/60 bg-background/40 p-3 space-y-3">
+                                <div className="grid gap-2 sm:grid-cols-2">
+                                  <div className="space-y-1">
+                                    <Label htmlFor={`max-seats-${s.name}`} className="text-xs">
+                                      Max seats
+                                    </Label>
+                                    <Input
+                                      id={`max-seats-${s.name}`}
+                                      type="number"
+                                      min="1"
+                                      value={s.maxSeats}
+                                      onChange={(e) =>
+                                        updateSectionMaxSeats(
+                                          s.name,
+                                          Math.max(1, parseInt(e.target.value) || 1),
+                                        )
+                                      }
+                                      className="h-8"
+                                    />
+                                  </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                  <div className="flex items-center justify-between">
+                                    <Label className="text-xs">Meeting times (weekly)</Label>
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => addMeetingTime(s.name)}
+                                    >
+                                      <Plus className="h-3.5 w-3.5 mr-1" />
+                                      Add time
+                                    </Button>
+                                  </div>
+
+                                  {s.meetingTimes.length === 0 ? (
+                                    <div className="text-xs text-muted-foreground text-center py-3 border border-dashed rounded">
+                                      No meeting times yet — click "Add time" above
+                                    </div>
+                                  ) : (
+                                    <div className="space-y-1.5">
+                                      {s.meetingTimes.map((mt, index) => (
+                                        <div
+                                          key={index}
+                                          className="flex flex-wrap gap-1.5 items-center rounded border bg-background/60 p-1.5"
+                                        >
+                                          <div className="min-w-[120px] flex-1">
+                                            <SelectRoot
+                                              value={mt.day}
+                                              onValueChange={(value) =>
+                                                updateMeetingTime(s.name, index, { day: value })
+                                              }
+                                            >
+                                              <SelectTrigger className="h-8">
+                                                <SelectValue />
+                                              </SelectTrigger>
+                                              <SelectContent>
+                                                <SelectItem value="Monday">Monday</SelectItem>
+                                                <SelectItem value="Tuesday">Tuesday</SelectItem>
+                                                <SelectItem value="Wednesday">Wednesday</SelectItem>
+                                                <SelectItem value="Thursday">Thursday</SelectItem>
+                                                <SelectItem value="Friday">Friday</SelectItem>
+                                                <SelectItem value="Saturday">Saturday</SelectItem>
+                                                <SelectItem value="Sunday">Sunday</SelectItem>
+                                              </SelectContent>
+                                            </SelectRoot>
+                                          </div>
+                                          <Input
+                                            type="time"
+                                            className="h-8 w-[110px]"
+                                            value={mt.startTime}
+                                            onChange={(e) =>
+                                              updateMeetingTime(s.name, index, {
+                                                startTime: e.target.value,
+                                              })
+                                            }
+                                          />
+                                          <span className="text-xs text-muted-foreground">to</span>
+                                          <Input
+                                            type="time"
+                                            className="h-8 w-[110px]"
+                                            value={mt.endTime}
+                                            onChange={(e) =>
+                                              updateMeetingTime(s.name, index, {
+                                                endTime: e.target.value,
+                                              })
+                                            }
+                                          />
+                                          <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-7 w-7 shrink-0"
+                                            onClick={() => removeMeetingTime(s.name, index)}
+                                            aria-label="Remove time"
+                                          >
+                                            <X className="h-3.5 w-3.5" />
+                                          </Button>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </li>
+                        )
+                      })}
                     </ul>
                   </div>
                 )}
