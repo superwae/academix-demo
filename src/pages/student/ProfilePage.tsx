@@ -197,7 +197,11 @@ export function ProfilePage() {
       }
     }
     loadProfile()
-  }, [authUser])
+    // Only re-run when the logged-in user ID changes (login/logout), NOT
+    // whenever fields on the user object mutate — otherwise updateAuthUser
+    // inside this effect would trigger an infinite reload loop.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authUser?.id])
 
   const handleChangePassword = async () => {
     if (!passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
