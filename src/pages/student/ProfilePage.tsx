@@ -75,7 +75,7 @@ const MOCK_BADGES = [
 ]
 
 export function ProfilePage() {
-  const { user: authUser } = useAuthStore()
+  const { user: authUser, updateUser: updateAuthUser } = useAuthStore()
   const [user, setUser] = useState<UserDto | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -114,6 +114,8 @@ export function ProfilePage() {
       await userService.updateCurrentUser({ profilePictureUrl: result.fileUrl })
       setPhotoUrl(result.fileUrl)
       setAvatarImageError('none')
+      // Update auth store so the header avatar + any other consumers reflect the change
+      updateAuthUser({ profilePictureUrl: result.fileUrl })
       toast.success('Profile photo updated')
     } catch (error) {
       toast.error('Failed to upload photo', {
@@ -130,6 +132,7 @@ export function ProfilePage() {
     try {
       setBioSaving(true)
       await userService.updateCurrentUser({ bio })
+      updateAuthUser({ bio })
       toast.success('Bio updated')
     } catch (error) {
       toast.error('Failed to save bio', { description: error instanceof Error ? error.message : undefined })
@@ -154,6 +157,7 @@ export function ProfilePage() {
       const result = await fileService.uploadFile(file, 'cover-images')
       await userService.updateCurrentUser({ coverImageUrl: result.fileUrl })
       setCoverImageUrl(result.fileUrl)
+      updateAuthUser({ coverImageUrl: result.fileUrl })
       toast.success('Cover image updated')
     } catch (error) {
       toast.error('Failed to upload cover image', { description: error instanceof Error ? error.message : undefined })

@@ -11,6 +11,8 @@ interface AuthState {
   logout: () => void;
   refreshToken: () => Promise<void>;
   initialize: () => void;
+  /** Merge updates into the current user and sync to localStorage. */
+  updateUser: (updates: Partial<User>) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -109,6 +111,21 @@ export const useAuthStore = create<AuthState>()(
             },
           }));
         });
+      },
+
+      updateUser: (updates: Partial<User>) => {
+        const current = get().user;
+        if (!current) return;
+        const merged = { ...current, ...updates } as User;
+        set({ user: merged });
+        // Keep localStorage in sync so next page load sees the new avatar
+        if (typeof window !== 'undefined') {
+          try {
+            localStorage.setItem('user', JSON.stringify(merged));
+          } catch {
+            /* storage full / blocked — ignore */
+          }
+        }
       },
 
       refreshToken: async () => {

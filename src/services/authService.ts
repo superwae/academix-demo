@@ -23,6 +23,8 @@ export interface User {
   fullName: string;
   phoneNumber?: string;
   profilePictureUrl?: string;
+  bio?: string;
+  coverImageUrl?: string;
   isActive: boolean;
   isEmailVerified: boolean;
   createdAt: string;
