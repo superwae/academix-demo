@@ -181,6 +181,13 @@ export function ProfilePage() {
         setBio(userData.bio || MOCK_BIO)
         if (userData.coverImageUrl) setCoverImageUrl(userData.coverImageUrl)
         setAvatarImageError('none')
+        // Sync the auth store so sidebar card + header avatar reflect the latest
+        // server state even if a different session updated the user's photo.
+        updateAuthUser({
+          profilePictureUrl: userData.profilePictureUrl,
+          bio: userData.bio,
+          coverImageUrl: userData.coverImageUrl,
+        })
       } catch (error) {
         toast.error('Failed to load profile', {
           description: error instanceof Error ? error.message : 'Please try again later',

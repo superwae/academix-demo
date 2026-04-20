@@ -780,6 +780,10 @@ export function StudentLayout() {
                       alt=""
                       className="h-full w-full object-cover"
                     />
+                  ) : user?.firstName ? (
+                    <span className="text-sm font-bold">
+                      {user.firstName[0]}{user.lastName?.[0] ?? ''}
+                    </span>
                   ) : (
                     <User className="h-6 w-6" />
                   )}
