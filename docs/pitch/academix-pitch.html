@@ -1,0 +1,1188 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>AcademiX — Investor Deck</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #3b82f6;
+      --primary-dark: #2563eb;
+      --primary-light: #dbeafe;
+      --primary-bg: #eff6ff;
+      --ink: #0f172a;
+      --ink-soft: #334155;
+      --ink-muted: #64748b;
+      --border: #e2e8f0;
+      --surface: #f8fafc;
+      --card: #ffffff;
+      --emerald: #10b981;
+      --amber: #f59e0b;
+      --rose: #f43f5e;
+      --violet: #8b5cf6;
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      color: var(--ink);
+      background: #e5e7eb;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    h1, h2, h3, h4 { font-family: 'Poppins', sans-serif; margin: 0; letter-spacing: -0.02em; }
+
+    /* Page */
+    .page {
+      position: relative;
+      width: 297mm;
+      height: 210mm;
+      margin: 12px auto;
+      background: var(--card);
+      overflow: hidden;
+      page-break-after: always;
+      break-after: page;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15);
+      padding: 16mm 18mm;
+      display: flex;
+      flex-direction: column;
+    }
+    .page:last-child { page-break-after: auto; }
+
+    @media print {
+      @page { size: A4 landscape; margin: 0; }
+      body { background: #fff; }
+      .page { margin: 0; box-shadow: none; }
+    }
+
+    /* Header/footer across pages */
+    .page .corner-brand {
+      position: absolute;
+      top: 10mm;
+      left: 18mm;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 12px;
+      color: var(--ink-muted);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .page .corner-brand .dot {
+      width: 10px; height: 10px; border-radius: 3px;
+      background: linear-gradient(135deg, var(--primary), var(--violet));
+    }
+    .page .corner-page {
+      position: absolute;
+      top: 10mm;
+      right: 18mm;
+      font-size: 11px;
+      color: var(--ink-muted);
+    }
+    .page-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      margin-top: 6mm;
+    }
+
+    /* Reusable */
+    .eyebrow {
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--primary);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    h1.headline {
+      font-size: 42px;
+      line-height: 1.05;
+      font-weight: 800;
+      max-width: 20ch;
+    }
+    h2.section-title {
+      font-size: 30px;
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 6px;
+    }
+    .lead {
+      color: var(--ink-soft);
+      font-size: 15px;
+      line-height: 1.55;
+      max-width: 70ch;
+    }
+    .muted { color: var(--ink-muted); }
+    .small { font-size: 11px; }
+
+    /* Cover page */
+    .cover {
+      background:
+        radial-gradient(1200px 600px at 85% 10%, rgba(59,130,246,0.18), transparent 60%),
+        radial-gradient(900px 500px at 15% 90%, rgba(139,92,246,0.15), transparent 60%),
+        #ffffff;
+    }
+    .cover .brand {
+      display: flex; align-items: center; gap: 14px;
+    }
+    .cover .logo {
+      width: 56px; height: 56px; border-radius: 14px;
+      background: linear-gradient(135deg, var(--primary), var(--violet));
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-weight: 800; font-family: 'Poppins'; font-size: 26px;
+      box-shadow: 0 10px 30px rgba(59,130,246,0.25);
+    }
+    .cover .brandname {
+      font-family: 'Poppins'; font-weight: 700; font-size: 24px;
+    }
+    .cover .tagline {
+      font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--ink-muted); margin-top: 2px;
+    }
+    .cover .hero-wrap {
+      flex: 1; display: flex; flex-direction: column; justify-content: center;
+      max-width: 22ch;
+    }
+    .cover .hero-sub {
+      margin-top: 16px; font-size: 16px; line-height: 1.55; color: var(--ink-soft);
+      max-width: 60ch;
+    }
+    .cover .meta {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 28px;
+    }
+    .cover .meta-box {
+      border-left: 3px solid var(--primary); padding-left: 12px;
+    }
+    .cover .meta-label {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-muted);
+    }
+    .cover .meta-value { font-size: 14px; font-weight: 600; margin-top: 2px; }
+
+    /* Grids */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    .flex-row { display: flex; align-items: center; gap: 14px; }
+
+    /* Cards */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px 18px;
+      break-inside: avoid;
+    }
+    .card.tinted {
+      background: linear-gradient(135deg, var(--primary-bg), #f5f3ff);
+      border-color: #e0e7ff;
+    }
+    .card.primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      border: 0;
+    }
+    .card.primary .muted { color: rgba(255,255,255,0.75); }
+    .card h4 {
+      font-size: 15px; font-weight: 700; margin-bottom: 6px;
+    }
+    .card p {
+      font-size: 13px; line-height: 1.5; color: var(--ink-soft); margin: 0;
+    }
+
+    /* Icon chip */
+    .chip {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 700;
+      background: var(--primary-bg); color: var(--primary);
+      flex-shrink: 0;
+    }
+    .chip.emerald { background: #d1fae5; color: #059669; }
+    .chip.amber { background: #fef3c7; color: #d97706; }
+    .chip.violet { background: #ede9fe; color: #7c3aed; }
+    .chip.rose { background: #ffe4e6; color: #e11d48; }
+
+    /* Feature list row */
+    .feature-row { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; }
+    .feature-row + .feature-row { border-top: 1px solid var(--border); }
+    .feature-row .title { font-weight: 600; font-size: 14px; margin-bottom: 2px; }
+    .feature-row .body { font-size: 12.5px; color: var(--ink-soft); line-height: 1.5; }
+
+    /* Tables */
+    table {
+      width: 100%; border-collapse: collapse; font-size: 12.5px;
+    }
+    table th, table td {
+      text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border);
+    }
+    table th {
+      font-weight: 600; color: var(--ink-soft); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em;
+      background: var(--surface);
+    }
+    table td.num { font-variant-numeric: tabular-nums; }
+    table tr:last-child td { border-bottom: 0; }
+    table.compare th, table.compare td { text-align: center; }
+    table.compare th:first-child, table.compare td:first-child { text-align: left; font-weight: 500; }
+    table.compare .tick { color: var(--emerald); font-weight: 700; }
+    table.compare .cross { color: var(--ink-muted); font-weight: 400; }
+    table.compare .partial { color: var(--amber); font-weight: 600; font-size: 11px; }
+    table.compare .ours { background: linear-gradient(180deg, var(--primary-bg), transparent); }
+    table.compare .ours th { color: var(--primary); background: var(--primary-bg); }
+
+    /* Pills / badges */
+    .pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 600;
+      background: var(--primary-bg); color: var(--primary-dark);
+    }
+    .pill.emerald { background: #d1fae5; color: #065f46; }
+    .pill.amber { background: #fef3c7; color: #92400e; }
+    .pill.live { background: #ffe4e6; color: #be123c; }
+
+    /* Diagram */
+    .diagram {
+      padding: 18px; border-radius: 16px;
+      background: linear-gradient(135deg, #f0f9ff, #faf5ff);
+      border: 1px solid #e0e7ff;
+    }
+    .diagram .platform {
+      padding: 14px 18px; border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white; text-align: center; font-weight: 600;
+    }
+    .diagram .legs {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 20px;
+    }
+    .diagram .leg {
+      text-align: center; padding: 12px; background: white;
+      border: 1px solid var(--border); border-radius: 10px;
+      position: relative;
+    }
+    .diagram .leg::before {
+      content: ""; position: absolute; top: -20px; left: 50%; transform: translateX(-50%);
+      width: 2px; height: 20px; background: var(--primary);
+    }
+    .diagram .leg .leg-title {
+      font-weight: 600; font-size: 13px; color: var(--ink);
+    }
+    .diagram .leg .leg-sub {
+      font-size: 11px; color: var(--ink-muted); margin-top: 2px;
+    }
+
+    /* Stat bars */
+    .stat {
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .stat .num { font-family: 'Poppins'; font-weight: 800; font-size: 30px; color: var(--primary-dark); line-height: 1; }
+    .stat .label { font-size: 11px; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+
+    /* Quote */
+    .quote {
+      background: var(--surface); border-left: 3px solid var(--primary);
+      padding: 10px 14px; font-style: italic; color: var(--ink-soft); font-size: 13px;
+      border-radius: 0 10px 10px 0;
+    }
+
+    /* Utility */
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+    .gap-4 { gap: 16px; }
+    .mt-2 { margin-top: 8px; } .mt-3 { margin-top: 12px; } .mt-4 { margin-top: 16px; } .mt-5 { margin-top: 20px; } .mt-6 { margin-top: 24px; }
+    .mb-2 { margin-bottom: 8px; } .mb-3 { margin-bottom: 12px; } .mb-4 { margin-bottom: 16px; }
+
+    /* Roadmap timeline */
+    .timeline {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+      margin-top: 14px;
+    }
+    .timeline .q {
+      background: white; border: 1px solid var(--border); border-radius: 12px;
+      padding: 14px; position: relative;
+    }
+    .timeline .q .q-label {
+      font-family: 'Poppins'; font-size: 11px; color: var(--primary); font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;
+    }
+    .timeline .q .q-item {
+      font-size: 12px; padding: 4px 0; color: var(--ink-soft); line-height: 1.45;
+    }
+    .timeline .q .q-item::before { content: "▸ "; color: var(--primary); }
+
+    /* Checklist */
+    .checklist { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 18px; }
+    .checklist .item { display: flex; gap: 8px; font-size: 12.5px; color: var(--ink-soft); line-height: 1.45; }
+    .checklist .tick { color: var(--emerald); font-weight: 700; flex-shrink: 0; }
+  </style>
+</head>
+<body>
+
+<!-- ========== PAGE 1 — COVER ========== -->
+<section class="page cover">
+  <div class="corner-brand"><span class="dot"></span>&nbsp;AcademiX Investor Deck</div>
+  <div class="corner-page">01 / 14</div>
+
+  <div class="page-body">
+    <div class="brand">
+      <div class="logo">A</div>
+      <div>
+        <div class="brandname">AcademiX</div>
+        <div class="tagline">The operating system for online learning in MENA</div>
+      </div>
+    </div>
+
+    <div class="hero-wrap">
+      <div class="eyebrow">Investor overview · v1 · April 2026</div>
+      <h1 class="headline">Arabic-first learning, built for the way MENA actually buys and teaches.</h1>
+      <p class="hero-sub">
+        A modern LMS that lets independent teachers, institutions, and employers launch,
+        sell, and run online courses — with local payment rails, live classes, and
+        AI-powered student insights built in from day one.
+      </p>
+
+      <div class="meta">
+        <div class="meta-box">
+          <div class="meta-label">Stage</div>
+          <div class="meta-value">Pre-seed / Seed</div>
+        </div>
+        <div class="meta-box">
+          <div class="meta-label">HQ</div>
+          <div class="meta-value">Palestine · MENA-wide</div>
+        </div>
+        <div class="meta-box">
+          <div class="meta-label">Platform status</div>
+          <div class="meta-value">Live &amp; production-ready</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== PAGE 2 — PROBLEM ========== -->
+<section class="page">
+  <div class="corner-brand"><span class="dot"></span>&nbsp;AcademiX Investor Deck</div>
+  <div class="corner-page">02 / 14</div>
+  <div class="page-body">
+    <div class="eyebrow">The Problem</div>
+    <h2 class="section-title">MENA's online learners and teachers deserve better tools.</h2>
+    <p class="lead">
+      Global LMS platforms are English-first, built on Western payment rails, and ignore
+      the realities of how Arabic-speaking users, institutions, and employers actually work.
+    </p>
+
+    <div class="grid-2 mt-5" style="flex:1;">
+      <div class="card">
+        <div class="flex-row">
+          <div class="chip rose">!</div>
+          <h4>No Arabic-native UX</h4>
+        </div>
+        <p class="mt-2">
+          Udemy and Coursera are written LTR-first. Arabic content is a second-class citizen —
+          no right-to-left layout, no native Arabic UX, no Arabic instructor tooling.
+        </p>
+      </div>
+      <div class="card">
+        <div class="flex-row">
+          <div class="chip amber">₪</div>
+          <h4>Local payment rails ignored</h4>
+        </div>
+        <p class="mt-2">
+          Lahza, MyFatoorah, HyperPay — the gateways 250M+ people actually use — are not
+          supported. Teachers lose 5–10% per sale to forex + processor fees, and some
+          students simply can't check out at all.
+        </p>
+      </div>
+      <div class="card">
+        <div class="flex-row">
+          <div class="chip violet">⚙</div>
+          <h4>Institutions stitch it together</h4>
+        </div>
+        <p class="mt-2">
+          Schools and companies today run Zoom + Google Forms + spreadsheets + a WhatsApp
+          group. Every institution is reinventing the same broken workflow.
+        </p>
+      </div>
+      <div class="card">
+        <div class="flex-row">
+          <div class="chip">✕</div>
+          <h4>No platform serves all three sides</h4>
+        </div>
+        <p class="mt-2">
+          Independent teachers, teaching institutions, and corporate L&amp;D each get a
+          half-built tool or a misaligned product. Nothing scales from one teacher to a
+          10,000-seat enterprise.
+        </p>
+      </div>
+    </div>
+
+    <div class="quote mt-5">
+      The gap: a modern, Arabic-native, MENA-payment-native LMS that scales from
+      a single teacher to an enterprise-wide training program.
+    </div>
+  </div>
+</section>
+
+<!-- ========== PAGE 3 — SOLUTION ========== -->
+<section class="page">
+  <div class="corner-brand"><span class="dot"></span>&nbsp;AcademiX Investor Deck</div>
+  <div class="corner-page">03 / 14</div>
+  <div class="page-body">
+    <div class="eyebrow">The Solution</div>
+    <h2 class="section-title">One platform. Three audiences. One shared infrastructure.</h2>
+    <p class="lead">
+      AcademiX is a multi-tenant LMS designed around the reality that the same
+      infrastructure can serve the independent teacher, the university, and the
+      employer — each with the right surface for their role.
+    </p>
+
+    <div class="diagram mt-5">
+      <div class="platform">The AcademiX Platform — courses · payments · live classes · AI · messaging</div>
+      <div class="legs">
+        <div class="leg">
+          <div class="leg-title">Independent Teachers</div>
+          <div class="leg-sub">Sell courses on the marketplace</div>
+        </div>
+        <div class="leg">
+          <div class="leg-title">Teaching Institutions</div>
+          <div class="leg-sub">Universities, schools, bootcamps</div>
+        </div>
+        <div class="leg">
+          <div class="leg-title">Employer Organizations</div>
+          <div class="leg-sub">Train employees, compliance reporting</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-3 mt-5">
+      <div class="card tinted">
+        <div class="pill emerald">SHIPPED</div>
+        <h4 class="mt-2">Lahza payments</h4>
+        <p class="mt-2">Server-verified checkout, webhook HMAC, course purchases + subscription billing.</p>
+      </div>
+      <div class="card tinted">
+        <div class="pill emerald">SHIPPED</div>
+        <h4 class="mt-2">AI risk scoring</h4>
+        <p class="mt-2">Per-student engagement + risk level + factor breakdown + recommended interventions.</p>
+      </div>
+      <div class="card tinted">
+        <div class="pill emerald">SHIPPED</div>
+        <h4 class="mt-2">Live classes</h4>
+        <p class="mt-2">Weekly schedule, one-click join, "Live now / Soon" badges, per-section URLs.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== PAGE 4 — WHO IT'S FOR ========== -->
+<section class="page">
+  <div class="corner-brand"><span class="dot"></span>&nbsp;AcademiX Investor Deck</div>
+  <div class="corner-page">04 / 14</div>
+  <div class="page-body">
+    <div class="eyebrow">Who It's For</div>
+    <h2 class="section-title">Three customer archetypes, one product surface each.</h2>
+
+    <div class="grid-3 mt-5" style="flex:1;">
+      <div class="card">
+        <div class="chip">1</div>
+        <h4 class="mt-3">Independent teacher</h4>
+        <div class="quote mt-2" style="margin: 8px 0;">
+          "I have expertise. I want to teach. I don't want to be a web developer."
+        </div>
+        <div class="feature-row">
+          <div class="tick" style="color:var(--emerald);font-weight:700;">✓</div>
+          <div>
+            <div class="title">30-min course launch</div>
+            <div class="body">Title, content, price, schedule, certificate — one form, no wizard.</div>
+          </div>
+        </div>
+        <div class="feature-row">
+          <div class="tick" style="color:var(--emerald);font-weight:700;">✓</div>
+          <div>
+            <div class="title">Local currency payouts</div>
+            <div class="body">Lahza rails — get paid in ILS/JOD without Stripe or forex loss.</div>
+          </div>
+        </div>
+        <div class="feature-row">
+          <div class="tick" style="color:var(--emerald);font-weight:700;">✓</div>
+          <div>
+            <div class="title">Student-risk radar</div>
+            <div class="body">See who's falling behind before they drop, without scrolling 200 students.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="chip violet">2</div>
+        <h4 class="mt-3">Teaching institution</h4>
+        <div class="quote mt-2" style="margin: 8px 0;">
+          "We have 30 instructors. We need one place to manage them all — centrally billed."
+        </div>
+        <div class="feature-row">
+          <div class="tick" style="color:var(--emerald);font-weight:700;">✓</div>
+          <div>
+            <div class="title">Multi-teacher org</div>
+            <div class="body">Onboard teachers under one account; subscription caps shared across team.</div>
+          </div>
+        </div>
+        <div class="feature-row">
+          <div class="tick" style="color:var(--emerald);font-weight:700;">✓</div>
+          <div>
+            <div class="title">Central finance</div>
+            <div class="body">Single bill, per-teacher revenue breakdown, CSV / PDF exports.</div>
+          </div>
+        </div>
+        <div class="feature-row">
+          <div class="tick" style="color:var(--emerald);font-weight:700;">✓</div>
+          <div>
+            <div class="title">Branding &amp; theming</div>
+            <div class="body">14+ theme presets, custom color picker, cover images per org.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="chip amber">3</div>
+        <h4 class="mt-3">Employer / Corporate L&amp;D</h4>
+        <div class="quote mt-2" style="margin: 8px 0;">
+          "500 employees. Mandatory compliance by Q4. Plus a report for the auditor."
+        </div>
+        <div class="feature-row">
+          <div class="tick" style="color:var(--emerald);font-weight:700;">✓</div>
+          <div>
+            <div class="title">Seat licensing</div>
+            <div class="body">Buy N seats of a public course OR build private internal courses.</div>
+          </div>
+        </div>
+        <div class="feature-row">
+          <div class="tick" style="color:var(--emerald);font-weight:700;">✓</div>
+          <div>
+            <div class="title">Assignment workflow</div>
+            <div class="body">HR assigns courses to employees — no self-enrolment, no surprises.</div>
+          </div>
+        </div>
+        <div class="feature-row">
+          <div class="tick" style="color:var(--emerald);font-weight:700;">✓</div>
+          <div>
+            <div class="title">Compliance reports</div>
+            <div class="body">Who's done, who's overdue, who's at risk — exportable for audit.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== PAGE 5 — PRODUCT HIGHLIGHTS ========== -->
+<section class="page">
+  <div class="corner-brand"><span class="dot"></span>&nbsp;AcademiX Investor Deck</div>
+  <div class="corner-page">05 / 14</div>
+  <div class="page-body">
+    <div class="eyebrow">Product Highlights</div>
+    <h2 class="section-title">Every claim in this deck maps to code already in production.</h2>
+    <p class="lead">No roadmap in disguise — every module listed below is live on <code style="font-family:ui-monospace,monospace;background:var(--surface);padding:2px 6px;border-radius:4px;">master</code>.</p>
+
+    <div class="grid-2 mt-5 gap-4">
+      <div class="card">
+        <div class="flex-row">
+          <div class="chip">📚</div>
+          <h4>Course creation</h4>
+        </div>
+        <p class="mt-2">One-form setup: title, description, pricing, per-section meeting times, batches, certificates — no multi-step wizard.</p>
+      </div>
+      <div class="card">
+        <div class="flex-row">
+          <div class="chip emerald">🎥</div>
+          <h4>Live classes</h4>
+        </div>
+        <p class="mt-2">Per-section join URLs, weekly grouped schedule with real-time "Live now / Starting soon" badges, one-click join.</p>
+      </div>
+      <div class="card">
+        <div class="flex-row">
+          <div class="chip amber">💳</div>
+          <h4>Payments &amp; subscriptions</h4>
+        </div>
+        <p class="mt-2">Lahza integration with server verification, HMAC webhook signing, discount codes (% or fixed), monthly &amp; yearly plans.</p>
+      </div>
+      <div class="card">
+        <div class="flex-row">
+          <div class="chip violet">🤖</div>
+          <h4>AI student insights</h4>
+        </div>
+        <p class="mt-2">Engagement score, risk level (Low → Critical), grade prediction, risk-factor breakdown, recommended actions.</p>
+      </div>
+      <div class="card">
+        <div class="flex-row">
+          <div class="chip rose">🔁</div>
+          <h4>Cohort management</h4>
+        </div>
+        <p class="mt-2">"Start New Batch" clones an entire course — lessons, assignments, exams, sections — with fresh enrollments.</p>
+      </div>
+      <div class="card">
+        <div class="flex-row">
+          <div class="chip">💬</div>
+          <h4>Real-time messaging</h4>
+        </div>
+        <p class="mt-2">SignalR-backed direct + course chat, unread counters, block / report moderation tools.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== PAGE 6 — DEMO FLOW ========== -->
+<section class="page">
+  <div class="corner-brand"><span class="dot"></span>&nbsp;AcademiX Investor Deck</div>
+  <div class="corner-page">06 / 14</div>
+  <div class="page-body">
+    <div class="eyebrow">Demo Flow</div>
+    <h2 class="section-title">From "nothing" to a paying student in four steps.</h2>
+
+    <div class="grid-4 mt-5" style="flex:1;">
+      <div class="card" style="display:flex;flex-direction:column;">
+        <div class="pill" style="align-self:flex-start;">STEP 1</div>
+        <h4 class="mt-3">Teacher creates a course</h4>
+        <p class="mt-2" style="flex:1;">Title, sections, meeting times, pricing — all in under 30 seconds on one form.</p>
+        <div class="stat mt-3">
+          <div class="num">≤ 30s</div>
+          <div class="label">Time to publish</div>
+        </div>
+      </div>
+      <div class="card" style="display:flex;flex-direction:column;">
+        <div class="pill" style="align-self:flex-start;">STEP 2</div>
+        <h4 class="mt-3">Student buys with discount</h4>
+        <p class="mt-2" style="flex:1;">Applies a promo code, redirected to Lahza checkout, pays in local currency.</p>
+        <div class="stat mt-3">
+          <div class="num">1</div>
+          <div class="label">Checkout redirect</div>
+        </div>
+      </div>
+      <div class="card" style="display:flex;flex-direction:column;">
+        <div class="pill" style="align-self:flex-start;">STEP 3</div>
+        <h4 class="mt-3">Student joins live class</h4>
+        <p class="mt-2" style="flex:1;">One click on a red "Live now" badge in the weekly schedule. Zoom/Meet opens instantly.</p>
+        <div class="stat mt-3">
+          <div class="num">1 click</div>
+          <div class="label">To join</div>
+        </div>
+      </div>
+      <div class="card" style="display:flex;flex-direction:column;">
+        <div class="pill" style="align-self:flex-start;">STEP 4</div>
+        <h4 class="mt-3">Teacher gets at-risk alert</h4>
+        <p class="mt-2" style="flex:1;">Dashboard surfaces a student whose risk score spiked after missing sessions.</p>
+        <div class="stat mt-3">
+          <div class="num">Real-time</div>
+          <div class="label">Score updates</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== PAGE 7 — BUSINESS MODEL ========== -->
+<section class="page">
+  <div class="corner-brand"><span class="dot"></span>&nbsp;AcademiX Investor Deck</div>
+  <div class="corner-page">07 / 14</div>
+  <div class="page-body">
+    <div class="eyebrow">Business Model</div>
+    <h2 class="section-title">Three revenue streams from one product.</h2>
+
+    <table class="mt-5">
+      <thead>
+        <tr>
+          <th>Stream</th>
+          <th>Who pays</th>
+          <th>Pricing</th>
+          <th>% of target year-1 revenue</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Marketplace commission</strong></td>
+          <td>Independent teachers</td>
+          <td>15% on every course sale</td>
+          <td class="num">40%</td>
+        </tr>
+        <tr>
+          <td><strong>Platform subscriptions</strong></td>
+          <td>Teaching institutions &amp; pro teachers</td>
+          <td>$30 / $80 / $200 per month (20% annual discount)</td>
+          <td class="num">35%</td>
+        </tr>
+        <tr>
+          <td><strong>Enterprise training</strong></td>
+          <td>Employer orgs</td>
+          <td>Seat licenses + internal-content subscription</td>
+          <td class="num">25%</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="grid-3 mt-5">
+      <div class="card primary">
+        <div class="stat">
+          <div class="num" style="color:white;">15%</div>
+          <div class="label" style="color:rgba(255,255,255,0.85);">Platform take-rate on course sales</div>
+        </div>
+      </div>
+      <div class="card tinted">
+        <div class="stat">
+          <div class="num">$144</div>
+          <div class="label">Avg student LTV (GMV)</div>
+        </div>
+      </div>
+      <div class="card tinted">
+        <div class="stat">
+          <div class="num">~3×</div>
+          <div class="label">Target LTV / CAC at scale</div>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="mt-5" style="font-size:16px;">Subscription tiers (live today)</h3>
+    <table class="mt-2">
+      <thead>
+        <tr>
+          <th>Plan</th><th>Monthly</th><th>Max courses</th><th>Seats / course</th><th>Total seats</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Starter</td><td class="num">$29.99</td><td class="num">3</td><td class="num">30</td><td class="num">90</td></tr>
+        <tr><td>Professional</td><td class="num">$79.99</td><td class="num">15</td><td class="num">100</td><td class="num">500</td></tr>
+        <tr><td>Enterprise</td><td class="num">$199.99</td><td>Unlimited</td><td>Unlimited</td><td>Unlimited</td></tr>
+      </tbody>
+    </table>
+    <p class="small muted mt-2">All tiers CRUD-editable from the SuperAdmin panel — pricing experiments require no code changes.</p>
+  </div>
+</section>
+
+<!-- ========== PAGE 8 — MARKET ========== -->
+<section class="page">
+  <div class="corner-brand"><span class="dot"></span>&nbsp;AcademiX Investor Deck</div>
+  <div class="corner-page">08 / 14</div>
+  <div class="page-body">
+    <div class="eyebrow">Market Opportunity</div>
+    <h2 class="section-title">A growing $Xbn MENA market, specifically underserved.</h2>
+
+    <div class="grid-3 mt-5">
+      <div class="card">
+        <div class="stat">
+          <div class="num">250M+</div>
+          <div class="label">Arabic-speaking internet users</div>
+        </div>
+        <p class="mt-3 small muted">The largest underserved linguistic block in online education.</p>
+      </div>
+      <div class="card">
+        <div class="stat">
+          <div class="num">20%+</div>
+          <div class="label">YoY MENA e-learning growth</div>
+        </div>
+        <p class="mt-3 small muted">Fastest-growing regional e-learning market, 2023–2028 (HolonIQ).</p>
+      </div>
+      <div class="card">
+        <div class="stat">
+          <div class="num">Vision 2030</div>
+          <div class="label">KSA HCDP tailwind</div>
+        </div>
+        <p class="mt-3 small muted">Every major Saudi employer now needs a compliance-training platform.</p>
+      </div>
+    </div>
+
+    <div class="card mt-5" style="flex:1;">
+      <h4>Why now</h4>
+      <div class="grid-2 mt-3 gap-4">
+        <div>
+          <div class="feature-row" style="border:0;padding:6px 0;">
+            <div class="tick" style="color:var(--primary);font-weight:700;">▸</div>
+            <div>
+              <div class="title">Local payment rails matured</div>
+              <div class="body">Lahza, MyFatoorah, HyperPay now cover 250M+ payment-capable users the incumbents don't support.</div>
+            </div>
+          </div>
+          <div class="feature-row" style="border:0;padding:6px 0;">
+            <div class="tick" style="color:var(--primary);font-weight:700;">▸</div>
+            <div>
+              <div class="title">Arabic-first workforce</div>
+              <div class="body">Generation Z in MENA consumes content in Arabic first; they reject English-only platforms.</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="feature-row" style="border:0;padding:6px 0;">
+            <div class="tick" style="color:var(--primary);font-weight:700;">▸</div>
+            <div>
+              <div class="title">Post-COVID normal</div>
+              <div class="body">Online-first training is now the default for corporates &amp; institutions, not the exception.</div>
+            </div>
+          </div>
+          <div class="feature-row" style="border:0;padding:6px 0;">
+            <div class="tick" style="color:var(--primary);font-weight:700;">▸</div>
+            <div>
+              <div class="title">Incumbents distracted</div>
+              <div class="body">Udemy &amp; Coursera are focused on Western enterprise deals; MENA is an afterthought.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="small muted mt-3">Replace $X headline with sourced TAM figure before pitching.</p>
+  </div>
+</section>
+
+<!-- ========== PAGE 9 — COMPETITION ========== -->
+<section class="page">
+  <div class="corner-brand"><span class="dot"></span>&nbsp;AcademiX Investor Deck</div>
+  <div class="corner-page">09 / 14</div>
+  <div class="page-body">
+    <div class="eyebrow">Competitive Positioning</div>
+    <h2 class="section-title">The only platform that serves all three sides, built for MENA.</h2>
+
+    <table class="compare mt-5">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Udemy</th>
+          <th>Coursera</th>
+          <th>Thinkific</th>
+          <th class="ours">AcademiX</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Arabic UI + RTL</td>
+          <td class="cross">—</td>
+          <td class="partial">Partial</td>
+          <td class="cross">—</td>
+          <td class="tick ours">✓</td>
+        </tr>
+        <tr>
+          <td>Local payment rails (Lahza, MyFatoorah)</td>
+          <td class="cross">—</td>
+          <td class="cross">—</td>
+          <td class="cross">—</td>
+          <td class="tick ours">✓</td>
+        </tr>
+        <tr>
+          <td>Live classes built-in</td>
+          <td class="cross">—</td>
+          <td class="tick">✓</td>
+          <td class="cross">—</td>
+          <td class="tick ours">✓</td>
+        </tr>
+        <tr>
+          <td>Employer seat licensing</td>
+          <td class="cross">—</td>
+          <td class="tick">✓</td>
+          <td class="cross">—</td>
+          <td class="tick ours">✓</td>
+        </tr>
+        <tr>
+          <td>AI at-risk detection</td>
+          <td class="cross">—</td>
+          <td class="tick">✓</td>
+          <td class="cross">—</td>
+          <td class="tick ours">✓</td>
+        </tr>
+        <tr>
+          <td>Multi-tenant organizations</td>
+          <td class="cross">—</td>
+          <td class="cross">—</td>
+          <td class="partial">Partial</td>
+          <td class="tick ours">✓</td>
+        </tr>
+        <tr>
+          <td>Open to MENA independent teachers</td>
+          <td class="cross">—</td>
+          <td class="cross">—</td>
+          <td class="tick">✓</td>
+          <td class="tick ours">✓</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="card mt-5" style="background: linear-gradient(135deg,var(--primary-bg),#faf5ff); border-color:#dbeafe;">
+      <h4 style="color:var(--primary-dark);">Our defensible moat</h4>
+      <p class="mt-2" style="color:var(--ink);">
+        The <strong>only</strong> platform that simultaneously serves Arabic independent teachers,
+        MENA teaching institutions, and GCC employer training — with local payment rails,
+        Arabic-first UX, and AI analytics built in from day one. Not a port of a Western
+        product; built from a blank page for this market.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== PAGE 10 — TECH ========== -->
+<section class="page">
+  <div class="corner-brand"><span class="dot"></span>&nbsp;AcademiX Investor Deck</div>
+  <div class="corner-page">10 / 14</div>
+  <div class="page-body">
+    <div class="eyebrow">Technology</div>
+    <h2 class="section-title">Modern stack. Clean architecture. Secure by default.</h2>
+
+    <div class="grid-2 mt-5 gap-4" style="flex:1;">
+      <div class="card">
+        <h4>Stack</h4>
+        <div class="feature-row"><div class="chip" style="width:32px;height:32px;font-size:13px;">FE</div>
+          <div><div class="title">React 19 · Vite 7 · TypeScript 5.9 · Tailwind CSS 3</div>
+          <div class="body">SPA architecture, 111 TSX components, 48 TS modules.</div></div>
+        </div>
+        <div class="feature-row"><div class="chip emerald" style="width:32px;height:32px;font-size:13px;">BE</div>
+          <div><div class="title">.NET 8 ASP.NET Core · EF Core · PostgreSQL 16</div>
+          <div class="body">Clean Architecture — Domain, Application, Infrastructure, API layers.</div></div>
+        </div>
+        <div class="feature-row"><div class="chip violet" style="width:32px;height:32px;font-size:13px;">RT</div>
+          <div><div class="title">SignalR WebSockets (long-poll fallback)</div>
+          <div class="body">Real-time messaging + push notifications.</div></div>
+        </div>
+        <div class="feature-row"><div class="chip amber" style="width:32px;height:32px;font-size:13px;">AI</div>
+          <div><div class="title">In-house engagement &amp; risk scoring</div>
+          <div class="body">Server-side, deterministic, predictable cost — no external model dependency.</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h4>Security posture</h4>
+        <div class="checklist mt-3" style="grid-template-columns:1fr;">
+          <div class="item"><span class="tick">✓</span><span>JWT access + refresh tokens, rotated on refresh</span></div>
+          <div class="item"><span class="tick">✓</span><span>Server-side webhook signature verification (HMAC SHA-256)</span></div>
+          <div class="item"><span class="tick">✓</span><span>Role-based policy enforcement at every endpoint</span></div>
+          <div class="item"><span class="tick">✓</span><span>Rate limiting (IP + endpoint level, in-memory)</span></div>
+          <div class="item"><span class="tick">✓</span><span>Soft delete everywhere — no data lost to fat-fingers</span></div>
+          <div class="item"><span class="tick">✓</span><span>Structured Serilog logging with correlation IDs</span></div>
+          <div class="item"><span class="tick">✓</span><span>Global exception handler (no stack traces leaked to clients)</span></div>
+          <div class="item"><span class="tick">✓</span><span>BCrypt password hashing, secrets in env only</span></div>
+        </div>
+      </div>
+    </div>
+
+    <p class="small muted mt-3">Modular monolith today — ready to split into services when scale demands it. No premature architecture.</p>
+  </div>
+</section>
+
+<!-- ========== PAGE 11 — TRACTION ========== -->
+<section class="page">
+  <div class="corner-brand"><span class="dot"></span>&nbsp;AcademiX Investor Deck</div>
+  <div class="corner-page">11 / 14</div>
+  <div class="page-body">
+    <div class="eyebrow">Status &amp; Traction</div>
+    <h2 class="section-title">Platform is production-ready. Pilot begins Q2.</h2>
+
+    <div class="grid-4 mt-5">
+      <div class="card tinted">
+        <div class="stat"><div class="num">50+</div><div class="label">Courses seeded</div></div>
+      </div>
+      <div class="card tinted">
+        <div class="stat"><div class="num">18</div><div class="label">Role-based test accounts</div></div>
+      </div>
+      <div class="card tinted">
+        <div class="stat"><div class="num">6</div><div class="label">QA regression rounds passed</div></div>
+      </div>
+      <div class="card tinted">
+        <div class="stat"><div class="num">100%</div><div class="label">Lahza sandbox flows verified</div></div>
+      </div>
+    </div>
+
+    <div class="card mt-5" style="flex:1;">
+      <h4>What we've proven so far</h4>
+      <div class="grid-2 mt-3 gap-4">
+        <div>
+          <div class="feature-row" style="border:0;padding:5px 0;">
+            <div class="tick" style="color:var(--emerald);font-weight:700;">✓</div>
+            <div class="body"><strong>Full feature parity with enterprise LMS competitors</strong> — course management, subscriptions, payments, live classes, analytics, messaging, certificates — all shipped and tested end-to-end.</div>
+          </div>
+          <div class="feature-row" style="border:0;padding:5px 0;">
+            <div class="tick" style="color:var(--emerald);font-weight:700;">✓</div>
+            <div class="body"><strong>Lahza integration live</strong> against their sandbox for both course purchases and recurring subscriptions, with HMAC webhook verification.</div>
+          </div>
+          <div class="feature-row" style="border:0;padding:5px 0;">
+            <div class="tick" style="color:var(--emerald);font-weight:700;">✓</div>
+            <div class="body"><strong>Engineering velocity</strong> — 6 end-to-end QA cycles over the past two weeks, all outstanding bugs resolved.</div>
+          </div>
+        </div>
+        <div>
+          <div class="feature-row" style="border:0;padding:5px 0;">
+            <div class="tick" style="color:var(--emerald);font-weight:700;">✓</div>
+            <div class="body"><strong>Multi-role foundation</strong> — Student, Teacher, Admin, Accountant, Secretary portals all implemented.</div>
+          </div>
+          <div class="feature-row" style="border:0;padding:5px 0;">
+            <div class="tick" style="color:var(--emerald);font-weight:700;">✓</div>
+            <div class="body"><strong>Clean architecture</strong> — clear separation of concerns makes scaling the team straightforward.</div>
+          </div>
+          <div class="feature-row" style="border:0;padding:5px 0;">
+            <div class="tick" style="color:var(--emerald);font-weight:700;">✓</div>
+            <div class="body"><strong>Demoable today</strong> — public tunnel, 18 test accounts, real data — any investor can test the platform live in under 60 seconds.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="small muted mt-3">Replace "pilot begins Q2" with the name of the first signed institution as soon as confirmed.</p>
+  </div>
+</section>
+
+<!-- ========== PAGE 12 — ROADMAP ========== -->
+<section class="page">
+  <div class="corner-brand"><span class="dot"></span>&nbsp;AcademiX Investor Deck</div>
+  <div class="corner-page">12 / 14</div>
+  <div class="page-body">
+    <div class="eyebrow">Roadmap</div>
+    <h2 class="section-title">Next 6 months of execution.</h2>
+    <p class="lead">Pulled directly from our internal tracker — same document the engineering team ships from.</p>
+
+    <div class="timeline" style="margin-top:22px;">
+      <div class="q">
+        <div class="q-label">Q2 2026 · Now</div>
+        <div class="q-item">Ship org types A + B (teaching institutions vs employers)</div>
+        <div class="q-item">Finance dashboard — earnings, payouts, per-teacher splits</div>
+        <div class="q-item">Mobile + tablet responsive layout</div>
+        <div class="q-item">First paying pilot institution onboarded</div>
+      </div>
+      <div class="q">
+        <div class="q-label">Q3 2026</div>
+        <div class="q-item">Full Arabic + RTL across the product</div>
+        <div class="q-item">Employer-type organization rollout</div>
+        <div class="q-item">Native marketing site + self-serve signup</div>
+        <div class="q-item">Payout automation (weekly bank transfers)</div>
+      </div>
+      <div class="q">
+        <div class="q-label">Q4 2026</div>
+        <div class="q-item">First enterprise training contract (500+ seats)</div>
+        <div class="q-item">Native mobile apps (React Native)</div>
+        <div class="q-item">Expand payment rails → MyFatoorah + HyperPay</div>
+        <div class="q-item">Analytics v2 with cohort-level insights</div>
+      </div>
+      <div class="q">
+        <div class="q-label">Q1 2027</div>
+        <div class="q-item">SOC 2 Type I</div>
+        <div class="q-item">Saudi market entry</div>
+        <div class="q-item">White-label offering for universities</div>
+        <div class="q-item">Public marketplace launch event</div>
+      </div>
+    </div>
+
+    <div class="card mt-5" style="background: var(--surface);">
+      <h4 style="font-size:14px;">Engineering investments</h4>
+      <p class="mt-2 small muted">3 → 8 engineers (Q2–Q3), 1 designer, 1 devops, 1 data/AI specialist by Q4. Backend → AKS on Azure. Frontend → CDN + edge caching.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== PAGE 13 — THE ASK ========== -->
+<section class="page">
+  <div class="corner-brand"><span class="dot"></span>&nbsp;AcademiX Investor Deck</div>
+  <div class="corner-page">13 / 14</div>
+  <div class="page-body">
+    <div class="eyebrow">The Ask</div>
+    <h2 class="section-title">Raising a seed round to scale engineering and land the first cohort of paying institutions.</h2>
+
+    <div class="grid-2 mt-5 gap-4" style="flex:1;">
+      <div class="card primary">
+        <div class="stat">
+          <div class="num" style="color:white;">$[amount]</div>
+          <div class="label" style="color:rgba(255,255,255,0.85);">Seed round, 12 months of runway</div>
+        </div>
+        <div class="feature-row" style="border-top:1px solid rgba(255,255,255,0.2);margin-top:12px;padding-top:12px;">
+          <div class="tick" style="color:white;font-weight:700;">▸</div>
+          <div>
+            <div class="title" style="color:white;">Engineering (~60%)</div>
+            <div class="body" style="color:rgba(255,255,255,0.85);">Scale from 3 → 8 engineers across backend, frontend, mobile, data.</div>
+          </div>
+        </div>
+        <div class="feature-row" style="border-top:1px solid rgba(255,255,255,0.2);">
+          <div class="tick" style="color:white;font-weight:700;">▸</div>
+          <div>
+            <div class="title" style="color:white;">GTM &amp; sales (~25%)</div>
+            <div class="body" style="color:rgba(255,255,255,0.85);">Head of MENA sales, first pilot activations, institutional contracts.</div>
+          </div>
+        </div>
+        <div class="feature-row" style="border-top:1px solid rgba(255,255,255,0.2);">
+          <div class="tick" style="color:white;font-weight:700;">▸</div>
+          <div>
+            <div class="title" style="color:white;">Marketing &amp; ops (~15%)</div>
+            <div class="body" style="color:rgba(255,255,255,0.85);">Content in Arabic, paid acquisition tests, legal + finance overhead.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h4>What investors get</h4>
+        <div class="feature-row">
+          <div class="tick" style="color:var(--emerald);font-weight:700;">✓</div>
+          <div>
+            <div class="title">Proven execution team</div>
+            <div class="body">Entire platform shipped and QA-tested before opening the round.</div>
+          </div>
+        </div>
+        <div class="feature-row">
+          <div class="tick" style="color:var(--emerald);font-weight:700;">✓</div>
+          <div>
+            <div class="title">Dual-rail unit economics</div>
+            <div class="body">Marketplace commission plus SaaS subscription plus enterprise licensing — never a single point of revenue failure.</div>
+          </div>
+        </div>
+        <div class="feature-row">
+          <div class="tick" style="color:var(--emerald);font-weight:700;">✓</div>
+          <div>
+            <div class="title">Defensible geography</div>
+            <div class="body">Arabic UX + MENA payment rails = incumbents can't flip a switch to compete.</div>
+          </div>
+        </div>
+        <div class="feature-row">
+          <div class="tick" style="color:var(--emerald);font-weight:700;">✓</div>
+          <div>
+            <div class="title">Clear path to $100M+</div>
+            <div class="body">B2C marketplace + B2B subscriptions + enterprise training — three compounding tailwinds in one platform.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== PAGE 14 — CONTACT ========== -->
+<section class="page">
+  <div class="corner-brand"><span class="dot"></span>&nbsp;AcademiX Investor Deck</div>
+  <div class="corner-page">14 / 14</div>
+  <div class="page-body cover" style="justify-content:center;">
+    <div style="max-width:70ch;margin:auto;text-align:center;">
+      <div class="brand" style="justify-content:center;">
+        <div class="logo">A</div>
+      </div>
+      <h1 class="headline" style="font-size:36px;margin:24px auto;max-width:25ch;">
+        Let's build MENA's learning OS together.
+      </h1>
+      <p class="lead" style="margin:auto;">
+        We'd love to walk you through a live demo, share current numbers, and answer
+        any question you have.
+      </p>
+
+      <div class="grid-3 mt-6" style="text-align:left;">
+        <div class="card">
+          <div class="eyebrow">Live demo</div>
+          <div style="font-weight:600;font-size:14px;margin-top:4px;">academix.sa/demo</div>
+          <div class="small muted mt-2">18 seeded accounts covering every role.</div>
+        </div>
+        <div class="card">
+          <div class="eyebrow">Email</div>
+          <div style="font-weight:600;font-size:14px;margin-top:4px;">[founder]@academix.sa</div>
+          <div class="small muted mt-2">Reply within 24h.</div>
+        </div>
+        <div class="card">
+          <div class="eyebrow">Deck</div>
+          <div style="font-weight:600;font-size:14px;margin-top:4px;">academix.sa/deck</div>
+          <div class="small muted mt-2">Always the latest version.</div>
+        </div>
+      </div>
+
+      <p class="small muted mt-6">AcademiX · Confidential · v1 · April 2026</p>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>
