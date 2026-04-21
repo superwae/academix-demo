@@ -9,7 +9,7 @@ item has its own deep-dive file in this folder.
 | 2 | Arabic language support (i18n + RTL) | Not started | [02-arabic-support.md](./02-arabic-support.md) |
 | 3 | Finance / earnings dashboard for teachers & organizations | Not started | [03-finance-dashboard.md](./03-finance-dashboard.md) |
 | 4 | Organization types + course modality expansion | Not started | [04-organizations-and-sections.md](./04-organizations-and-sections.md) |
-| 5 | Investor-facing PDF pitch document | Not started | [05-investor-pitch.md](./05-investor-pitch.md) |
+| 5 | Investor-facing PDF pitch document | **Content drafted** · [pitch/pitch-content-en.md](./pitch/pitch-content-en.md) | [05-investor-pitch.md](./05-investor-pitch.md) |
 
 ## Priority order
 
