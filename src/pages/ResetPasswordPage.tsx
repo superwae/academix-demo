@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -10,6 +11,7 @@ import { toast } from 'sonner';
 import { GraduationCap, Loader2, KeyRound } from 'lucide-react';
 
 export function ResetPasswordPage() {
+  const { t } = useTranslation(['auth', 'common', 'errors']);
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token') ?? '';
   const [password, setPassword] = useState('');
@@ -18,31 +20,31 @@ export function ResetPasswordPage() {
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    if (!token) toast.error('Invalid reset link. Please request a new password reset.');
-  }, [token]);
+    if (!token) toast.error(t('auth:resetPassword.invalidToken'));
+  }, [token, t]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!token) {
-      toast.error('Missing reset token');
+      toast.error(t('auth:resetPassword.missingToken'));
       return;
     }
     if (password.length < 8) {
-      toast.error('Password must be at least 8 characters');
+      toast.error(t('errors:passwordTooShort'));
       return;
     }
     if (password !== confirmPassword) {
-      toast.error('Passwords do not match');
+      toast.error(t('errors:passwordsDoNotMatch'));
       return;
     }
     try {
       setLoading(true);
       await authService.resetPassword(token, password);
       setSuccess(true);
-      toast.success('Password reset successfully');
+      toast.success(t('auth:resetPassword.success'));
     } catch (error) {
-      toast.error('Reset failed', {
-        description: error instanceof Error ? error.message : 'Link may be expired. Request a new one.',
+      toast.error(t('auth:resetPassword.failedTitle'), {
+        description: error instanceof Error ? error.message : t('auth:resetPassword.linkExpiredDescription'),
       });
     } finally {
       setLoading(false);
@@ -54,9 +56,9 @@ export function ResetPasswordPage() {
       <div className="min-h-[calc(100vh-5rem)] flex items-center justify-center px-6 py-12">
         <Card className="max-w-md w-full">
           <CardContent className="pt-6 text-center">
-            <p className="text-muted-foreground">This reset link is invalid or missing. Please use the link from your email or request a new one.</p>
+            <p className="text-muted-foreground">{t('auth:resetPassword.invalidLinkBody')}</p>
             <Button asChild className="mt-4">
-              <Link to="/forgot-password">Request reset link</Link>
+              <Link to="/forgot-password">{t('auth:resetPassword.requestNewLinkCta')}</Link>
             </Button>
           </CardContent>
         </Card>
@@ -83,42 +85,42 @@ export function ResetPasswordPage() {
               </div>
             </div>
             <div>
-              <CardTitle className="text-2xl">Set new password</CardTitle>
+              <CardTitle className="text-2xl">{t('auth:resetPassword.title')}</CardTitle>
               <CardDescription className="mt-2">
-                Enter your new password below. This link expires in 1 hour.
+                {t('auth:resetPassword.subtitle')}
               </CardDescription>
             </div>
           </CardHeader>
           <CardContent>
             {success ? (
               <div className="text-center space-y-4">
-                <p className="text-sm text-muted-foreground">Your password has been reset. You can now sign in.</p>
+                <p className="text-sm text-muted-foreground">{t('auth:resetPassword.successBody')}</p>
                 <Button asChild className="w-full">
-                  <Link to="/login">Sign in</Link>
+                  <Link to="/login">{t('auth:resetPassword.signInCta')}</Link>
                 </Button>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="password">New password</Label>
+                  <Label htmlFor="password">{t('auth:resetPassword.newPasswordLabel')}</Label>
                   <Input
                     id="password"
                     type="password"
-                    placeholder="••••••••"
+                    placeholder={t('auth:resetPassword.passwordPlaceholder')}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     minLength={8}
                     disabled={loading}
                   />
-                  <p className="text-xs text-muted-foreground">At least 8 characters</p>
+                  <p className="text-xs text-muted-foreground">{t('auth:resetPassword.passwordHint')}</p>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirm new password</Label>
+                  <Label htmlFor="confirmPassword">{t('auth:resetPassword.confirmPasswordLabel')}</Label>
                   <Input
                     id="confirmPassword"
                     type="password"
-                    placeholder="••••••••"
+                    placeholder={t('auth:resetPassword.passwordPlaceholder')}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
@@ -128,18 +130,18 @@ export function ResetPasswordPage() {
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Resetting...
+                      <Loader2 className="me-2 h-4 w-4 animate-spin" />
+                      {t('auth:resetPassword.submitting')}
                     </>
                   ) : (
-                    'Reset password'
+                    t('auth:resetPassword.submit')
                   )}
                 </Button>
               </form>
             )}
             <div className="mt-6 text-center text-sm">
               <Link to="/login" className="text-primary hover:underline font-medium">
-                Back to sign in
+                {t('auth:resetPassword.backToLogin')}
               </Link>
             </div>
           </CardContent>

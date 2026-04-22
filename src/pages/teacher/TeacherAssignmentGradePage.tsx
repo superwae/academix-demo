@@ -251,7 +251,7 @@ export function TeacherAssignmentGradePage() {
                         }
                       })()}
                       {s.isLate ? (
-                        <Badge variant="destructive" className="ml-2 text-[10px]">
+                        <Badge variant="destructive" className="ms-2 text-[10px]">
                           Late
                         </Badge>
                       ) : null}
@@ -346,7 +346,7 @@ export function TeacherAssignmentGradePage() {
                         <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
                         <>
-                          <Save className="h-4 w-4 mr-2" />
+                          <Save className="h-4 w-4 me-2" />
                           Save grade
                         </>
                       )}

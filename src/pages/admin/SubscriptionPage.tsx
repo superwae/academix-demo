@@ -187,7 +187,7 @@ export function SubscriptionPage() {
                   className="text-destructive hover:text-destructive"
                   onClick={() => setCancelOpen(true)}
                 >
-                  <XCircle className="mr-2 h-4 w-4" />
+                  <XCircle className="me-2 h-4 w-4" />
                   Cancel Subscription
                 </Button>
               </div>
@@ -219,7 +219,7 @@ export function SubscriptionPage() {
               )}
             >
               Yearly
-              <span className="ml-1.5 rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-600">
+              <span className="ms-1.5 rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-600">
                 Save 20%
               </span>
             </button>

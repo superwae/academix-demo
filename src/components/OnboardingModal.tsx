@@ -289,7 +289,7 @@ export function OnboardingModal({ open, onComplete, userId }: OnboardingModalPro
                           key={category.id}
                           onClick={() => toggleCategory(category.id)}
                           className={cn(
-                            'flex items-start gap-3 p-4 rounded-lg border-2 text-left transition-all hover:shadow-md',
+                            'flex items-start gap-3 p-4 rounded-lg border-2 text-start transition-all hover:shadow-md',
                             selectedCategories.has(category.id)
                               ? 'border-primary bg-primary/5 shadow-sm'
                               : 'border-border hover:border-primary/50'
@@ -358,7 +358,7 @@ export function OnboardingModal({ open, onComplete, userId }: OnboardingModalPro
                                   onClick={() => toggleTopic(categoryId, topic)}
                                 >
                                   {topic}
-                                  {isSelected && <Check className="ml-1 h-3 w-3" />}
+                                  {isSelected && <Check className="ms-1 h-3 w-3" />}
                                 </Badge>
                               );
                             })}
@@ -398,7 +398,7 @@ export function OnboardingModal({ open, onComplete, userId }: OnboardingModalPro
                               onClick={() => toggleGoal(goal)}
                             >
                               {goal}
-                              {isSelected && <Check className="ml-1 h-3 w-3" />}
+                              {isSelected && <Check className="ms-1 h-3 w-3" />}
                             </Badge>
                           );
                         })}
@@ -438,7 +438,7 @@ export function OnboardingModal({ open, onComplete, userId }: OnboardingModalPro
                           onChange={(e) => setWeeklyHours(parseInt(e.target.value))}
                           className="flex-1 accent-primary"
                         />
-                        <span className="text-sm font-medium w-20 text-right">
+                        <span className="text-sm font-medium w-20 text-end">
                           {weeklyHours} hrs/week
                         </span>
                       </div>
@@ -464,7 +464,7 @@ export function OnboardingModal({ open, onComplete, userId }: OnboardingModalPro
                     onClick={() => setStep(step - 1)}
                     disabled={saving}
                   >
-                    <ChevronLeft className="h-4 w-4 mr-1" />
+                    <ChevronLeft className="h-4 w-4 me-1" />
                     Back
                   </Button>
                 )}
@@ -474,7 +474,7 @@ export function OnboardingModal({ open, onComplete, userId }: OnboardingModalPro
                     disabled={!canProceed()}
                   >
                     Next
-                    <ChevronRight className="h-4 w-4 ml-1" />
+                    <ChevronRight className="h-4 w-4 ms-1" />
                   </Button>
                 ) : (
                   <Button
@@ -483,13 +483,13 @@ export function OnboardingModal({ open, onComplete, userId }: OnboardingModalPro
                   >
                     {saving ? (
                       <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        <Loader2 className="h-4 w-4 me-2 animate-spin" />
                         Saving...
                       </>
                     ) : (
                       <>
                         Get Started
-                        <Sparkles className="h-4 w-4 ml-1" />
+                        <Sparkles className="h-4 w-4 ms-1" />
                       </>
                     )}
                   </Button>

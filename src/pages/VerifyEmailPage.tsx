@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -10,6 +11,7 @@ import { toast } from 'sonner';
 import { GraduationCap, Loader2, CheckCircle, Mail } from 'lucide-react';
 
 export function VerifyEmailPage() {
+  const { t } = useTranslation(['auth', 'common', 'errors']);
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token') ?? '';
   const [loading, setLoading] = useState(!!token);
@@ -20,7 +22,7 @@ export function VerifyEmailPage() {
 
   useEffect(() => {
     if (!token) {
-      setError('Invalid verification link.');
+      setError(t('auth:verifyEmail.invalidLink'));
       setLoading(false);
       return;
     }
@@ -30,36 +32,36 @@ export function VerifyEmailPage() {
         await authService.verifyEmail(token);
         if (!cancelled) {
           setSuccess(true);
-          toast.success('Email verified successfully');
+          toast.success(t('auth:verifyEmail.success'));
         }
       } catch (e) {
         if (!cancelled) {
-          const msg = e instanceof Error ? e.message : 'Verification failed. Link may be expired.';
+          const msg = e instanceof Error ? e.message : t('auth:verifyEmail.failureFallback');
           setError(msg);
-          toast.error('Verification failed', { description: msg });
+          toast.error(t('auth:verifyEmail.failure'), { description: msg });
         }
       } finally {
         if (!cancelled) setLoading(false);
       }
     })();
     return () => { cancelled = true; };
-  }, [token]);
+  }, [token, t]);
 
   const handleResend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!resendEmail?.trim()) {
-      toast.error('Please enter your email');
+      toast.error(t('auth:verifyEmail.missingEmail'));
       return;
     }
     try {
       setResending(true);
       await authService.resendVerificationEmail(resendEmail.trim());
-      toast.success('Check your email', {
-        description: 'If your email is not yet verified, you will receive a new verification link.',
+      toast.success(t('auth:verifyEmail.resendSuccessTitle'), {
+        description: t('auth:verifyEmail.resendSuccessDescription'),
       });
     } catch (e) {
-      toast.error('Failed to resend', {
-        description: e instanceof Error ? e.message : 'Please try again.',
+      toast.error(t('auth:verifyEmail.resendFailedTitle'), {
+        description: e instanceof Error ? e.message : t('auth:verifyEmail.resendFailedFallback'),
       });
     } finally {
       setResending(false);
@@ -72,7 +74,7 @@ export function VerifyEmailPage() {
         <Card className="max-w-md w-full">
           <CardContent className="pt-6 flex flex-col items-center gap-4">
             <Loader2 className="h-10 w-10 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">Verifying your email...</p>
+            <p className="text-sm text-muted-foreground">{t('auth:verifyEmail.verifying')}</p>
           </CardContent>
         </Card>
       </div>
@@ -101,32 +103,36 @@ export function VerifyEmailPage() {
             </div>
             <div>
               <CardTitle className="text-2xl">
-                {success ? 'Email verified' : error ? 'Verification failed' : 'Verify your email'}
+                {success
+                  ? t('auth:verifyEmail.successCardTitle')
+                  : error
+                    ? t('auth:verifyEmail.failure')
+                    : t('auth:verifyEmail.title')}
               </CardTitle>
               <CardDescription className="mt-2">
                 {success
-                  ? 'Your email has been verified. You can use your account fully now.'
-                  : error ?? 'Use the link from your verification email.'}
+                  ? t('auth:verifyEmail.successCardBody')
+                  : error ?? t('auth:verifyEmail.fallbackSubtitle')}
               </CardDescription>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <Button asChild className="w-full">
               <Link to="/login">
-                {success ? 'Go to sign in' : 'Sign in'}
+                {success ? t('auth:verifyEmail.goToSignIn') : t('auth:verifyEmail.signIn')}
               </Link>
             </Button>
             {error && (
               <form onSubmit={handleResend} className="space-y-3 pt-4 border-t">
                 <p className="text-sm text-muted-foreground">
-                  Link expired or invalid? Enter your email to receive a new verification link.
+                  {t('auth:verifyEmail.expiredHint')}
                 </p>
                 <div className="space-y-2">
-                  <Label htmlFor="resend-email">Email</Label>
+                  <Label htmlFor="resend-email">{t('auth:verifyEmail.emailLabel')}</Label>
                   <Input
                     id="resend-email"
                     type="email"
-                    placeholder="you@example.com"
+                    placeholder={t('auth:verifyEmail.emailPlaceholder')}
                     value={resendEmail}
                     onChange={(e) => setResendEmail(e.target.value)}
                     disabled={resending}
@@ -135,13 +141,13 @@ export function VerifyEmailPage() {
                 <Button type="submit" variant="outline" className="w-full" disabled={resending}>
                   {resending ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Sending...
+                      <Loader2 className="me-2 h-4 w-4 animate-spin" />
+                      {t('auth:verifyEmail.resending')}
                     </>
                   ) : (
                     <>
-                      <Mail className="mr-2 h-4 w-4" />
-                      Resend verification email
+                      <Mail className="me-2 h-4 w-4" />
+                      {t('auth:verifyEmail.resendCta')}
                     </>
                   )}
                 </Button>
@@ -149,7 +155,7 @@ export function VerifyEmailPage() {
             )}
             {!token && !error && (
               <p className="text-center text-sm text-muted-foreground">
-                Check your inbox for the verification link we sent when you signed up.
+                {t('auth:verifyEmail.checkInboxNote')}
               </p>
             )}
           </CardContent>

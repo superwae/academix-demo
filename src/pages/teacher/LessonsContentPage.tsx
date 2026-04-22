@@ -110,7 +110,7 @@ function SortableLessonRow({
       </button>
       <button
         type="button"
-        className="flex-1 min-w-0 text-left rounded-md -m-1 p-1 hover:bg-muted/30 transition-colors disabled:opacity-50"
+        className="flex-1 min-w-0 text-start rounded-md -m-1 p-1 hover:bg-muted/30 transition-colors disabled:opacity-50"
         onClick={() => !disabled && onSelect(lesson)}
         disabled={disabled}
       >
@@ -454,7 +454,7 @@ export function LessonsContentPage() {
           variant="gradient"
           disabled={!selectedCourse || !selectedSection || loading}
         >
-          <PlusCircle className="h-4 w-4 mr-2" />
+          <PlusCircle className="h-4 w-4 me-2" />
           Add Lesson
         </Button>
       </div>
@@ -504,7 +504,7 @@ export function LessonsContentPage() {
                     disabled={loading}
                     className="h-6 px-2 text-xs"
                   >
-                    <FolderPlus className="h-3 w-3 mr-1" />
+                    <FolderPlus className="h-3 w-3 me-1" />
                     Add Section
                   </Button>
                 )}
@@ -549,7 +549,7 @@ export function LessonsContentPage() {
                       <SortableContext items={lessonIds} strategy={verticalListSortingStrategy}>
                         <div
                           className={cn(
-                            'h-fit min-h-0 w-full max-w-full overflow-x-hidden touch-pan-y space-y-1.5 pr-1',
+                            'h-fit min-h-0 w-full max-w-full overflow-x-hidden touch-pan-y space-y-1.5 pe-1',
                             'overscroll-y-contain [overscroll-behavior-x:none]',
                             lessonListNeedsInternalScroll
                               ? 'overflow-y-auto scroll-fancy [scrollbar-gutter:stable]'
@@ -653,12 +653,12 @@ export function LessonsContentPage() {
                   >
                     {editingLesson.isPreview ? (
                       <>
-                        <EyeOff className="h-3 w-3 mr-1" />
+                        <EyeOff className="h-3 w-3 me-1" />
                         Remove Preview
                       </>
                     ) : (
                       <>
-                        <Eye className="h-3 w-3 mr-1" />
+                        <Eye className="h-3 w-3 me-1" />
                         Make Preview
                       </>
                     )}
@@ -672,7 +672,7 @@ export function LessonsContentPage() {
                     onClick={() => handleMoveLesson(editingLesson.id, 'up')}
                     disabled={lessonsSorted.findIndex(l => l.id === editingLesson.id) === 0 || loading}
                   >
-                    <ArrowUp className="h-3 w-3 mr-1" />
+                    <ArrowUp className="h-3 w-3 me-1" />
                     Move Up
                   </Button>
                   <Button
@@ -681,7 +681,7 @@ export function LessonsContentPage() {
                     onClick={() => handleMoveLesson(editingLesson.id, 'down')}
                     disabled={lessonsSorted.findIndex(l => l.id === editingLesson.id) === lessonsSorted.length - 1 || loading}
                   >
-                    <ArrowDown className="h-3 w-3 mr-1" />
+                    <ArrowDown className="h-3 w-3 me-1" />
                     Move Down
                   </Button>
                   <Button
@@ -689,9 +689,9 @@ export function LessonsContentPage() {
                     size="sm"
                     onClick={() => setDeleteLessonId(editingLesson.id)}
                     disabled={loading}
-                    className="ml-auto"
+                    className="ms-auto"
                   >
-                    <Trash2 className="h-3 w-3 mr-1" />
+                    <Trash2 className="h-3 w-3 me-1" />
                     Delete
                   </Button>
                 </div>

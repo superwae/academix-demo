@@ -72,11 +72,11 @@ export function PaymentHistoryPage() {
           <table className="w-full">
             <thead className="border-b border-border bg-muted/50">
               <tr>
-                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Date</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Course</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Amount</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Status</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Reference</th>
+                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">Date</th>
+                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">Course</th>
+                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">Amount</th>
+                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">Status</th>
+                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">Reference</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">

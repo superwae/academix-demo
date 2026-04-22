@@ -218,12 +218,12 @@ export function TeacherStudentsPage() {
 
       {/* Search bar - below cards */}
       <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           placeholder="Search students..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10"
+          className="ps-10"
         />
       </div>
 
@@ -262,7 +262,7 @@ export function TeacherStudentsPage() {
                   <AccordionItem key={course.id} id={course.id}>
                     <AccordionTrigger className="flex items-center gap-2">
                       <span className="font-medium">{course.title}</span>
-                      <Badge variant="secondary" className="ml-2 text-xs">
+                      <Badge variant="secondary" className="ms-2 text-xs">
                         {courseStudents.length} student{courseStudents.length !== 1 ? 's' : ''}
                       </Badge>
                     </AccordionTrigger>
@@ -317,13 +317,13 @@ export function TeacherStudentsPage() {
                                 <div className="mt-4 flex flex-col gap-2 border-t border-border/50 pt-3 sm:flex-row">
                                   <Button variant="outline" size="sm" className="w-full" asChild>
                                     <Link to={`/teacher/students/${student.userId}`}>
-                                      <Users className="h-4 w-4 mr-2" />
+                                      <Users className="h-4 w-4 me-2" />
                                       Profile
                                     </Link>
                                   </Button>
                                   <Button variant="outline" size="sm" className="w-full" asChild>
                                     <Link to={`/teacher/messages?student=${student.userId}`}>
-                                      <MessageSquare className="h-4 w-4 mr-2" />
+                                      <MessageSquare className="h-4 w-4 me-2" />
                                       Message
                                     </Link>
                                   </Button>
@@ -342,7 +342,7 @@ export function TeacherStudentsPage() {
                                   <TableHead>Risk</TableHead>
                                   <TableHead>Enrolled</TableHead>
                                   <TableHead>Status</TableHead>
-                                  <TableHead className="text-right">Actions</TableHead>
+                                  <TableHead className="text-end">Actions</TableHead>
                                 </TableRow>
                               </TableHeader>
                               <TableBody>
@@ -391,17 +391,17 @@ export function TeacherStudentsPage() {
                                         {student.status}
                                       </Badge>
                                     </TableCell>
-                                    <TableCell className="text-right">
+                                    <TableCell className="text-end">
                                       <div className="flex items-center justify-end gap-1.5">
                                         <Button variant="ghost" size="sm" asChild>
                                           <Link to={`/teacher/students/${student.userId}`}>
-                                            <Users className="h-3 w-3 mr-1" />
+                                            <Users className="h-3 w-3 me-1" />
                                             Profile
                                           </Link>
                                         </Button>
                                         <Button variant="ghost" size="sm" asChild>
                                           <Link to={`/teacher/messages?student=${student.userId}`}>
-                                            <MessageSquare className="h-3 w-3 mr-1" />
+                                            <MessageSquare className="h-3 w-3 me-1" />
                                             Message
                                           </Link>
                                         </Button>

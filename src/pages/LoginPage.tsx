@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate, Navigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -8,13 +9,14 @@ import { Label } from '../components/ui/label';
 import { useAuthStore } from '../store/useAuthStore';
 import { AlertCircle, GraduationCap, Loader2 } from 'lucide-react';
 
-function formatLoginErrorMessage(error: unknown): string {
+function formatLoginErrorMessage(error: unknown, fallback: string): string {
   const raw = error instanceof Error ? error.message.trim() : ''
   if (raw.length > 280) return `${raw.slice(0, 277)}…`
-  return raw || 'Couldn’t sign in. Check your email and password.'
+  return raw || fallback
 }
 
 export function LoginPage() {
+  const { t } = useTranslation(['auth', 'common']);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -37,7 +39,7 @@ export function LoginPage() {
     setFormError(null);
 
     if (!email || !password) {
-      setFormError('Please enter both your email and password.');
+      setFormError(t('auth:login.missingFields'));
       return;
     }
 
@@ -75,7 +77,7 @@ export function LoginPage() {
         navigate('/student/dashboard');
       }
     } catch (error) {
-      setFormError(formatLoginErrorMessage(error))
+      setFormError(formatLoginErrorMessage(error, t('auth:login.genericError')))
     } finally {
       setLoading(false);
     }
@@ -100,9 +102,9 @@ export function LoginPage() {
               </div>
             </div>
             <div>
-              <CardTitle className="text-2xl">Welcome Back</CardTitle>
+              <CardTitle className="text-2xl">{t('auth:login.title')}</CardTitle>
               <CardDescription className="mt-2">
-                Sign in to your AcademiX account
+                {t('auth:login.subtitle')}
               </CardDescription>
             </div>
           </CardHeader>
@@ -123,27 +125,27 @@ export function LoginPage() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -4 }}
                     transition={{ duration: 0.2 }}
-                    className="flex gap-3 rounded-lg border border-destructive/25 bg-destructive/[0.06] px-3.5 py-3 text-left shadow-sm"
+                    className="flex gap-3 rounded-lg border border-destructive/25 bg-destructive/[0.06] px-3.5 py-3 text-start shadow-sm"
                   >
                     <AlertCircle
                       className="mt-0.5 h-4 w-4 shrink-0 text-destructive"
                       aria-hidden
                     />
                     <div className="min-w-0 flex-1 space-y-0.5">
-                      <p className="text-sm font-medium text-destructive">Unable to sign in</p>
+                      <p className="text-sm font-medium text-destructive">{t('auth:login.unableToSignIn')}</p>
                       <p className="text-sm leading-relaxed text-muted-foreground">{formError}</p>
                     </div>
                   </motion.div>
                 ) : null}
               </AnimatePresence>
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t('auth:login.emailLabel')}</Label>
                 <Input
                   id="email"
                   name="username"
                   type="email"
                   inputMode="email"
-                  placeholder="you@example.com"
+                  placeholder={t('auth:login.emailPlaceholder')}
                   value={email}
                   onChange={(e) => {
                     setEmail(e.target.value)
@@ -157,13 +159,13 @@ export function LoginPage() {
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">{t('auth:login.passwordLabel')}</Label>
                   <Link
                     to="/forgot-password"
                     className="text-sm text-primary hover:underline"
                     tabIndex={-1}
                   >
-                    Forgot password?
+                    {t('auth:login.forgotPassword')}
                   </Link>
                 </div>
                 <Input
@@ -185,18 +187,18 @@ export function LoginPage() {
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Signing in...
+                    <Loader2 className="me-2 h-4 w-4 animate-spin" />
+                    {t('auth:login.submitting')}
                   </>
                 ) : (
-                  'Sign In'
+                  t('auth:login.submit')
                 )}
               </Button>
             </form>
             <div className="mt-6 text-center text-sm">
-              <span className="text-muted-foreground">Don't have an account? </span>
+              <span className="text-muted-foreground">{t('auth:login.signUpHint')} </span>
               <Link to="/register" className="text-primary hover:underline font-medium">
-                Sign up
+                {t('auth:login.signUpCta')}
               </Link>
             </div>
           </CardContent>

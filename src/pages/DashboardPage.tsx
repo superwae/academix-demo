@@ -160,7 +160,7 @@ export function DashboardPage() {
                   </div>
                   <Button asChild variant="ghost" size="sm">
                     <Link to="/catalog">
-                      View All <ArrowRight className="ml-1 h-4 w-4" />
+                      View All <ArrowRight className="ms-1 h-4 w-4" />
                     </Link>
                   </Button>
                 </div>
@@ -187,7 +187,7 @@ export function DashboardPage() {
                   </div>
                   <Button asChild variant="ghost" size="sm">
                     <Link to="/catalog">
-                      View All <ArrowRight className="ml-1 h-4 w-4" />
+                      View All <ArrowRight className="ms-1 h-4 w-4" />
                     </Link>
                   </Button>
                 </div>

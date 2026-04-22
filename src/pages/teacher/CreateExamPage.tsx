@@ -338,7 +338,7 @@ export function CreateExamPage() {
                     </CardDescription>
                   </div>
                   <Button type="button" variant="outline" size="sm" onClick={addQuestion}>
-                    <PlusCircle className="h-4 w-4 mr-2" />
+                    <PlusCircle className="h-4 w-4 me-2" />
                     Add Question
                   </Button>
                 </div>
@@ -365,7 +365,7 @@ export function CreateExamPage() {
                             disabled={questions.length <= 1}
                             className="text-destructive hover:text-destructive"
                           >
-                            <Trash2 className="h-3 w-3 mr-1" />
+                            <Trash2 className="h-3 w-3 me-1" />
                             Remove
                           </Button>
                         </div>
@@ -456,7 +456,7 @@ export function CreateExamPage() {
                                 size="sm"
                                 onClick={() => addQuestionChoice(qIndex)}
                               >
-                                <PlusCircle className="h-3 w-3 mr-1" />
+                                <PlusCircle className="h-3 w-3 me-1" />
                                 Add choice
                               </Button>
                             </div>
@@ -542,12 +542,12 @@ export function CreateExamPage() {
                   >
                     {loading ? (
                       <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        <Loader2 className="h-4 w-4 me-2 animate-spin" />
                         Creating...
                       </>
                     ) : (
                       <>
-                        <Save className="h-4 w-4 mr-2" />
+                        <Save className="h-4 w-4 me-2" />
                         Create Exam
                       </>
                     )}

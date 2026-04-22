@@ -377,9 +377,9 @@ export function FinancePayoutsPage() {
       key: "amount",
       header: "Gross",
       sortable: true,
-      className: "text-right",
+      className: "text-end",
       render: (payout) => (
-        <div className="text-right">
+        <div className="text-end">
           <p className="font-semibold">{formatCurrency(payout.amount)}</p>
           <p className="text-xs text-muted-foreground">-{formatCurrency(payout.platformFee)} fee</p>
         </div>
@@ -389,7 +389,7 @@ export function FinancePayoutsPage() {
       key: "netAmount",
       header: "Net Payout",
       sortable: true,
-      className: "text-right",
+      className: "text-end",
       render: (payout) => (
         <p className="text-lg font-bold text-emerald-500">{formatCurrency(payout.netAmount)}</p>
       ),

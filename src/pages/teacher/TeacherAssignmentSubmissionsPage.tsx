@@ -115,7 +115,7 @@ export function TeacherAssignmentSubmissionsPage() {
         </div>
         <Button variant="gradient" asChild>
           <Link to={`/teacher/assignments/${assignmentId}/grade`}>
-            <Pencil className="h-4 w-4 mr-2" />
+            <Pencil className="h-4 w-4 me-2" />
             Grade students
           </Link>
         </Button>
@@ -166,7 +166,7 @@ export function TeacherAssignmentSubmissionsPage() {
                     <TableHead>Submitted at</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Score</TableHead>
-                    <TableHead className="text-right w-[1%] whitespace-nowrap">Submission</TableHead>
+                    <TableHead className="text-end w-[1%] whitespace-nowrap">Submission</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -193,7 +193,7 @@ export function TeacherAssignmentSubmissionsPage() {
                           </Badge>
                         )}
                         {s.gradedAt ? (
-                          <Badge variant="secondary" className="text-xs ml-1">
+                          <Badge variant="secondary" className="text-xs ms-1">
                             Graded
                           </Badge>
                         ) : null}
@@ -205,7 +205,7 @@ export function TeacherAssignmentSubmissionsPage() {
                           <span className="text-muted-foreground">—</span>
                         )}
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-end">
                         <div className="flex flex-col items-end gap-1">
                           <span className="text-[10px] text-muted-foreground hidden sm:inline">
                             {s.text?.trim()
@@ -221,7 +221,7 @@ export function TeacherAssignmentSubmissionsPage() {
                             className="shrink-0"
                             onClick={() => setViewing(s)}
                           >
-                            <Eye className="h-3.5 w-3.5 mr-1.5" />
+                            <Eye className="h-3.5 w-3.5 me-1.5" />
                             View
                           </Button>
                         </div>
@@ -239,7 +239,7 @@ export function TeacherAssignmentSubmissionsPage() {
         <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col gap-0 p-0 overflow-hidden">
           {viewing && assignment && (
             <>
-              <DialogHeader className="p-6 pb-4 border-b shrink-0 text-left space-y-1">
+              <DialogHeader className="p-6 pb-4 border-b shrink-0 text-start space-y-1">
                 <DialogTitle className="text-lg">{viewing.userName}&apos;s submission</DialogTitle>
                 <DialogDescription asChild>
                   <div className="flex flex-wrap gap-x-3 gap-y-1 text-sm">
@@ -305,7 +305,7 @@ export function TeacherAssignmentSubmissionsPage() {
                     <div className="font-medium">Attachment</div>
                     <Button variant="secondary" size="sm" className="w-full sm:w-auto" asChild>
                       <a href={viewing.fileUrl} target="_blank" rel="noopener noreferrer">
-                        <ExternalLink className="h-4 w-4 mr-2" />
+                        <ExternalLink className="h-4 w-4 me-2" />
                         {viewing.fileName || 'Open file'}
                       </a>
                     </Button>

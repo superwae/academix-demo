@@ -91,7 +91,7 @@ export function KPIStatCard({
           </div>
         </div>
         {isClickable && (
-          <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="absolute bottom-2 end-2 opacity-0 group-hover:opacity-100 transition-opacity">
             <ChevronRight className="h-4 w-4 text-primary" />
           </div>
         )}
@@ -103,7 +103,7 @@ export function KPIStatCard({
     return (
       <button
         onClick={handleClick}
-        className="group relative w-full text-left overflow-hidden rounded-xl border border-border bg-card p-5 transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+        className="group relative w-full text-start overflow-hidden rounded-xl border border-border bg-card p-5 transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
       >
         {content}
       </button>

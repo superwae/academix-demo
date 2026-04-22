@@ -51,17 +51,17 @@ export function MobileSearchDialog({
         )}
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
-        <DialogHeader className="border-b border-border/60 px-4 py-3 text-left sm:px-5">
+        <DialogHeader className="border-b border-border/60 px-4 py-3 text-start sm:px-5">
           <DialogTitle className="text-base font-semibold">Search</DialogTitle>
         </DialogHeader>
         <form onSubmit={onSubmit} className="border-b border-border/40 px-4 py-3 sm:px-5">
           <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder={placeholder}
-              className="h-11 pl-10 pr-10 text-base"
+              className="h-11 ps-10 pe-10 text-base"
               autoComplete="off"
               autoCorrect="off"
               spellCheck={false}
@@ -92,7 +92,7 @@ export function MobileSearchDialog({
                   key={`${row.type}-${row.id}`}
                   type="button"
                   onClick={() => onSelectResult(row)}
-                  className="flex w-full min-h-[52px] items-start gap-3 rounded-xl px-3 py-3 text-left text-sm transition-colors hover:bg-accent/60 active:bg-accent/80"
+                  className="flex w-full min-h-[52px] items-start gap-3 rounded-xl px-3 py-3 text-start text-sm transition-colors hover:bg-accent/60 active:bg-accent/80"
                 >
                   <span className="mt-0.5 shrink-0 text-primary">
                     {renderIcon ? renderIcon(row.type) : null}

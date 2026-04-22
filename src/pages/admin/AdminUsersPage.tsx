@@ -170,7 +170,7 @@ export function AdminUsersPage() {
         </div>
         <div className="flex items-center gap-3">
           <Button variant="outline" size="sm">
-            <Upload className="mr-2 h-4 w-4" />
+            <Upload className="me-2 h-4 w-4" />
             Import
           </Button>
           <Button
@@ -185,11 +185,11 @@ export function AdminUsersPage() {
               }
             }}
           >
-            <Download className="mr-2 h-4 w-4" />
+            <Download className="me-2 h-4 w-4" />
             Export
           </Button>
           <Button size="sm">
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className="me-2 h-4 w-4" />
             Add User
           </Button>
         </div>
@@ -198,7 +198,7 @@ export function AdminUsersPage() {
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-4">
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search users..."
             value={search}
@@ -206,7 +206,7 @@ export function AdminUsersPage() {
               setSearch(e.target.value);
               setCurrentPage(1);
             }}
-            className="pl-10"
+            className="ps-10"
           />
         </div>
         <div className="flex items-center gap-2">
@@ -251,12 +251,12 @@ export function AdminUsersPage() {
           <table className="w-full">
             <thead className="border-b border-border bg-muted/50">
               <tr>
-                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">User</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Role</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Status</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Created</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Last Login</th>
-                <th className="px-4 py-3 text-right text-sm font-medium text-muted-foreground">Actions</th>
+                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">User</th>
+                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">Role</th>
+                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">Status</th>
+                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">Created</th>
+                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">Last Login</th>
+                <th className="px-4 py-3 text-end text-sm font-medium text-muted-foreground">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -313,7 +313,7 @@ export function AdminUsersPage() {
                     <td className="px-4 py-3 text-sm text-muted-foreground">
                       {user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString() : "Never"}
                     </td>
-                    <td className="px-4 py-3 text-right">
+                    <td className="px-4 py-3 text-end">
                       <div className="flex items-center justify-end gap-2">
                         <Button
                           variant="outline"
@@ -338,29 +338,29 @@ export function AdminUsersPage() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => { setSelectedUser(user); setViewDialogOpen(true); }}>
-                              <Eye className="mr-2 h-4 w-4" />
+                              <Eye className="me-2 h-4 w-4" />
                               View Details
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => { setSelectedUser(user); setEditDialogOpen(true); }}>
-                              <Pencil className="mr-2 h-4 w-4" />
+                              <Pencil className="me-2 h-4 w-4" />
                               Edit User
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={() => handleSuspend(user)}>
                               {user.isActive ? (
                                 <>
-                                  <Ban className="mr-2 h-4 w-4" />
+                                  <Ban className="me-2 h-4 w-4" />
                                   Suspend
                                 </>
                               ) : (
                                 <>
-                                  <CheckCircle className="mr-2 h-4 w-4" />
+                                  <CheckCircle className="me-2 h-4 w-4" />
                                   Activate
                                 </>
                               )}
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => setDeleteUser(user)} className="text-destructive">
-                              <UserX className="mr-2 h-4 w-4" />
+                              <UserX className="me-2 h-4 w-4" />
                               Delete User
                             </DropdownMenuItem>
                           </DropdownMenuContent>

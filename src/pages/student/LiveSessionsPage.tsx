@@ -153,7 +153,7 @@ export function LiveSessionsPage() {
             {liveNow[0].joinUrl && (
               <Button asChild variant="default">
                 <a href={liveNow[0].joinUrl} target="_blank" rel="noopener noreferrer">
-                  <PlayCircle className="mr-1.5 h-4 w-4" />
+                  <PlayCircle className="me-1.5 h-4 w-4" />
                   Join {liveNow[0].courseTitle}
                 </a>
               </Button>
@@ -223,7 +223,7 @@ export function LiveSessionsPage() {
             </p>
             <Button asChild className="mt-4">
               <Link to="/student/catalog">
-                <BookOpen className="mr-1.5 h-4 w-4" />
+                <BookOpen className="me-1.5 h-4 w-4" />
                 Browse courses
               </Link>
             </Button>
@@ -291,7 +291,7 @@ function StudentSessionRow({ event }: { event: WeeklySessionEvent }) {
           </Link>
           {badgeLabel && (
             <Badge className={`${badgeClass} border text-xs px-2 py-0.5`}>
-              {event.badge === 'live' && <Radio className="mr-1 h-3 w-3 animate-pulse" />}
+              {event.badge === 'live' && <Radio className="me-1 h-3 w-3 animate-pulse" />}
               {badgeLabel}
             </Badge>
           )}
@@ -318,19 +318,19 @@ function StudentSessionRow({ event }: { event: WeeklySessionEvent }) {
           canJoin ? (
             <Button size="sm" variant="default" asChild>
               <a href={event.joinUrl} target="_blank" rel="noopener noreferrer">
-                <PlayCircle className="mr-1.5 h-3.5 w-3.5" /> Join
+                <PlayCircle className="me-1.5 h-3.5 w-3.5" /> Join
               </a>
             </Button>
           ) : (
             <Button size="sm" variant="outline" asChild>
               <a href={event.joinUrl} target="_blank" rel="noopener noreferrer">
-                <ExternalLink className="mr-1.5 h-3.5 w-3.5" /> View link
+                <ExternalLink className="me-1.5 h-3.5 w-3.5" /> View link
               </a>
             </Button>
           )
         ) : (
           <Button size="sm" variant="outline" disabled title="Your instructor has not set a join link yet">
-            <Video className="mr-1.5 h-3.5 w-3.5" />
+            <Video className="me-1.5 h-3.5 w-3.5" />
             No link yet
           </Button>
         )}

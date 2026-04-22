@@ -188,12 +188,12 @@ export function CourseStudentsPage() {
               </CardDescription>
             </div>
             <div className="relative w-64">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Search students..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9"
+                className="ps-9"
               />
             </div>
           </div>
@@ -213,7 +213,7 @@ export function CourseStudentsPage() {
                   <TableHead>Progress</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Enrolled</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="text-end">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -248,7 +248,7 @@ export function CourseStudentsPage() {
                     <TableCell className="text-sm text-muted-foreground">
                       {formatDistanceToNow(new Date(enrollment.enrolledAt), { addSuffix: true })}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-end">
                       <Button variant="ghost" size="icon">
                         <MessageSquare className="h-4 w-4" />
                       </Button>

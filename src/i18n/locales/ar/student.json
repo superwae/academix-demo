@@ -1,0 +1,83 @@
+{
+  "dashboard": {
+    "welcome": "مرحباً بعودتك، {{name}}",
+    "continueLearning": "واصل التعلّم",
+    "todaysClasses": "حصص اليوم",
+    "noClassesToday": "لا توجد حصص مجدولة لليوم.",
+    "upcomingAssignments": "الواجبات القادمة",
+    "noAssignments": "لا توجد واجبات معلّقة.",
+    "upcomingExams": "الاختبارات القادمة",
+    "noExams": "لا توجد اختبارات قريبة.",
+    "recommended": "مقترحات لك",
+    "trending": "الأكثر رواجاً"
+  },
+  "myClasses": {
+    "title": "صفوفي",
+    "empty": "لم تسجّل في أي صف بعد.",
+    "progress": "{{percent}}٪ مكتمل"
+  },
+  "liveClasses": {
+    "title": "الحصص المباشرة",
+    "subtitle": "نظرة سريعة على جلساتك المباشرة.",
+    "liveNow": "مباشر الآن",
+    "startingSoon": "يبدأ قريباً",
+    "thisWeek": "هذا الأسبوع",
+    "join": "الانضمام إلى الحصة",
+    "viewLink": "عرض الرابط",
+    "noLink": "الرابط غير متاح بعد",
+    "empty": "لا توجد حصص مباشرة مجدولة.",
+    "bannerLive": "لديك حصة جارية الآن."
+  },
+  "payments": {
+    "title": "سجل المدفوعات",
+    "empty": "لا توجد مدفوعات بعد.",
+    "columnDate": "التاريخ",
+    "columnCourse": "الدورة",
+    "columnAmount": "المبلغ",
+    "columnStatus": "الحالة",
+    "columnReference": "المرجع"
+  },
+  "checkout": {
+    "title": "إتمام الدفع",
+    "discountPlaceholder": "رمز الخصم",
+    "applyDiscount": "تطبيق",
+    "original": "السعر الأصلي",
+    "discount": "الخصم",
+    "total": "الإجمالي",
+    "payNow": "ادفع الآن",
+    "paying": "جارٍ معالجة الدفع…",
+    "invalidCode": "رمز الخصم غير صالح.",
+    "noRedirectUrl": "تعذّر بدء عملية الدفع. يرجى المحاولة مرة أخرى."
+  },
+  "profile": {
+    "bioAbout": "نبذة عنّي",
+    "bioDescription": "عرّف الآخرين بنفسك وبما تتعلّمه.",
+    "saveBio": "حفظ النبذة",
+    "bioSaved": "تم حفظ نبذتك.",
+    "changeCover": "تغيير صورة الغلاف",
+    "changePhoto": "تغيير الصورة الشخصية",
+    "certifications": "الشهادات",
+    "badges": "الأوسمة",
+    "focusAreas": "مجالات التركيز",
+    "security": "الأمان",
+    "changePassword": "تغيير كلمة المرور",
+    "currentPassword": "كلمة المرور الحالية",
+    "newPassword": "كلمة المرور الجديدة",
+    "confirmPassword": "تأكيد كلمة المرور الجديدة",
+    "passwordChanged": "تم تحديث كلمة المرور."
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "accountSection": "الحساب",
+    "nameLabel": "الاسم",
+    "emailLabel": "البريد الإلكتروني",
+    "passwordSection": "كلمة المرور",
+    "notificationsSection": "الإشعارات",
+    "notificationsOn": "الإشعارات مفعّلة",
+    "notificationsOff": "الإشعارات معطّلة",
+    "dangerZone": "منطقة الحذر",
+    "deleteAccount": "حذف حسابي",
+    "deleteAccountConfirm": "سيؤدي ذلك إلى حذف حسابك وجميع بياناتك نهائياً. هل أنت متأكد؟",
+    "accountDeleted": "تم حذف حسابك."
+  }
+}

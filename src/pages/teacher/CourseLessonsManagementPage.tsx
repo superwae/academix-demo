@@ -329,7 +329,7 @@ export function CourseLessonsManagementPage() {
           </div>
         </div>
         <Button onClick={handleAddLesson} disabled={!selectedSection || loading}>
-          <PlusCircle className="h-4 w-4 mr-2" />
+          <PlusCircle className="h-4 w-4 me-2" />
           Add Lesson
         </Button>
       </div>
@@ -391,7 +391,7 @@ export function CourseLessonsManagementPage() {
             </div>
           </div>
           <Button type="button" onClick={handleAddMaterial} disabled={materialsBusy}>
-            {materialsBusy ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
+            {materialsBusy ? <Loader2 className="h-4 w-4 animate-spin me-2" /> : <Upload className="h-4 w-4 me-2" />}
             Add material
           </Button>
           {materials.length > 0 && (
@@ -660,7 +660,7 @@ export function CourseLessonsManagementPage() {
                 <Button onClick={handleSaveLesson} disabled={loading}>
                   {loading ? (
                     <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      <Loader2 className="h-4 w-4 me-2 animate-spin" />
                       Saving...
                     </>
                   ) : (

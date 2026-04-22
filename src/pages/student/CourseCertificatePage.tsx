@@ -96,7 +96,7 @@ export function CourseCertificatePage() {
       <div className="mx-auto max-w-lg space-y-4 px-4 py-8">
         <Button variant="ghost" size="sm" asChild>
           <Link to={courseId ? `/student/my-classes/${courseId}/lessons` : '/student/my-classes'}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
+            <ArrowLeft className="me-2 h-4 w-4" />
             Back to course
           </Link>
         </Button>
@@ -165,10 +165,10 @@ export function CourseCertificatePage() {
           <div className="pointer-events-none absolute inset-5 rounded-sm border border-[#c9a962]/50 sm:inset-6" />
 
           <div className="relative flex min-h-[min(92vh,1040px)] flex-col px-6 pb-10 pt-12 sm:px-12 sm:pb-14 sm:pt-16 md:px-16 md:pt-20">
-            <CertificateOfficialSeal className="absolute right-4 top-20 z-10 sm:right-8 sm:top-24 print:top-20 print:right-6" />
+            <CertificateOfficialSeal className="absolute end-4 top-20 z-10 sm:end-8 sm:top-24 print:top-20 print:end-6" />
 
             {/* Top: emblem + title */}
-            <header className="pr-16 text-center sm:pr-0">
+            <header className="pe-16 text-center sm:pe-0">
               <div className="mx-auto mb-8 flex justify-center">
                 <div
                   className="relative flex h-24 w-24 items-center justify-center rounded-full border-4 border-[#c9a962] bg-gradient-to-br from-[#fefce8] via-amber-50 to-[#fef3c7] shadow-inner sm:h-28 sm:w-28"
@@ -206,7 +206,7 @@ export function CourseCertificatePage() {
               )}
 
               {data.courseDescription && data.courseDescription.trim().length > 0 && (
-                <div className="mx-auto mt-8 max-w-3xl border-y border-[#e2e8f0] bg-[#f8fafc]/60 px-5 py-5 text-left sm:px-8">
+                <div className="mx-auto mt-8 max-w-3xl border-y border-[#e2e8f0] bg-[#f8fafc]/60 px-5 py-5 text-start sm:px-8">
                   <p
                     className="mb-2 text-center text-[10px] font-semibold uppercase tracking-[0.3em] text-[#94a3b8]"
                     style={{ fontFamily: "'Cinzel', serif" }}
@@ -263,7 +263,7 @@ export function CourseCertificatePage() {
             {/* Footer: instructor · CEO · issued */}
             <footer className="mt-auto pt-12 sm:pt-16">
               <div className="mx-auto grid max-w-5xl grid-cols-1 gap-10 border-t border-[#cbd5e1]/80 pt-10 sm:gap-8 md:grid-cols-3 md:pt-12">
-                <div className="text-center md:text-left">
+                <div className="text-center md:text-start">
                   <p className="text-xs font-medium uppercase tracking-widest text-[#94a3b8]">Instructor</p>
                   <p
                     className="mt-3 text-xl font-semibold text-[#0f172a] sm:text-2xl"
@@ -288,7 +288,7 @@ export function CourseCertificatePage() {
                   <p className="mt-2 text-xs text-[#94a3b8]">Executive signature</p>
                 </div>
 
-                <div className="text-center md:text-right">
+                <div className="text-center md:text-end">
                   <p className="text-xs font-medium uppercase tracking-widest text-[#94a3b8]">Issued</p>
                   <p
                     className="mt-3 text-xl font-semibold text-[#0f172a] sm:text-2xl"
@@ -300,7 +300,7 @@ export function CourseCertificatePage() {
                       day: 'numeric',
                     })}
                   </p>
-                  <div className="mx-auto mt-6 h-px w-48 max-w-full bg-gradient-to-r from-transparent via-[#94a3b8] to-transparent md:ml-auto md:mr-0" />
+                  <div className="mx-auto mt-6 h-px w-48 max-w-full bg-gradient-to-r from-transparent via-[#94a3b8] to-transparent md:ms-auto md:me-0" />
                   <p className="mt-2 text-xs text-[#94a3b8]">Date of issue</p>
                 </div>
               </div>

@@ -355,7 +355,7 @@ function TeacherSessionRow({
           <span className="font-semibold text-sm truncate">{event.courseTitle}</span>
           {badgeLabel && (
             <Badge className={`${badgeClass} border text-xs px-2 py-0.5`}>
-              {event.badge === 'live' && <Radio className="mr-1 h-3 w-3 animate-pulse" />}
+              {event.badge === 'live' && <Radio className="me-1 h-3 w-3 animate-pulse" />}
               {badgeLabel}
             </Badge>
           )}
@@ -391,11 +391,11 @@ function TeacherSessionRow({
               <a href={event.joinUrl} target="_blank" rel="noopener noreferrer">
                 {event.badge === 'live' ? (
                   <>
-                    <PlayCircle className="mr-1.5 h-3.5 w-3.5" /> Start
+                    <PlayCircle className="me-1.5 h-3.5 w-3.5" /> Start
                   </>
                 ) : (
                   <>
-                    <ExternalLink className="mr-1.5 h-3.5 w-3.5" /> Open
+                    <ExternalLink className="me-1.5 h-3.5 w-3.5" /> Open
                   </>
                 )}
               </a>
@@ -403,7 +403,7 @@ function TeacherSessionRow({
           </>
         ) : (
           <Button size="sm" variant="outline" onClick={onEditUrl}>
-            <LinkIcon className="mr-1.5 h-3.5 w-3.5" /> Add link
+            <LinkIcon className="me-1.5 h-3.5 w-3.5" /> Add link
           </Button>
         )}
       </div>

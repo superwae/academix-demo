@@ -54,10 +54,10 @@ export function AccountantTransactionsPage() {
                 <TableRow>
                   <TableHead>Reference</TableHead>
                   <TableHead>Counterparty</TableHead>
-                  <TableHead className="text-right">Amount</TableHead>
+                  <TableHead className="text-end">Amount</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead className="text-right">When</TableHead>
+                  <TableHead className="text-end">When</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -65,7 +65,7 @@ export function AccountantTransactionsPage() {
                   <TableRow key={r.id}>
                     <TableCell className="font-mono text-xs">{r.id}</TableCell>
                     <TableCell>{r.party}</TableCell>
-                    <TableCell className="text-right tabular-nums">
+                    <TableCell className="text-end tabular-nums">
                       {r.amount === 0 ? "—" : `$${r.amount.toFixed(2)}`}
                     </TableCell>
                     <TableCell>{r.type}</TableCell>
@@ -82,7 +82,7 @@ export function AccountantTransactionsPage() {
                         {r.status}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right text-muted-foreground text-sm">{r.when}</TableCell>
+                    <TableCell className="text-end text-muted-foreground text-sm">{r.when}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

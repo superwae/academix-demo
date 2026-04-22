@@ -172,7 +172,7 @@ export function AdminReportsPage() {
             key={report.id}
             onClick={() => setSelectedReport(report.id)}
             className={cn(
-              "flex flex-col items-start gap-2 rounded-xl border p-4 text-left transition-all",
+              "flex flex-col items-start gap-2 rounded-xl border p-4 text-start transition-all",
               selectedReport === report.id
                 ? "border-primary bg-primary/5 shadow-sm"
                 : "border-border bg-card hover:border-primary/30 hover:bg-muted/30"
@@ -213,15 +213,15 @@ export function AdminReportsPage() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => handleExport('csv')}>
-                <FileSpreadsheet className="mr-2 h-4 w-4" />
+                <FileSpreadsheet className="me-2 h-4 w-4" />
                 Export as CSV
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleExport('pdf')}>
-                <FileText className="mr-2 h-4 w-4" />
+                <FileText className="me-2 h-4 w-4" />
                 Export as PDF
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleExport('json')}>
-                <FileJson className="mr-2 h-4 w-4" />
+                <FileJson className="me-2 h-4 w-4" />
                 Export as JSON
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -437,10 +437,10 @@ export function AdminReportsPage() {
                         <table className="w-full text-sm">
                           <thead>
                             <tr className="border-b bg-muted/50">
-                              <th className="px-4 py-2 text-left font-medium text-muted-foreground">Student</th>
-                              <th className="px-4 py-2 text-left font-medium text-muted-foreground">Engagement</th>
-                              <th className="px-4 py-2 text-left font-medium text-muted-foreground">Completion</th>
-                              <th className="px-4 py-2 text-left font-medium text-muted-foreground">Avg. Grade</th>
+                              <th className="px-4 py-2 text-start font-medium text-muted-foreground">Student</th>
+                              <th className="px-4 py-2 text-start font-medium text-muted-foreground">Engagement</th>
+                              <th className="px-4 py-2 text-start font-medium text-muted-foreground">Completion</th>
+                              <th className="px-4 py-2 text-start font-medium text-muted-foreground">Avg. Grade</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -493,12 +493,12 @@ export function AdminReportsPage() {
                         <table className="w-full text-sm">
                           <thead>
                             <tr className="border-b bg-muted/50">
-                              <th className="px-4 py-2 text-left font-medium text-muted-foreground">Student</th>
-                              <th className="px-4 py-2 text-left font-medium text-muted-foreground">Risk Level</th>
-                              <th className="px-4 py-2 text-left font-medium text-muted-foreground">Risk Score</th>
-                              <th className="px-4 py-2 text-left font-medium text-muted-foreground">Engagement</th>
-                              <th className="px-4 py-2 text-left font-medium text-muted-foreground">Completion</th>
-                              <th className="px-4 py-2 text-left font-medium text-muted-foreground">Risk Factors</th>
+                              <th className="px-4 py-2 text-start font-medium text-muted-foreground">Student</th>
+                              <th className="px-4 py-2 text-start font-medium text-muted-foreground">Risk Level</th>
+                              <th className="px-4 py-2 text-start font-medium text-muted-foreground">Risk Score</th>
+                              <th className="px-4 py-2 text-start font-medium text-muted-foreground">Engagement</th>
+                              <th className="px-4 py-2 text-start font-medium text-muted-foreground">Completion</th>
+                              <th className="px-4 py-2 text-start font-medium text-muted-foreground">Risk Factors</th>
                             </tr>
                           </thead>
                           <tbody>

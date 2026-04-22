@@ -1,5 +1,7 @@
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState, type ComponentType } from "react";
+import { useTranslation } from "react-i18next";
+import { LanguagePicker } from "../LanguagePicker";
 import {
   LayoutDashboard,
   Users,
@@ -56,59 +58,60 @@ import { Badge } from "../ui/badge";
 
 type NavItem = {
   to: string;
-  label: string;
+  labelKey: string;
   icon: ComponentType<{ className?: string }>;
   badge?: number;
 };
 
 type NavSection = {
-  title: string;
+  titleKey: string;
   items: NavItem[];
 };
 
 // Admin navigation - ALL paths use /admin/* prefix
 const ADMIN_NAV_SECTIONS: NavSection[] = [
   {
-    title: "Overview",
+    titleKey: "nav:sectionOverview",
     items: [
-      { to: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
+      { to: "/admin/dashboard", labelKey: "nav:dashboard", icon: LayoutDashboard },
     ],
   },
   {
-    title: "Management",
+    titleKey: "nav:sectionManagement",
     items: [
-      { to: "/admin/users", label: "Users", icon: Users },
-      { to: "/admin/messages", label: "Messages", icon: MessageSquare },
-      { to: "/admin/courses", label: "Courses", icon: BookOpen, badge: 3 },
+      { to: "/admin/users", labelKey: "nav:users", icon: Users },
+      { to: "/admin/messages", labelKey: "nav:messages", icon: MessageSquare },
+      { to: "/admin/courses", labelKey: "nav:courses", icon: BookOpen, badge: 3 },
     ],
   },
   {
-    title: "Finance",
+    titleKey: "nav:sectionFinance",
     items: [
-      { to: "/admin/finance", label: "Overview", icon: DollarSign },
-      { to: "/admin/finance/transactions", label: "Transactions", icon: CreditCard },
-      { to: "/admin/finance/payouts", label: "Payouts", icon: Wallet },
-      { to: "/admin/finance/revenue-split", label: "Revenue Split", icon: PieChart },
+      { to: "/admin/finance", labelKey: "nav:overview", icon: DollarSign },
+      { to: "/admin/finance/transactions", labelKey: "nav:transactions", icon: CreditCard },
+      { to: "/admin/finance/payouts", labelKey: "nav:payouts", icon: Wallet },
+      { to: "/admin/finance/revenue-split", labelKey: "nav:revenueSplit", icon: PieChart },
     ],
   },
   {
-    title: "Subscriptions",
+    titleKey: "nav:sectionSubscriptions",
     items: [
-      { to: "/admin/subscription-plans", label: "Subscription Plans", icon: Crown },
-      { to: "/admin/subscription", label: "Subscription", icon: CreditCard },
+      { to: "/admin/subscription-plans", labelKey: "nav:subscriptionPlans", icon: Crown },
+      { to: "/admin/subscription", labelKey: "nav:subscription", icon: CreditCard },
     ],
   },
   {
-    title: "Reports & System",
+    titleKey: "nav:sectionReportsSystem",
     items: [
-      { to: "/admin/reports", label: "Reports", icon: FileText },
-      { to: "/admin/audit-logs", label: "Audit Logs", icon: ScrollText },
-      { to: "/admin/settings", label: "Settings", icon: Settings },
+      { to: "/admin/reports", labelKey: "nav:reports", icon: FileText },
+      { to: "/admin/audit-logs", labelKey: "nav:auditLogs", icon: ScrollText },
+      { to: "/admin/settings", labelKey: "nav:settings", icon: Settings },
     ],
   },
 ];
 
 export function AdminLayout() {
+  const { t } = useTranslation(['nav', 'common', 'auth']);
   const theme = useAppStore((s) => s.data.theme);
   const customThemeColor = useAppStore((s) => s.data.customThemeColor);
   const mixTheme = useAppStore((s) => s.data.mixTheme);
@@ -125,19 +128,19 @@ export function AdminLayout() {
 
   const handleLogout = () => {
     logout();
-    toast.success("Logged out successfully");
+    toast.success(t('auth:logoutSuccess'));
     navigate("/");
   };
 
   const toggleDarkMode = () => {
     const newTheme = isDarkMode ? 'light' : 'dark';
     setTheme(newTheme);
-    toast.success(`Switched to ${newTheme} mode`);
+    toast.success(newTheme === 'dark' ? t('common:switchedToDarkMode') : t('common:switchedToLightMode'));
   };
 
   const themeLabel = useMemo(
-    () => THEMES.find((t) => t.id === theme)?.label ?? "Theme",
-    [theme]
+    () => THEMES.find((th) => th.id === theme)?.label ?? t('common:theme'),
+    [theme, t]
   );
 
   useEffect(() => {
@@ -161,7 +164,7 @@ export function AdminLayout() {
                   variant="ghost"
                   size="icon"
                   className="lg:hidden"
-                  aria-label="Open navigation"
+                  aria-label={t('common:openNavigation')}
                 >
                   <Menu className="h-5 w-5" />
                 </Button>
@@ -188,7 +191,7 @@ export function AdminLayout() {
               <div className="hidden sm:block leading-tight">
                 <div className="text-base font-bold tracking-tight">AcademiX</div>
                 <div className="text-[10px] text-muted-foreground font-medium -mt-0.5">
-                  Admin Portal
+                  {t('nav:adminPortal')}
                 </div>
               </div>
             </NavLink>
@@ -203,26 +206,26 @@ export function AdminLayout() {
           {/* Center: Global Search */}
           <div className="flex-1 max-w-md mx-4 hidden md:block">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 type="search"
-                placeholder="Search users, courses, reports..."
+                placeholder={t('common:searchAdminPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 h-9 bg-muted/50 border-transparent focus:border-primary/30 focus:bg-background"
+                className="ps-9 h-9 bg-muted/50 border-transparent focus:border-primary/30 focus:bg-background"
               />
             </div>
           </div>
 
           {/* Right: Actions */}
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ms-auto flex items-center gap-2">
             {/* Search button for mobile */}
             <Button
               type="button"
               variant="ghost"
               size="icon"
               className="h-10 w-10 md:hidden"
-              aria-label="Open search"
+              aria-label={t('common:openSearch')}
               onClick={() => setMobileSearchOpen(true)}
             >
               <Search className="h-4 w-4" />
@@ -256,7 +259,7 @@ export function AdminLayout() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-44">
                   <DropdownMenuLabel className="text-xs font-semibold">
-                    Choose Theme
+                    {t('common:chooseTheme')}
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuRadioGroup
@@ -279,42 +282,44 @@ export function AdminLayout() {
                           }
                         }
                         setTheme('custom');
-                        toast.success("Custom theme enabled", {
-                          description: "Use the color picker to choose your color",
+                        toast.success(t('common:customThemeEnabled'), {
+                          description: t('common:customThemeEnabledDesc'),
                         });
                       } else {
                         setTheme(next);
-                        toast.success("Theme updated", {
-                          description: `Switched to ${THEMES.find((t) => t.id === next)?.label}`,
+                        toast.success(t('common:themeUpdated'), {
+                          description: t('common:switchedToTheme', {
+                            theme: THEMES.find((th) => th.id === next)?.label,
+                          }),
                         });
                       }
                     }}
                   >
-                    {THEMES.filter(t => t.id !== 'custom').map((t) => (
+                    {THEMES.filter(th => th.id !== 'custom').map((th) => (
                       <DropdownMenuRadioItem
-                        key={t.id}
-                        value={t.id}
+                        key={th.id}
+                        value={th.id}
                         className="text-xs"
                       >
                         <div className="flex items-center gap-2">
                           <span
                             className={cn(
                               "h-3 w-3 rounded-full border border-border shadow-sm",
-                              t.id === "light" && "bg-white",
-                              t.id === "dark" && "bg-black",
-                              t.id === "purple" && "bg-[#a855f7]",
-                              t.id === "sky" && "bg-[#06b6d4]",
-                              t.id === "green" && "bg-[#22c55e]",
-                              t.id === "emerald" && "bg-[#10b981]",
-                              t.id === "orange" && "bg-[#f97316]",
-                              t.id === "amber" && "bg-[#f59e0b]",
-                              t.id === "red" && "bg-[#ef4444]",
-                              t.id === "rose" && "bg-[#f43f5e]",
-                              t.id === "pink" && "bg-[#ec4899]",
-                              t.id === "indigo" && "bg-[#6366f1]"
+                              th.id === "light" && "bg-white",
+                              th.id === "dark" && "bg-black",
+                              th.id === "purple" && "bg-[#a855f7]",
+                              th.id === "sky" && "bg-[#06b6d4]",
+                              th.id === "green" && "bg-[#22c55e]",
+                              th.id === "emerald" && "bg-[#10b981]",
+                              th.id === "orange" && "bg-[#f97316]",
+                              th.id === "amber" && "bg-[#f59e0b]",
+                              th.id === "red" && "bg-[#ef4444]",
+                              th.id === "rose" && "bg-[#f43f5e]",
+                              th.id === "pink" && "bg-[#ec4899]",
+                              th.id === "indigo" && "bg-[#6366f1]"
                             )}
                           />
-                          <span>{t.label}</span>
+                          <span>{th.label}</span>
                         </div>
                       </DropdownMenuRadioItem>
                     ))}
@@ -325,7 +330,7 @@ export function AdminLayout() {
                           className="h-3 w-3 rounded-full border border-border shadow-sm"
                           style={{ background: customThemeColor || 'hsl(222, 84%, 60%)' }}
                         />
-                        <span>Custom Color</span>
+                        <span>{t('common:customColor')}</span>
                       </div>
                     </DropdownMenuRadioItem>
                   </DropdownMenuRadioGroup>
@@ -339,7 +344,7 @@ export function AdminLayout() {
               size="icon"
               onClick={toggleDarkMode}
               className="h-9 w-9"
-              title={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+              title={isDarkMode ? t('common:switchToLightMode') : t('common:switchToDarkMode')}
             >
               {isDarkMode ? (
                 <Sun className="h-4 w-4" />
@@ -347,6 +352,9 @@ export function AdminLayout() {
                 <Moon className="h-4 w-4" />
               )}
             </Button>
+
+            {/* Language Picker */}
+            <LanguagePicker compact />
 
             <NotificationBell />
 
@@ -365,12 +373,12 @@ export function AdminLayout() {
                       {user?.firstName?.[0]}{user?.lastName?.[0]}
                     </div>
                   )}
-                  <div className="hidden lg:block text-left">
+                  <div className="hidden lg:block text-start">
                     <p className="text-sm font-medium leading-none">
                       {user?.firstName} {user?.lastName}
                     </p>
                     <p className="text-[10px] text-muted-foreground">
-                      {user?.roles?.[0] || "Admin"}
+                      {user?.roles?.[0] || t('nav:admin')}
                     </p>
                   </div>
                   <ChevronDown className="h-3 w-3 text-muted-foreground hidden lg:block" />
@@ -385,17 +393,17 @@ export function AdminLayout() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => navigate("/admin/settings")}>
-                  <Settings className="mr-2 h-4 w-4" />
-                  Settings
+                  <Settings className="me-2 h-4 w-4" />
+                  {t('common:settings')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate("/admin/audit-logs")}>
-                  <ScrollText className="mr-2 h-4 w-4" />
-                  Activity Log
+                  <ScrollText className="me-2 h-4 w-4" />
+                  {t('nav:activityLog')}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Log out
+                  <LogOut className="me-2 h-4 w-4" />
+                  {t('common:logout')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -406,9 +414,9 @@ export function AdminLayout() {
       <Dialog open={mobileSearchOpen} onOpenChange={setMobileSearchOpen}>
         <DialogContent className="max-w-md gap-4">
           <DialogHeader>
-            <DialogTitle>Search admin</DialogTitle>
+            <DialogTitle>{t('common:searchAdminTitle')}</DialogTitle>
             <DialogDescription>
-              Search users, courses, or reports — same as the bar on larger screens.
+              {t('common:searchAdminDescription')}
             </DialogDescription>
           </DialogHeader>
           <form
@@ -426,14 +434,14 @@ export function AdminLayout() {
           >
             <Input
               type="search"
-              placeholder="Search users, courses, reports…"
+              placeholder={t('common:searchAdminPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="h-11 text-base"
               autoComplete="off"
             />
             <Button type="submit" className="w-full h-11">
-              Search
+              {t('common:search')}
             </Button>
           </form>
         </DialogContent>
@@ -473,12 +481,13 @@ function AdminNavList({
   onNavigate?: () => void;
   unreadMessages?: number;
 }) {
+  const { t } = useTranslation(['nav']);
   return (
     <nav className="flex flex-col gap-4" aria-label="Main navigation">
       {ADMIN_NAV_SECTIONS.map((section) => (
-        <div key={section.title}>
+        <div key={section.titleKey}>
           <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-            {section.title}
+            {t(section.titleKey)}
           </div>
           <div className="mt-1 flex flex-col gap-0.5">
             {section.items.map((item) => {
@@ -507,7 +516,7 @@ function AdminNavList({
                         isActive ? "text-primary" : "text-muted-foreground"
                       )}
                     />
-                    <span className="flex-1 truncate">{item.label}</span>
+                    <span className="flex-1 truncate">{t(item.labelKey)}</span>
                     {showMessagesBadge && (
                       <Badge
                         variant="destructive"

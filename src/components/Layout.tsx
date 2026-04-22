@@ -338,9 +338,9 @@ export function Layout() {
           </div>
 
           {/* Search Bar */}
-          <div ref={searchContainerRef} className="ml-auto hidden w-[400px] max-w-[35vw] items-center lg:flex relative">
+          <div ref={searchContainerRef} className="ms-auto hidden w-[400px] max-w-[35vw] items-center lg:flex relative">
             <form onSubmit={handleSearchSubmit} className="relative w-full group">
-              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" />
+              <Search className="pointer-events-none absolute start-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" />
               <Input
                 value={search}
                 onChange={(e) => {
@@ -353,7 +353,7 @@ export function Layout() {
                   }
                 }}
                 placeholder="Search courses, assignments, messages…"
-                className="h-12 pl-11 pr-10 rounded-xl border-2 border-border/50 bg-background/50 backdrop-blur-sm focus-visible:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/20 transition-all"
+                className="h-12 ps-11 pe-10 rounded-xl border-2 border-border/50 bg-background/50 backdrop-blur-sm focus-visible:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/20 transition-all"
               />
               {search && (
                 <button
@@ -363,7 +363,7 @@ export function Layout() {
                     setSearchResults([]);
                     setShowResults(false);
                   }}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  className="absolute end-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                   aria-label="Clear search"
                 >
                   <X className="h-4 w-4" />
@@ -389,7 +389,7 @@ export function Layout() {
                           key={`${result.type}-${result.id}`}
                           type="button"
                           onClick={() => handleResultClick(result)}
-                          className="w-full text-left p-3 rounded-lg hover:bg-accent/50 transition-colors group"
+                          className="w-full text-start p-3 rounded-lg hover:bg-accent/50 transition-colors group"
                         >
                           <div className="flex items-start gap-3">
                             <div className="flex-shrink-0 mt-0.5">
@@ -692,7 +692,7 @@ function NavList({ onNavigate }: { onNavigate?: () => void }) {
               {isActive && (
                 <motion.div
                   layoutId="activeNav"
-                  className="absolute right-0 top-1 bottom-1 w-1 rounded-l-full bg-primary shadow-sm shadow-primary/50"
+                  className="absolute end-0 top-1 bottom-1 w-1 rounded-l-full bg-primary shadow-sm shadow-primary/50"
                   transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 />
               )}

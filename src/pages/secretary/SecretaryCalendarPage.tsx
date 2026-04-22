@@ -44,7 +44,7 @@ export function SecretaryCalendarPage() {
                   animate={{ opacity: 1 }}
                   transition={{ delay: i * 0.03 }}
                   className={cn(
-                    "rounded-xl border border-border/50 bg-muted/20 p-2 min-h-[88px] text-left",
+                    "rounded-xl border border-border/50 bg-muted/20 p-2 min-h-[88px] text-start",
                     block && "bg-primary/10 border-primary/25"
                   )}
                 >

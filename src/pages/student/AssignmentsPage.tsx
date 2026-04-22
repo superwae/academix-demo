@@ -454,11 +454,11 @@ export function AssignmentsPage() {
                             'gap-1 rounded-full border-violet-300/90 bg-violet-100 font-medium text-violet-950 shadow-none hover:bg-violet-100 dark:border-violet-500/40 dark:bg-violet-500/15 dark:text-violet-100 dark:hover:bg-violet-500/20'
                         )}
                       >
-                        <status.icon className="h-3 w-3 mr-1" />
+                        <status.icon className="h-3 w-3 me-1" />
                         {status.label}
                       </Badge>
                       <Badge variant="outline">
-                        <Clock className="h-3 w-3 mr-1" />
+                        <Clock className="h-3 w-3 me-1" />
                         Due {format(new Date(assignment.dueAt), 'MMM d, p')}
                       </Badge>
                       {submission?.score != null && typeof submission.score === 'number' && (

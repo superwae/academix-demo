@@ -154,7 +154,7 @@ export function CourseDiscountsPage() {
           </div>
         </div>
         <Button size="sm" onClick={openCreateDialog}>
-          <Plus className="mr-2 h-4 w-4" />
+          <Plus className="me-2 h-4 w-4" />
           Create Discount
         </Button>
       </div>
@@ -169,13 +169,13 @@ export function CourseDiscountsPage() {
           <table className="w-full">
             <thead className="border-b border-border bg-muted/50">
               <tr>
-                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Code</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Type</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Value</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Dates</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Usage</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Status</th>
-                <th className="px-4 py-3 text-right text-sm font-medium text-muted-foreground">Actions</th>
+                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">Code</th>
+                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">Type</th>
+                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">Value</th>
+                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">Dates</th>
+                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">Usage</th>
+                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">Status</th>
+                <th className="px-4 py-3 text-end text-sm font-medium text-muted-foreground">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -231,7 +231,7 @@ export function CourseDiscountsPage() {
                         {discount.isActive ? "Active" : "Inactive"}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-right">
+                    <td className="px-4 py-3 text-end">
                       <div className="flex items-center justify-end gap-2">
                         <Button
                           variant="outline"

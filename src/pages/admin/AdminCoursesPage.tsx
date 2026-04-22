@@ -262,12 +262,12 @@ export function AdminCoursesPage() {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search courses or instructors..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
+            className="ps-9"
           />
         </div>
         <DropdownMenu>
@@ -295,13 +295,13 @@ export function AdminCoursesPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/50">
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Course</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Instructor</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Category</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Price</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Rating</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
-                <th className="px-4 py-3 text-right font-medium text-muted-foreground">Actions</th>
+                <th className="px-4 py-3 text-start font-medium text-muted-foreground">Course</th>
+                <th className="px-4 py-3 text-start font-medium text-muted-foreground">Instructor</th>
+                <th className="px-4 py-3 text-start font-medium text-muted-foreground">Category</th>
+                <th className="px-4 py-3 text-start font-medium text-muted-foreground">Price</th>
+                <th className="px-4 py-3 text-start font-medium text-muted-foreground">Rating</th>
+                <th className="px-4 py-3 text-start font-medium text-muted-foreground">Status</th>
+                <th className="px-4 py-3 text-end font-medium text-muted-foreground">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -319,7 +319,7 @@ export function AdminCoursesPage() {
                     <td className="px-4 py-3"><div className="h-4 w-12 animate-pulse rounded bg-muted" /></td>
                     <td className="px-4 py-3"><div className="h-4 w-12 animate-pulse rounded bg-muted" /></td>
                     <td className="px-4 py-3"><div className="h-6 w-20 animate-pulse rounded-full bg-muted" /></td>
-                    <td className="px-4 py-3"><div className="h-8 w-8 animate-pulse rounded bg-muted ml-auto" /></td>
+                    <td className="px-4 py-3"><div className="h-8 w-8 animate-pulse rounded bg-muted ms-auto" /></td>
                   </tr>
                 ))
               ) : (
@@ -362,7 +362,7 @@ export function AdminCoursesPage() {
                         {STATUS_CONFIG[course.status as keyof typeof STATUS_CONFIG]?.label}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-right">
+                    <td className="px-4 py-3 text-end">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button
@@ -380,11 +380,11 @@ export function AdminCoursesPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => navigate(`/courses/${course.id}`)}>
-                            <Eye className="mr-2 h-4 w-4" />
+                            <Eye className="me-2 h-4 w-4" />
                             View Course
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => openCourseInsights(course)}>
-                            <FileText className="mr-2 h-4 w-4" />
+                            <FileText className="me-2 h-4 w-4" />
                             Materials & ratings
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
@@ -393,7 +393,7 @@ export function AdminCoursesPage() {
                               className="text-emerald-600"
                               onClick={() => handlePublish(course)}
                             >
-                              <CheckCircle className="mr-2 h-4 w-4" />
+                              <CheckCircle className="me-2 h-4 w-4" />
                               Publish
                             </DropdownMenuItem>
                           )}
@@ -402,7 +402,7 @@ export function AdminCoursesPage() {
                               className="text-amber-600"
                               onClick={() => handleArchive(course)}
                             >
-                              <Archive className="mr-2 h-4 w-4" />
+                              <Archive className="me-2 h-4 w-4" />
                               Archive
                             </DropdownMenuItem>
                           )}
@@ -410,7 +410,7 @@ export function AdminCoursesPage() {
                             className="text-destructive"
                             onClick={() => handleDeleteClick(course)}
                           >
-                            <Trash2 className="mr-2 h-4 w-4" />
+                            <Trash2 className="me-2 h-4 w-4" />
                             Delete
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -555,7 +555,7 @@ export function AdminCoursesPage() {
             >
               {actionLoading === courseToDelete?.id ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="me-2 h-4 w-4 animate-spin" />
                   Deleting...
                 </>
               ) : (

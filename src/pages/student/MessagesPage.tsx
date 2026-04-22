@@ -365,11 +365,11 @@ export function MessagesPage() {
             size="sm"
             className="flex-1 sm:flex-initial"
           >
-            <MessageSquare className="h-4 w-4 mr-2" />
+            <MessageSquare className="h-4 w-4 me-2" />
             <span className="hidden sm:inline">Conversations</span>
             <span className="sm:hidden">Chats</span>
             {totalUnread > 0 && (
-              <Badge variant="destructive" className="ml-2 h-5 min-w-5 px-1.5 text-xs">
+              <Badge variant="destructive" className="ms-2 h-5 min-w-5 px-1.5 text-xs">
                 {totalUnread}
               </Badge>
             )}
@@ -380,11 +380,11 @@ export function MessagesPage() {
             size="sm"
             className="flex-1 sm:flex-initial"
           >
-            <UserPlus className="h-4 w-4 mr-2" />
+            <UserPlus className="h-4 w-4 me-2" />
             <span className="hidden sm:inline">Requests</span>
             <span className="sm:hidden">Req</span>
             {pendingRequestsCount > 0 && (
-              <Badge variant="destructive" className="ml-2 h-5 min-w-5 px-1.5 text-xs">
+              <Badge variant="destructive" className="ms-2 h-5 min-w-5 px-1.5 text-xs">
                 {pendingRequestsCount}
               </Badge>
             )}
@@ -432,7 +432,7 @@ export function MessagesPage() {
                         <button
                           key={conv.id}
                           className={cn(
-                            'w-full rounded-lg px-3 py-2.5 text-left text-sm transition-all',
+                            'w-full rounded-lg px-3 py-2.5 text-start text-sm transition-all',
                             'hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                             isActive && 'bg-accent border border-primary/30'
                           )}
@@ -464,7 +464,7 @@ export function MessagesPage() {
                                   )}
                               </div>
                               {conv.lastMessage && (
-                                <p className="truncate text-xs text-muted-foreground mt-1 ml-6">
+                                <p className="truncate text-xs text-muted-foreground mt-1 ms-6">
                                   {conv.lastMessage.senderName}: {conv.lastMessage.content}
                                 </p>
                               )}
@@ -475,7 +475,7 @@ export function MessagesPage() {
                               </Badge>
                             )}
                           </div>
-                          <p className="text-xs text-muted-foreground mt-1 ml-6">
+                          <p className="text-xs text-muted-foreground mt-1 ms-6">
                             {formatDistanceToNow(new Date(conv.lastMessageAt), { addSuffix: true })}
                           </p>
                         </button>
@@ -732,7 +732,7 @@ export function MessagesPage() {
                   <p className="text-sm text-muted-foreground mt-1">You're all caught up!</p>
                 </div>
               ) : (
-                <div className="space-y-3 pr-4">
+                <div className="space-y-3 pe-4">
                   {requests.map((request) => (
                     <div key={request.id} className="rounded-lg border p-4">
                       <div className="flex items-start justify-between gap-4">

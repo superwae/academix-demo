@@ -529,7 +529,7 @@ export function CourseLessonsPage() {
                               transition={{ duration: 0.2, delay: lessonIndex * 0.05 }}
                               onClick={() => handleLessonClick(lesson)}
                               className={cn(
-                                "w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-muted/50 transition-colors group",
+                                "w-full flex items-center gap-3 px-4 py-3 text-start hover:bg-muted/50 transition-colors group",
                                 lessonIndex === 0 && "rounded-t-none",
                                 sessionBadge === 'live' && "bg-primary/5 ring-1 ring-inset ring-primary/25"
                               )}
@@ -700,7 +700,7 @@ export function CourseLessonsPage() {
                       }
                     }}
                   >
-                    <PlayCircle className="h-4 w-4 mr-2" />
+                    <PlayCircle className="h-4 w-4 me-2" />
                     Continue Watching
                   </Button>
                 )}
@@ -746,7 +746,7 @@ export function CourseLessonsPage() {
                     <button
                       key={m.id}
                       type="button"
-                      className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors text-left group"
+                      className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors text-start group"
                       onClick={() => window.open(resolvePublicFileUrl(m.fileUrl), '_blank', 'noopener,noreferrer')}
                     >
                       <FileText className="h-4 w-4 text-muted-foreground group-hover:text-primary shrink-0" />

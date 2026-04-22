@@ -1,0 +1,77 @@
+{
+  "dashboard": {
+    "title": "Admin dashboard",
+    "totalUsers": "Total users",
+    "totalInstructors": "Instructors",
+    "totalStudents": "Students",
+    "totalCourses": "Courses",
+    "totalEnrollments": "Total enrollments",
+    "activeEnrollments": "Active enrollments",
+    "engagement": "Engagement",
+    "atRisk": "At-risk learners",
+    "systemHealth": "System health",
+    "operational": "All systems operational"
+  },
+  "users": {
+    "title": "Users",
+    "create": "Create user",
+    "edit": "Edit user",
+    "delete": "Delete user",
+    "suspend": "Suspend",
+    "activate": "Activate",
+    "assignRoles": "Assign roles",
+    "emailLabel": "Email",
+    "firstNameLabel": "First name",
+    "lastNameLabel": "Last name",
+    "phoneLabel": "Phone",
+    "roleLabel": "Role",
+    "statusLabel": "Status",
+    "statusActive": "Active",
+    "statusSuspended": "Suspended",
+    "search": "Search users",
+    "empty": "No users match your filters.",
+    "deleteConfirm": "Delete this user? This cannot be undone."
+  },
+  "courses": {
+    "title": "Courses",
+    "publish": "Publish",
+    "archive": "Archive",
+    "delete": "Delete",
+    "published": "Published",
+    "draft": "Draft",
+    "archived": "Archived"
+  },
+  "subscriptionPlans": {
+    "title": "Subscription plans",
+    "createPlan": "Create plan",
+    "editPlan": "Edit plan",
+    "nameLabel": "Plan name",
+    "descriptionLabel": "Description",
+    "monthlyPriceLabel": "Monthly price",
+    "yearlyPriceLabel": "Yearly price",
+    "maxCoursesLabel": "Max courses",
+    "maxSeatsPerCourseLabel": "Max seats per course",
+    "maxTotalSeatsLabel": "Max total seats",
+    "activeLabel": "Active",
+    "sortOrderLabel": "Sort order",
+    "unlimited": "Unlimited",
+    "deleteConfirm": "Delete this plan? Instructors on it will keep access until renewal.",
+    "empty": "No subscription plans yet."
+  },
+  "finance": {
+    "overview": "Overview",
+    "transactions": "Transactions",
+    "payouts": "Payouts",
+    "revenueSplit": "Revenue split",
+    "totalRevenue": "Total revenue",
+    "totalTransactions": "Total transactions",
+    "pendingPayouts": "Pending payouts",
+    "refunds": "Refunds"
+  },
+  "settings": {
+    "title": "Platform settings",
+    "platformSettings": "Platform settings",
+    "activityLog": "Activity log",
+    "emailTemplates": "Email templates"
+  }
+}

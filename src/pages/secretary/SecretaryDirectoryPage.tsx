@@ -22,8 +22,8 @@ export function SecretaryDirectoryPage() {
       </div>
 
       <div className="relative max-w-xl">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input placeholder="Search by name, email, or cohort…" className="pl-10 h-11" />
+        <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input placeholder="Search by name, email, or cohort…" className="ps-10 h-11" />
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">

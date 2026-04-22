@@ -272,7 +272,7 @@ export function EditAssignmentPage() {
                   <Button type="submit" variant="gradient" className="w-full" disabled={loading}>
                     {loading ? (
                       <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        <Loader2 className="h-4 w-4 me-2 animate-spin" />
                         Saving...
                       </>
                     ) : (
@@ -286,7 +286,7 @@ export function EditAssignmentPage() {
                     onClick={(e) => handleSubmit(e, true)}
                     disabled={loading}
                   >
-                    <Save className="h-4 w-4 mr-2" />
+                    <Save className="h-4 w-4 me-2" />
                     Save as Draft
                   </Button>
                   <Button

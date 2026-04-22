@@ -53,7 +53,7 @@ export function TeacherAtRiskStudentsPage() {
         </div>
         <Button variant="outline" size="sm" asChild>
           <Link to="/teacher/students">
-            <ArrowLeft className="mr-1 h-3 w-3" />
+            <ArrowLeft className="me-1 h-3 w-3" />
             Back to Students
           </Link>
         </Button>
@@ -84,7 +84,7 @@ export function TeacherAtRiskStudentsPage() {
               </Button>
             </div>
           ) : (
-            <div className="max-h-[60vh] overflow-y-auto scroll-fancy space-y-2 pr-1">
+            <div className="max-h-[60vh] overflow-y-auto scroll-fancy space-y-2 pe-1">
               {atRiskStudents.map((student) => (
                 <AtRiskStudentCard key={student.userId} student={student} />
               ))}
@@ -135,13 +135,13 @@ function AtRiskStudentCard({ student }: { student: StudentAnalytics }) {
         <div className="flex flex-col gap-1">
           <Button variant="outline" size="sm" asChild>
             <Link to={`/teacher/students/${student.userId}`}>
-              <Users className="h-3 w-3 mr-1" />
+              <Users className="h-3 w-3 me-1" />
               View
             </Link>
           </Button>
           <Button variant="ghost" size="sm" asChild>
             <Link to={`/teacher/messages?student=${student.userId}`}>
-              <MessageSquare className="h-3 w-3 mr-1" />
+              <MessageSquare className="h-3 w-3 me-1" />
               Message
             </Link>
           </Button>

@@ -1,0 +1,43 @@
+{
+  "landing": {
+    "heroTitle": "Learn. Teach. Grow with AcademiX.",
+    "heroSubtitle": "A modern platform for live and on-demand learning — built for students, instructors, and institutions.",
+    "heroCtaBrowse": "Browse courses",
+    "heroCtaSignUp": "Get started free",
+    "howItWorksTitle": "How it works",
+    "featuresTitle": "Everything you need to teach and learn",
+    "faqTitle": "Frequently asked questions",
+    "ctaTitle": "Ready to start learning?",
+    "ctaSubtitle": "Join AcademiX today and unlock hundreds of courses."
+  },
+  "catalog": {
+    "title": "Course catalog",
+    "subtitle": "Explore live classes and self-paced courses from top instructors.",
+    "searchPlaceholder": "Search courses, topics, or instructors",
+    "filterCategory": "Category",
+    "filterLevel": "Level",
+    "filterModality": "Format",
+    "sortNewest": "Newest",
+    "sortTopRated": "Top rated",
+    "sortPriceLow": "Price: low to high",
+    "sortPriceHigh": "Price: high to low",
+    "noResults": "No courses match your filters.",
+    "loadMore": "Load more courses"
+  },
+  "courseDetails": {
+    "enroll": "Enroll now",
+    "enrolling": "Enrolling…",
+    "alreadyEnrolled": "You're enrolled",
+    "reEnroll": "Enroll in a new batch",
+    "checkout": "Go to checkout",
+    "sectionsTitle": "Available sections",
+    "selectSection": "Choose a section",
+    "lessonsTitle": "What you'll learn",
+    "reviewsTitle": "Student reviews",
+    "instructorTitle": "About the instructor",
+    "durationLabel": "Duration",
+    "seatsRemaining": "{{count}} seats remaining",
+    "sessionFull": "This section is full",
+    "sectionInactive": "This section is not accepting enrollments"
+  }
+}

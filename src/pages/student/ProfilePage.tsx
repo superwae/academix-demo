@@ -299,10 +299,10 @@ export function ProfilePage() {
             />
           )}
           <div className="absolute inset-0 rounded-2xl bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(255,255,255,0.2),transparent)]" />
-          <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent rounded-b-2xl" />
+          <div className="absolute bottom-0 start-0 end-0 h-24 bg-gradient-to-t from-background to-transparent rounded-b-2xl" />
           <button
             type="button"
-            className="absolute top-3 right-3 flex items-center gap-2 rounded-lg border border-white/30 bg-black/40 px-3 py-2 text-sm font-medium text-white backdrop-blur-sm opacity-0 transition-opacity group-hover/cover:opacity-100 focus:opacity-100 hover:bg-black/50"
+            className="absolute top-3 end-3 flex items-center gap-2 rounded-lg border border-white/30 bg-black/40 px-3 py-2 text-sm font-medium text-white backdrop-blur-sm opacity-0 transition-opacity group-hover/cover:opacity-100 focus:opacity-100 hover:bg-black/50"
             onClick={handleCoverUpload}
             disabled={uploadingCover}
             aria-label="Change cover image"
@@ -361,11 +361,11 @@ export function ProfilePage() {
               </div>
               <div className="flex flex-wrap gap-2 mt-3">
                 <Badge variant="secondary" className="font-medium">
-                  <BookOpen className="h-3.5 w-3.5 mr-1" />
+                  <BookOpen className="h-3.5 w-3.5 me-1" />
                   {MOCK_STATS.courses} courses
                 </Badge>
                 <Badge variant="secondary" className="font-medium">
-                  <Award className="h-3.5 w-3.5 mr-1" />
+                  <Award className="h-3.5 w-3.5 me-1" />
                   {MOCK_STATS.certifications} certifications
                 </Badge>
               </div>

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -10,6 +11,7 @@ import { toast } from 'sonner';
 import { GraduationCap, Loader2, BookOpen, UserCircle } from 'lucide-react';
 
 export function RegisterPage() {
+  const { t } = useTranslation(['auth', 'common', 'errors']);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -35,17 +37,17 @@ export function RegisterPage() {
     e.preventDefault();
 
     if (!formData.email || !formData.password || !formData.firstName || !formData.lastName) {
-      toast.error('Please fill in all required fields');
+      toast.error(t('auth:register.missingFields'));
       return;
     }
 
     if (formData.password.length < 8) {
-      toast.error('Password must be at least 8 characters long');
+      toast.error(t('errors:passwordTooShort'));
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      toast.error('Passwords do not match');
+      toast.error(t('errors:passwordsDoNotMatch'));
       return;
     }
 
@@ -59,15 +61,15 @@ export function RegisterPage() {
         formData.phoneNumber || undefined,
         formData.role === 'Instructor' ? 'Instructor' : undefined
       );
-      
+
       // Get user from store to check roles
       const { user } = useAuthStore.getState();
-      
+
       // Check if user has Instructor role
       const isInstructor = user?.roles?.includes('Instructor') || user?.roles?.includes('instructor');
-      
-      toast.success('Account created successfully!');
-      
+
+      toast.success(t('auth:register.successToast'));
+
       // Redirect based on role - use portal-specific paths
       if (isInstructor) {
         navigate('/teacher/dashboard');
@@ -77,7 +79,7 @@ export function RegisterPage() {
     } catch (error) {
       const raw = error instanceof Error ? error.message.trim() : ''
       const message =
-        raw.length > 200 ? `${raw.slice(0, 197)}…` : raw || 'Couldn’t create your account. Please try again.'
+        raw.length > 200 ? `${raw.slice(0, 197)}…` : raw || t('auth:register.failureFallback')
       toast.error(message, { duration: 5200 })
     } finally {
       setLoading(false);
@@ -103,16 +105,16 @@ export function RegisterPage() {
               </div>
             </div>
             <div>
-              <CardTitle className="text-2xl">Create Account</CardTitle>
+              <CardTitle className="text-2xl">{t('auth:register.title')}</CardTitle>
               <CardDescription className="mt-2">
-                Join AcademiX as a student or teacher
+                {t('auth:register.subtitle')}
               </CardDescription>
             </div>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label>I want to join as</Label>
+                <Label>{t('auth:register.roleLabel')}</Label>
                 <div className="grid grid-cols-2 gap-3">
                   <label
                     className={`flex cursor-pointer items-center gap-2 rounded-lg border-2 p-3 transition-colors ${
@@ -130,7 +132,7 @@ export function RegisterPage() {
                       className="sr-only"
                     />
                     <UserCircle className="h-5 w-5 shrink-0" />
-                    <span className="font-medium">Student</span>
+                    <span className="font-medium">{t('auth:register.roleStudent')}</span>
                   </label>
                   <label
                     className={`flex cursor-pointer items-center gap-2 rounded-lg border-2 p-3 transition-colors ${
@@ -148,18 +150,18 @@ export function RegisterPage() {
                       className="sr-only"
                     />
                     <BookOpen className="h-5 w-5 shrink-0" />
-                    <span className="font-medium">Teacher</span>
+                    <span className="font-medium">{t('auth:register.roleTeacher')}</span>
                   </label>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="firstName">First Name</Label>
+                  <Label htmlFor="firstName">{t('auth:register.firstNameLabel')}</Label>
                   <Input
                     id="firstName"
                     name="firstName"
                     type="text"
-                    placeholder="John"
+                    placeholder={t('auth:register.firstNamePlaceholder')}
                     value={formData.firstName}
                     onChange={handleChange}
                     required
@@ -167,12 +169,12 @@ export function RegisterPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="lastName">Last Name</Label>
+                  <Label htmlFor="lastName">{t('auth:register.lastNameLabel')}</Label>
                   <Input
                     id="lastName"
                     name="lastName"
                     type="text"
-                    placeholder="Doe"
+                    placeholder={t('auth:register.lastNamePlaceholder')}
                     value={formData.lastName}
                     onChange={handleChange}
                     required
@@ -181,12 +183,12 @@ export function RegisterPage() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t('auth:register.emailLabel')}</Label>
                 <Input
                   id="email"
                   name="email"
                   type="email"
-                  placeholder="you@example.com"
+                  placeholder={t('auth:register.emailPlaceholder')}
                   value={formData.email}
                   onChange={handleChange}
                   required
@@ -194,24 +196,24 @@ export function RegisterPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="phoneNumber">Phone Number (Optional)</Label>
+                <Label htmlFor="phoneNumber">{t('auth:register.phoneOptional')}</Label>
                 <Input
                   id="phoneNumber"
                   name="phoneNumber"
                   type="tel"
-                  placeholder="+1 (555) 000-0000"
+                  placeholder={t('auth:register.phonePlaceholder')}
                   value={formData.phoneNumber}
                   onChange={handleChange}
                   disabled={loading}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t('auth:register.passwordLabel')}</Label>
                 <Input
                   id="password"
                   name="password"
                   type="password"
-                  placeholder="••••••••"
+                  placeholder={t('auth:register.passwordPlaceholder')}
                   value={formData.password}
                   onChange={handleChange}
                   required
@@ -219,16 +221,16 @@ export function RegisterPage() {
                   minLength={8}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Must be at least 8 characters long
+                  {t('auth:register.passwordHint')}
                 </p>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Label htmlFor="confirmPassword">{t('auth:register.confirmPasswordLabel')}</Label>
                 <Input
                   id="confirmPassword"
                   name="confirmPassword"
                   type="password"
-                  placeholder="••••••••"
+                  placeholder={t('auth:register.passwordPlaceholder')}
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   required
@@ -238,18 +240,18 @@ export function RegisterPage() {
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Creating account...
+                    <Loader2 className="me-2 h-4 w-4 animate-spin" />
+                    {t('auth:register.submitting')}
                   </>
                 ) : (
-                  'Create Account'
+                  t('auth:register.submit')
                 )}
               </Button>
             </form>
             <div className="mt-6 text-center text-sm">
-              <span className="text-muted-foreground">Already have an account? </span>
+              <span className="text-muted-foreground">{t('auth:register.loginHint')} </span>
               <Link to="/login" className="text-primary hover:underline font-medium">
-                Sign in
+                {t('auth:register.loginCta')}
               </Link>
             </div>
           </CardContent>

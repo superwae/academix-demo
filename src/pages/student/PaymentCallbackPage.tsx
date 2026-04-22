@@ -100,7 +100,7 @@ export function PaymentCallbackPage() {
                 {isSubscription ? (
                   <Button asChild>
                     <Link to={`${portalBase}/subscription`}>
-                      <Crown className="mr-2 h-4 w-4" />
+                      <Crown className="me-2 h-4 w-4" />
                       View My Subscription
                     </Link>
                   </Button>
@@ -109,7 +109,7 @@ export function PaymentCallbackPage() {
                     {courseId && (
                       <Button asChild>
                         <Link to={`/student/my-classes/${courseId}/lessons`}>
-                          <BookOpen className="mr-2 h-4 w-4" />
+                          <BookOpen className="me-2 h-4 w-4" />
                           Go to Course
                         </Link>
                       </Button>

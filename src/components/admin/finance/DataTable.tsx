@@ -160,13 +160,13 @@ export function DataTable<T>({
                 </th>
               )}
               {columns.map((column) => {
-                const isRightAligned = column.className?.includes("text-right");
+                const isRightAligned = column.className?.includes("text-end");
                 return (
                   <th
                     key={column.key}
                     className={cn(
                       "px-4 py-3 font-medium text-muted-foreground",
-                      isRightAligned ? "text-right" : "text-left",
+                      isRightAligned ? "text-end" : "text-start",
                       column.sortable && "cursor-pointer hover:text-foreground select-none",
                       column.className
                     )}
@@ -183,7 +183,7 @@ export function DataTable<T>({
                 );
               })}
               {rowActions && rowActions.length > 0 && (
-                <th className="w-12 px-4 py-3 text-right font-medium text-muted-foreground">
+                <th className="w-12 px-4 py-3 text-end font-medium text-muted-foreground">
                   Actions
                 </th>
               )}
@@ -220,7 +220,7 @@ export function DataTable<T>({
                     </td>
                   ))}
                   {rowActions && rowActions.length > 0 && (
-                    <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+                    <td className="px-4 py-3 text-end" onClick={(e) => e.stopPropagation()}>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon" className="h-8 w-8">

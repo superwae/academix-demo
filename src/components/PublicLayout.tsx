@@ -1,24 +1,20 @@
 import { Outlet, Link, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
-import { GraduationCap, Menu } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { GraduationCap } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from './ui/button';
 import { useAuthStore } from '../store/useAuthStore';
 import { useAppStore } from '../store/useAppStore';
 import { applyTheme } from '../theme/applyTheme';
 import { AnimatedBackground } from './AnimatedBackground';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from './ui/dialog';
+import { LanguagePicker } from './LanguagePicker';
 
 export function PublicLayout() {
   const { isAuthenticated, user } = useAuthStore();
   const navigate = useNavigate();
   const mixTheme = useAppStore((s) => s.data.mixTheme);
+  const { t } = useTranslation(['nav', 'common']);
 
   // Reset theme to default on public pages so a previous user's custom theme
   // doesn't bleed into login/register/etc.
@@ -74,34 +70,35 @@ export function PublicLayout() {
           </Link>
 
           {/* Navigation */}
-          <nav className="ml-auto flex items-center gap-1 sm:gap-3">
+          <nav className="ms-auto flex items-center gap-1 sm:gap-3">
             <Link
               to="/#how-it-works"
               className="hidden md:inline-flex text-sm font-medium text-foreground/70 hover:text-foreground transition-colors px-2 py-1 rounded-md hover:bg-muted/50"
             >
-              How it works
+              {t('nav:howItWorks')}
             </Link>
             <Link
               to="/#features"
               className="hidden lg:inline-flex text-sm font-medium text-foreground/70 hover:text-foreground transition-colors px-2 py-1 rounded-md hover:bg-muted/50"
             >
-              Features
+              {t('nav:features')}
             </Link>
             <Link
               to="/#faq"
               className="hidden lg:inline-flex text-sm font-medium text-foreground/70 hover:text-foreground transition-colors px-2 py-1 rounded-md hover:bg-muted/50"
             >
-              FAQ
+              {t('nav:faq')}
             </Link>
             <Link
               to="/courses"
               className="text-sm font-medium text-foreground/70 hover:text-foreground transition-colors px-2 py-1 rounded-md hover:bg-muted/50"
             >
-              Courses
+              {t('nav:courses')}
             </Link>
+            <LanguagePicker compact />
             {isAuthenticated ? (
               <Button onClick={handleDashboardClick} variant="default">
-                Dashboard
+                {t('nav:dashboard')}
               </Button>
             ) : (
               <>
@@ -110,10 +107,10 @@ export function PublicLayout() {
                   variant="ghost"
                   className="hidden sm:inline-flex"
                 >
-                  Login
+                  {t('common:login')}
                 </Button>
                 <Button onClick={() => navigate('/register')} variant="default">
-                  Sign Up
+                  {t('common:signUp')}
                 </Button>
               </>
             )}

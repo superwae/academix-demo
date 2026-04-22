@@ -89,13 +89,13 @@ export function PublicCoursesPage() {
         <form onSubmit={handleSearch} className="space-y-4">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+              <Search className="absolute start-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
               <Input
                 type="text"
                 placeholder="Search courses..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-11"
+                className="ps-11"
               />
             </div>
             <Select
@@ -116,7 +116,7 @@ export function PublicCoursesPage() {
                 variant="outline"
                 onClick={() => setSelectedCategory('All')}
               >
-                <X className="mr-2 h-4 w-4" />
+                <X className="me-2 h-4 w-4" />
                 Clear Filter
               </Button>
             )}

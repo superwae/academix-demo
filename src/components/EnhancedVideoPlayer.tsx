@@ -373,7 +373,7 @@ const EmbeddedVideoPlayer = forwardRef<VideoPlayerHandle, {
               onClick={() => window.open(originalUrl, '_blank')}
               className="bg-white text-blue-700 hover:bg-white/90"
             >
-              <ExternalLink className="h-4 w-4 mr-2" />
+              <ExternalLink className="h-4 w-4 me-2" />
               Open Zoom Recording
             </Button>
             <Button
@@ -431,7 +431,7 @@ const EmbeddedVideoPlayer = forwardRef<VideoPlayerHandle, {
       </div>
 
       {/* Controls Overlay */}
-      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
+      <div className="absolute bottom-0 start-0 end-0 bg-gradient-to-t from-black/60 to-transparent p-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-white/80 text-xs px-2 py-1 bg-white/10 rounded">
@@ -769,7 +769,7 @@ const NativeVideoPlayer = forwardRef<VideoPlayerHandle, {
             onClick={() => window.open(src, '_blank')}
             className="bg-white text-gray-900 hover:bg-white/90"
           >
-            <ExternalLink className="h-4 w-4 mr-2" />
+            <ExternalLink className="h-4 w-4 me-2" />
             Open Video
           </Button>
         </div>
@@ -816,7 +816,7 @@ const NativeVideoPlayer = forwardRef<VideoPlayerHandle, {
         )}
       >
         {/* Top Controls */}
-        <div className="absolute top-4 right-4 flex gap-2">
+        <div className="absolute top-4 end-4 flex gap-2">
           <Button
             variant="ghost"
             size="icon"
@@ -852,7 +852,7 @@ const NativeVideoPlayer = forwardRef<VideoPlayerHandle, {
         </div>
 
         {/* Bottom Controls */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 space-y-2">
+        <div className="absolute bottom-0 start-0 end-0 p-4 space-y-2">
           {/* Progress Bar */}
           <Slider
             value={[currentTime]}

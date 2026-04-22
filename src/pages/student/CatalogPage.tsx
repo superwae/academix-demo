@@ -328,18 +328,18 @@ export function CatalogPage() {
       <div className="space-y-4">
         <div className="grid gap-3 md:grid-cols-4">
           <div className="md:col-span-2 relative">
-            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+            <Search className="absolute start-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
             <Input
               ref={searchInputRef}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search courses, instructors, providers… (Press / to focus)"
-              className="pl-11"
+              className="ps-11"
             />
             {query && (
               <button
                 onClick={() => setQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                className="absolute end-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 aria-label="Clear search"
               >
                 <X className="h-4 w-4" />
@@ -374,11 +374,11 @@ export function CatalogPage() {
             <Filter className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm text-muted-foreground">Active filters:</span>
             {filters.category !== 'All' && (
-              <Badge variant="subtle" className="gap-1.5 pr-1.5">
+              <Badge variant="subtle" className="gap-1.5 pe-1.5">
                 Category: {filters.category}
                 <button
                   onClick={() => setFilters((f) => ({ ...f, category: 'All' }))}
-                  className="ml-1 rounded-full hover:bg-background/50 p-0.5 transition-colors"
+                  className="ms-1 rounded-full hover:bg-background/50 p-0.5 transition-colors"
                   aria-label={`Remove category filter: ${filters.category}`}
                 >
                   <X className="h-3 w-3" />
@@ -386,11 +386,11 @@ export function CatalogPage() {
               </Badge>
             )}
             {filters.modality !== 'All' && (
-              <Badge variant="subtle" className="gap-1.5 pr-1.5">
+              <Badge variant="subtle" className="gap-1.5 pe-1.5">
                 Modality: {filters.modality}
                 <button
                   onClick={() => setFilters((f) => ({ ...f, modality: 'All' }))}
-                  className="ml-1 rounded-full hover:bg-background/50 p-0.5 transition-colors"
+                  className="ms-1 rounded-full hover:bg-background/50 p-0.5 transition-colors"
                   aria-label={`Remove modality filter: ${filters.modality}`}
                 >
                   <X className="h-3 w-3" />
@@ -398,11 +398,11 @@ export function CatalogPage() {
               </Badge>
             )}
             {filters.providerType !== 'All' && (
-              <Badge variant="subtle" className="gap-1.5 pr-1.5">
+              <Badge variant="subtle" className="gap-1.5 pe-1.5">
                 Provider: {filters.providerType}
                 <button
                   onClick={() => setFilters((f) => ({ ...f, providerType: 'All' }))}
-                  className="ml-1 rounded-full hover:bg-background/50 p-0.5 transition-colors"
+                  className="ms-1 rounded-full hover:bg-background/50 p-0.5 transition-colors"
                   aria-label={`Remove provider filter: ${filters.providerType}`}
                 >
                   <X className="h-3 w-3" />
@@ -410,11 +410,11 @@ export function CatalogPage() {
               </Badge>
             )}
             {filters.day !== 'All' && (
-              <Badge variant="subtle" className="gap-1.5 pr-1.5">
+              <Badge variant="subtle" className="gap-1.5 pe-1.5">
                 Day: {filters.day}
                 <button
                   onClick={() => setFilters((f) => ({ ...f, day: 'All' }))}
-                  className="ml-1 rounded-full hover:bg-background/50 p-0.5 transition-colors"
+                  className="ms-1 rounded-full hover:bg-background/50 p-0.5 transition-colors"
                   aria-label={`Remove day filter: ${filters.day}`}
                 >
                   <X className="h-3 w-3" />
@@ -610,7 +610,7 @@ export function CatalogPage() {
                     </div>
                   )}
                   {openCourse.sections && openCourse.sections.length > 0 ? (
-                    <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 scroll-fancy">
+                    <div className="space-y-3 max-h-[400px] overflow-y-auto pe-2 scroll-fancy">
                       {openCourse.sections.map((sec) => (
                         <label
                           key={sec.id}

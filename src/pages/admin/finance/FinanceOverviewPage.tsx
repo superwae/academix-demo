@@ -401,7 +401,7 @@ export function FinanceOverviewPage() {
                     <p className="text-xs text-muted-foreground">{txn.course}</p>
                   </div>
                 </div>
-                <div className="text-right">
+                <div className="text-end">
                   <p
                     className={cn(
                       "text-sm font-semibold",
@@ -462,7 +462,7 @@ export function FinanceOverviewPage() {
                     </p>
                   </div>
                 </div>
-                <div className="text-right">
+                <div className="text-end">
                   <p className="text-sm font-bold">{formatCurrency(payout.amount)}</p>
                   <p
                     className={cn(
@@ -515,20 +515,20 @@ export function FinanceOverviewPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/50">
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">#</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">
+                <th className="px-4 py-3 text-start font-medium text-muted-foreground">#</th>
+                <th className="px-4 py-3 text-start font-medium text-muted-foreground">
                   Course
                 </th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">
+                <th className="px-4 py-3 text-start font-medium text-muted-foreground">
                   Instructor
                 </th>
-                <th className="px-4 py-3 text-right font-medium text-muted-foreground">
+                <th className="px-4 py-3 text-end font-medium text-muted-foreground">
                   Revenue
                 </th>
-                <th className="px-4 py-3 text-right font-medium text-muted-foreground">
+                <th className="px-4 py-3 text-end font-medium text-muted-foreground">
                   Enrollments
                 </th>
-                <th className="px-4 py-3 text-right font-medium text-muted-foreground">
+                <th className="px-4 py-3 text-end font-medium text-muted-foreground">
                   Growth
                 </th>
               </tr>
@@ -552,13 +552,13 @@ export function FinanceOverviewPage() {
                     </div>
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">{course.instructor}</td>
-                  <td className="px-4 py-3 text-right font-semibold">
+                  <td className="px-4 py-3 text-end font-semibold">
                     {formatCurrency(course.revenue)}
                   </td>
-                  <td className="px-4 py-3 text-right text-muted-foreground">
+                  <td className="px-4 py-3 text-end text-muted-foreground">
                     {course.enrollments}
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="px-4 py-3 text-end">
                     <span
                       className={cn(
                         "inline-flex items-center gap-1 text-xs font-medium",

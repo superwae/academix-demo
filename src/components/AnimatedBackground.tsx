@@ -48,7 +48,7 @@ export function AnimatedBackground({ mixActive = false }: { mixActive?: boolean 
         }}
       />
       <motion.div
-        className="absolute right-[-150px] top-32 h-[600px] w-[600px] rounded-full blur-3xl"
+        className="absolute end-[-150px] top-32 h-[600px] w-[600px] rounded-full blur-3xl"
         style={{
           opacity: mixActive ? 0.12 : 0.4,
           background: 'hsl(var(--ring))',
@@ -65,7 +65,7 @@ export function AnimatedBackground({ mixActive = false }: { mixActive?: boolean 
         }}
       />
       <motion.div
-        className="absolute left-[40%] bottom-[-250px] h-[550px] w-[550px] rounded-full blur-3xl"
+        className="absolute start-[40%] bottom-[-250px] h-[550px] w-[550px] rounded-full blur-3xl"
         style={{
           opacity: mixActive ? 0.1 : 0.35,
           background: 'hsl(var(--primary))',
@@ -84,7 +84,7 @@ export function AnimatedBackground({ mixActive = false }: { mixActive?: boolean 
       
       {/* Additional medium blobs for depth */}
       <motion.div
-        className="absolute left-[60%] top-[20%] h-[400px] w-[400px] rounded-full blur-3xl"
+        className="absolute start-[60%] top-[20%] h-[400px] w-[400px] rounded-full blur-3xl"
         style={{
           opacity: mixActive ? 0.08 : 0.25,
           background: 'hsl(var(--ring))',
@@ -101,7 +101,7 @@ export function AnimatedBackground({ mixActive = false }: { mixActive?: boolean 
         }}
       />
       <motion.div
-        className="absolute right-[20%] bottom-[30%] h-[350px] w-[350px] rounded-full blur-3xl"
+        className="absolute end-[20%] bottom-[30%] h-[350px] w-[350px] rounded-full blur-3xl"
         style={{
           opacity: mixActive ? 0.1 : 0.3,
           background: 'hsl(var(--primary))',

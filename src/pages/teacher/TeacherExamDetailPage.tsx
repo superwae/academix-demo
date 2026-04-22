@@ -330,7 +330,7 @@ export function TeacherExamDetailPage() {
                             {latest && (
                               <span className="text-sm tabular-nums">
                                 {latest.score}/{latest.total}
-                                <span className="text-muted-foreground ml-1">({Number(latest.percentage).toFixed(0)}%)</span>
+                                <span className="text-muted-foreground ms-1">({Number(latest.percentage).toFixed(0)}%)</span>
                               </span>
                             )}
                           </TableCell>
@@ -454,7 +454,7 @@ export function TeacherExamDetailPage() {
       </Card>
 
       <Dialog open={submissionDialog.open} onOpenChange={(open) => !submissionDialog.loading && setSubmissionDialog((p) => ({ ...p, open }))}>
-        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto scroll-fancy pr-2">
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto scroll-fancy pe-2">
           <DialogHeader>
             <DialogTitle>Submission — {submissionDialog.studentName}</DialogTitle>
             <DialogDescription>

@@ -379,7 +379,7 @@ export function AdminDashboardPage() {
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => navigate("/admin/reports")}>
-            <FileCheck className="mr-2 h-4 w-4" />
+            <FileCheck className="me-2 h-4 w-4" />
             Generate Report
           </Button>
         </div>
@@ -716,7 +716,7 @@ export function AdminDashboardPage() {
                 onClick={() => navigate("/admin/courses")}
               >
                 View all
-                <ArrowRight className="ml-1 h-3 w-3" />
+                <ArrowRight className="ms-1 h-3 w-3" />
               </Button>
             </div>
             <div className="space-y-2">
@@ -777,7 +777,7 @@ export function AdminDashboardPage() {
                 onClick={() => navigate("/admin/reports")}
               >
                 View Details
-                <ArrowRight className="ml-1 h-3 w-3" />
+                <ArrowRight className="ms-1 h-3 w-3" />
               </Button>
             }
           />
@@ -786,11 +786,11 @@ export function AdminDashboardPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b bg-muted/50">
-                    <th className="px-4 py-3 text-left font-medium text-muted-foreground">Student</th>
-                    <th className="px-4 py-3 text-left font-medium text-muted-foreground">Risk Level</th>
-                    <th className="px-4 py-3 text-left font-medium text-muted-foreground">Engagement</th>
-                    <th className="px-4 py-3 text-left font-medium text-muted-foreground">Completion</th>
-                    <th className="px-4 py-3 text-left font-medium text-muted-foreground">Risk Factors</th>
+                    <th className="px-4 py-3 text-start font-medium text-muted-foreground">Student</th>
+                    <th className="px-4 py-3 text-start font-medium text-muted-foreground">Risk Level</th>
+                    <th className="px-4 py-3 text-start font-medium text-muted-foreground">Engagement</th>
+                    <th className="px-4 py-3 text-start font-medium text-muted-foreground">Completion</th>
+                    <th className="px-4 py-3 text-start font-medium text-muted-foreground">Risk Factors</th>
                   </tr>
                 </thead>
                 <tbody>

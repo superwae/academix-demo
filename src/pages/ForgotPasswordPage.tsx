@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Trans, useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -10,6 +11,7 @@ import { toast } from 'sonner';
 import { GraduationCap, Loader2, Mail } from 'lucide-react';
 
 export function ForgotPasswordPage() {
+  const { t } = useTranslation(['auth', 'common', 'errors']);
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
@@ -17,19 +19,19 @@ export function ForgotPasswordPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email?.trim()) {
-      toast.error('Please enter your email');
+      toast.error(t('auth:forgotPassword.missingEmail'));
       return;
     }
     try {
       setLoading(true);
       await authService.forgotPassword(email.trim());
       setSent(true);
-      toast.success('Check your email', {
-        description: 'If an account exists, you will receive a password reset link.',
+      toast.success(t('auth:forgotPassword.successToastTitle'), {
+        description: t('auth:forgotPassword.successToastDescription'),
       });
     } catch (error) {
       const raw = error instanceof Error ? error.message.trim() : ''
-      const message = raw.length > 200 ? `${raw.slice(0, 197)}…` : raw || 'Something went wrong. Please try again.'
+      const message = raw.length > 200 ? `${raw.slice(0, 197)}…` : raw || t('auth:forgotPassword.genericError')
       toast.error(message, { duration: 5200 })
     } finally {
       setLoading(false);
@@ -55,9 +57,9 @@ export function ForgotPasswordPage() {
               </div>
             </div>
             <div>
-              <CardTitle className="text-2xl">Forgot password?</CardTitle>
+              <CardTitle className="text-2xl">{t('auth:forgotPassword.title')}</CardTitle>
               <CardDescription className="mt-2">
-                Enter your email and we’ll send you a link to reset your password.
+                {t('auth:forgotPassword.subtitle')}
               </CardDescription>
             </div>
           </CardHeader>
@@ -65,21 +67,25 @@ export function ForgotPasswordPage() {
             {sent ? (
               <div className="text-center space-y-4">
                 <p className="text-sm text-muted-foreground">
-                  If an account exists for <strong>{email}</strong>, you will receive an email with a reset link shortly.
+                  <Trans
+                    i18nKey="auth:forgotPassword.emailSentDetails"
+                    values={{ email }}
+                    components={{ 1: <strong /> }}
+                  />
                 </p>
                 <Button variant="outline" asChild className="w-full">
-                  <Link to="/login">Back to sign in</Link>
+                  <Link to="/login">{t('auth:forgotPassword.backToLogin')}</Link>
                 </Button>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">{t('auth:forgotPassword.emailLabel')}</Label>
                   <Input
                     id="email"
                     name="email"
                     type="email"
-                    placeholder="you@example.com"
+                    placeholder={t('auth:forgotPassword.emailPlaceholder')}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -89,19 +95,19 @@ export function ForgotPasswordPage() {
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Sending...
+                      <Loader2 className="me-2 h-4 w-4 animate-spin" />
+                      {t('auth:forgotPassword.submitting')}
                     </>
                   ) : (
-                    'Send reset link'
+                    t('auth:forgotPassword.submit')
                   )}
                 </Button>
               </form>
             )}
             <div className="mt-6 text-center text-sm">
-              <span className="text-muted-foreground">Remember your password? </span>
+              <span className="text-muted-foreground">{t('auth:forgotPassword.rememberPassword')} </span>
               <Link to="/login" className="text-primary hover:underline font-medium">
-                Sign in
+                {t('auth:forgotPassword.signIn')}
               </Link>
             </div>
           </CardContent>

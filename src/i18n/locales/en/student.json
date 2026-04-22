@@ -1,0 +1,83 @@
+{
+  "dashboard": {
+    "welcome": "Welcome back, {{name}}",
+    "continueLearning": "Continue learning",
+    "todaysClasses": "Today's classes",
+    "noClassesToday": "No classes scheduled for today.",
+    "upcomingAssignments": "Upcoming assignments",
+    "noAssignments": "You're all caught up on assignments.",
+    "upcomingExams": "Upcoming exams",
+    "noExams": "No exams on the horizon.",
+    "recommended": "Recommended for you",
+    "trending": "Trending now"
+  },
+  "myClasses": {
+    "title": "My classes",
+    "empty": "You haven't enrolled in any classes yet.",
+    "progress": "{{percent}}% complete"
+  },
+  "liveClasses": {
+    "title": "Live classes",
+    "subtitle": "Your live sessions at a glance.",
+    "liveNow": "Live now",
+    "startingSoon": "Starting soon",
+    "thisWeek": "This week",
+    "join": "Join class",
+    "viewLink": "View link",
+    "noLink": "Link not available yet",
+    "empty": "No live classes scheduled.",
+    "bannerLive": "You have a class happening right now."
+  },
+  "payments": {
+    "title": "Payment history",
+    "empty": "No payments yet.",
+    "columnDate": "Date",
+    "columnCourse": "Course",
+    "columnAmount": "Amount",
+    "columnStatus": "Status",
+    "columnReference": "Reference"
+  },
+  "checkout": {
+    "title": "Checkout",
+    "discountPlaceholder": "Discount code",
+    "applyDiscount": "Apply",
+    "original": "Original price",
+    "discount": "Discount",
+    "total": "Total",
+    "payNow": "Pay now",
+    "paying": "Processing payment…",
+    "invalidCode": "That discount code isn't valid.",
+    "noRedirectUrl": "We couldn't start the payment. Please try again."
+  },
+  "profile": {
+    "bioAbout": "About me",
+    "bioDescription": "Tell others a bit about yourself and what you're learning.",
+    "saveBio": "Save bio",
+    "bioSaved": "Your bio has been saved.",
+    "changeCover": "Change cover photo",
+    "changePhoto": "Change profile photo",
+    "certifications": "Certifications",
+    "badges": "Badges",
+    "focusAreas": "Focus areas",
+    "security": "Security",
+    "changePassword": "Change password",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm new password",
+    "passwordChanged": "Your password has been updated."
+  },
+  "settings": {
+    "title": "Settings",
+    "accountSection": "Account",
+    "nameLabel": "Name",
+    "emailLabel": "Email",
+    "passwordSection": "Password",
+    "notificationsSection": "Notifications",
+    "notificationsOn": "Notifications are on",
+    "notificationsOff": "Notifications are off",
+    "dangerZone": "Danger zone",
+    "deleteAccount": "Delete my account",
+    "deleteAccountConfirm": "This will permanently delete your account and all your data. Are you sure?",
+    "accountDeleted": "Your account has been deleted."
+  }
+}

@@ -176,7 +176,7 @@ export function CourseDetailsPage() {
         onClick={() => navigate(-1)}
         className="mb-4"
       >
-        <ArrowLeft className="mr-2 h-4 w-4" />
+        <ArrowLeft className="me-2 h-4 w-4" />
         Back
       </Button>
 
@@ -292,7 +292,7 @@ export function CourseDetailsPage() {
                           >
                             <Calendar className="h-4 w-4" />
                             <span className="font-medium">{mt.day}</span>
-                            <Clock className="h-4 w-4 ml-2" />
+                            <Clock className="h-4 w-4 ms-2" />
                             <span>
                               {mt.startTime} - {mt.endTime}
                             </span>

@@ -79,7 +79,7 @@ export function AccordionTrigger({ children, className }: AccordionTriggerProps)
       type="button"
       onClick={() => context.toggleItem(itemContext.itemId)}
       className={cn(
-        'w-full flex items-center justify-between p-4 text-left hover:bg-muted/50 transition-colors',
+        'w-full flex items-center justify-between p-4 text-start hover:bg-muted/50 transition-colors',
         className
       )}
     >

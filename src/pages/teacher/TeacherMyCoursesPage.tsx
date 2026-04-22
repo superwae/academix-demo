@@ -429,7 +429,7 @@ export function TeacherMyCoursesPage() {
         </div>
         <Button asChild variant="gradient">
           <Link to="/teacher/create-course">
-            <PlusCircle className="h-4 w-4 mr-2" />
+            <PlusCircle className="h-4 w-4 me-2" />
             Create Course
           </Link>
         </Button>
@@ -446,14 +446,14 @@ export function TeacherMyCoursesPage() {
             </p>
             <Button asChild variant="gradient">
               <Link to="/teacher/create-course">
-                <PlusCircle className="h-4 w-4 mr-2" />
+                <PlusCircle className="h-4 w-4 me-2" />
                 Create Your First Course
               </Link>
             </Button>
           </CardContent>
         </Card>
       ) : (
-        <div className="max-h-[70vh] overflow-y-auto scroll-fancy pr-1">
+        <div className="max-h-[70vh] overflow-y-auto scroll-fancy pe-1">
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
           {courses.map((course, index) => {
             const stats = getCourseCardStats(course)
@@ -499,34 +499,34 @@ export function TeacherMyCoursesPage() {
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem asChild>
                             <Link to={`/teacher/courses/${course.id}/edit`}>
-                              <Edit className="h-4 w-4 mr-2" />
+                              <Edit className="h-4 w-4 me-2" />
                               Edit Course
                             </Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem asChild>
                             <Link to={`/teacher/courses/${course.id}/lessons`}>
-                              <BookOpen className="h-4 w-4 mr-2" />
+                              <BookOpen className="h-4 w-4 me-2" />
                               Manage Lessons
                             </Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => openSectionsDialog(course)}>
-                            <Calendar className="h-4 w-4 mr-2" />
+                            <Calendar className="h-4 w-4 me-2" />
                             Manage Sections
                           </DropdownMenuItem>
                           <DropdownMenuItem asChild>
                             <Link to={`/teacher/courses/${course.id}/students`}>
-                              <Users className="h-4 w-4 mr-2" />
+                              <Users className="h-4 w-4 me-2" />
                               View Students
                             </Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem asChild>
                             <Link to={`/teacher/courses/${course.id}/discounts`}>
-                              <Tag className="h-4 w-4 mr-2" />
+                              <Tag className="h-4 w-4 me-2" />
                               Discounts
                             </Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => openCloneDialog(course)}>
-                            <Copy className="h-4 w-4 mr-2" />
+                            <Copy className="h-4 w-4 me-2" />
                             Start New Batch
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -570,13 +570,13 @@ export function TeacherMyCoursesPage() {
                     <div className="flex gap-2 mt-auto pt-2">
                       <Button variant="outline" size="sm" className="flex-1" asChild>
                         <Link to={`/teacher/courses/${course.id}`}>
-                          <Eye className="h-3 w-3 mr-1" />
+                          <Eye className="h-3 w-3 me-1" />
                           View
                         </Link>
                       </Button>
                       <Button variant="outline" size="sm" className="flex-1" asChild>
                         <Link to={`/teacher/courses/${course.id}/edit`}>
-                          <Settings className="h-3 w-3 mr-1" />
+                          <Settings className="h-3 w-3 me-1" />
                           Manage
                         </Link>
                       </Button>
@@ -657,7 +657,7 @@ export function TeacherMyCoursesPage() {
                   <div className="flex items-center justify-between">
                     <Label>Meeting Times</Label>
                     <Button type="button" variant="outline" size="sm" onClick={addMeetingTime}>
-                      <Plus className="h-4 w-4 mr-1" />
+                      <Plus className="h-4 w-4 me-1" />
                       Add Time
                     </Button>
                   </div>
@@ -739,7 +739,7 @@ export function TeacherMyCoursesPage() {
             <div className="space-y-4">
               <div className="flex justify-end">
                 <Button onClick={handleAddSection}>
-                  <Plus className="h-4 w-4 mr-2" />
+                  <Plus className="h-4 w-4 me-2" />
                   Add Section
                 </Button>
               </div>
@@ -754,7 +754,7 @@ export function TeacherMyCoursesPage() {
                     Add sections so students can choose their preferred schedule
                   </p>
                   <Button onClick={handleAddSection} variant="outline">
-                    <Plus className="h-4 w-4 mr-2" />
+                    <Plus className="h-4 w-4 me-2" />
                     Add First Section
                   </Button>
                 </div>
@@ -801,7 +801,7 @@ export function TeacherMyCoursesPage() {
                             onClick={() => handleEditSection(section)}
                             disabled={sectionsLoading}
                           >
-                            <Edit className="h-3 w-3 mr-1" />
+                            <Edit className="h-3 w-3 me-1" />
                             Edit
                           </Button>
                           <Button

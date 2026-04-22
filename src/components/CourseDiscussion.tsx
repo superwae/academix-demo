@@ -162,7 +162,7 @@ export function CourseDiscussion({ courseId, lessonId, title }: CourseDiscussion
         animate={{ opacity: 1, y: 0 }}
         className={cn(
           'border rounded-lg p-4 space-y-3',
-          depth > 0 && 'ml-8 mt-3 bg-muted/30'
+          depth > 0 && 'ms-8 mt-3 bg-muted/30'
         )}
       >
         <div className="flex items-start justify-between gap-3">
@@ -281,7 +281,7 @@ export function CourseDiscussion({ courseId, lessonId, title }: CourseDiscussion
               />
               <div className="flex gap-2">
                 <Button size="sm" onClick={() => handleReply(post.id)}>
-                  <Send className="h-3 w-3 mr-1" />
+                  <Send className="h-3 w-3 me-1" />
                   Post Reply
                 </Button>
                 <Button
@@ -312,7 +312,7 @@ export function CourseDiscussion({ courseId, lessonId, title }: CourseDiscussion
                 {post.replies.length} {post.replies.length === 1 ? 'Reply' : 'Replies'}
               </span>
             </div>
-            <div className="space-y-3 pl-2 border-l-2 border-primary/20">
+            <div className="space-y-3 ps-2 border-l-2 border-primary/20">
               {post.replies.map((reply) => renderPost(reply, depth + 1))}
             </div>
           </motion.div>
@@ -340,7 +340,7 @@ export function CourseDiscussion({ courseId, lessonId, title }: CourseDiscussion
           />
           <div className="flex justify-end">
             <Button onClick={handleCreatePost} size="sm">
-              <Send className="h-4 w-4 mr-2" />
+              <Send className="h-4 w-4 me-2" />
               Post
             </Button>
           </div>
@@ -354,7 +354,7 @@ export function CourseDiscussion({ courseId, lessonId, title }: CourseDiscussion
               <p className="text-sm">No discussions yet. Be the first to start a conversation!</p>
             </div>
           ) : (
-            <div className="space-y-3 pr-4">
+            <div className="space-y-3 pe-4">
               {posts.map((post) => renderPost(post))}
             </div>
           )}

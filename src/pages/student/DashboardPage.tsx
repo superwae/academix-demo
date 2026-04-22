@@ -390,7 +390,7 @@ export function DashboardPage() {
                   </div>
                   <Button asChild className="shrink-0">
                     <Link to={`/student/my-classes/${learningStats.continueWatching.courseId}/lessons/${learningStats.continueWatching.lessonId}`}>
-                      <PlayCircle className="h-4 w-4 mr-2" />
+                      <PlayCircle className="h-4 w-4 me-2" />
                       Continue Watching
                     </Link>
                   </Button>
@@ -434,7 +434,7 @@ export function DashboardPage() {
                   body="Browse the catalog and enroll to see your schedule here."
                 />
               ) : todayLiveSlots.length === 0 ? (
-                <div className="space-y-3 pr-0.5">
+                <div className="space-y-3 pe-0.5">
                   <p className="text-sm text-muted-foreground">
                     No live sessions scheduled for today. Open{' '}
                     <Link to="/student/calendar" className="text-primary font-medium underline-offset-2 hover:underline">
@@ -447,7 +447,7 @@ export function DashboardPage() {
                   </Button>
                 </div>
               ) : (
-                <div className="space-y-2 pr-0.5">
+                <div className="space-y-2 pe-0.5">
                   {todayLiveSlots.map((slot) => {
                     const badge = getLiveSessionBadge(slot.meta, new Date())
                     return (
@@ -525,7 +525,7 @@ export function DashboardPage() {
                   body="Check back later for featured courses."
                 />
               ) : (
-                <div className="space-y-2 pr-0.5">
+                <div className="space-y-2 pe-0.5">
                   {featuredCourses.map((c, idx) => (
                     <motion.div
                       key={c.id}
@@ -580,7 +580,7 @@ export function DashboardPage() {
                   body="Once you enroll, assignments will appear here."
                 />
               ) : (
-                <div className="space-y-2 pr-0.5">
+                <div className="space-y-2 pe-0.5">
                   {sortedPendingAssignments.map((a) => (
                     <div
                       key={a.id}
@@ -636,7 +636,7 @@ export function DashboardPage() {
                   body="You're all caught up. Enroll in courses to see exams and quizzes here."
                 />
               ) : (
-                <ul className="space-y-2 pr-0.5">
+                <ul className="space-y-2 pe-0.5">
                   {dashboardExams.map((exam) => {
                     const startDate = safeDate(exam.startsAt)
                     const now = new Date()

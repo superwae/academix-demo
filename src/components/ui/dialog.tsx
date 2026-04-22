@@ -17,14 +17,20 @@ export function DialogContent({
       <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
       <DialogPrimitive.Content
         className={cn(
-          'fixed left-1/2 top-[48%] z-50 max-h-[min(92dvh,920px)] w-[calc(100%-1rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-xl border border-border bg-card p-5 text-card-foreground shadow-lg outline-none sm:top-1/2 sm:w-[calc(100%-2rem)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
+          // Mobile: bottom sheet — full-width, pinned to the bottom, rounded top.
+          'fixed inset-x-0 bottom-0 left-auto top-auto z-50 max-h-[92dvh] w-full translate-x-0 translate-y-0 overflow-y-auto rounded-t-2xl rounded-b-none border-t border-x border-b-0 border-border bg-card p-5 text-card-foreground shadow-lg outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom',
+          // sm+: centered modal (original treatment).
+          'sm:inset-x-auto sm:bottom-auto sm:start-1/2 sm:top-1/2 sm:left-auto sm:max-h-[min(92dvh,920px)] sm:w-[calc(100%-2rem)] sm:max-w-lg sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-xl sm:border sm:border-b sm:border-border sm:data-[state=closed]:slide-out-to-bottom-0 sm:data-[state=open]:slide-in-from-bottom-0 sm:data-[state=closed]:fade-out-0 sm:data-[state=open]:fade-in-0 sm:data-[state=closed]:zoom-out-95 sm:data-[state=open]:zoom-in-95',
           'pb-[max(1.25rem,env(safe-area-inset-bottom,0px))] pt-[max(0.25rem,env(safe-area-inset-top,0px))]',
           className,
         )}
         {...props}
       >
         {children}
-        <DialogPrimitive.Close className="absolute right-3 top-3 rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+        <DialogPrimitive.Close
+          aria-label="Close"
+          className="absolute end-2 top-2 inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:end-3 sm:top-3 sm:min-h-0 sm:min-w-0 sm:p-1"
+        >
           <X className="h-4 w-4" />
           <span className="sr-only">Close</span>
         </DialogPrimitive.Close>

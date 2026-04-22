@@ -646,7 +646,7 @@ export function EditCoursePage() {
                         type="button"
                         variant="destructive"
                         size="icon"
-                        className="absolute top-2 right-2"
+                        className="absolute top-2 end-2"
                         onClick={() => setFormData({ ...formData, thumbnailUrl: '' })}
                       >
                         <X className="h-4 w-4" />
@@ -715,7 +715,7 @@ export function EditCoursePage() {
                         onClick={() => handleAddSectionPreset(preset)}
                         disabled={exists || addingSection}
                       >
-                        <Plus className="h-3.5 w-3.5 mr-1" />
+                        <Plus className="h-3.5 w-3.5 me-1" />
                         {preset.name}
                       </Button>
                     )
@@ -726,7 +726,7 @@ export function EditCoursePage() {
                     Current sections ({course.sections?.length ?? 0})
                   </p>
                   <Button type="button" variant="outline" size="sm" onClick={openSectionsDialog}>
-                    <Calendar className="h-3.5 w-3.5 mr-1" />
+                    <Calendar className="h-3.5 w-3.5 me-1" />
                     Manage Sections
                   </Button>
                 </div>
@@ -741,7 +741,7 @@ export function EditCoursePage() {
                         <strong>{s.name}</strong>
                         <span className="text-muted-foreground">— {s.locationLabel}</span>
                         {s.seatsRemaining != null && (
-                          <span className="text-xs text-muted-foreground ml-auto">
+                          <span className="text-xs text-muted-foreground ms-auto">
                             {s.seatsRemaining} seats left
                           </span>
                         )}
@@ -898,12 +898,12 @@ export function EditCoursePage() {
               <Button type="submit" variant="gradient" className="w-full" disabled={loading}>
                 {loading ? (
                   <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    <Loader2 className="h-4 w-4 me-2 animate-spin" />
                     Saving...
                   </>
                 ) : (
                   <>
-                    <Save className="h-4 w-4 mr-2" />
+                    <Save className="h-4 w-4 me-2" />
                     Save Changes
                   </>
                 )}
@@ -926,12 +926,12 @@ export function EditCoursePage() {
               >
                 {deleting ? (
                   <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    <Loader2 className="h-4 w-4 me-2 animate-spin" />
                     Deleting...
                   </>
                 ) : (
                   <>
-                    <Trash2 className="h-4 w-4 mr-2" />
+                    <Trash2 className="h-4 w-4 me-2" />
                     Delete Course
                   </>
                 )}
@@ -1002,7 +1002,7 @@ export function EditCoursePage() {
                   <div className="flex items-center justify-between">
                     <Label>Meeting Times</Label>
                     <Button type="button" variant="outline" size="sm" onClick={addMeetingTime}>
-                      <Plus className="h-4 w-4 mr-1" />
+                      <Plus className="h-4 w-4 me-1" />
                       Add Time
                     </Button>
                   </div>
@@ -1078,7 +1078,7 @@ export function EditCoursePage() {
                 <Button variant="gradient" onClick={handleSaveSection} disabled={sectionsSaving}>
                   {sectionsSaving ? (
                     <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      <Loader2 className="h-4 w-4 me-2 animate-spin" />
                       Saving...
                     </>
                   ) : (
@@ -1091,7 +1091,7 @@ export function EditCoursePage() {
             <div className="space-y-4">
               <div className="flex justify-end">
                 <Button onClick={handleAddSectionForm}>
-                  <Plus className="h-4 w-4 mr-2" />
+                  <Plus className="h-4 w-4 me-2" />
                   Add Section
                 </Button>
               </div>
@@ -1104,7 +1104,7 @@ export function EditCoursePage() {
                     Add sections so students can choose their preferred schedule
                   </p>
                   <Button onClick={handleAddSectionForm} variant="outline">
-                    <Plus className="h-4 w-4 mr-2" />
+                    <Plus className="h-4 w-4 me-2" />
                     Add First Section
                   </Button>
                 </div>
@@ -1151,7 +1151,7 @@ export function EditCoursePage() {
                             onClick={() => handleEditSection(section)}
                             disabled={sectionsSaving}
                           >
-                            <Edit className="h-3 w-3 mr-1" />
+                            <Edit className="h-3 w-3 me-1" />
                             Edit
                           </Button>
                           <Button
@@ -1197,12 +1197,12 @@ export function EditCoursePage() {
             >
               {deleting ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="h-4 w-4 me-2 animate-spin" />
                   Deleting...
                 </>
               ) : (
                 <>
-                  <Trash2 className="h-4 w-4 mr-2" />
+                  <Trash2 className="h-4 w-4 me-2" />
                   Delete Course
                 </>
               )}

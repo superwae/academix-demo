@@ -422,7 +422,7 @@ export function FinanceTransactionsPage() {
       key: "amount",
       header: "Amount",
       sortable: true,
-      className: "text-right",
+      className: "text-end",
       render: (txn) => (
         <span
           className={cn(

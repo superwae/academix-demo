@@ -1,0 +1,77 @@
+{
+  "dashboard": {
+    "title": "لوحة المسؤول",
+    "totalUsers": "إجمالي المستخدمين",
+    "totalInstructors": "المدرّسون",
+    "totalStudents": "الطلاب",
+    "totalCourses": "الدورات",
+    "totalEnrollments": "إجمالي التسجيلات",
+    "activeEnrollments": "التسجيلات النشطة",
+    "engagement": "التفاعل",
+    "atRisk": "المتعلّمون المعرّضون للخطر",
+    "systemHealth": "حالة النظام",
+    "operational": "جميع الأنظمة تعمل بشكل طبيعي"
+  },
+  "users": {
+    "title": "المستخدمون",
+    "create": "إنشاء مستخدم",
+    "edit": "تعديل المستخدم",
+    "delete": "حذف المستخدم",
+    "suspend": "تعليق",
+    "activate": "تفعيل",
+    "assignRoles": "تعيين الأدوار",
+    "emailLabel": "البريد الإلكتروني",
+    "firstNameLabel": "الاسم الأول",
+    "lastNameLabel": "اسم العائلة",
+    "phoneLabel": "الهاتف",
+    "roleLabel": "الدور",
+    "statusLabel": "الحالة",
+    "statusActive": "نشط",
+    "statusSuspended": "معلّق",
+    "search": "بحث عن مستخدمين",
+    "empty": "لا يوجد مستخدمون يطابقون الفلاتر المحدّدة.",
+    "deleteConfirm": "هل تريد حذف هذا المستخدم؟ لا يمكن التراجع عن هذا الإجراء."
+  },
+  "courses": {
+    "title": "الدورات",
+    "publish": "نشر",
+    "archive": "أرشفة",
+    "delete": "حذف",
+    "published": "منشورة",
+    "draft": "مسودّة",
+    "archived": "مؤرشفة"
+  },
+  "subscriptionPlans": {
+    "title": "خطط الاشتراك",
+    "createPlan": "إنشاء خطّة",
+    "editPlan": "تعديل الخطّة",
+    "nameLabel": "اسم الخطّة",
+    "descriptionLabel": "الوصف",
+    "monthlyPriceLabel": "السعر الشهري",
+    "yearlyPriceLabel": "السعر السنوي",
+    "maxCoursesLabel": "الحد الأقصى للدورات",
+    "maxSeatsPerCourseLabel": "الحد الأقصى للمقاعد لكل دورة",
+    "maxTotalSeatsLabel": "الحد الأقصى لإجمالي المقاعد",
+    "activeLabel": "مفعّلة",
+    "sortOrderLabel": "ترتيب العرض",
+    "unlimited": "غير محدود",
+    "deleteConfirm": "هل تريد حذف هذه الخطّة؟ سيحتفظ المشتركون بها حتى تاريخ التجديد.",
+    "empty": "لا توجد خطط اشتراك بعد."
+  },
+  "finance": {
+    "overview": "نظرة عامة",
+    "transactions": "المعاملات",
+    "payouts": "المدفوعات الصادرة",
+    "revenueSplit": "تقسيم الإيرادات",
+    "totalRevenue": "إجمالي الإيرادات",
+    "totalTransactions": "إجمالي المعاملات",
+    "pendingPayouts": "المدفوعات المعلّقة",
+    "refunds": "المبالغ المستردّة"
+  },
+  "settings": {
+    "title": "إعدادات المنصّة",
+    "platformSettings": "إعدادات المنصّة",
+    "activityLog": "سجل النشاط",
+    "emailTemplates": "قوالب البريد الإلكتروني"
+  }
+}

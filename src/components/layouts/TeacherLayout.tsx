@@ -1,5 +1,7 @@
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState, useRef, type ComponentType } from "react";
+import { useTranslation } from "react-i18next";
+import { LanguagePicker } from "../LanguagePicker";
 import {
   GraduationCap,
   CalendarDays,
@@ -61,25 +63,25 @@ import { getAccountRoleLabel, isPlatformAdminAccount } from "../../lib/userRoles
 
 type NavItem = {
   to: string;
-  label: string;
+  labelKey: string;
   icon: ComponentType<{ className?: string }>;
 };
 
 // Teacher navigation - ALL paths use /teacher/* prefix
 const TEACHER_NAV: NavItem[] = [
-  { to: "/teacher/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/teacher/courses", label: "My Courses", icon: BookOpen },
-  { to: "/teacher/calendar", label: "My Schedule", icon: CalendarDays },
-  { to: "/teacher/live-sessions", label: "Live Sessions", icon: Radio },
-  { to: "/teacher/create-course", label: "Create Course", icon: PlusCircle },
-  { to: "/teacher/lessons", label: "Lessons & Content", icon: Video },
-  { to: "/teacher/assignments", label: "Assignments", icon: ClipboardList },
-  { to: "/teacher/exams", label: "Exams & Quizzes", icon: FileText },
-  { to: "/teacher/students", label: "Students", icon: Users },
-  { to: "/teacher/subscription", label: "Subscription", icon: Crown },
-  { to: "/teacher/messages", label: "Messages", icon: Inbox },
-  { to: "/teacher/profile", label: "Profile", icon: User },
-  { to: "/teacher/settings", label: "Settings", icon: Settings },
+  { to: "/teacher/dashboard", labelKey: "nav:dashboard", icon: LayoutDashboard },
+  { to: "/teacher/courses", labelKey: "nav:myCourses", icon: BookOpen },
+  { to: "/teacher/calendar", labelKey: "nav:mySchedule", icon: CalendarDays },
+  { to: "/teacher/live-sessions", labelKey: "nav:liveSessions", icon: Radio },
+  { to: "/teacher/create-course", labelKey: "nav:createCourse", icon: PlusCircle },
+  { to: "/teacher/lessons", labelKey: "nav:lessonsContent", icon: Video },
+  { to: "/teacher/assignments", labelKey: "nav:assignments", icon: ClipboardList },
+  { to: "/teacher/exams", labelKey: "nav:examsQuizzes", icon: FileText },
+  { to: "/teacher/students", labelKey: "nav:students", icon: Users },
+  { to: "/teacher/subscription", labelKey: "nav:subscription", icon: Crown },
+  { to: "/teacher/messages", labelKey: "nav:messages", icon: Inbox },
+  { to: "/teacher/profile", labelKey: "nav:profile", icon: User },
+  { to: "/teacher/settings", labelKey: "nav:settings", icon: Settings },
 ];
 
 interface SearchResult {
@@ -91,6 +93,7 @@ interface SearchResult {
 }
 
 export function TeacherLayout() {
+  const { t } = useTranslation(['nav', 'common', 'auth']);
   const theme = useAppStore((s) => s.data.theme);
   const customThemeColor = useAppStore((s) => s.data.customThemeColor);
   const mixTheme = useAppStore((s) => s.data.mixTheme);
@@ -110,16 +113,16 @@ export function TeacherLayout() {
 
   const handleLogout = () => {
     logout();
-    toast.success("Logged out successfully");
+    toast.success(t('auth:logoutSuccess'));
     navigate("/");
   };
 
   const isDarkMode = theme === 'dark';
-  
+
   const toggleDarkMode = () => {
     const newTheme = isDarkMode ? 'light' : 'dark';
     setTheme(newTheme);
-    toast.success(`Switched to ${newTheme} mode`);
+    toast.success(newTheme === 'dark' ? t('common:switchedToDarkMode') : t('common:switchedToLightMode'));
   };
 
   useEffect(() => {
@@ -249,8 +252,8 @@ export function TeacherLayout() {
   };
 
   const themeLabel = useMemo(
-    () => THEMES.find((t) => t.id === theme)?.label ?? "Theme",
-    [theme]
+    () => THEMES.find((th) => th.id === theme)?.label ?? t('common:theme'),
+    [theme, t]
   );
 
   const accountRoleLabel = useMemo(
@@ -265,7 +268,7 @@ export function TeacherLayout() {
 
       {/* Skip to content link for accessibility */}
       <a href="#main-content" className="skip-to-content">
-        Skip to main content
+        {t('common:skipToContent')}
       </a>
 
       {/* Premium Header */}
@@ -282,7 +285,7 @@ export function TeacherLayout() {
                   variant="ghost"
                   size="icon"
                   className="lg:hidden"
-                  aria-label="Open navigation"
+                  aria-label={t('common:openNavigation')}
                 >
                   <Menu className="h-5 w-5" />
                 </Button>
@@ -327,16 +330,16 @@ export function TeacherLayout() {
                   AcademiX
                 </div>
                 <div className="hidden text-xs text-muted-foreground font-medium sm:block">
-                  Teacher Portal
+                  {t('nav:teacherPortal')}
                 </div>
               </div>
             </motion.div>
           </div>
 
           {/* Search Bar */}
-          <div ref={searchContainerRef} className="ml-auto hidden w-[400px] max-w-[35vw] items-center lg:flex relative">
+          <div ref={searchContainerRef} className="ms-auto hidden w-[400px] max-w-[35vw] items-center lg:flex relative">
             <form onSubmit={handleSearchSubmit} className="relative w-full group">
-              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" />
+              <Search className="pointer-events-none absolute start-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" />
               <Input
                 value={search}
                 onChange={(e) => {
@@ -348,8 +351,8 @@ export function TeacherLayout() {
                     setShowResults(true);
                   }
                 }}
-                placeholder="Search courses, assignments, students…"
-                className="h-12 pl-11 pr-10 rounded-xl border-2 border-border/50 bg-background/50 backdrop-blur-sm focus-visible:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/20 transition-all"
+                placeholder={t('common:searchTeacherPlaceholder')}
+                className="h-12 ps-11 pe-10 rounded-xl border-2 border-border/50 bg-background/50 backdrop-blur-sm focus-visible:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/20 transition-all"
               />
               {search && (
                 <button
@@ -359,8 +362,8 @@ export function TeacherLayout() {
                     setSearchResults([]);
                     setShowResults(false);
                   }}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                  aria-label="Clear search"
+                  className="absolute end-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label={t('common:clearSearch')}
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -376,7 +379,7 @@ export function TeacherLayout() {
                 >
                   {isSearching ? (
                     <div className="p-4 text-center text-sm text-muted-foreground">
-                      Searching...
+                      {t('common:searching')}
                     </div>
                   ) : searchResults.length > 0 ? (
                     <div className="p-2">
@@ -385,7 +388,7 @@ export function TeacherLayout() {
                           key={`${result.type}-${result.id}`}
                           type="button"
                           onClick={() => handleResultClick(result)}
-                          className="w-full text-left p-3 rounded-lg hover:bg-accent/50 transition-colors group"
+                          className="w-full text-start p-3 rounded-lg hover:bg-accent/50 transition-colors group"
                         >
                           <div className="flex items-start gap-3">
                             <div className="flex-shrink-0 mt-0.5">
@@ -418,7 +421,7 @@ export function TeacherLayout() {
                     </div>
                   ) : (
                     <div className="p-4 text-center text-sm text-muted-foreground">
-                      No results found
+                      {t('common:noResultsFound')}
                     </div>
                   )}
                 </motion.div>
@@ -438,7 +441,7 @@ export function TeacherLayout() {
             isSearching={isSearching}
             results={searchResults}
             onSelectResult={handleResultClick}
-            placeholder="Search courses, assignments, students…"
+            placeholder={t('common:searchTeacherPlaceholder')}
             renderIcon={(type) => {
               switch (type) {
                 case "course":
@@ -460,7 +463,7 @@ export function TeacherLayout() {
               variant="ghost"
               size="icon"
               className="h-11 w-11 shrink-0 lg:hidden"
-              aria-label="Open search"
+              aria-label={t('common:openSearch')}
               onClick={() => setMobileSearchOpen(true)}
             >
               <Search className="h-5 w-5" />
@@ -472,10 +475,10 @@ export function TeacherLayout() {
                 size="sm"
                 className="gap-1.5 shrink-0 h-9 px-2 sm:px-3"
                 onClick={() => navigate("/admin/dashboard")}
-                title="Return to Admin portal"
+                title={t('nav:returnToAdmin')}
               >
                 <LayoutDashboard className="h-4 w-4 shrink-0" />
-                <span className="hidden sm:inline font-medium">Admin dashboard</span>
+                <span className="hidden sm:inline font-medium">{t('nav:adminDashboard')}</span>
               </Button>
             )}
             {/* Notifications */}
@@ -510,17 +513,17 @@ export function TeacherLayout() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => navigate("/teacher/profile")}>
-                  <User className="mr-2 h-4 w-4" />
-                  Profile
+                  <User className="me-2 h-4 w-4" />
+                  {t('common:profile')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate("/teacher/settings")}>
-                  <Settings className="mr-2 h-4 w-4" />
-                  Settings
+                  <Settings className="me-2 h-4 w-4" />
+                  {t('common:settings')}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Log out
+                  <LogOut className="me-2 h-4 w-4" />
+                  {t('common:logout')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -538,7 +541,7 @@ export function TeacherLayout() {
                 <Button
                   variant="outline"
                   className="h-10 gap-2 border-2 rounded-xl px-2.5 sm:h-11 sm:px-3"
-                  title="Theme"
+                  title={t('common:theme')}
                 >
                   <span
                     className="h-3.5 w-3.5 rounded-full border-2 border-border shadow-sm"
@@ -547,7 +550,7 @@ export function TeacherLayout() {
                   <span className="hidden sm:inline font-medium">
                     {themeLabel}
                   </span>
-                  <span className="sm:hidden">Theme</span>
+                  <span className="sm:hidden">{t('common:theme')}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
@@ -555,7 +558,7 @@ export function TeacherLayout() {
                 className="w-40 glass-strong rounded-xl"
               >
                 <DropdownMenuLabel className="font-semibold">
-                  Choose Theme
+                  {t('common:chooseTheme')}
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuRadioGroup
@@ -578,44 +581,44 @@ export function TeacherLayout() {
                           }
                         }
                         setTheme('custom');
-                        toast.success("Custom theme enabled", {
-                          description: "Use the color picker to choose your color",
+                        toast.success(t('common:customThemeEnabled'), {
+                          description: t('common:customThemeEnabledDesc'),
                         });
                       } else {
                     setTheme(next);
-                    toast.success("Theme updated", {
-                      description: `Switched to ${
-                        THEMES.find((t) => t.id === next)?.label
-                      }`,
+                    toast.success(t('common:themeUpdated'), {
+                      description: t('common:switchedToTheme', {
+                        theme: THEMES.find((th) => th.id === next)?.label,
+                      }),
                     });
                       }
                   }}
                 >
-                    {THEMES.filter(t => t.id !== 'custom').map((t) => (
+                    {THEMES.filter(th => th.id !== 'custom').map((th) => (
                     <DropdownMenuRadioItem
-                      key={t.id}
-                      value={t.id}
+                      key={th.id}
+                      value={th.id}
                       className="rounded-lg"
                     >
                       <div className="flex items-center gap-3">
                         <span
                           className={cn(
                             "h-4 w-4 rounded-full border-2 border-border shadow-sm",
-                            t.id === "light" && "bg-white",
-                            t.id === "dark" && "bg-black",
-                            t.id === "purple" && "bg-[#a855f7]",
-                            t.id === "sky" && "bg-[#06b6d4]",
-                            t.id === "green" && "bg-[#22c55e]",
-                            t.id === "emerald" && "bg-[#10b981]",
-                            t.id === "orange" && "bg-[#f97316]",
-                            t.id === "amber" && "bg-[#f59e0b]",
-                            t.id === "red" && "bg-[#ef4444]",
-                            t.id === "rose" && "bg-[#f43f5e]",
-                            t.id === "pink" && "bg-[#ec4899]",
-                            t.id === "indigo" && "bg-[#6366f1]"
+                            th.id === "light" && "bg-white",
+                            th.id === "dark" && "bg-black",
+                            th.id === "purple" && "bg-[#a855f7]",
+                            th.id === "sky" && "bg-[#06b6d4]",
+                            th.id === "green" && "bg-[#22c55e]",
+                            th.id === "emerald" && "bg-[#10b981]",
+                            th.id === "orange" && "bg-[#f97316]",
+                            th.id === "amber" && "bg-[#f59e0b]",
+                            th.id === "red" && "bg-[#ef4444]",
+                            th.id === "rose" && "bg-[#f43f5e]",
+                            th.id === "pink" && "bg-[#ec4899]",
+                            th.id === "indigo" && "bg-[#6366f1]"
                           )}
                         />
-                        <span className="font-medium">{t.label}</span>
+                        <span className="font-medium">{th.label}</span>
                       </div>
                     </DropdownMenuRadioItem>
                   ))}
@@ -625,13 +628,13 @@ export function TeacherLayout() {
                       className="rounded-lg"
                     >
                       <div className="flex items-center gap-3">
-                        <span 
+                        <span
                           className="h-4 w-4 rounded-full border-2 border-border shadow-sm"
-                          style={{ 
+                          style={{
                             background: customThemeColor || 'hsl(222, 84%, 60%)'
                           }}
                         />
-                        <span className="font-medium">Custom Color</span>
+                        <span className="font-medium">{t('common:customColor')}</span>
                       </div>
                     </DropdownMenuRadioItem>
                 </DropdownMenuRadioGroup>
@@ -645,20 +648,23 @@ export function TeacherLayout() {
               size="sm"
               onClick={toggleDarkMode}
               className="h-11 gap-2 border-2 rounded-xl"
-              title={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+              title={isDarkMode ? t('common:switchToLightMode') : t('common:switchToDarkMode')}
             >
               {isDarkMode ? (
                 <>
                   <Sun className="h-4 w-4" />
-                  <span className="hidden sm:inline font-medium">Light Mode</span>
+                  <span className="hidden sm:inline font-medium">{t('common:lightMode')}</span>
                 </>
               ) : (
                 <>
                   <Moon className="h-4 w-4" />
-                  <span className="hidden sm:inline font-medium">Dark Mode</span>
+                  <span className="hidden sm:inline font-medium">{t('common:darkMode')}</span>
                 </>
               )}
             </Button>
+
+            {/* Language Picker */}
+            <LanguagePicker compact />
           </div>
         </div>
       </header>
@@ -700,11 +706,11 @@ export function TeacherLayout() {
                     {accountRoleLabel}
                   </div>
                   <div className="mt-0.5 truncate text-base font-bold">
-                    {user ? `${user.firstName} ${user.lastName}` : "Teacher"}
+                    {user ? `${user.firstName} ${user.lastName}` : t('nav:instructor')}
                   </div>
                   {showTeacherPortalHint && (
                     <p className="mt-1 text-[10px] font-medium text-muted-foreground/90">
-                      Teacher portal view
+                      {t('nav:teacherPortalView')}
                     </p>
                   )}
                   {showTeacherPortalHint && (
@@ -716,7 +722,7 @@ export function TeacherLayout() {
                       onClick={() => navigate("/admin/dashboard")}
                     >
                       <LayoutDashboard className="h-3.5 w-3.5 shrink-0" />
-                      Admin dashboard
+                      {t('nav:adminDashboard')}
                     </Button>
                   )}
                   <div className="mt-1.5 flex items-center gap-2">
@@ -726,7 +732,7 @@ export function TeacherLayout() {
                       className="h-2 w-2 rounded-full bg-primary shadow-sm shadow-primary/50"
                     />
                     <span className="text-xs font-medium text-muted-foreground">
-                      Active Semester
+                      {t('nav:activeSemester')}
                     </span>
                   </div>
                 </div>
@@ -738,7 +744,7 @@ export function TeacherLayout() {
                 className="mt-3 w-full justify-start gap-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
               >
                 <LogOut className="h-4 w-4" />
-                Log Out
+                {t('common:logout')}
               </Button>
             </motion.div>
 
@@ -765,6 +771,7 @@ export function TeacherLayout() {
 }
 
 function TeacherNavList({ onNavigate, unreadMessages = 0, hideSubscription = false }: { onNavigate?: () => void; unreadMessages?: number; hideSubscription?: boolean }) {
+  const { t } = useTranslation(['nav']);
   const navItems = hideSubscription
     ? TEACHER_NAV.filter((item) => item.to !== "/teacher/subscription")
     : TEACHER_NAV;
@@ -805,7 +812,7 @@ function TeacherNavList({ onNavigate, unreadMessages = 0, hideSubscription = fal
                   )}
                 />
               </motion.div>
-              <span className="flex-1">{item.label}</span>
+              <span className="flex-1">{t(item.labelKey)}</span>
               {showBadge && (
                 <Badge
                   variant="destructive"
@@ -817,7 +824,7 @@ function TeacherNavList({ onNavigate, unreadMessages = 0, hideSubscription = fal
               {isActive && (
                 <motion.div
                   layoutId="activeNav"
-                  className="absolute right-0 top-1 bottom-1 w-1 rounded-l-full bg-primary shadow-sm shadow-primary/50"
+                  className="absolute end-0 top-1 bottom-1 w-1 rounded-l-full bg-primary shadow-sm shadow-primary/50"
                   transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 />
               )}

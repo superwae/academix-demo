@@ -1,0 +1,16 @@
+{
+  "networkError": "Can't reach the server. Check your internet connection.",
+  "serverError": "The server ran into a problem. Please try again shortly.",
+  "notFound": "We couldn't find what you're looking for.",
+  "forbidden": "You don't have permission to do that.",
+  "unauthorized": "You need to sign in to continue.",
+  "sessionExpired": "Your session has expired. Please sign in again.",
+  "validationFailed": "Some fields need your attention.",
+  "fieldRequired": "This field is required.",
+  "invalidEmail": "Please enter a valid email address.",
+  "passwordTooShort": "Password must be at least 8 characters.",
+  "passwordsDoNotMatch": "The passwords don't match.",
+  "fileTooLarge": "That file is too large.",
+  "unsupportedFileType": "That file type is not supported.",
+  "unknownError": "Something unexpected happened. Please try again."
+}

@@ -81,7 +81,7 @@ export function TeacherExamsPage() {
         </div>
         <Button variant="gradient" asChild>
           <Link to="/teacher/exams/create">
-            <PlusCircle className="h-4 w-4 mr-2" />
+            <PlusCircle className="h-4 w-4 me-2" />
             Create Exam
           </Link>
         </Button>
@@ -92,7 +92,7 @@ export function TeacherExamsPage() {
         <CardContent className="pt-4">
           {loading ? (
             <div className="flex justify-center items-center py-12 text-muted-foreground">
-              <Loader2 className="h-8 w-8 animate-spin mr-2" />
+              <Loader2 className="h-8 w-8 animate-spin me-2" />
               <span className="text-sm">Loading courses...</span>
             </div>
           ) : courses.length === 0 ? (
@@ -109,7 +109,7 @@ export function TeacherExamsPage() {
                   <AccordionItem key={course.id} id={course.id}>
                     <AccordionTrigger className="flex items-center gap-2">
                       <span className="font-medium">{course.title}</span>
-                      <Badge variant="secondary" className="ml-2 text-xs">
+                      <Badge variant="secondary" className="ms-2 text-xs">
                         {courseExams.length} exam{courseExams.length !== 1 ? 's' : ''}
                       </Badge>
                     </AccordionTrigger>
@@ -119,7 +119,7 @@ export function TeacherExamsPage() {
                           <p>No exams in this course yet.</p>
                           <Button variant="outline" size="sm" className="mt-2" asChild>
                             <Link to={`/teacher/exams/create?courseId=${course.id}`}>
-                              <PlusCircle className="h-3 w-3 mr-1" />
+                              <PlusCircle className="h-3 w-3 me-1" />
                               Create exam
                             </Link>
                           </Button>
@@ -134,12 +134,12 @@ export function TeacherExamsPage() {
                                 <TableHead>Duration</TableHead>
                                 <TableHead>Questions</TableHead>
                                 <TableHead>Status</TableHead>
-                                <TableHead className="text-right">
+                                <TableHead className="text-end">
                                   <div className="flex items-center justify-end gap-2">
                                     <span>Actions</span>
                                     <Button variant="outline" size="sm" asChild>
                                       <Link to={`/teacher/exams/create?courseId=${course.id}`}>
-                                        <PlusCircle className="h-3 w-3 mr-1" />
+                                        <PlusCircle className="h-3 w-3 me-1" />
                                         Create Exam
                                       </Link>
                                     </Button>
@@ -181,7 +181,7 @@ export function TeacherExamsPage() {
                                         {status}
                                       </Badge>
                                     </TableCell>
-                                    <TableCell className="text-right">
+                                    <TableCell className="text-end">
                                       <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
                                           <Button variant="ghost" size="sm">
@@ -191,13 +191,13 @@ export function TeacherExamsPage() {
                                         <DropdownMenuContent align="end">
                                           <DropdownMenuItem asChild>
                                             <Link to={`/teacher/exams/${exam.id}`}>
-                                              <Eye className="h-3 w-3 mr-2" />
+                                              <Eye className="h-3 w-3 me-2" />
                                               View
                                             </Link>
                                           </DropdownMenuItem>
                                           <DropdownMenuItem asChild>
                                             <Link to={`/teacher/exams/${exam.id}/edit`}>
-                                              <Edit className="h-3 w-3 mr-2" />
+                                              <Edit className="h-3 w-3 me-2" />
                                               Edit
                                             </Link>
                                           </DropdownMenuItem>

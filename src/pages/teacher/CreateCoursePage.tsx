@@ -502,7 +502,7 @@ export function CreateCoursePage() {
                         type="button"
                         variant="destructive"
                         size="icon"
-                        className="absolute top-2 right-2"
+                        className="absolute top-2 end-2"
                         onClick={() => setFormData({ ...formData, thumbnailUrl: '' })}
                       >
                         <X className="h-4 w-4" />
@@ -558,7 +558,7 @@ export function CreateCoursePage() {
                       onClick={() => addSection(preset)}
                       disabled={formData.sections.some((s) => s.name === preset.name)}
                     >
-                      <Plus className="h-3.5 w-3.5 mr-1" />
+                      <Plus className="h-3.5 w-3.5 me-1" />
                       {preset.name}
                     </Button>
                   ))}
@@ -579,15 +579,15 @@ export function CreateCoursePage() {
                             <div className="flex items-center justify-between gap-2 px-3 py-2 text-sm">
                               <button
                                 type="button"
-                                className="flex flex-1 items-center gap-2 text-left"
+                                className="flex flex-1 items-center gap-2 text-start"
                                 onClick={() => setExpandedSection(isExpanded ? null : s.name)}
                               >
                                 <MapPin className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                                 <strong>{s.name}</strong>
                                 <span className="text-muted-foreground truncate">— {s.locationLabel}</span>
                                 {s.meetingTimes.length > 0 && (
-                                  <Badge variant="subtle" className="text-xs ml-auto mr-2">
-                                    <Clock className="h-3 w-3 mr-1" />
+                                  <Badge variant="subtle" className="text-xs ms-auto me-2">
+                                    <Clock className="h-3 w-3 me-1" />
                                     {s.meetingTimes.length}{' '}
                                     {s.meetingTimes.length === 1 ? 'time' : 'times'}
                                   </Badge>
@@ -642,7 +642,7 @@ export function CreateCoursePage() {
                                       size="sm"
                                       onClick={() => addMeetingTime(s.name)}
                                     >
-                                      <Plus className="h-3.5 w-3.5 mr-1" />
+                                      <Plus className="h-3.5 w-3.5 me-1" />
                                       Add time
                                     </Button>
                                   </div>
@@ -844,7 +844,7 @@ export function CreateCoursePage() {
                     onClick={(e) => handleSubmit(e, true)}
                     disabled={loading}
                   >
-                    <Save className="h-4 w-4 mr-2" />
+                    <Save className="h-4 w-4 me-2" />
                     Save as Draft
                   </Button>
                   <Button

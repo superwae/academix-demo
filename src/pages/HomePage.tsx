@@ -273,7 +273,7 @@ function SectionDivider() {
       aria-hidden
     >
       <div className="mx-auto h-px max-w-2xl bg-gradient-to-r from-transparent via-primary/35 to-transparent" />
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex h-2 w-2 rounded-full bg-primary/50 ring-4 ring-background" />
+      <div className="absolute start-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex h-2 w-2 rounded-full bg-primary/50 ring-4 ring-background" />
     </div>
   );
 }
@@ -292,7 +292,7 @@ function ScrollProgress() {
   const scaleX = useTransform(scrollYProgress, [0, 1], [0, 1]);
   return (
     <motion.div
-      className="fixed top-0 left-0 right-0 h-1 bg-primary origin-left z-[100]"
+      className="fixed top-0 start-0 end-0 h-1 bg-primary origin-left z-[100]"
       style={{ scaleX }}
     />
   );
@@ -413,40 +413,40 @@ function ThemeCelebration({
           <div className="relative w-[72px] h-[88px]">
             {/* Robe — single clean shape */}
             <div
-              className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-9 rounded-t-[2rem] border-2 border-gray-900 bg-indigo-600"
+              className="absolute bottom-0 start-1/2 -translate-x-1/2 w-12 h-9 rounded-t-[2rem] border-2 border-gray-900 bg-indigo-600"
             />
             {/* Face — round head, skin tone */}
             <motion.div
-              className="absolute bottom-7 left-1/2 -translate-x-1/2 w-10 h-10 rounded-full border-2 border-gray-900 bg-amber-100"
+              className="absolute bottom-7 start-1/2 -translate-x-1/2 w-10 h-10 rounded-full border-2 border-gray-900 bg-amber-100"
               animate={{ y: [0, -2, 0] }}
               transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
             >
               {/* Eyes */}
               <motion.div
-                className="absolute left-2 top-3 w-2.5 h-2.5 rounded-full bg-gray-900"
+                className="absolute start-2 top-3 w-2.5 h-2.5 rounded-full bg-gray-900"
                 animate={phase === 'firework' ? { scaleY: [1, 0.2, 1] } : {}}
                 transition={{ duration: 0.15, repeat: 2 }}
               />
-              <div className="absolute left-2.5 top-3 w-1 h-1 rounded-full bg-white" />
+              <div className="absolute start-2.5 top-3 w-1 h-1 rounded-full bg-white" />
               <motion.div
-                className="absolute right-2 top-3 w-2.5 h-2.5 rounded-full bg-gray-900"
+                className="absolute end-2 top-3 w-2.5 h-2.5 rounded-full bg-gray-900"
                 animate={phase === 'firework' ? { scaleY: [1, 0.2, 1] } : {}}
                 transition={{ duration: 0.15, repeat: 2 }}
               />
-              <div className="absolute right-2.5 top-3 w-1 h-1 rounded-full bg-white" />
+              <div className="absolute end-2.5 top-3 w-1 h-1 rounded-full bg-white" />
               {/* Smile */}
-              <div className="absolute left-1/2 top-[52%] -translate-x-1/2 w-4 border-b-2 border-gray-800 rounded-b-full h-1" />
+              <div className="absolute start-1/2 top-[52%] -translate-x-1/2 w-4 border-b-2 border-gray-800 rounded-b-full h-1" />
             </motion.div>
             {/* Hat — pointed cone + band */}
             <motion.div
-              className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[14px] border-l-transparent border-r-[14px] border-r-transparent border-b-[28px] border-b-indigo-900 border-[0]"
+              className="absolute -top-0.5 start-1/2 -translate-x-1/2 w-0 h-0 border-l-[14px] border-l-transparent border-r-[14px] border-r-transparent border-b-[28px] border-b-indigo-900 border-[0]"
               animate={{ rotate: [0, 3, -2, 0] }}
               transition={{ repeat: Infinity, duration: 2.5, ease: 'easeInOut' }}
             />
-            <div className="absolute top-5 left-1/2 -translate-x-1/2 w-7 h-2 rounded-sm border-2 border-gray-900 bg-amber-200" />
-            <div className="absolute top-5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 border border-gray-800 bg-amber-600" style={{ marginLeft: 2 }} />
+            <div className="absolute top-5 start-1/2 -translate-x-1/2 w-7 h-2 rounded-sm border-2 border-gray-900 bg-amber-200" />
+            <div className="absolute top-5 start-1/2 -translate-x-1/2 w-1.5 h-1.5 border border-gray-800 bg-amber-600" style={{ marginLeft: 2 }} />
             {/* Star on hat */}
-            <motion.div className="absolute -top-6 left-1/2 -translate-x-1/2 text-yellow-400" animate={{ scale: [1, 1.15, 1] }} transition={{ repeat: Infinity, duration: 1.2 }}>
+            <motion.div className="absolute -top-6 start-1/2 -translate-x-1/2 text-yellow-400" animate={{ scale: [1, 1.15, 1] }} transition={{ repeat: Infinity, duration: 1.2 }}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="1.5"><polygon points="12 2 15 9 22 9 17 14 19 21 12 17 5 21 7 14 2 9 9 9" /></svg>
             </motion.div>
             {/* Wand — stick + star, clearly to the side */}
@@ -635,7 +635,7 @@ export function HomePage() {
               variants={{
                 visible: { transition: { staggerChildren: 0.12, delayChildren: 0.1 } },
               }}
-              className="space-y-4 text-center lg:text-left"
+              className="space-y-4 text-center lg:text-start"
             >
               <motion.div
                 variants={fadeUp}
@@ -825,14 +825,14 @@ export function HomePage() {
                 transition={spring}
                 animate={floatSubtle(index)}
                 whileHover={{ y: -8, scale: 1.02, transition: springSoft }}
-                className={`relative rounded-2xl border p-6 text-left transition-shadow ${
+                className={`relative rounded-2xl border p-6 text-start transition-shadow ${
                   feature.highlight
                     ? 'border-primary/40 bg-primary/5 shadow-lg shadow-primary/10'
                     : 'border-border/50 bg-card hover:shadow-lg'
                 }`}
               >
                 {feature.highlight && (
-                  <span className="absolute top-4 right-4 text-xs font-semibold text-primary bg-primary/15 px-2 py-1 rounded-full">
+                  <span className="absolute top-4 end-4 text-xs font-semibold text-primary bg-primary/15 px-2 py-1 rounded-full">
                     Try it below
                   </span>
                 )}
@@ -893,7 +893,7 @@ export function HomePage() {
                 key={label}
                 variants={staggerItem}
                 transition={spring}
-                className="flex items-center gap-2 rounded-xl border border-border/40 bg-muted/30 px-3 py-3 text-left"
+                className="flex items-center gap-2 rounded-xl border border-border/40 bg-muted/30 px-3 py-3 text-start"
               >
                 <Icon className="h-4 w-4 text-primary shrink-0" />
                 <span className="text-xs font-medium text-foreground/85 leading-snug">{label}</span>
@@ -1061,7 +1061,7 @@ export function HomePage() {
             </div>
             <motion.div variants={staggerItem} transition={spring}>
               <Button asChild variant="ghost">
-                <Link to="/courses">View all courses <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                <Link to="/courses">View all courses <ArrowRight className="ms-2 h-4 w-4" /></Link>
               </Button>
             </motion.div>
           </div>
@@ -1104,7 +1104,7 @@ export function HomePage() {
             </div>
             <motion.div variants={staggerItem} transition={spring}>
               <Button asChild variant="ghost">
-                <Link to="/courses">View All <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                <Link to="/courses">View All <ArrowRight className="ms-2 h-4 w-4" /></Link>
               </Button>
             </motion.div>
           </div>
@@ -1169,7 +1169,7 @@ export function HomePage() {
                           </div>
                         )}
                         {course.isFeatured && (
-                          <Badge className="absolute top-3 right-3 shadow-lg">Featured</Badge>
+                          <Badge className="absolute top-3 end-3 shadow-lg">Featured</Badge>
                         )}
                         <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/20 to-transparent" />
                       </div>
@@ -1235,7 +1235,7 @@ export function HomePage() {
             </div>
             <motion.div variants={staggerItem} transition={spring}>
               <Button asChild variant="ghost">
-                <Link to="/courses?sortBy=rating&sortDescending=true">View All <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                <Link to="/courses?sortBy=rating&sortDescending=true">View All <ArrowRight className="ms-2 h-4 w-4" /></Link>
               </Button>
             </motion.div>
           </div>
@@ -1404,7 +1404,7 @@ export function HomePage() {
             </div>
             <motion.div variants={staggerItem} transition={spring}>
               <Button asChild variant="ghost">
-                <Link to="/courses">View all courses <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                <Link to="/courses">View all courses <ArrowRight className="ms-2 h-4 w-4" /></Link>
               </Button>
             </motion.div>
           </div>
@@ -1443,7 +1443,7 @@ export function HomePage() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
             </span>
-            <span className="relative inline-block min-w-[200px] min-h-[1.25rem] pl-1">
+            <span className="relative inline-block min-w-[200px] min-h-[1.25rem] ps-1">
               <AnimatePresence mode="wait">
                 <motion.span
                   key={activityIndex}
@@ -1587,7 +1587,7 @@ export function HomePage() {
       )}
 
       {/* Floating theme & color customizer — test the page look live */}
-      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
+      <div className="fixed bottom-6 end-6 z-50 flex flex-col items-end gap-2">
         <AnimatePresence>
           {themePanelOpen && (
             <motion.div

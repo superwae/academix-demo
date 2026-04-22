@@ -5,6 +5,9 @@ import { HelmetProvider } from 'react-helmet-async'
 import App from './App'
 import './style.css'
 import 'lenis/dist/lenis.css'
+// Side-effect import: initializes i18next, detects browser language, applies
+// <html lang> + <html dir> + font class before the first render.
+import './i18n'
 import { initThemeFromStorage } from './theme/initTheme'
 import { hydrateUiPreferencesFromServer } from './theme/syncUserUiPreferences'
 import { useAuthStore } from './store/useAuthStore'

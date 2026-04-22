@@ -127,13 +127,13 @@ export function StudentDetailPage() {
           <div className="flex gap-2">
             {data.activeCourses.length > 0 && (
               <Badge variant="secondary" className="px-3 py-1.5">
-                <Activity className="mr-1.5 h-3.5 w-3.5" />
+                <Activity className="me-1.5 h-3.5 w-3.5" />
                 {data.activeCourses.length} active
               </Badge>
             )}
             {data.completedCourses.length > 0 && (
               <Badge variant="secondary" className="px-3 py-1.5">
-                <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />
+                <CheckCircle2 className="me-1.5 h-3.5 w-3.5" />
                 {data.completedCourses.length} completed
               </Badge>
             )}
@@ -276,7 +276,7 @@ function CourseStatsView({ stats }: { stats: StudentCourseStats }) {
             {formatDistanceToNow(new Date(stats.lastActivityAt), { addSuffix: true })}
           </span>
         )}
-        <Badge variant="outline" className="ml-auto">
+        <Badge variant="outline" className="ms-auto">
           {stats.status}
         </Badge>
       </div>
@@ -293,7 +293,7 @@ function CompletedCourseCard({ stats }: { stats: StudentCourseStats }) {
           <p className="text-xs text-muted-foreground mt-0.5">{stats.sectionName}</p>
         </div>
         <Badge className="shrink-0 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-0">
-          <CheckCircle2 className="mr-1 h-3 w-3" />
+          <CheckCircle2 className="me-1 h-3 w-3" />
           Completed
         </Badge>
       </div>

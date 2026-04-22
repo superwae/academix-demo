@@ -62,7 +62,7 @@ export function SessionRatingDialog({
             <DialogTitle>{headline}</DialogTitle>
           </div>
           <DialogDescription asChild>
-            <div className="space-y-1 pt-1 text-left text-sm text-muted-foreground">
+            <div className="space-y-1 pt-1 text-start text-sm text-muted-foreground">
               <p className="font-medium text-foreground">{courseTitle}</p>
               <p className="text-foreground/90">{sessionTitle}</p>
             </div>

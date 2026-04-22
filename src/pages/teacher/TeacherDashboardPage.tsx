@@ -222,7 +222,7 @@ export function TeacherDashboardPage() {
                   body="You have no scheduled classes for today."
                 />
               ) : (
-                <div className="max-h-[320px] overflow-y-auto scroll-fancy space-y-1.5 pr-1">
+                <div className="max-h-[320px] overflow-y-auto scroll-fancy space-y-1.5 pe-1">
                   {todaysClasses.map((classItem) => (
                     <div key={classItem.id} className="rounded-lg border border-border/50 bg-muted/20 p-2">
                       <div className="flex items-start justify-between gap-3">
@@ -246,12 +246,12 @@ export function TeacherDashboardPage() {
                         >
                           {classItem.joinUrl ? (
                             <a href={classItem.joinUrl} target="_blank" rel="noopener noreferrer">
-                              <PlayCircle className="h-3 w-3 mr-1" />
+                              <PlayCircle className="h-3 w-3 me-1" />
                               Start Session
                             </a>
                           ) : (
                             <span>
-                              <PlayCircle className="h-3 w-3 mr-1" />
+                              <PlayCircle className="h-3 w-3 me-1" />
                               Start Session
                             </span>
                           )}
@@ -329,7 +329,7 @@ export function TeacherDashboardPage() {
                 body="Activity will appear here as it happens."
               />
             ) : (
-              <div className="max-h-[280px] overflow-y-auto scroll-fancy space-y-1.5 pr-1">
+              <div className="max-h-[280px] overflow-y-auto scroll-fancy space-y-1.5 pe-1">
                 {recentActivity.map((activity) => {
                   // Map activity type to icon
                   const getIcon = () => {
@@ -381,7 +381,7 @@ export function TeacherDashboardPage() {
               </div>
               <Button asChild variant="ghost" size="sm">
                 <Link to="/teacher/at-risk-students">
-                  View All <ArrowRight className="ml-1 h-3 w-3" />
+                  View All <ArrowRight className="ms-1 h-3 w-3" />
                 </Link>
               </Button>
             </div>
@@ -400,7 +400,7 @@ export function TeacherDashboardPage() {
                 body="All your students are on track!"
               />
             ) : (
-              <div className="max-h-[320px] overflow-y-auto scroll-fancy space-y-2 pr-1">
+              <div className="max-h-[320px] overflow-y-auto scroll-fancy space-y-2 pe-1">
                 {atRiskStudents.map((student) => (
                   <AtRiskStudentCard key={student.userId} student={student} />
                 ))}
@@ -491,13 +491,13 @@ function AtRiskStudentCard({ student }: { student: StudentAnalytics }) {
         <div className="flex flex-col gap-1">
           <Button variant="outline" size="sm" asChild>
             <Link to={`/teacher/students/${student.userId}`}>
-              <Users className="h-3 w-3 mr-1" />
+              <Users className="h-3 w-3 me-1" />
               View
             </Link>
           </Button>
           <Button variant="ghost" size="sm" asChild>
             <Link to={`/teacher/messages?student=${student.userId}`}>
-              <MessageSquare className="h-3 w-3 mr-1" />
+              <MessageSquare className="h-3 w-3 me-1" />
               Message
             </Link>
           </Button>

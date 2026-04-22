@@ -1,8 +1,22 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Locale-specific font switching.
+   The active locale toggles one of these classes on <html> (see src/i18n/index.ts).
+   Tailwind logical properties (ms-, me-, ps-, pe-, start-, end-, text-start,
+   text-end) handle the LTR/RTL swap automatically when <html dir="rtl"> is set. */
+html.font-sans-latin,
+html.font-sans-latin body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+html.font-sans-arabic,
+html.font-sans-arabic body { font-family: 'Cairo', 'Inter', system-ui, -apple-system, sans-serif; }
+
+/* Reverse the visual direction of icons inside flow-direction-sensitive buttons
+   when the document is RTL. Opt-in via the .rtl-flip class on the icon. */
+html[dir="rtl"] .rtl-flip { transform: scaleX(-1); }
 
 /* Theme tokens with dramatic differences */
 

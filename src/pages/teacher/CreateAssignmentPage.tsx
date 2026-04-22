@@ -276,7 +276,7 @@ export function CreateAssignmentPage() {
                   >
                     {loading ? (
                       <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        <Loader2 className="h-4 w-4 me-2 animate-spin" />
                         Publishing...
                       </>
                     ) : (
@@ -290,7 +290,7 @@ export function CreateAssignmentPage() {
                     onClick={(e) => handleSubmit(e, true)}
                     disabled={loading || loadingCourses}
                   >
-                    <Save className="h-4 w-4 mr-2" />
+                    <Save className="h-4 w-4 me-2" />
                     Save as Draft
                   </Button>
                   <Button

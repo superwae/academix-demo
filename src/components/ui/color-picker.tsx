@@ -135,7 +135,7 @@ export function ColorPicker({ value, onChange, onClose, placement = 'bottom' }: 
               transformOrigin: placement === 'top' ? 'right bottom' : 'right top',
             }}
             className={cn(
-              'absolute right-0 w-72 glass-strong rounded-xl border border-border/60 shadow-xl z-[100] p-3 overflow-visible',
+              'absolute end-0 w-72 glass-strong rounded-xl border border-border/60 shadow-xl z-[100] p-3 overflow-visible',
               placement === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'
             )}
           >
@@ -189,7 +189,7 @@ export function ColorPicker({ value, onChange, onClose, placement = 'bottom' }: 
                   setIsOpen(false);
                   onClose();
                 }}
-                className="absolute right-2 top-2 text-muted-foreground hover:text-foreground transition-colors z-10"
+                className="absolute end-2 top-2 text-muted-foreground hover:text-foreground transition-colors z-10"
                 aria-label="Close"
               >
                 <X className="h-4 w-4" />
@@ -198,7 +198,7 @@ export function ColorPicker({ value, onChange, onClose, placement = 'bottom' }: 
 
             <div className="space-y-3">
               <div>
-                <h3 className="font-semibold text-sm mb-2 pr-6">Choose Custom Color</h3>
+                <h3 className="font-semibold text-sm mb-2 pe-6">Choose Custom Color</h3>
                 
                 {/* Color Wheel — fixed size so no scroll */}
                 <div className="relative mx-auto mb-3 w-44 h-44 shrink-0">

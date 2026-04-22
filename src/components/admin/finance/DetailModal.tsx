@@ -104,7 +104,7 @@ export function DetailModal({
                     )}
                   >
                     <span className="text-muted-foreground shrink-0">{item.label}</span>
-                    <span className="font-medium text-right">{item.value}</span>
+                    <span className="font-medium text-end">{item.value}</span>
                   </div>
                 ))}
               </div>
@@ -174,13 +174,13 @@ export function DetailTimeline({
 }) {
   return (
     <div className="relative">
-      <div className="absolute left-2 top-3 bottom-3 w-0.5 bg-border" />
+      <div className="absolute start-2 top-3 bottom-3 w-0.5 bg-border" />
       <div className="space-y-4">
         {items.map((item, index) => (
-          <div key={index} className="relative flex items-start gap-4 pl-6">
+          <div key={index} className="relative flex items-start gap-4 ps-6">
             <div
               className={cn(
-                "absolute left-0 top-1 h-4 w-4 rounded-full border-2",
+                "absolute start-0 top-1 h-4 w-4 rounded-full border-2",
                 item.completed
                   ? "border-emerald-500 bg-emerald-500"
                   : item.active

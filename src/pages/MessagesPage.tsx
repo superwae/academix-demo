@@ -43,7 +43,7 @@ export function MessagesPage() {
                 <button
                   key={m.id}
                   className={cn(
-                    'w-full rounded-md border border-border px-3 py-2 text-left text-sm transition-colors hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                    'w-full rounded-md border border-border px-3 py-2 text-start text-sm transition-colors hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                     isActive && 'bg-accent',
                   )}
                   onClick={() => {

@@ -247,12 +247,12 @@ export function AdminAuditLogsPage() {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search logs..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
+            className="ps-9"
           />
         </div>
         <DropdownMenu>
@@ -279,12 +279,12 @@ export function AdminAuditLogsPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/50">
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Action</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Actor</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Target</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Description</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">IP Address</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Time</th>
+                <th className="px-4 py-3 text-start font-medium text-muted-foreground">Action</th>
+                <th className="px-4 py-3 text-start font-medium text-muted-foreground">Actor</th>
+                <th className="px-4 py-3 text-start font-medium text-muted-foreground">Target</th>
+                <th className="px-4 py-3 text-start font-medium text-muted-foreground">Description</th>
+                <th className="px-4 py-3 text-start font-medium text-muted-foreground">IP Address</th>
+                <th className="px-4 py-3 text-start font-medium text-muted-foreground">Time</th>
               </tr>
             </thead>
             <tbody>

@@ -1,5 +1,7 @@
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState, useRef, type ComponentType } from "react";
+import { useTranslation } from "react-i18next";
+import { LanguagePicker } from "../LanguagePicker";
 import {
   GraduationCap,
   CalendarDays,
@@ -64,23 +66,23 @@ import {
 
 type NavItem = {
   to: string;
-  label: string;
+  labelKey: string;
   icon: ComponentType<{ className?: string }>;
 };
 
 // Student navigation - ALL paths use /student/* prefix
 const STUDENT_NAV: NavItem[] = [
-  { to: "/student/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/student/catalog", label: "Course Catalog", icon: BookOpen },
-  { to: "/student/my-classes", label: "My Classes", icon: GraduationCap },
-  { to: "/student/calendar", label: "Calendar", icon: CalendarDays },
-  { to: "/student/live-sessions", label: "Live Classes", icon: Radio },
-  { to: "/student/assignments", label: "Assignments", icon: ClipboardList },
-  { to: "/student/exams", label: "Exams", icon: ClipboardList },
-  { to: "/student/payments", label: "Payments", icon: CreditCard },
-  { to: "/student/messages", label: "Messages", icon: Inbox },
-  { to: "/student/profile", label: "Profile", icon: User },
-  { to: "/student/settings", label: "Settings", icon: Settings },
+  { to: "/student/dashboard", labelKey: "nav:dashboard", icon: LayoutDashboard },
+  { to: "/student/catalog", labelKey: "nav:courseCatalog", icon: BookOpen },
+  { to: "/student/my-classes", labelKey: "nav:myClasses", icon: GraduationCap },
+  { to: "/student/calendar", labelKey: "nav:calendar", icon: CalendarDays },
+  { to: "/student/live-sessions", labelKey: "nav:liveClasses", icon: Radio },
+  { to: "/student/assignments", labelKey: "nav:assignments", icon: ClipboardList },
+  { to: "/student/exams", labelKey: "nav:exams", icon: ClipboardList },
+  { to: "/student/payments", labelKey: "nav:payments", icon: CreditCard },
+  { to: "/student/messages", labelKey: "nav:messages", icon: Inbox },
+  { to: "/student/profile", labelKey: "nav:profile", icon: User },
+  { to: "/student/settings", labelKey: "nav:settings", icon: Settings },
 ];
 
 interface SearchResult {
@@ -92,6 +94,7 @@ interface SearchResult {
 }
 
 export function StudentLayout() {
+  const { t } = useTranslation(['nav', 'common', 'auth']);
   const theme = useAppStore((s) => s.data.theme);
   const customThemeColor = useAppStore((s) => s.data.customThemeColor);
   const mixTheme = useAppStore((s) => s.data.mixTheme);
@@ -164,16 +167,16 @@ export function StudentLayout() {
 
   const handleLogout = () => {
     logout();
-    toast.success("Logged out successfully");
+    toast.success(t('auth:logoutSuccess'));
     navigate("/");
   };
 
   const isDarkMode = theme === 'dark';
-  
+
   const toggleDarkMode = () => {
     const newTheme = isDarkMode ? 'light' : 'dark';
     setTheme(newTheme);
-    toast.success(`Switched to ${newTheme} mode`);
+    toast.success(newTheme === 'dark' ? t('common:switchedToDarkMode') : t('common:switchedToLightMode'));
   };
 
   useEffect(() => {
@@ -337,8 +340,8 @@ export function StudentLayout() {
   };
 
   const themeLabel = useMemo(
-    () => THEMES.find((t) => t.id === theme)?.label ?? "Theme",
-    [theme]
+    () => THEMES.find((th) => th.id === theme)?.label ?? t('common:theme'),
+    [theme, t]
   );
 
   const accountRoleLabel = useMemo(
@@ -354,7 +357,7 @@ export function StudentLayout() {
 
       {/* Skip to content link for accessibility */}
       <a href="#main-content" className="skip-to-content">
-        Skip to main content
+        {t('common:skipToContent')}
       </a>
 
       {/* Premium Header */}
@@ -371,7 +374,7 @@ export function StudentLayout() {
                   variant="ghost"
                   size="icon"
                   className="lg:hidden"
-                  aria-label="Open navigation"
+                  aria-label={t('common:openNavigation')}
                 >
                   <Menu className="h-5 w-5" />
                 </Button>
@@ -420,16 +423,16 @@ export function StudentLayout() {
                   AcademiX
                 </div>
                 <div className="hidden text-xs text-muted-foreground font-medium sm:block">
-                  Student Learning Portal
+                  {t('nav:studentPortal')}
                 </div>
               </div>
             </motion.div>
           </div>
 
           {/* Search Bar */}
-          <div ref={searchContainerRef} className="ml-auto hidden w-[400px] max-w-[35vw] items-center lg:flex relative">
+          <div ref={searchContainerRef} className="ms-auto hidden w-[400px] max-w-[35vw] items-center lg:flex relative">
             <form onSubmit={handleSearchSubmit} className="relative w-full group">
-              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" />
+              <Search className="pointer-events-none absolute start-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" />
               <Input
                 value={search}
                 onChange={(e) => {
@@ -441,8 +444,8 @@ export function StudentLayout() {
                     setShowResults(true);
                   }
                 }}
-                placeholder="Search courses, assignments, messages…"
-                className="h-12 pl-11 pr-10 rounded-xl border-2 border-border/50 bg-background/50 backdrop-blur-sm focus-visible:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/20 transition-all"
+                placeholder={t('common:searchStudentPlaceholder')}
+                className="h-12 ps-11 pe-10 rounded-xl border-2 border-border/50 bg-background/50 backdrop-blur-sm focus-visible:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/20 transition-all"
               />
               {search && (
                 <button
@@ -452,8 +455,8 @@ export function StudentLayout() {
                     setSearchResults([]);
                     setShowResults(false);
                   }}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                  aria-label="Clear search"
+                  className="absolute end-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label={t('common:clearSearch')}
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -469,7 +472,7 @@ export function StudentLayout() {
                 >
                   {isSearching ? (
                     <div className="p-4 text-center text-sm text-muted-foreground">
-                      Searching...
+                      {t('common:searching')}
                     </div>
                   ) : searchResults.length > 0 ? (
                     <div className="p-2">
@@ -478,7 +481,7 @@ export function StudentLayout() {
                           key={`${result.type}-${result.id}`}
                           type="button"
                           onClick={() => handleResultClick(result)}
-                          className="w-full text-left p-3 rounded-lg hover:bg-accent/50 transition-colors group"
+                          className="w-full text-start p-3 rounded-lg hover:bg-accent/50 transition-colors group"
                         >
                           <div className="flex items-start gap-3">
                             <div className="flex-shrink-0 mt-0.5">
@@ -511,7 +514,7 @@ export function StudentLayout() {
                     </div>
                   ) : (
                     <div className="p-4 text-center text-sm text-muted-foreground">
-                      No results found
+                      {t('common:noResultsFound')}
                     </div>
                   )}
                 </motion.div>
@@ -531,7 +534,7 @@ export function StudentLayout() {
             isSearching={isSearching}
             results={searchResults}
             onSelectResult={handleResultClick}
-            placeholder="Search courses, assignments, messages…"
+            placeholder={t('common:searchStudentPlaceholder')}
             renderIcon={(type) => {
               switch (type) {
                 case "course":
@@ -553,7 +556,7 @@ export function StudentLayout() {
               variant="ghost"
               size="icon"
               className="h-11 w-11 shrink-0 lg:hidden"
-              aria-label="Open search"
+              aria-label={t('common:openSearch')}
               onClick={() => setMobileSearchOpen(true)}
             >
               <Search className="h-5 w-5" />
@@ -565,10 +568,10 @@ export function StudentLayout() {
                 size="sm"
                 className="gap-1.5 shrink-0 h-9 px-2 sm:px-3"
                 onClick={() => navigate("/admin/dashboard")}
-                title="Return to Admin portal"
+                title={t('nav:returnToAdmin')}
               >
                 <LayoutDashboard className="h-4 w-4 shrink-0" />
-                <span className="hidden sm:inline font-medium">Admin dashboard</span>
+                <span className="hidden sm:inline font-medium">{t('nav:adminDashboard')}</span>
               </Button>
             )}
             {/* Notifications */}
@@ -603,17 +606,17 @@ export function StudentLayout() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => navigate("/student/profile")}>
-                  <User className="mr-2 h-4 w-4" />
-                  Profile
+                  <User className="me-2 h-4 w-4" />
+                  {t('common:profile')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate("/student/settings")}>
-                  <Settings className="mr-2 h-4 w-4" />
-                  Settings
+                  <Settings className="me-2 h-4 w-4" />
+                  {t('common:settings')}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Log out
+                  <LogOut className="me-2 h-4 w-4" />
+                  {t('common:logout')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -631,7 +634,7 @@ export function StudentLayout() {
                 <Button
                   variant="outline"
                   className="h-10 gap-2 border-2 rounded-xl px-2.5 sm:h-11 sm:px-3"
-                  title="Theme"
+                  title={t('common:theme')}
                 >
                   <span
                     className="h-3.5 w-3.5 rounded-full border-2 border-border shadow-sm"
@@ -640,7 +643,7 @@ export function StudentLayout() {
                   <span className="hidden sm:inline font-medium">
                     {themeLabel}
                   </span>
-                  <span className="sm:hidden">Theme</span>
+                  <span className="sm:hidden">{t('common:theme')}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
@@ -648,7 +651,7 @@ export function StudentLayout() {
                 className="w-40 glass-strong rounded-xl"
               >
                 <DropdownMenuLabel className="font-semibold">
-                  Choose Theme
+                  {t('common:chooseTheme')}
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuRadioGroup
@@ -671,44 +674,44 @@ export function StudentLayout() {
                           }
                         }
                         setTheme('custom');
-                        toast.success("Custom theme enabled", {
-                          description: "Use the color picker to choose your color",
+                        toast.success(t('common:customThemeEnabled'), {
+                          description: t('common:customThemeEnabledDesc'),
                         });
                       } else {
                     setTheme(next);
-                    toast.success("Theme updated", {
-                      description: `Switched to ${
-                        THEMES.find((t) => t.id === next)?.label
-                      }`,
+                    toast.success(t('common:themeUpdated'), {
+                      description: t('common:switchedToTheme', {
+                        theme: THEMES.find((th) => th.id === next)?.label,
+                      }),
                     });
                       }
                   }}
                 >
-                    {THEMES.filter(t => t.id !== 'custom').map((t) => (
+                    {THEMES.filter(th => th.id !== 'custom').map((th) => (
                     <DropdownMenuRadioItem
-                      key={t.id}
-                      value={t.id}
+                      key={th.id}
+                      value={th.id}
                       className="rounded-lg"
                     >
                       <div className="flex items-center gap-3">
                         <span
                           className={cn(
                             "h-4 w-4 rounded-full border-2 border-border shadow-sm",
-                            t.id === "light" && "bg-white",
-                            t.id === "dark" && "bg-black",
-                            t.id === "purple" && "bg-[#a855f7]",
-                            t.id === "sky" && "bg-[#06b6d4]",
-                            t.id === "green" && "bg-[#22c55e]",
-                            t.id === "emerald" && "bg-[#10b981]",
-                            t.id === "orange" && "bg-[#f97316]",
-                            t.id === "amber" && "bg-[#f59e0b]",
-                            t.id === "red" && "bg-[#ef4444]",
-                            t.id === "rose" && "bg-[#f43f5e]",
-                            t.id === "pink" && "bg-[#ec4899]",
-                            t.id === "indigo" && "bg-[#6366f1]"
+                            th.id === "light" && "bg-white",
+                            th.id === "dark" && "bg-black",
+                            th.id === "purple" && "bg-[#a855f7]",
+                            th.id === "sky" && "bg-[#06b6d4]",
+                            th.id === "green" && "bg-[#22c55e]",
+                            th.id === "emerald" && "bg-[#10b981]",
+                            th.id === "orange" && "bg-[#f97316]",
+                            th.id === "amber" && "bg-[#f59e0b]",
+                            th.id === "red" && "bg-[#ef4444]",
+                            th.id === "rose" && "bg-[#f43f5e]",
+                            th.id === "pink" && "bg-[#ec4899]",
+                            th.id === "indigo" && "bg-[#6366f1]"
                           )}
                         />
-                        <span className="font-medium">{t.label}</span>
+                        <span className="font-medium">{th.label}</span>
                       </div>
                     </DropdownMenuRadioItem>
                   ))}
@@ -718,13 +721,13 @@ export function StudentLayout() {
                       className="rounded-lg"
                     >
                       <div className="flex items-center gap-3">
-                        <span 
+                        <span
                           className="h-4 w-4 rounded-full border-2 border-border shadow-sm"
-                          style={{ 
+                          style={{
                             background: customThemeColor || 'hsl(222, 84%, 60%)'
                           }}
                         />
-                        <span className="font-medium">Custom Color</span>
+                        <span className="font-medium">{t('common:customColor')}</span>
                       </div>
                     </DropdownMenuRadioItem>
                 </DropdownMenuRadioGroup>
@@ -738,20 +741,23 @@ export function StudentLayout() {
               size="sm"
               onClick={toggleDarkMode}
               className="h-11 gap-2 border-2 rounded-xl"
-              title={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+              title={isDarkMode ? t('common:switchToLightMode') : t('common:switchToDarkMode')}
             >
               {isDarkMode ? (
                 <>
                   <Sun className="h-4 w-4" />
-                  <span className="hidden sm:inline font-medium">Light Mode</span>
+                  <span className="hidden sm:inline font-medium">{t('common:lightMode')}</span>
                 </>
               ) : (
                 <>
                   <Moon className="h-4 w-4" />
-                  <span className="hidden sm:inline font-medium">Dark Mode</span>
+                  <span className="hidden sm:inline font-medium">{t('common:darkMode')}</span>
                 </>
               )}
             </Button>
+
+            {/* Language Picker */}
+            <LanguagePicker compact />
           </div>
         </div>
       </header>
@@ -793,11 +799,11 @@ export function StudentLayout() {
                     {accountRoleLabel}
                   </div>
                   <div className="mt-0.5 truncate text-base font-bold">
-                    {user ? `${user.firstName} ${user.lastName}` : "Student"}
+                    {user ? `${user.firstName} ${user.lastName}` : t('nav:student')}
                   </div>
                   {showStudentPortalHint && (
                     <p className="mt-1 text-[10px] font-medium text-muted-foreground/90">
-                      Student portal view
+                      {t('nav:studentPortalView')}
                     </p>
                   )}
                   {showBackToAdmin && (
@@ -809,7 +815,7 @@ export function StudentLayout() {
                       onClick={() => navigate("/admin/dashboard")}
                     >
                       <LayoutDashboard className="h-3.5 w-3.5 shrink-0" />
-                      Admin dashboard
+                      {t('nav:adminDashboard')}
                     </Button>
                   )}
                   <div className="mt-1.5 flex items-center gap-2">
@@ -819,7 +825,7 @@ export function StudentLayout() {
                       className="h-2 w-2 rounded-full bg-primary shadow-sm shadow-primary/50"
                     />
                     <span className="text-xs font-medium text-muted-foreground">
-                      Active Semester
+                      {t('nav:activeSemester')}
                     </span>
                   </div>
                 </div>
@@ -831,7 +837,7 @@ export function StudentLayout() {
                 className="mt-3 w-full justify-start gap-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
               >
                 <LogOut className="h-4 w-4" />
-                Log Out
+                {t('common:logout')}
               </Button>
             </motion.div>
 
@@ -873,6 +879,7 @@ function StudentNavList({
   unreadMessages?: number;
   unreadNewGrades?: number;
 }) {
+  const { t } = useTranslation(['nav']);
   return (
     <nav className="flex flex-col gap-1.5" aria-label="Main navigation">
       {STUDENT_NAV.map((item) => {
@@ -911,7 +918,7 @@ function StudentNavList({
                   )}
                 />
               </motion.div>
-              <span className="flex-1">{item.label}</span>
+              <span className="flex-1">{t(item.labelKey)}</span>
               {messageBadge && (
                 <Badge
                   variant="destructive"
@@ -931,7 +938,7 @@ function StudentNavList({
               {isActive && (
                 <motion.div
                   layoutId="activeNav"
-                  className="absolute right-0 top-1 bottom-1 w-1 rounded-l-full bg-primary shadow-sm shadow-primary/50"
+                  className="absolute end-0 top-1 bottom-1 w-1 rounded-l-full bg-primary shadow-sm shadow-primary/50"
                   transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 />
               )}

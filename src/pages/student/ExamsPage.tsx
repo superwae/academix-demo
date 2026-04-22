@@ -340,7 +340,7 @@ export function ExamsPage() {
               <AccordionItem key={courseId} id={courseId}>
                 <AccordionTrigger className="flex items-center gap-2">
                   <span className="font-medium">{courseTitle}</span>
-                  <Badge variant="secondary" className="ml-2 text-xs">
+                  <Badge variant="secondary" className="ms-2 text-xs">
                     {courseExams.length} exam{courseExams.length !== 1 ? 's' : ''}
                   </Badge>
                 </AccordionTrigger>
@@ -497,7 +497,7 @@ export function ExamsPage() {
                               disabled={loadingResults}
                             >
                               View summary
-                              <ChevronRight className="h-4 w-4 ml-0.5" />
+                              <ChevronRight className="h-4 w-4 ms-0.5" />
                             </Button>
                           </li>
                         ))}
@@ -767,7 +767,7 @@ setSummaryFrom('score')
               )}
 
               {mode === 'summary' && examResult && (
-                <div className="mt-4 space-y-5 max-h-[70vh] overflow-y-auto pr-1">
+                <div className="mt-4 space-y-5 max-h-[70vh] overflow-y-auto pe-1">
                   <div className="rounded-xl border-2 border-primary/20 bg-primary/5 p-5">
                     <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-1">
                       <Award className="h-4 w-4" />

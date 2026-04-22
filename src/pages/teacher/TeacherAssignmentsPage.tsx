@@ -134,7 +134,7 @@ export function TeacherAssignmentsPage() {
         </div>
         <Button variant="gradient" asChild className="w-full shrink-0 sm:w-auto">
           <Link to="/teacher/assignments/create">
-            <PlusCircle className="h-4 w-4 mr-2" />
+            <PlusCircle className="h-4 w-4 me-2" />
             Create Assignment
           </Link>
         </Button>
@@ -144,12 +144,12 @@ export function TeacherAssignmentsPage() {
       <Card>
         <CardContent className="pt-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Search assignments..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className="ps-10"
             />
           </div>
         </CardContent>
@@ -225,7 +225,7 @@ export function TeacherAssignmentsPage() {
                       <div className="mt-4 flex flex-wrap gap-2 border-t border-border/50 pt-3">
                         <Button variant="outline" size="sm" className="flex-1 min-w-[calc(50%-0.25rem)]" asChild>
                           <Link to={`/teacher/assignments/${assignment.id}/edit`}>
-                            <Pencil className="h-3.5 w-3.5 mr-1" />
+                            <Pencil className="h-3.5 w-3.5 me-1" />
                             Edit
                           </Link>
                         </Button>
@@ -237,19 +237,19 @@ export function TeacherAssignmentsPage() {
                             className="flex-1 min-w-[calc(50%-0.25rem)]"
                             onClick={() => handlePublish(assignment.id)}
                           >
-                            <Send className="h-3.5 w-3.5 mr-1" />
+                            <Send className="h-3.5 w-3.5 me-1" />
                             Publish
                           </Button>
                         )}
                         <Button variant="outline" size="sm" className="flex-1 min-w-[calc(50%-0.25rem)]" asChild>
                           <Link to={`/teacher/assignments/${assignment.id}/submissions`}>
-                            <Eye className="h-3.5 w-3.5 mr-1" />
+                            <Eye className="h-3.5 w-3.5 me-1" />
                             Submissions
                           </Link>
                         </Button>
                         <Button variant="outline" size="sm" className="flex-1 min-w-[calc(50%-0.25rem)]" asChild>
                           <Link to={`/teacher/assignments/${assignment.id}/grade`}>
-                            <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
+                            <CheckCircle2 className="h-3.5 w-3.5 me-1" />
                             Grade
                           </Link>
                         </Button>
@@ -270,7 +270,7 @@ export function TeacherAssignmentsPage() {
                         <TableHead>Due Date</TableHead>
                         <TableHead>Submissions</TableHead>
                         <TableHead>Status</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
+                        <TableHead className="text-end">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -308,11 +308,11 @@ export function TeacherAssignmentsPage() {
                               {assignment.status || 'Draft'}
                             </Badge>
                           </TableCell>
-                          <TableCell className="text-right">
+                          <TableCell className="text-end">
                             <div className="flex flex-wrap items-center justify-end gap-1">
                               <Button variant="ghost" size="sm" asChild>
                                 <Link to={`/teacher/assignments/${assignment.id}/edit`}>
-                                  <Pencil className="h-3 w-3 mr-1" />
+                                  <Pencil className="h-3 w-3 me-1" />
                                   Edit
                                 </Link>
                               </Button>
@@ -323,19 +323,19 @@ export function TeacherAssignmentsPage() {
                                   type="button"
                                   onClick={() => handlePublish(assignment.id)}
                                 >
-                                  <Send className="h-3 w-3 mr-1" />
+                                  <Send className="h-3 w-3 me-1" />
                                   Publish
                                 </Button>
                               )}
                               <Button variant="ghost" size="sm" asChild>
                                 <Link to={`/teacher/assignments/${assignment.id}/submissions`}>
-                                  <Eye className="h-3 w-3 mr-1" />
+                                  <Eye className="h-3 w-3 me-1" />
                                   View
                                 </Link>
                               </Button>
                               <Button variant="ghost" size="sm" asChild>
                                 <Link to={`/teacher/assignments/${assignment.id}/grade`}>
-                                  <CheckCircle2 className="h-3 w-3 mr-1" />
+                                  <CheckCircle2 className="h-3 w-3 me-1" />
                                   Grade
                                 </Link>
                               </Button>

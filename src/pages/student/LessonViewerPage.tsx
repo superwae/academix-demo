@@ -245,7 +245,7 @@ export function LessonViewerPage() {
                     <button
                       key={m.id}
                       type="button"
-                      className="w-full flex items-center gap-3 p-3 rounded-lg border hover:bg-muted/50 text-left"
+                      className="w-full flex items-center gap-3 p-3 rounded-lg border hover:bg-muted/50 text-start"
                       onClick={() =>
                         window.open(resolvePublicFileUrl(m.fileUrl), '_blank', 'noopener,noreferrer')
                       }

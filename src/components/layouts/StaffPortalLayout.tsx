@@ -319,7 +319,7 @@ export function StaffPortalShell({
 
           <div className="flex-1 max-w-md mx-4 hidden md:block">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 type="search"
                 placeholder={
@@ -329,12 +329,12 @@ export function StaffPortalShell({
                 }
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 h-9 bg-muted/50 border-transparent focus:border-primary/30 focus:bg-background"
+                className="ps-9 h-9 bg-muted/50 border-transparent focus:border-primary/30 focus:bg-background"
               />
             </div>
           </div>
 
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ms-auto flex items-center gap-2">
             <Button
               type="button"
               variant="ghost"
@@ -473,7 +473,7 @@ export function StaffPortalShell({
                     {user?.firstName?.[0]}
                     {user?.lastName?.[0]}
                   </div>
-                  <div className="hidden lg:block text-left max-w-[8rem]">
+                  <div className="hidden lg:block text-start max-w-[8rem]">
                     <p className="text-sm font-medium leading-none truncate">
                       {user?.firstName} {user?.lastName}
                     </p>
@@ -495,14 +495,14 @@ export function StaffPortalShell({
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => navigate(meta.home)}>
-                  <GraduationCap className="mr-2 h-4 w-4" />
+                  <GraduationCap className="me-2 h-4 w-4" />
                   Portal home
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={handleLogout}
                   className="text-destructive focus:text-destructive"
                 >
-                  <LogOut className="mr-2 h-4 w-4" />
+                  <LogOut className="me-2 h-4 w-4" />
                   Log out
                 </DropdownMenuItem>
               </DropdownMenuContent>

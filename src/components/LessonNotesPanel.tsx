@@ -72,7 +72,7 @@ export function LessonNotesPanel({ lessonId, courseId, currentTime, onSeekToTime
             size="sm"
             onClick={() => setIsAddingNote(!isAddingNote)}
           >
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="h-4 w-4 me-2" />
             Add Note
           </Button>
         </div>

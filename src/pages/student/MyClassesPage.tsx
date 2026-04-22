@@ -120,7 +120,7 @@ function EnrollmentCard({ enrollment }: { enrollment: EnrollmentWithCourse }) {
                 className="w-full border-2 border-[#c9a962] bg-gradient-to-b from-[#fffbeb] to-[#fef3c7] font-medium text-[#78350f] shadow-sm transition-colors hover:from-[#fefce8] hover:to-[#fde68a] hover:text-[#451a03] dark:border-[#b8974a] dark:from-[#422006]/90 dark:to-[#451a03]/90 dark:text-[#fde68a] dark:hover:from-[#57320d] dark:hover:to-[#451a03]"
               >
                 <Link to={`/student/my-classes/${course.id}/certificate`}>
-                  <Award className="mr-2 h-4 w-4 text-[#b45309] dark:text-amber-300" />
+                  <Award className="me-2 h-4 w-4 text-[#b45309] dark:text-amber-300" />
                   View Certificate
                 </Link>
               </Button>
@@ -229,7 +229,7 @@ export function MyClassesPage() {
             </CardDescription>
             <Button variant="default" asChild>
               <Link to="/student/catalog">
-                <BookOpen className="mr-2 h-4 w-4" />
+                <BookOpen className="me-2 h-4 w-4" />
                 Browse Catalog
               </Link>
             </Button>

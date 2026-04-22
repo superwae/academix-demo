@@ -431,13 +431,13 @@ export function FinanceRevenueSplitPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/50">
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">#</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Instructor</th>
+                <th className="px-4 py-3 text-start font-medium text-muted-foreground">#</th>
+                <th className="px-4 py-3 text-start font-medium text-muted-foreground">Instructor</th>
                 <th className="px-4 py-3 text-center font-medium text-muted-foreground">Courses</th>
-                <th className="px-4 py-3 text-right font-medium text-muted-foreground">Gross Revenue</th>
-                <th className="px-4 py-3 text-right font-medium text-muted-foreground">Earnings (80%)</th>
-                <th className="px-4 py-3 text-right font-medium text-muted-foreground">% of Total</th>
-                <th className="px-4 py-3 text-right font-medium text-muted-foreground">Growth</th>
+                <th className="px-4 py-3 text-end font-medium text-muted-foreground">Gross Revenue</th>
+                <th className="px-4 py-3 text-end font-medium text-muted-foreground">Earnings (80%)</th>
+                <th className="px-4 py-3 text-end font-medium text-muted-foreground">% of Total</th>
+                <th className="px-4 py-3 text-end font-medium text-muted-foreground">Growth</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -461,11 +461,11 @@ export function FinanceRevenueSplitPage() {
                     </div>
                   </td>
                   <td className="px-4 py-3 text-center text-muted-foreground">{instructor.courses}</td>
-                  <td className="px-4 py-3 text-right">{formatCurrency(instructor.revenue)}</td>
-                  <td className="px-4 py-3 text-right font-semibold text-emerald-500">
+                  <td className="px-4 py-3 text-end">{formatCurrency(instructor.revenue)}</td>
+                  <td className="px-4 py-3 text-end font-semibold text-emerald-500">
                     {formatCurrency(instructor.share)}
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="px-4 py-3 text-end">
                     <div className="flex items-center justify-end gap-2">
                       <div className="w-16 h-2 rounded-full bg-muted overflow-hidden">
                         <div
@@ -473,12 +473,12 @@ export function FinanceRevenueSplitPage() {
                           style={{ width: `${Math.min(instructor.percentage * 8, 100)}%` }}
                         />
                       </div>
-                      <span className="text-muted-foreground w-12 text-right">
+                      <span className="text-muted-foreground w-12 text-end">
                         {instructor.percentage}%
                       </span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="px-4 py-3 text-end">
                     <span
                       className={cn(
                         "inline-flex items-center gap-1 text-xs font-medium",

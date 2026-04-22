@@ -75,18 +75,18 @@ export function FilterBar({
       <div className="flex flex-col sm:flex-row gap-3">
         {/* Search Input */}
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
             placeholder={searchPlaceholder}
             value={searchValue}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-9 h-10 bg-muted/50 border-border/50 focus:border-primary/30 focus:bg-background"
+            className="ps-9 h-10 bg-muted/50 border-border/50 focus:border-primary/30 focus:bg-background"
           />
           {searchValue && (
             <button
               onClick={() => onSearchChange("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              className="absolute end-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
             >
               <X className="h-4 w-4" />
             </button>

@@ -1,0 +1,43 @@
+{
+  "landing": {
+    "heroTitle": "تعلّم وعلّم وانمُ مع أكاديميكس.",
+    "heroSubtitle": "منصّة حديثة للتعلّم المباشر وحسب الطلب — مصمّمة للطلاب والمدرّسين والمؤسسات.",
+    "heroCtaBrowse": "تصفّح الدورات",
+    "heroCtaSignUp": "ابدأ مجاناً",
+    "howItWorksTitle": "كيف تعمل المنصّة",
+    "featuresTitle": "كل ما تحتاجه للتعليم والتعلّم",
+    "faqTitle": "الأسئلة الشائعة",
+    "ctaTitle": "هل أنت جاهز لبدء التعلّم؟",
+    "ctaSubtitle": "انضم إلى أكاديميكس اليوم واكتشف مئات الدورات."
+  },
+  "catalog": {
+    "title": "كتالوج الدورات",
+    "subtitle": "استكشف الحصص المباشرة والدورات الذاتية من أفضل المدرّسين.",
+    "searchPlaceholder": "ابحث عن دورات أو مواضيع أو مدرّسين",
+    "filterCategory": "التصنيف",
+    "filterLevel": "المستوى",
+    "filterModality": "نمط التعليم",
+    "sortNewest": "الأحدث",
+    "sortTopRated": "الأعلى تقييماً",
+    "sortPriceLow": "السعر: من الأقل إلى الأعلى",
+    "sortPriceHigh": "السعر: من الأعلى إلى الأقل",
+    "noResults": "لا توجد دورات تطابق الفلاتر المحدّدة.",
+    "loadMore": "عرض المزيد من الدورات"
+  },
+  "courseDetails": {
+    "enroll": "سجّل الآن",
+    "enrolling": "جارٍ التسجيل…",
+    "alreadyEnrolled": "أنت مسجّل في هذه الدورة",
+    "reEnroll": "التسجيل في دفعة جديدة",
+    "checkout": "الانتقال إلى الدفع",
+    "sectionsTitle": "الشُّعب المتاحة",
+    "selectSection": "اختر شعبة",
+    "lessonsTitle": "ما الذي ستتعلّمه",
+    "reviewsTitle": "آراء الطلاب",
+    "instructorTitle": "عن المدرّس",
+    "durationLabel": "المدّة",
+    "seatsRemaining": "المقاعد المتبقّية: {{count}}",
+    "sessionFull": "اكتملت مقاعد هذه الشعبة",
+    "sectionInactive": "هذه الشعبة لا تقبل التسجيل حالياً"
+  }
+}
