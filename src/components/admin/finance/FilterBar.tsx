@@ -6,6 +6,7 @@ import {
   X,
   Calendar,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { cn } from "../../../lib/cn";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
@@ -56,7 +57,7 @@ export interface FilterBarProps {
 }
 
 export function FilterBar({
-  searchPlaceholder = "Search...",
+  searchPlaceholder,
   searchValue,
   onSearchChange,
   filters,
@@ -65,7 +66,9 @@ export function FilterBar({
   showAdvancedFilters = false,
   advancedFilters,
 }: FilterBarProps) {
+  const { t } = useTranslation(['admin', 'common', 'errors']);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const resolvedSearchPlaceholder = searchPlaceholder ?? t('admin:finance.components.filterBar.searchPlaceholder');
 
   const hasActiveFilters = filters.some((f) => f.value !== "all") || 
     (dateRange && (dateRange.from || dateRange.to));
@@ -78,7 +81,7 @@ export function FilterBar({
           <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
-            placeholder={searchPlaceholder}
+            placeholder={resolvedSearchPlaceholder}
             value={searchValue}
             onChange={(e) => onSearchChange(e.target.value)}
             className="ps-9 h-10 bg-muted/50 border-border/50 focus:border-primary/30 focus:bg-background"
@@ -104,7 +107,7 @@ export function FilterBar({
                   filter.value !== "all" && "border-primary/50 bg-primary/5"
                 )}
               >
-                {filter.label}: {filter.options.find((o) => o.id === filter.value)?.label || "All"}
+                {filter.label}: {filter.options.find((o) => o.id === filter.value)?.label || t('admin:finance.components.filterBar.all')}
                 <ChevronDown className="h-3 w-3 opacity-50" />
               </Button>
             </DropdownMenuTrigger>
@@ -140,14 +143,14 @@ export function FilterBar({
                 )}
               >
                 <Calendar className="h-4 w-4" />
-                Date Range
+                {t('admin:finance.components.filterBar.dateRange')}
                 <ChevronDown className="h-3 w-3 opacity-50" />
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-4" align="start">
               <div className="space-y-3">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-muted-foreground">From</label>
+                  <label className="text-xs font-medium text-muted-foreground">{t('admin:finance.components.filterBar.from')}</label>
                   <Input
                     type="date"
                     value={dateRange.from}
@@ -156,7 +159,7 @@ export function FilterBar({
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-muted-foreground">To</label>
+                  <label className="text-xs font-medium text-muted-foreground">{t('admin:finance.components.filterBar.to')}</label>
                   <Input
                     type="date"
                     value={dateRange.to}
@@ -174,7 +177,7 @@ export function FilterBar({
                       dateRange.onToChange("");
                     }}
                   >
-                    Clear dates
+                    {t('admin:finance.components.filterBar.clearDates')}
                   </Button>
                 )}
               </div>
@@ -190,7 +193,7 @@ export function FilterBar({
             onClick={() => setShowAdvanced(!showAdvanced)}
           >
             <Filter className="h-4 w-4" />
-            More Filters
+            {t('admin:finance.components.filterBar.moreFilters')}
             {hasActiveFilters && (
               <span className="h-2 w-2 rounded-full bg-primary" />
             )}
@@ -206,7 +209,7 @@ export function FilterBar({
             className="gap-1.5 h-10 text-muted-foreground hover:text-foreground"
           >
             <X className="h-4 w-4" />
-            Clear all
+            {t('admin:finance.components.filterBar.clearAll')}
           </Button>
         )}
       </div>

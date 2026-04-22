@@ -1,6 +1,7 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState, useMemo, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
@@ -49,9 +50,6 @@ import { cn } from '../lib/cn';
 import { Helmet } from 'react-helmet-async';
 import { useLenis } from '../hooks/useLenis';
 
-const LANDING_META_DESCRIPTION =
-  'Discover thousands of courses from expert instructors. Learn at your pace with assignments, exams, and certificates on AcademiX.';
-
 /** Theme background colors for the top-to-bottom sweep (HSL string for each theme). */
 const THEME_BACKGROUNDS: Record<ThemeId, string> = {
   light: 'hsl(0 0% 100%)',
@@ -70,153 +68,88 @@ const THEME_BACKGROUNDS: Record<ThemeId, string> = {
   custom: 'hsl(0 0% 100%)',
 };
 
-const STATS = [
-  { value: '50K+', label: 'Active learners' },
-  { value: '1,200+', label: 'Courses' },
-  { value: '98%', label: 'Completion rate' },
+const STATS_VALUES = [
+  { value: '50K+', labelKey: 'home.stats.activeLearners' },
+  { value: '1,200+', labelKey: 'home.stats.courses' },
+  { value: '98%', labelKey: 'home.stats.completionRate' },
 ];
 
 /** Partner-style strip — monogram + label for a more polished look */
 const TRUST_PARTNERS = [
-  { initials: 'UN', name: 'Universities' },
-  { initials: 'K12', name: 'Schools' },
-  { initials: 'ENT', name: 'Enterprises' },
-  { initials: 'ED', name: 'EdTech' },
+  { initials: 'UN', nameKey: 'home.trust.universities' },
+  { initials: 'K12', nameKey: 'home.trust.schools' },
+  { initials: 'ENT', nameKey: 'home.trust.enterprises' },
+  { initials: 'ED', nameKey: 'home.trust.edtech' },
 ];
 
 const TRUST_BADGES = [
-  { label: 'Encrypted & secure', icon: Lock },
-  { label: '24/7 learner support', icon: Headphones },
-  { label: '99.9% uptime', icon: Zap },
-  { label: 'Global CDN', icon: Globe2 },
+  { labelKey: 'home.trust.encrypted', icon: Lock },
+  { labelKey: 'home.trust.support', icon: Headphones },
+  { labelKey: 'home.trust.uptime', icon: Zap },
+  { labelKey: 'home.trust.globalCdn', icon: Globe2 },
 ];
 
 const HOW_IT_WORKS = [
-  {
-    step: 1,
-    title: 'Browse courses',
-    description: 'Explore by category, level, or instructor. Find the right fit for your goals.',
-    icon: Search,
-  },
-  {
-    step: 2,
-    title: 'Enroll & learn',
-    description: 'Join with one click. Access lessons, assignments, and track your progress.',
-    icon: ClipboardCheck,
-  },
-  {
-    step: 3,
-    title: 'Get certified',
-    description: 'Complete courses and earn certificates to showcase your skills.',
-    icon: Award,
-  },
+  { step: 1, titleKey: 'home.howItWorks.step1Title', descKey: 'home.howItWorks.step1Desc', icon: Search },
+  { step: 2, titleKey: 'home.howItWorks.step2Title', descKey: 'home.howItWorks.step2Desc', icon: ClipboardCheck },
+  { step: 3, titleKey: 'home.howItWorks.step3Title', descKey: 'home.howItWorks.step3Desc', icon: Award },
 ];
 
 const FEATURES = [
-  { title: 'Expert instructors', description: 'Learn from industry professionals', icon: GraduationCap },
-  { title: 'Learn at your pace', description: 'Self-paced courses, anytime', icon: Clock },
-  { title: 'Certificates', description: 'Earn credentials you can share', icon: Award },
-  { title: 'Mobile-friendly', description: 'Study on any device', icon: Smartphone },
-  { title: 'Secure & private', description: 'Your data is protected', icon: Shield },
-  { title: 'Video lessons', description: 'High-quality video content', icon: Video },
+  { titleKey: 'home.features.expertInstructorsTitle', descKey: 'home.features.expertInstructorsDesc', icon: GraduationCap },
+  { titleKey: 'home.features.selfPacedTitle', descKey: 'home.features.selfPacedDesc', icon: Clock },
+  { titleKey: 'home.features.certificatesTitle', descKey: 'home.features.certificatesDesc', icon: Award },
+  { titleKey: 'home.features.mobileTitle', descKey: 'home.features.mobileDesc', icon: Smartphone },
+  { titleKey: 'home.features.secureTitle', descKey: 'home.features.secureDesc', icon: Shield },
+  { titleKey: 'home.features.videoTitle', descKey: 'home.features.videoDesc', icon: Video },
 ];
 
 const AUDIENCES = [
-  { id: 'students', label: 'For students', description: 'Browse, enroll, and learn with structured courses and support.' },
-  { id: 'instructors', label: 'For instructors', description: 'Create and manage courses, engage with learners, and get paid.' },
-  { id: 'organizations', label: 'For organizations', description: 'Train teams, track progress, and scale learning programs.' },
+  { id: 'students', labelKey: 'home.audiences.studentsLabel', descKey: 'home.audiences.studentsDesc' },
+  { id: 'instructors', labelKey: 'home.audiences.instructorsLabel', descKey: 'home.audiences.instructorsDesc' },
+  { id: 'organizations', labelKey: 'home.audiences.organizationsLabel', descKey: 'home.audiences.organizationsDesc' },
 ];
 
 const CATEGORIES = [
-  { name: 'Programming', slug: 'Programming', icon: Code },
-  { name: 'Design', slug: 'Design', icon: Palette },
-  { name: 'Business', slug: 'Business', icon: Briefcase },
-  { name: 'Data Science', slug: 'Data Science', icon: TrendingUp },
-  { name: 'Marketing', slug: 'Marketing', icon: Sparkles },
+  { nameKey: 'home.categories.programming', slug: 'Programming', icon: Code },
+  { nameKey: 'home.categories.design', slug: 'Design', icon: Palette },
+  { nameKey: 'home.categories.business', slug: 'Business', icon: Briefcase },
+  { nameKey: 'home.categories.dataScience', slug: 'Data Science', icon: TrendingUp },
+  { nameKey: 'home.categories.marketing', slug: 'Marketing', icon: Sparkles },
 ];
 
 const TESTIMONIALS = [
-  {
-    quote: 'AcademiX made it easy to upskill while working full-time. The structure and support are exactly what I needed.',
-    name: 'Sarah Chen',
-    role: 'Software Developer',
-    avatar: null,
-  },
-  {
-    quote: 'I moved from zero to landing my first dev job in under a year. The courses and community are top-notch.',
-    name: 'Marcus Johnson',
-    role: 'Career switcher',
-    avatar: null,
-  },
-  {
-    quote: 'As an instructor, the tools are intuitive and my students love the experience. Highly recommend.',
-    name: 'Dr. Elena Rodriguez',
-    role: 'University Professor',
-    avatar: null,
-  },
+  { quoteKey: 'home.testimonials.quote1', nameKey: 'home.testimonials.name1', roleKey: 'home.testimonials.role1' },
+  { quoteKey: 'home.testimonials.quote2', nameKey: 'home.testimonials.name2', roleKey: 'home.testimonials.role2' },
+  { quoteKey: 'home.testimonials.quote3', nameKey: 'home.testimonials.name3', roleKey: 'home.testimonials.role3' },
 ];
 
 const INSTRUCTORS = [
-  { name: 'Dr. Elena Rodriguez', subject: 'Computer Science', initials: 'ER' },
-  { name: 'James Wilson', subject: 'Design & UX', initials: 'JW' },
-  { name: 'Priya Sharma', subject: 'Data & Analytics', initials: 'PS' },
-  { name: 'Alex Kim', subject: 'Business', initials: 'AK' },
+  { nameKey: 'home.instructors.name1', subjectKey: 'home.instructors.subject1', initials: 'ER' },
+  { nameKey: 'home.instructors.name2', subjectKey: 'home.instructors.subject2', initials: 'JW' },
+  { nameKey: 'home.instructors.name3', subjectKey: 'home.instructors.subject3', initials: 'PS' },
+  { nameKey: 'home.instructors.name4', subjectKey: 'home.instructors.subject4', initials: 'AK' },
 ];
 
 const FAQ_ITEMS = [
-  {
-    id: 'what-is',
-    q: 'What is AcademiX?',
-    a: 'AcademiX is a learning management system (LMS) where you can discover courses, enroll, watch lessons, complete assignments and exams, and earn certificates. It supports students, instructors, and organizations.',
-  },
-  {
-    id: 'free',
-    q: 'Are there free courses?',
-    a: 'Yes. Many courses are free. Filter by price on the course catalog to find free options. Paid courses are clearly marked.',
-  },
-  {
-    id: 'certificate',
-    q: 'Do I get a certificate?',
-    a: 'Completed courses can award certificates you can download or share. Requirements are set by each course instructor.',
-  },
-  {
-    id: 'cancel',
-    q: 'Can I cancel or get a refund?',
-    a: 'You can drop a course from your dashboard. Refund policies depend on the course and are shown at enrollment.',
-  },
-  {
-    id: 'support',
-    q: 'How do I get support?',
-    a: 'Use the Help or Contact link in the footer, or message your instructor from within a course. For account issues, check our support page.',
-  },
+  { id: 'what-is', qKey: 'home.faq.whatIsQ', aKey: 'home.faq.whatIsA' },
+  { id: 'free', qKey: 'home.faq.freeQ', aKey: 'home.faq.freeA' },
+  { id: 'certificate', qKey: 'home.faq.certificateQ', aKey: 'home.faq.certificateA' },
+  { id: 'cancel', qKey: 'home.faq.cancelQ', aKey: 'home.faq.cancelA' },
+  { id: 'support', qKey: 'home.faq.supportQ', aKey: 'home.faq.supportA' },
 ];
 
-const ACTIVITY_MESSAGES = [
-  'Someone just enrolled in Introduction to Python',
-  'A learner completed "Web Design Basics"',
-  'New course published: Data Science Fundamentals',
-  '3 people started "Business Analytics" this hour',
+const ACTIVITY_MESSAGE_KEYS = [
+  'home.activity.msg1',
+  'home.activity.msg2',
+  'home.activity.msg3',
+  'home.activity.msg4',
 ];
 
 const TOP_FEATURES = [
-  {
-    title: 'Strong customization',
-    description: 'Change colors and themes in real time. Use the color picker on this page to make it yours—no refresh needed.',
-    icon: Palette,
-    highlight: true,
-  },
-  {
-    title: 'Modern design',
-    description: 'Clean layouts, smooth animations, and a polished experience that works everywhere.',
-    icon: Layout,
-    highlight: false,
-  },
-  {
-    title: 'Fully responsive',
-    description: 'From desktop to mobile, the platform adapts so learners and instructors get the best view.',
-    icon: Monitor,
-    highlight: false,
-  },
+  { titleKey: 'home.topFeatures.customTitle', descKey: 'home.topFeatures.customDesc', icon: Palette, highlight: true },
+  { titleKey: 'home.topFeatures.modernTitle', descKey: 'home.topFeatures.modernDesc', icon: Layout, highlight: false },
+  { titleKey: 'home.topFeatures.responsiveTitle', descKey: 'home.topFeatures.responsiveDesc', icon: Monitor, highlight: false },
 ];
 
 // Reusable animation variants
@@ -315,8 +248,9 @@ function ThemeCelebration({
 }: {
   celebration: CelebrationState;
   onComplete: (next: CelebrationState | null) => void;
-  setTheme: (t: ThemeId) => void;
+  setTheme: (theme: ThemeId) => void;
 }) {
+  const { t } = useTranslation(['public', 'common']);
   const { phase, theme: themeId } = celebration;
   const [logoPos, setLogoPos] = useState<{ x: number; y: number } | null>(null);
   const [fireworkDone, setFireworkDone] = useState(false);
@@ -329,8 +263,8 @@ function ThemeCelebration({
   // Advance: wizard → firework after delay
   useEffect(() => {
     if (phase === 'wizard') {
-      const t = setTimeout(() => onComplete({ phase: 'firework', theme: themeId }), 1100);
-      return () => clearTimeout(t);
+      const timer = setTimeout(() => onComplete({ phase: 'firework', theme: themeId }), 1100);
+      return () => clearTimeout(timer);
     }
   }, [phase, themeId, onComplete]);
 
@@ -342,8 +276,8 @@ function ThemeCelebration({
         const r = el.getBoundingClientRect();
         setLogoPos({ x: r.left + r.width / 2, y: r.top + r.height / 2 });
       }
-      const t = setTimeout(() => setFireworkDone(true), 50);
-      return () => clearTimeout(t);
+      const timer = setTimeout(() => setFireworkDone(true), 50);
+      return () => clearTimeout(timer);
     }
   }, [phase]);
 
@@ -352,7 +286,7 @@ function ThemeCelebration({
     if (phase === 'firework' && fireworkDone) {
       const oldBg = getCurrentBackgroundHsl();
       const newBg = THEME_BACKGROUNDS[themeId] ?? THEME_BACKGROUNDS.light;
-      const t = setTimeout(
+      const timer = setTimeout(
         () => {
           setTheme(themeId);
           applyTheme(themeId);
@@ -360,7 +294,7 @@ function ThemeCelebration({
         },
         700
       );
-      return () => clearTimeout(t);
+      return () => clearTimeout(timer);
     }
   }, [phase, fireworkDone, themeId, onComplete, setTheme]);
 
@@ -384,7 +318,8 @@ function ThemeCelebration({
           }}
           onAnimationComplete={() => {
             onComplete(null);
-            toast.success(`Theme: ${THEMES.find((t) => t.id === themeId)?.label ?? themeId}`);
+            const matched = THEMES.find((th) => th.id === themeId);
+            toast.success(t('public:home.themeApplied', { theme: matched?.label ?? themeId }));
           }}
         />
       )}
@@ -510,6 +445,7 @@ function ThemeCelebration({
 }
 
 export function HomePage() {
+  const { t } = useTranslation(['public', 'common']);
   const [featuredCourses, setFeaturedCourses] = useState<CourseDto[]>([]);
   const [topRatedCourses, setTopRatedCourses] = useState<CourseDto[]>([]);
   const [loading, setLoading] = useState(true);
@@ -525,6 +461,8 @@ export function HomePage() {
   const mixTheme = useAppStore((s) => s.data.mixTheme);
   const setTheme = useAppStore((s) => s.setTheme);
   const setCustomThemeColor = useAppStore((s) => s.setCustomThemeColor);
+
+  const landingMetaDescription = t('public:home.metaDescription');
 
   /** Lenis smooth scroll — landing page only (destroyed when navigating away) */
   useLenis(true);
@@ -544,21 +482,22 @@ export function HomePage() {
         setFeaturedCourses(featured);
         setTopRatedCourses(topRated);
       } catch (error) {
-        toast.error('Failed to load courses', {
-          description: error instanceof Error ? error.message : 'Please try again later',
+        toast.error(t('public:home.loadCoursesFailed'), {
+          description: error instanceof Error ? error.message : t('public:home.tryLater'),
         });
       } finally {
         setLoading(false);
       }
     };
     loadCourses();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    const t = setInterval(() => {
-      setActivityIndex((i) => (i + 1) % ACTIVITY_MESSAGES.length);
+    const timer = setInterval(() => {
+      setActivityIndex((i) => (i + 1) % ACTIVITY_MESSAGE_KEYS.length);
     }, 4000);
-    return () => clearInterval(t);
+    return () => clearInterval(timer);
   }, []);
 
   const handleEmailSubmit = (e: React.FormEvent) => {
@@ -566,7 +505,7 @@ export function HomePage() {
     if (!email.trim()) return;
     setEmailSubmitting(true);
     setTimeout(() => {
-      toast.success('You\'re on the list!', { description: 'We\'ll send course recommendations to your inbox.' });
+      toast.success(t('public:home.newsletterSuccessTitle'), { description: t('public:home.newsletterSuccessBody') });
       setEmail('');
       setEmailSubmitting(false);
     }, 600);
@@ -580,32 +519,35 @@ export function HomePage() {
 
   const siteUrl = typeof window !== 'undefined' ? window.location.origin : '';
   const canonicalUrl = siteUrl ? `${siteUrl}/` : '/';
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'WebSite',
-    name: 'AcademiX',
-    description: LANDING_META_DESCRIPTION,
-    ...(siteUrl ? { url: canonicalUrl } : {}),
-    publisher: {
-      '@type': 'Organization',
+  const jsonLd = useMemo(
+    () => ({
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
       name: 'AcademiX',
-      ...(siteUrl ? { url: siteUrl } : {}),
-    },
-  };
+      description: landingMetaDescription,
+      ...(siteUrl ? { url: canonicalUrl } : {}),
+      publisher: {
+        '@type': 'Organization',
+        name: 'AcademiX',
+        ...(siteUrl ? { url: siteUrl } : {}),
+      },
+    }),
+    [landingMetaDescription, siteUrl, canonicalUrl]
+  );
 
   return (
     <div className="relative min-h-screen">
       <Helmet>
-        <title>AcademiX — Learn skills that matter | Courses &amp; certificates</title>
-        <meta name="description" content={LANDING_META_DESCRIPTION} />
+        <title>{t('public:home.metaTitle')}</title>
+        <meta name="description" content={landingMetaDescription} />
         <link rel="canonical" href={canonicalUrl} />
         <meta property="og:type" content="website" />
-        <meta property="og:title" content="AcademiX — Learn skills that matter" />
-        <meta property="og:description" content={LANDING_META_DESCRIPTION} />
+        <meta property="og:title" content={t('public:home.metaOgTitle')} />
+        <meta property="og:description" content={landingMetaDescription} />
         <meta property="og:url" content={canonicalUrl} />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="AcademiX — Learn skills that matter" />
-        <meta name="twitter:description" content={LANDING_META_DESCRIPTION} />
+        <meta name="twitter:title" content={t('public:home.metaOgTitle')} />
+        <meta name="twitter:description" content={landingMetaDescription} />
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       </Helmet>
       <ScrollProgress />
@@ -643,25 +585,25 @@ export function HomePage() {
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/25 border border-primary/40 text-foreground text-sm font-semibold shadow-md"
               >
                 <Sparkles className="h-4 w-4 animate-pulse text-primary" />
-                Welcome to AcademiX
+                {t('public:home.hero.welcome')}
               </motion.div>
               <motion.h1
                 variants={fadeUp}
                 transition={spring}
                 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-foreground"
               >
-                Learn skills that{' '}
-                <span className="gradient-text">matter</span>.
+                {t('public:home.hero.titleStart')}{' '}
+                <span className="gradient-text">{t('public:home.hero.titleMatter')}</span>.
                 <br className="hidden sm:block" />
-                <span className="text-foreground"> From </span>
-                <span className="gradient-text">anywhere</span>.
+                <span className="text-foreground"> {t('public:home.hero.titleFrom')} </span>
+                <span className="gradient-text">{t('public:home.hero.titleAnywhere')}</span>.
               </motion.h1>
               <motion.p
                 variants={fadeUp}
                 transition={spring}
                 className="text-lg sm:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0 leading-relaxed"
               >
-                Discover thousands of courses from top instructors. Start your learning journey today—at your own pace.
+                {t('public:home.hero.subtitle')}
               </motion.p>
               <motion.ul
                 variants={fadeUp}
@@ -670,11 +612,11 @@ export function HomePage() {
               >
                 <li className="flex items-center gap-2">
                   <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
-                  Enterprise-ready security
+                  {t('public:home.hero.badgeSecurity')}
                 </li>
                 <li className="flex items-center gap-2">
                   <Award className="h-4 w-4 text-primary shrink-0" />
-                  Certificates & progress
+                  {t('public:home.hero.badgeCerts')}
                 </li>
               </motion.ul>
               <motion.div
@@ -684,17 +626,17 @@ export function HomePage() {
               >
                 <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.98 }} transition={springSoft}>
                   <Button asChild size="lg" className="text-lg px-8 shadow-lg shadow-primary/20">
-                    <Link to="/courses">Browse Courses</Link>
+                    <Link to="/courses">{t('public:home.hero.browseCourses')}</Link>
                   </Button>
                 </motion.div>
                 <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.98 }} transition={springSoft}>
                   <Button size="lg" variant="outline" className="text-lg px-8" onClick={scrollToFeatured}>
-                    See featured courses
+                    {t('public:home.hero.seeFeatured')}
                   </Button>
                 </motion.div>
                 <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.98 }} transition={springSoft}>
                   <Button asChild size="lg" variant="ghost" className="text-lg px-8">
-                    <Link to="/register">Get Started Free</Link>
+                    <Link to="/register">{t('public:home.hero.getStartedFree')}</Link>
                   </Button>
                 </motion.div>
               </motion.div>
@@ -707,12 +649,12 @@ export function HomePage() {
                   type="button"
                   onClick={scrollToFeatured}
                   className="inline-flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
-                  aria-label="Scroll to courses"
+                  aria-label={t('public:home.hero.scrollToCourses')}
                   whileHover={{ y: 4 }}
                   animate={{ y: [0, 6, 0] }}
                   transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
                 >
-                  <span className="text-xs font-medium">Explore</span>
+                  <span className="text-xs font-medium">{t('public:home.hero.explore')}</span>
                   <ChevronDown className="h-6 w-6" />
                 </motion.button>
               </motion.div>
@@ -756,7 +698,7 @@ export function HomePage() {
                   </div>
                   <div className="h-24 rounded-xl border border-dashed border-primary/25 bg-gradient-to-br from-primary/5 to-transparent flex items-center justify-center gap-2 text-sm text-muted-foreground">
                     <Video className="h-5 w-5 text-primary" />
-                    Continue watching
+                    {t('public:home.hero.previewContinueWatching')}
                   </div>
                 </div>
               </div>
@@ -774,9 +716,9 @@ export function HomePage() {
           variants={staggerContainer}
           className={cn('grid grid-cols-3 gap-6 sm:gap-8', band.wash)}
         >
-          {STATS.map(({ value, label }, i) => (
+          {STATS_VALUES.map(({ value, labelKey }, i) => (
             <motion.div
-              key={label}
+              key={labelKey}
               variants={staggerItem}
               transition={spring}
               className="text-center"
@@ -792,7 +734,7 @@ export function HomePage() {
               >
                 {value}
               </motion.div>
-              <div className="text-sm font-medium text-foreground/90 mt-1">{label}</div>
+              <div className="text-sm font-medium text-foreground/90 mt-1">{t(`public:${labelKey}`)}</div>
             </motion.div>
           ))}
         </motion.section>
@@ -808,19 +750,19 @@ export function HomePage() {
         >
           <div className="text-center max-w-2xl mx-auto space-y-3">
             <motion.div variants={staggerItem} transition={spring} className="flex justify-center">
-              <SectionLabel>Platform</SectionLabel>
+              <SectionLabel>{t('public:home.sectionLabels.platform')}</SectionLabel>
             </motion.div>
             <motion.h2 variants={staggerItem} transition={spring} className="text-3xl font-bold text-foreground">
-              Top features
+              {t('public:home.topFeaturesTitle')}
             </motion.h2>
             <motion.p variants={staggerItem} transition={spring} className="text-foreground/90 mt-2 leading-relaxed">
-              Built for clarity and control—customize the experience to match your brand.
+              {t('public:home.topFeaturesSubtitle')}
             </motion.p>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {TOP_FEATURES.map((feature, index) => (
               <motion.div
-                key={feature.title}
+                key={feature.titleKey}
                 variants={staggerItem}
                 transition={spring}
                 animate={floatSubtle(index)}
@@ -833,7 +775,7 @@ export function HomePage() {
               >
                 {feature.highlight && (
                   <span className="absolute top-4 end-4 text-xs font-semibold text-primary bg-primary/15 px-2 py-1 rounded-full">
-                    Try it below
+                    {t('public:home.tryItBelow')}
                   </span>
                 )}
                 <motion.div
@@ -845,8 +787,8 @@ export function HomePage() {
                 >
                   <feature.icon className="h-6 w-6" />
                 </motion.div>
-                <h3 className="text-xl font-semibold text-foreground">{feature.title}</h3>
-                <p className="text-foreground/90 mt-2 text-sm leading-relaxed">{feature.description}</p>
+                <h3 className="text-xl font-semibold text-foreground">{t(`public:${feature.titleKey}`)}</h3>
+                <p className="text-foreground/90 mt-2 text-sm leading-relaxed">{t(`public:${feature.descKey}`)}</p>
               </motion.div>
             ))}
           </div>
@@ -862,19 +804,19 @@ export function HomePage() {
         >
           <div className="text-center max-w-2xl mx-auto">
             <motion.p variants={staggerItem} transition={spring} className="text-xs font-semibold uppercase tracking-wider text-primary/90 mb-2">
-              Trusted worldwide
+              {t('public:home.trustedWorldwide')}
             </motion.p>
             <motion.h2 variants={staggerItem} transition={spring} className="text-2xl sm:text-3xl font-bold text-foreground">
-              Partnering with educators and teams
+              {t('public:home.trustHeading')}
             </motion.h2>
             <motion.p variants={staggerItem} transition={spring} className="text-muted-foreground mt-2 text-sm sm:text-base">
-              From campuses to companies, AcademiX scales with your learning goals.
+              {t('public:home.trustSubtitle')}
             </motion.p>
           </div>
           <div className="flex flex-wrap justify-center gap-4 sm:gap-6">
             {TRUST_PARTNERS.map((p) => (
               <motion.div
-                key={p.name}
+                key={p.nameKey}
                 variants={staggerItem}
                 transition={spring}
                 whileHover={{ y: -4, transition: springSoft }}
@@ -883,20 +825,20 @@ export function HomePage() {
                 <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-primary/25 to-primary/10 text-xs font-bold text-primary ring-1 ring-primary/20">
                   {p.initials}
                 </div>
-                <span className="text-sm font-semibold text-foreground/90">{p.name}</span>
+                <span className="text-sm font-semibold text-foreground/90">{t(`public:${p.nameKey}`)}</span>
               </motion.div>
             ))}
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-4xl mx-auto">
-            {TRUST_BADGES.map(({ label, icon: Icon }) => (
+            {TRUST_BADGES.map(({ labelKey, icon: Icon }) => (
               <motion.div
-                key={label}
+                key={labelKey}
                 variants={staggerItem}
                 transition={spring}
                 className="flex items-center gap-2 rounded-xl border border-border/40 bg-muted/30 px-3 py-3 text-start"
               >
                 <Icon className="h-4 w-4 text-primary shrink-0" />
-                <span className="text-xs font-medium text-foreground/85 leading-snug">{label}</span>
+                <span className="text-xs font-medium text-foreground/85 leading-snug">{t(`public:${labelKey}`)}</span>
               </motion.div>
             ))}
           </div>
@@ -913,10 +855,10 @@ export function HomePage() {
         >
           <div className="text-center max-w-2xl mx-auto space-y-3">
             <motion.div variants={staggerItem} transition={spring} className="flex justify-center">
-              <SectionLabel>Journey</SectionLabel>
+              <SectionLabel>{t('public:home.sectionLabels.journey')}</SectionLabel>
             </motion.div>
-            <motion.h2 variants={staggerItem} transition={spring} className="text-3xl font-bold text-foreground">How it works</motion.h2>
-            <motion.p variants={staggerItem} transition={spring} className="text-foreground/90 mt-2 leading-relaxed">Get started in three simple steps</motion.p>
+            <motion.h2 variants={staggerItem} transition={spring} className="text-3xl font-bold text-foreground">{t('public:home.howItWorksTitle')}</motion.h2>
+            <motion.p variants={staggerItem} transition={spring} className="text-foreground/90 mt-2 leading-relaxed">{t('public:home.howItWorksSubtitle')}</motion.p>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
             {HOW_IT_WORKS.map((item, index) => (
@@ -936,8 +878,8 @@ export function HomePage() {
                 >
                   <item.icon className="h-6 w-6" />
                 </motion.div>
-                <h3 className="text-xl font-semibold">{item.title}</h3>
-                <p className="text-foreground/90 mt-2 text-sm leading-relaxed">{item.description}</p>
+                <h3 className="text-xl font-semibold">{t(`public:${item.titleKey}`)}</h3>
+                <p className="text-foreground/90 mt-2 text-sm leading-relaxed">{t(`public:${item.descKey}`)}</p>
                 {index < HOW_IT_WORKS.length - 1 && (
                   <div className="hidden md:block absolute top-1/2 -right-4 w-8 h-0.5 bg-border" aria-hidden />
                 )}
@@ -957,15 +899,15 @@ export function HomePage() {
         >
           <div className="text-center max-w-2xl mx-auto space-y-3">
             <motion.div variants={staggerItem} transition={spring} className="flex justify-center">
-              <SectionLabel>Why us</SectionLabel>
+              <SectionLabel>{t('public:home.sectionLabels.whyUs')}</SectionLabel>
             </motion.div>
-            <motion.h2 variants={staggerItem} transition={spring} className="text-3xl font-bold text-foreground">Why AcademiX</motion.h2>
-            <motion.p variants={staggerItem} transition={spring} className="text-foreground/90 mt-2 leading-relaxed">Everything you need to learn and teach effectively</motion.p>
+            <motion.h2 variants={staggerItem} transition={spring} className="text-3xl font-bold text-foreground">{t('public:home.whyTitle')}</motion.h2>
+            <motion.p variants={staggerItem} transition={spring} className="text-foreground/90 mt-2 leading-relaxed">{t('public:home.whySubtitle')}</motion.p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {FEATURES.map((feature, i) => (
               <motion.div
-                key={feature.title}
+                key={feature.titleKey}
                 variants={staggerItem}
                 transition={spring}
                 animate={floatSubtle(i + 1)}
@@ -980,8 +922,8 @@ export function HomePage() {
                   <feature.icon className="h-5 w-5 text-primary" />
                 </motion.div>
                 <div>
-                  <h3 className="font-semibold">{feature.title}</h3>
-                  <p className="text-sm text-foreground/90 mt-1 leading-relaxed">{feature.description}</p>
+                  <h3 className="font-semibold">{t(`public:${feature.titleKey}`)}</h3>
+                  <p className="text-sm text-foreground/90 mt-1 leading-relaxed">{t(`public:${feature.descKey}`)}</p>
                 </div>
               </motion.div>
             ))}
@@ -999,10 +941,10 @@ export function HomePage() {
         >
           <div className="text-center max-w-2xl mx-auto space-y-3">
             <motion.div variants={staggerItem} transition={spring} className="flex justify-center">
-              <SectionLabel>Audience</SectionLabel>
+              <SectionLabel>{t('public:home.sectionLabels.audience')}</SectionLabel>
             </motion.div>
-            <motion.h2 variants={staggerItem} transition={spring} className="text-3xl font-bold text-foreground">Built for everyone</motion.h2>
-            <motion.p variants={staggerItem} transition={spring} className="text-foreground/90 mt-2 leading-relaxed">Whether you learn, teach, or train teams</motion.p>
+            <motion.h2 variants={staggerItem} transition={spring} className="text-3xl font-bold text-foreground">{t('public:home.audienceTitle')}</motion.h2>
+            <motion.p variants={staggerItem} transition={spring} className="text-foreground/90 mt-2 leading-relaxed">{t('public:home.audienceSubtitle')}</motion.p>
           </div>
           <div className="flex flex-wrap justify-center gap-2">
             {AUDIENCES.map((a) => (
@@ -1018,7 +960,7 @@ export function HomePage() {
                 whileTap={{ scale: 0.96 }}
                 transition={springSoft}
               >
-                {a.label}
+                {t(`public:${a.labelKey}`)}
               </motion.button>
             ))}
           </div>
@@ -1034,7 +976,7 @@ export function HomePage() {
                     transition={springSoft}
                     className="text-foreground/80"
                   >
-                    {a.description}
+                    {t(`public:${a.descKey}`)}
                   </motion.p>
                 ) : null
               )}
@@ -1054,14 +996,14 @@ export function HomePage() {
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="space-y-2">
               <motion.div variants={staggerItem} transition={spring}>
-                <SectionLabel>Topics</SectionLabel>
+                <SectionLabel>{t('public:home.sectionLabels.topics')}</SectionLabel>
               </motion.div>
-              <motion.h2 variants={staggerItem} transition={spring} className="text-3xl font-bold text-foreground">Explore by topic</motion.h2>
-              <motion.p variants={staggerItem} transition={spring} className="text-foreground/90 mt-2 leading-relaxed">Find courses in your area of interest</motion.p>
+              <motion.h2 variants={staggerItem} transition={spring} className="text-3xl font-bold text-foreground">{t('public:home.topicsTitle')}</motion.h2>
+              <motion.p variants={staggerItem} transition={spring} className="text-foreground/90 mt-2 leading-relaxed">{t('public:home.topicsSubtitle')}</motion.p>
             </div>
             <motion.div variants={staggerItem} transition={spring}>
               <Button asChild variant="ghost">
-                <Link to="/courses">View all courses <ArrowRight className="ms-2 h-4 w-4" /></Link>
+                <Link to="/courses">{t('public:home.viewAllCourses')} <ArrowRight className="ms-2 h-4 w-4" /></Link>
               </Button>
             </motion.div>
           </div>
@@ -1078,7 +1020,7 @@ export function HomePage() {
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-card hover:border-primary/50 hover:bg-primary/5 transition-colors text-sm font-medium"
                 >
                   <cat.icon className="h-4 w-4 text-primary" />
-                  {cat.name}
+                  {t(`public:${cat.nameKey}`)}
                 </Link>
               </motion.div>
             ))}
@@ -1097,14 +1039,14 @@ export function HomePage() {
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="space-y-2">
               <motion.div variants={staggerItem} transition={spring}>
-                <SectionLabel>Curated</SectionLabel>
+                <SectionLabel>{t('public:home.sectionLabels.curated')}</SectionLabel>
               </motion.div>
-              <motion.h2 variants={staggerItem} transition={spring} className="text-3xl font-bold text-foreground">Featured Courses</motion.h2>
-              <motion.p variants={staggerItem} transition={spring} className="text-foreground/90 mt-2 leading-relaxed">Handpicked courses for you</motion.p>
+              <motion.h2 variants={staggerItem} transition={spring} className="text-3xl font-bold text-foreground">{t('public:home.featuredTitle')}</motion.h2>
+              <motion.p variants={staggerItem} transition={spring} className="text-foreground/90 mt-2 leading-relaxed">{t('public:home.featuredSubtitle')}</motion.p>
             </div>
             <motion.div variants={staggerItem} transition={spring}>
               <Button asChild variant="ghost">
-                <Link to="/courses">View All <ArrowRight className="ms-2 h-4 w-4" /></Link>
+                <Link to="/courses">{t('public:home.viewAll')} <ArrowRight className="ms-2 h-4 w-4" /></Link>
               </Button>
             </motion.div>
           </div>
@@ -1169,7 +1111,7 @@ export function HomePage() {
                           </div>
                         )}
                         {course.isFeatured && (
-                          <Badge className="absolute top-3 end-3 shadow-lg">Featured</Badge>
+                          <Badge className="absolute top-3 end-3 shadow-lg">{t('public:courses.featured')}</Badge>
                         )}
                         <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/20 to-transparent" />
                       </div>
@@ -1196,7 +1138,7 @@ export function HomePage() {
                             {course.price ? (
                               <span className="text-sm font-bold text-primary">${course.price.toFixed(2)}</span>
                             ) : (
-                              <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-500/30">Free</Badge>
+                              <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-500/30">{t('public:courses.free')}</Badge>
                             )}
                           </div>
                         </div>
@@ -1208,7 +1150,7 @@ export function HomePage() {
             </div>
           ) : (
             <div className="text-center py-12 text-foreground/90 leading-relaxed">
-              No featured courses available at the moment.
+              {t('public:home.noFeaturedAvailable')}
             </div>
           )}
         </motion.section>
@@ -1225,17 +1167,17 @@ export function HomePage() {
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="space-y-2">
               <motion.div variants={staggerItem} transition={spring}>
-                <SectionLabel>Trending</SectionLabel>
+                <SectionLabel>{t('public:home.sectionLabels.trending')}</SectionLabel>
               </motion.div>
               <motion.h2 variants={staggerItem} transition={spring} className="text-3xl font-bold flex items-center gap-2">
                 <TrendingUp className="h-8 w-8 text-primary" />
-                Top Rated Courses
+                {t('public:home.topRatedTitle')}
               </motion.h2>
-              <motion.p variants={staggerItem} transition={spring} className="text-foreground/90 mt-2 leading-relaxed">Most popular courses by rating</motion.p>
+              <motion.p variants={staggerItem} transition={spring} className="text-foreground/90 mt-2 leading-relaxed">{t('public:home.topRatedSubtitle')}</motion.p>
             </div>
             <motion.div variants={staggerItem} transition={spring}>
               <Button asChild variant="ghost">
-                <Link to="/courses?sortBy=rating&sortDescending=true">View All <ArrowRight className="ms-2 h-4 w-4" /></Link>
+                <Link to="/courses?sortBy=rating&sortDescending=true">{t('public:home.viewAll')} <ArrowRight className="ms-2 h-4 w-4" /></Link>
               </Button>
             </motion.div>
           </div>
@@ -1324,7 +1266,7 @@ export function HomePage() {
                             {course.price ? (
                               <span className="text-sm font-bold text-primary">${course.price.toFixed(2)}</span>
                             ) : (
-                              <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-500/30">Free</Badge>
+                              <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-500/30">{t('public:courses.free')}</Badge>
                             )}
                           </div>
                         </div>
@@ -1336,7 +1278,7 @@ export function HomePage() {
             </div>
           ) : (
             <div className="text-center py-12 text-foreground/90 leading-relaxed">
-              No top rated courses available at the moment.
+              {t('public:home.noTopRatedAvailable')}
             </div>
           )}
         </motion.section>
@@ -1352,15 +1294,17 @@ export function HomePage() {
         >
           <div className="text-center max-w-2xl mx-auto space-y-3">
             <motion.div variants={staggerItem} transition={spring} className="flex justify-center">
-              <SectionLabel>Social proof</SectionLabel>
+              <SectionLabel>{t('public:home.sectionLabels.socialProof')}</SectionLabel>
             </motion.div>
-            <motion.h2 variants={staggerItem} transition={spring} className="text-3xl font-bold text-foreground">What learners say</motion.h2>
-            <motion.p variants={staggerItem} transition={spring} className="text-foreground/90 mt-2 leading-relaxed">Real stories from our community</motion.p>
+            <motion.h2 variants={staggerItem} transition={spring} className="text-3xl font-bold text-foreground">{t('public:home.testimonialsTitle')}</motion.h2>
+            <motion.p variants={staggerItem} transition={spring} className="text-foreground/90 mt-2 leading-relaxed">{t('public:home.testimonialsSubtitle')}</motion.p>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
-            {TESTIMONIALS.map((t, i) => (
+            {TESTIMONIALS.map((tst, i) => {
+              const name = t(`public:${tst.nameKey}`);
+              return (
               <motion.div
-                key={t.name}
+                key={tst.nameKey}
                 variants={staggerItem}
                 transition={spring}
                 animate={floatSubtle(i + 2)}
@@ -1370,18 +1314,19 @@ export function HomePage() {
                 <motion.div whileHover={{ scale: 1.1, rotate: 5 }} transition={springSoft}>
                   <Quote className="h-8 w-8 text-primary/30 mb-4" />
                 </motion.div>
-                <p className="text-foreground mb-4 leading-relaxed">&ldquo;{t.quote}&rdquo;</p>
+                <p className="text-foreground mb-4 leading-relaxed">&ldquo;{t(`public:${tst.quoteKey}`)}&rdquo;</p>
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center text-primary font-semibold text-sm">
-                    {t.name.split(' ').map((n) => n[0]).join('')}
+                    {name.split(' ').map((n) => n[0]).join('')}
                   </div>
                   <div>
-                    <div className="font-medium">{t.name}</div>
-                    <div className="text-sm text-foreground/90 leading-relaxed">{t.role}</div>
+                    <div className="font-medium">{name}</div>
+                    <div className="text-sm text-foreground/90 leading-relaxed">{t(`public:${tst.roleKey}`)}</div>
                   </div>
                 </div>
               </motion.div>
-            ))}
+              );
+            })}
           </div>
         </motion.section>
 
@@ -1397,21 +1342,21 @@ export function HomePage() {
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="space-y-2">
               <motion.div variants={staggerItem} transition={spring}>
-                <SectionLabel>Experts</SectionLabel>
+                <SectionLabel>{t('public:home.sectionLabels.experts')}</SectionLabel>
               </motion.div>
-              <motion.h2 variants={staggerItem} transition={spring} className="text-3xl font-bold text-foreground">Meet our instructors</motion.h2>
-              <motion.p variants={staggerItem} transition={spring} className="text-foreground/90 mt-2 leading-relaxed">Experts who create and teach on AcademiX</motion.p>
+              <motion.h2 variants={staggerItem} transition={spring} className="text-3xl font-bold text-foreground">{t('public:home.instructorsTitle')}</motion.h2>
+              <motion.p variants={staggerItem} transition={spring} className="text-foreground/90 mt-2 leading-relaxed">{t('public:home.instructorsSubtitle')}</motion.p>
             </div>
             <motion.div variants={staggerItem} transition={spring}>
               <Button asChild variant="ghost">
-                <Link to="/courses">View all courses <ArrowRight className="ms-2 h-4 w-4" /></Link>
+                <Link to="/courses">{t('public:home.viewAllCourses')} <ArrowRight className="ms-2 h-4 w-4" /></Link>
               </Button>
             </motion.div>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {INSTRUCTORS.map((inst, i) => (
+            {INSTRUCTORS.map((inst) => (
               <motion.div
-                key={inst.name}
+                key={inst.nameKey}
                 variants={staggerItem}
                 transition={spring}
                 whileHover={{ scale: 1.04, y: -4, transition: springSoft }}
@@ -1422,8 +1367,8 @@ export function HomePage() {
                   {inst.initials}
                 </div>
                 <div>
-                  <div className="font-medium">{inst.name}</div>
-                  <div className="text-sm text-foreground/90 leading-relaxed">{inst.subject}</div>
+                  <div className="font-medium">{t(`public:${inst.nameKey}`)}</div>
+                  <div className="text-sm text-foreground/90 leading-relaxed">{t(`public:${inst.subjectKey}`)}</div>
                 </div>
               </motion.div>
             ))}
@@ -1453,7 +1398,7 @@ export function HomePage() {
                   transition={{ duration: 0.3 }}
                   className="block"
                 >
-                  Live: {ACTIVITY_MESSAGES[activityIndex]}
+                  {t('public:home.liveLabel')} {t(`public:${ACTIVITY_MESSAGE_KEYS[activityIndex]}`)}
                 </motion.span>
               </AnimatePresence>
             </span>
@@ -1477,7 +1422,7 @@ export function HomePage() {
               transition={spring}
               className="flex justify-center"
             >
-              <SectionLabel>FAQ</SectionLabel>
+              <SectionLabel>{t('public:home.sectionLabels.faq')}</SectionLabel>
             </motion.div>
             <motion.h2
               initial={{ opacity: 0, y: 12 }}
@@ -1486,15 +1431,15 @@ export function HomePage() {
               transition={spring}
               className="text-3xl font-bold text-foreground"
             >
-              Frequently asked questions
+              {t('public:home.faqTitle')}
             </motion.h2>
-            <p className="text-foreground/90 mt-2 leading-relaxed">Quick answers to common questions</p>
+            <p className="text-foreground/90 mt-2 leading-relaxed">{t('public:home.faqSubtitle')}</p>
           </div>
           <Accordion className="space-y-2">
             {FAQ_ITEMS.map((item) => (
               <AccordionItem key={item.id} id={item.id}>
-                <AccordionTrigger>{item.q}</AccordionTrigger>
-                <AccordionContent>{item.a}</AccordionContent>
+                <AccordionTrigger>{t(`public:${item.qKey}`)}</AccordionTrigger>
+                <AccordionContent>{t(`public:${item.aKey}`)}</AccordionContent>
               </AccordionItem>
             ))}
           </Accordion>
@@ -1518,23 +1463,23 @@ export function HomePage() {
             <Mail className="h-10 w-10 text-primary mx-auto" />
           </motion.div>
           <div className="flex justify-center">
-            <SectionLabel>Newsletter</SectionLabel>
+            <SectionLabel>{t('public:home.sectionLabels.newsletter')}</SectionLabel>
           </div>
-          <h2 className="text-2xl font-bold text-foreground">Get course recommendations</h2>
+          <h2 className="text-2xl font-bold text-foreground">{t('public:home.newsletterTitle')}</h2>
           <p className="text-foreground/90 text-sm leading-relaxed">
-            We&apos;ll send you new courses and tips once a week. No spam.
+            {t('public:home.newsletterBody')}
           </p>
           <form onSubmit={handleEmailSubmit} className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
             <Input
               type="email"
-              placeholder="you@example.com"
+              placeholder={t('public:home.emailPlaceholder')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="flex-1"
               disabled={emailSubmitting}
             />
             <Button type="submit" disabled={emailSubmitting}>
-              {emailSubmitting ? 'Subscribing…' : 'Subscribe'}
+              {emailSubmitting ? t('public:home.subscribing') : t('public:home.subscribe')}
             </Button>
           </form>
         </motion.section>
@@ -1555,10 +1500,10 @@ export function HomePage() {
             viewport={viewportOnce}
             transition={spring}
           >
-            Ready to start learning?
+            {t('public:home.finalCtaTitle')}
           </motion.h2>
           <p className="text-foreground/90 mt-2 max-w-lg mx-auto leading-relaxed">
-            Join thousands of learners. Create a free account and browse courses in minutes.
+            {t('public:home.finalCtaBody')}
           </p>
           <motion.div
             className="flex flex-col sm:flex-row gap-4 justify-center mt-8"
@@ -1568,10 +1513,10 @@ export function HomePage() {
             transition={{ ...spring, delay: 0.1 }}
           >
             <Button asChild size="lg" className="text-lg px-8">
-              <Link to="/register">Create free account</Link>
+              <Link to="/register">{t('public:home.createFreeAccount')}</Link>
             </Button>
             <Button asChild size="lg" variant="outline" className="text-lg px-8">
-              <Link to="/courses">Browse courses</Link>
+              <Link to="/courses">{t('public:home.browseCoursesCta')}</Link>
             </Button>
           </motion.div>
         </motion.section>
@@ -1600,7 +1545,7 @@ export function HomePage() {
               <div className="flex items-center justify-between mb-3">
                 <span className="font-semibold text-sm flex items-center gap-2">
                   <Palette className="h-4 w-4 text-primary" />
-                  Customize this page
+                  {t('public:home.customizePanel.title')}
                 </span>
                 <Button
                   type="button"
@@ -1608,29 +1553,29 @@ export function HomePage() {
                   size="icon"
                   className="h-8 w-8"
                   onClick={() => setThemePanelOpen(false)}
-                  aria-label="Close"
+                  aria-label={t('common:close')}
                 >
                   <ChevronDown className="h-4 w-4 rotate-180" />
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground mb-3">
-                Pick a theme or choose a custom color. Changes apply instantly.
+                {t('public:home.customizePanel.description')}
               </p>
               <div className="flex flex-wrap gap-2 mb-3">
-                {THEMES.filter((t) => t.id !== 'custom').map((t) => (
+                {THEMES.filter((th) => th.id !== 'custom').map((th) => (
                   <button
-                    key={t.id}
+                    key={th.id}
                     type="button"
                     onClick={() => {
-                      setCelebration({ phase: 'wizard', theme: t.id as ThemeId });
+                      setCelebration({ phase: 'wizard', theme: th.id as ThemeId });
                     }}
                     className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                      theme === t.id && !mixTheme
+                      theme === th.id && !mixTheme
                         ? 'bg-primary text-primary-foreground ring-2 ring-primary/50'
                         : 'bg-muted/80 text-muted-foreground hover:bg-muted'
                     }`}
                   >
-                    {t.label}
+                    {th.label}
                   </button>
                 ))}
               </div>
@@ -1640,7 +1585,7 @@ export function HomePage() {
                   value={customThemeColor ?? 'hsl(222, 84%, 60%)'}
                   onChange={(color) => {
                     setCustomThemeColor(color);
-                    toast.success('Custom color applied');
+                    toast.success(t('public:home.customColorApplied'));
                   }}
                   onClose={() => {}}
                 />
@@ -1656,12 +1601,12 @@ export function HomePage() {
           transition={{ repeat: Infinity, duration: 2.5, ease: 'easeInOut' }}
           whileHover={{ scale: 1.06, y: 0 }}
           whileTap={{ scale: 0.98 }}
-          aria-label={themePanelOpen ? 'Close customization' : 'Customize colors'}
+          aria-label={themePanelOpen ? t('public:home.customizePanel.closeAria') : t('public:home.customizePanel.openAria')}
         >
           <motion.span animate={{ rotate: [0, 10, -10, 0] }} transition={{ repeat: Infinity, duration: 4, ease: 'easeInOut' }}>
             <Palette className="h-5 w-5" />
           </motion.span>
-          <span className="font-medium text-sm">{themePanelOpen ? 'Close' : 'Customize colors'}</span>
+          <span className="font-medium text-sm">{themePanelOpen ? t('public:home.customizePanel.toggleClose') : t('public:home.customizePanel.toggleOpen')}</span>
         </motion.button>
       </div>
     </div>

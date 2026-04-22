@@ -1,22 +1,26 @@
 import { motion } from "framer-motion";
 import { CalendarDays } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
 import { cn } from "../../lib/cn";
 
-const WEEK = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const BLOCKS = [
-  { day: 1, label: "Office hours", span: 2 },
-  { day: 3, label: "Registrar sync", span: 1 },
-  { day: 4, label: "Certificates", span: 2 },
+type BlockKey = "officeHours" | "registrarSync" | "certificates";
+
+const WEEKDAY_KEYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
+const BLOCKS: { day: number; labelKey: BlockKey; span: number }[] = [
+  { day: 1, labelKey: "officeHours", span: 2 },
+  { day: 3, labelKey: "registrarSync", span: 1 },
+  { day: 4, labelKey: "certificates", span: 2 },
 ];
 
 export function SecretaryCalendarPage() {
+  const { t } = useTranslation(['admin', 'common', 'errors']);
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Calendar</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t('admin:secretary.calendar.title')}</h1>
         <p className="text-muted-foreground mt-1">
-          Week-at-a-glance for front-office commitments — integrate with a real calendar later.
+          {t('admin:secretary.calendar.subtitle')}
         </p>
       </div>
 
@@ -24,14 +28,14 @@ export function SecretaryCalendarPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <CalendarDays className="h-5 w-5 text-primary" />
-            March 2026 — week 12
+            {t('admin:secretary.calendar.headerTitle')}
           </CardTitle>
-          <CardDescription>Visual grid (read-only demo).</CardDescription>
+          <CardDescription>{t('admin:secretary.calendar.headerDesc')}</CardDescription>
         </CardHeader>
         <CardContent className="pb-6">
           <div className="grid grid-cols-7 gap-2 text-center text-xs font-semibold text-muted-foreground mb-3">
-            {WEEK.map((d) => (
-              <div key={d}>{d}</div>
+            {WEEKDAY_KEYS.map((d) => (
+              <div key={d}>{t(`admin:secretary.calendar.weekdays.${d}`)}</div>
             ))}
           </div>
           <div className="grid grid-cols-7 gap-2 min-h-[200px]">
@@ -51,7 +55,7 @@ export function SecretaryCalendarPage() {
                   <span className="text-[10px] font-mono text-muted-foreground">{24 + i}</span>
                   {block && (
                     <p className="text-[11px] font-medium leading-tight mt-1 text-primary">
-                      {block.label}
+                      {t(`admin:secretary.calendar.blocks.${block.labelKey}`)}
                     </p>
                   )}
                 </motion.div>

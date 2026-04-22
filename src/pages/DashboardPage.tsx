@@ -1,3 +1,5 @@
+// TODO: Deprecated legacy shim — not imported anywhere in App.tsx. Replaced by pages/student/DashboardPage.tsx.
+// Skipping i18n migration; remove this file when safe.
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { format } from 'date-fns'

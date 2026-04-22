@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   Search,
   Download,
@@ -260,6 +261,7 @@ const getStatusColor = (status: Payout["status"]) => {
 // =====================
 
 export function FinancePayoutsPage() {
+  const { t } = useTranslation(['admin', 'common', 'errors']);
   const [searchParams] = useSearchParams();
 
   // Filter state
@@ -271,6 +273,20 @@ export function FinancePayoutsPage() {
 
   // UI state
   const [selectedPayout, setSelectedPayout] = useState<Payout | null>(null);
+
+  // Translated status labels
+  const getStatusLabel = (status: Payout["status"]) => {
+    switch (status) {
+      case "completed":
+        return t('admin:finance.payouts.status.completed');
+      case "pending":
+        return t('admin:finance.payouts.status.pending');
+      case "processing":
+        return t('admin:finance.payouts.status.processing');
+      case "on_hold":
+        return t('admin:finance.payouts.status.onHold');
+    }
+  };
 
   // Filter payouts
   const filteredPayouts = useMemo(() => {
@@ -320,8 +336,8 @@ export function FinancePayoutsPage() {
 
   const handleBulkProcess = () => {
     if (selectedIds.length === 0) return;
-    toast.success(`Processing ${selectedIds.length} payouts`, {
-      description: "Payouts will be sent to instructors",
+    toast.success(t('admin:finance.payouts.toasts.processingCount', { count: selectedIds.length }), {
+      description: t('admin:finance.payouts.toasts.processingCountDesc'),
     });
     setSelectedIds([]);
   };
@@ -330,13 +346,13 @@ export function FinancePayoutsPage() {
   const filters: FilterConfig[] = [
     {
       key: "status",
-      label: "Status",
+      label: t('admin:finance.payouts.filterLabels.status'),
       options: [
-        { id: "all", label: "All Statuses" },
-        { id: "pending", label: "Pending" },
-        { id: "processing", label: "Processing" },
-        { id: "completed", label: "Completed" },
-        { id: "on_hold", label: "On Hold" },
+        { id: "all", label: t('admin:finance.payouts.status.all') },
+        { id: "pending", label: t('admin:finance.payouts.status.pending') },
+        { id: "processing", label: t('admin:finance.payouts.status.processing') },
+        { id: "completed", label: t('admin:finance.payouts.status.completed') },
+        { id: "on_hold", label: t('admin:finance.payouts.status.onHold') },
       ],
       value: statusFilter,
       onChange: setStatusFilter,
@@ -347,7 +363,7 @@ export function FinancePayoutsPage() {
   const columns: Column<Payout>[] = [
     {
       key: "instructor",
-      header: "Instructor",
+      header: t('admin:finance.payouts.columns.instructor'),
       sortable: true,
       render: (payout) => (
         <div className="flex items-center gap-3">
@@ -357,7 +373,7 @@ export function FinancePayoutsPage() {
           <div className="min-w-0">
             <p className="font-medium">{payout.instructor.name}</p>
             <p className="text-xs text-muted-foreground">
-              {payout.courses.length} {payout.courses.length === 1 ? "course" : "courses"} • {payout.instructor.paymentMethod}
+              {payout.courses.length} {payout.courses.length === 1 ? t('admin:finance.payouts.instructorMeta.courseSingular') : t('admin:finance.payouts.instructorMeta.coursePlural')} • {payout.instructor.paymentMethod}
             </p>
           </div>
         </div>
@@ -365,29 +381,29 @@ export function FinancePayoutsPage() {
     },
     {
       key: "period",
-      header: "Period",
+      header: t('admin:finance.payouts.columns.period'),
       render: (payout) => (
         <div>
           <p className="text-sm font-medium">{payout.period.split(" - ")[0]}</p>
-          <p className="text-xs text-muted-foreground">to {payout.period.split(" - ")[1]}</p>
+          <p className="text-xs text-muted-foreground">{t('admin:finance.payouts.periodTo', { date: payout.period.split(" - ")[1] })}</p>
         </div>
       ),
     },
     {
       key: "amount",
-      header: "Gross",
+      header: t('admin:finance.payouts.columns.gross'),
       sortable: true,
       className: "text-end",
       render: (payout) => (
         <div className="text-end">
           <p className="font-semibold">{formatCurrency(payout.amount)}</p>
-          <p className="text-xs text-muted-foreground">-{formatCurrency(payout.platformFee)} fee</p>
+          <p className="text-xs text-muted-foreground">{t('admin:finance.payouts.feeLine', { amount: formatCurrency(payout.platformFee) })}</p>
         </div>
       ),
     },
     {
       key: "netAmount",
-      header: "Net Payout",
+      header: t('admin:finance.payouts.columns.netPayout'),
       sortable: true,
       className: "text-end",
       render: (payout) => (
@@ -396,7 +412,7 @@ export function FinancePayoutsPage() {
     },
     {
       key: "status",
-      header: "Status",
+      header: t('admin:finance.payouts.columns.status'),
       className: "text-center",
       render: (payout) => {
         const StatusIcon = getStatusIcon(payout.status);
@@ -409,10 +425,10 @@ export function FinancePayoutsPage() {
               )}
             >
               <StatusIcon className="h-3.5 w-3.5" />
-              {payout.status === "on_hold" ? "On Hold" : payout.status.charAt(0).toUpperCase() + payout.status.slice(1)}
+              {getStatusLabel(payout.status)}
             </span>
             {payout.status === "pending" && (
-              <span className="text-[10px] text-muted-foreground">Due {formatDate(payout.scheduledDate)}</span>
+              <span className="text-[10px] text-muted-foreground">{t('admin:finance.payouts.dueOn', { date: formatDate(payout.scheduledDate) })}</span>
             )}
           </div>
         );
@@ -420,7 +436,7 @@ export function FinancePayoutsPage() {
     },
     {
       key: "action",
-      header: "Quick Action",
+      header: t('admin:finance.payouts.columns.quickAction'),
       className: "text-center",
       render: (payout) => (
         <div className="flex justify-center">
@@ -430,13 +446,13 @@ export function FinancePayoutsPage() {
               className="h-9 px-4 gap-2 shadow-sm"
               onClick={(e) => {
                 e.stopPropagation();
-                toast.success(`Processing ${payout.id}`, {
-                  description: `Sending ${formatCurrency(payout.netAmount)} to ${payout.instructor.name}`,
+                toast.success(t('admin:finance.payouts.toasts.processingSingle', { id: payout.id }), {
+                  description: t('admin:finance.payouts.toasts.processingSingleDesc', { amount: formatCurrency(payout.netAmount), name: payout.instructor.name }),
                 });
               }}
             >
               <Send className="h-4 w-4" />
-              Process Now
+              {t('admin:finance.payouts.actions.processNow')}
             </Button>
           )}
           {payout.status === "on_hold" && (
@@ -446,11 +462,11 @@ export function FinancePayoutsPage() {
               className="h-9 px-4 gap-2 border-emerald-500/50 text-emerald-600 hover:bg-emerald-500/10"
               onClick={(e) => {
                 e.stopPropagation();
-                toast.success(`Releasing hold on ${payout.id}`);
+                toast.success(t('admin:finance.payouts.toasts.releasingHold', { id: payout.id }));
               }}
             >
               <CheckCircle className="h-4 w-4" />
-              Release Hold
+              {t('admin:finance.payouts.actions.releaseHold')}
             </Button>
           )}
           {payout.status === "completed" && (
@@ -460,17 +476,17 @@ export function FinancePayoutsPage() {
               className="h-9 px-4 gap-2 text-muted-foreground hover:text-foreground"
               onClick={(e) => {
                 e.stopPropagation();
-                toast.info("Downloading receipt...");
+                toast.info(t('admin:finance.payouts.toasts.downloadingReceipt'));
               }}
             >
               <Download className="h-4 w-4" />
-              Receipt
+              {t('admin:finance.payouts.actions.receipt')}
             </Button>
           )}
           {payout.status === "processing" && (
             <div className="flex items-center gap-2 text-blue-500">
               <AlertCircle className="h-4 w-4 animate-pulse" />
-              <span className="text-xs font-medium">Processing...</span>
+              <span className="text-xs font-medium">{t('admin:finance.payouts.actions.processing')}</span>
             </div>
           )}
         </div>
@@ -481,38 +497,38 @@ export function FinancePayoutsPage() {
   // Row actions
   const rowActions: RowAction<Payout>[] = [
     {
-      label: "View Details",
+      label: t('admin:finance.payouts.actions.viewDetails'),
       icon: Eye,
       onClick: (payout) => setSelectedPayout(payout),
     },
     {
-      label: "Process Now",
+      label: t('admin:finance.payouts.actions.processNow'),
       icon: Send,
-      onClick: (payout) => toast.success(`Processing ${payout.id}`),
+      onClick: (payout) => toast.success(t('admin:finance.payouts.toasts.processingSingle', { id: payout.id })),
       show: (payout) => payout.status === "pending",
     },
     {
-      label: "Hold Payout",
+      label: t('admin:finance.payouts.actions.holdPayout'),
       icon: Ban,
-      onClick: (payout) => toast.info(`Holding ${payout.id}`),
+      onClick: (payout) => toast.info(t('admin:finance.payouts.toasts.holdingPayout', { id: payout.id })),
       show: (payout) => payout.status === "pending",
     },
     {
-      label: "Release Hold",
+      label: t('admin:finance.payouts.actions.releaseHold'),
       icon: CheckCircle,
-      onClick: (payout) => toast.success(`Releasing hold on ${payout.id}`),
+      onClick: (payout) => toast.success(t('admin:finance.payouts.toasts.releasingHold', { id: payout.id })),
       show: (payout) => payout.status === "on_hold",
     },
     {
-      label: "Download Receipt",
+      label: t('admin:finance.payouts.actions.downloadReceipt'),
       icon: FileText,
-      onClick: () => toast.info("Downloading receipt..."),
+      onClick: () => toast.info(t('admin:finance.payouts.toasts.downloadingReceipt')),
       show: (payout) => payout.status === "completed",
     },
     {
-      label: "View History",
+      label: t('admin:finance.payouts.actions.viewHistory'),
       icon: History,
-      onClick: () => toast.info("Opening history..."),
+      onClick: () => toast.info(t('admin:finance.payouts.toasts.openingHistory')),
     },
   ];
 
@@ -520,12 +536,12 @@ export function FinancePayoutsPage() {
   const getTimelineItems = (payout: Payout) => {
     const items = [
       {
-        label: "Created",
+        label: t('admin:finance.payouts.detail.timeline.created'),
         value: formatDate(payout.createdAt),
         completed: true,
       },
       {
-        label: "Scheduled",
+        label: t('admin:finance.payouts.detail.timeline.scheduled'),
         value: formatDate(payout.scheduledDate),
         completed: payout.status !== "pending" && payout.status !== "on_hold",
         active: payout.status === "pending",
@@ -534,7 +550,7 @@ export function FinancePayoutsPage() {
 
     if (payout.processedAt) {
       items.push({
-        label: "Processed",
+        label: t('admin:finance.payouts.detail.timeline.processed'),
         value: formatDate(payout.processedAt),
         completed: !!payout.completedAt,
         active: payout.status === "processing",
@@ -543,7 +559,7 @@ export function FinancePayoutsPage() {
 
     if (payout.completedAt) {
       items.push({
-        label: "Completed",
+        label: t('admin:finance.payouts.detail.timeline.completed'),
         value: formatDate(payout.completedAt),
         completed: true,
         active: false,
@@ -556,20 +572,20 @@ export function FinancePayoutsPage() {
   // Detail modal sections
   const getDetailSections = (payout: Payout) => [
     {
-      title: "Payout Information",
+      title: t('admin:finance.payouts.detail.sections.payoutInformation'),
       items: [
-        { label: "Payout ID", value: <span className="font-mono text-xs">{payout.id}</span> },
-        { label: "Period", value: payout.period },
-        { label: "Payment Method", value: payout.instructor.paymentMethod },
-        { label: "Account", value: payout.instructor.bankAccount },
+        { label: t('admin:finance.payouts.detail.fields.payoutId'), value: <span className="font-mono text-xs">{payout.id}</span> },
+        { label: t('admin:finance.payouts.detail.fields.period'), value: payout.period },
+        { label: t('admin:finance.payouts.detail.fields.paymentMethod'), value: payout.instructor.paymentMethod },
+        { label: t('admin:finance.payouts.detail.fields.account'), value: payout.instructor.bankAccount },
       ],
     },
     {
-      title: "Amount Breakdown",
+      title: t('admin:finance.payouts.detail.sections.amountBreakdown'),
       items: [
-        { label: "Gross Earnings", value: formatCurrency(payout.amount) },
-        { label: "Platform Fee (20%)", value: <span className="text-red-500">-{formatCurrency(payout.platformFee)}</span> },
-        { label: "Net Payout", value: <span className="text-emerald-500 font-bold">{formatCurrency(payout.netAmount)}</span> },
+        { label: t('admin:finance.payouts.detail.fields.grossEarnings'), value: formatCurrency(payout.amount) },
+        { label: t('admin:finance.payouts.detail.fields.platformFee'), value: <span className="text-red-500">-{formatCurrency(payout.platformFee)}</span> },
+        { label: t('admin:finance.payouts.detail.fields.netPayout'), value: <span className="text-emerald-500 font-bold">{formatCurrency(payout.netAmount)}</span> },
       ],
     },
   ];
@@ -579,26 +595,26 @@ export function FinancePayoutsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Payouts</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{t('admin:finance.payouts.title')}</h1>
           <p className="text-sm text-muted-foreground">
-            Manage instructor payment disbursements
+            {t('admin:finance.payouts.subtitle')}
           </p>
         </div>
         <div className="flex items-center gap-2">
           {selectedIds.length > 0 && (
             <Button size="sm" className="gap-2" onClick={handleBulkProcess}>
               <Send className="h-4 w-4" />
-              Process {selectedIds.length} Payouts
+              {t('admin:finance.payouts.bulkProcess', { count: selectedIds.length })}
             </Button>
           )}
           <Button
             variant="outline"
             size="sm"
             className="gap-2"
-            onClick={() => toast.info("Exporting payouts...")}
+            onClick={() => toast.info(t('admin:finance.payouts.exportingPayouts'))}
           >
             <Download className="h-4 w-4" />
-            Export
+            {t('admin:finance.payouts.export')}
           </Button>
         </div>
       </div>
@@ -611,9 +627,9 @@ export function FinancePayoutsPage() {
               <Clock className="h-5 w-5 text-amber-500" />
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">Pending</p>
+              <p className="text-xs text-muted-foreground">{t('admin:finance.payouts.stats.pending')}</p>
               <p className="text-xl font-bold">{formatCurrency(stats.pendingTotal)}</p>
-              <p className="text-xs text-muted-foreground">{stats.pendingCount} payouts</p>
+              <p className="text-xs text-muted-foreground">{t('admin:finance.payouts.stats.payouts', { count: stats.pendingCount })}</p>
             </div>
           </div>
         </div>
@@ -623,9 +639,9 @@ export function FinancePayoutsPage() {
               <AlertCircle className="h-5 w-5 text-blue-500" />
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">Processing</p>
+              <p className="text-xs text-muted-foreground">{t('admin:finance.payouts.stats.processing')}</p>
               <p className="text-xl font-bold">{formatCurrency(stats.processingTotal)}</p>
-              <p className="text-xs text-muted-foreground">{stats.processingCount} payouts</p>
+              <p className="text-xs text-muted-foreground">{t('admin:finance.payouts.stats.payouts', { count: stats.processingCount })}</p>
             </div>
           </div>
         </div>
@@ -635,9 +651,9 @@ export function FinancePayoutsPage() {
               <CheckCircle className="h-5 w-5 text-emerald-500" />
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">Paid This Month</p>
+              <p className="text-xs text-muted-foreground">{t('admin:finance.payouts.stats.paidThisMonth')}</p>
               <p className="text-xl font-bold">{formatCurrency(stats.completedTotal)}</p>
-              <p className="text-xs text-muted-foreground">{stats.completedCount} payouts</p>
+              <p className="text-xs text-muted-foreground">{t('admin:finance.payouts.stats.payouts', { count: stats.completedCount })}</p>
             </div>
           </div>
         </div>
@@ -647,9 +663,9 @@ export function FinancePayoutsPage() {
               <Users className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">Active Instructors</p>
+              <p className="text-xs text-muted-foreground">{t('admin:finance.payouts.stats.activeInstructors')}</p>
               <p className="text-xl font-bold">{stats.uniqueInstructors}</p>
-              <p className="text-xs text-muted-foreground">With earnings</p>
+              <p className="text-xs text-muted-foreground">{t('admin:finance.payouts.stats.withEarnings')}</p>
             </div>
           </div>
         </div>
@@ -658,7 +674,7 @@ export function FinancePayoutsPage() {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <FilterBar
-          searchPlaceholder="Search by instructor or payout ID..."
+          searchPlaceholder={t('admin:finance.payouts.searchPlaceholder')}
           searchValue={searchQuery}
           onSearchChange={setSearchQuery}
           filters={filters}
@@ -666,7 +682,7 @@ export function FinancePayoutsPage() {
         />
         {stats.pendingCount > 0 && (
           <Button variant="outline" size="sm" onClick={selectAllPending} className="h-10">
-            Select All Pending ({stats.pendingCount})
+            {t('admin:finance.payouts.selectAllPending', { count: stats.pendingCount })}
           </Button>
         )}
       </div>
@@ -682,10 +698,10 @@ export function FinancePayoutsPage() {
         selectedIds={selectedIds}
         onSelectionChange={setSelectedIds}
         emptyIcon={Wallet}
-        emptyMessage="No payouts found"
+        emptyMessage={t('admin:finance.payouts.empty.message')}
         emptyAction={
           <Button variant="link" size="sm" onClick={clearFilters}>
-            Clear filters
+            {t('admin:finance.payouts.empty.clearFilters')}
           </Button>
         }
         pageSize={10}
@@ -696,10 +712,10 @@ export function FinancePayoutsPage() {
         <DetailModal
           open={!!selectedPayout}
           onClose={() => setSelectedPayout(null)}
-          title="Payout Details"
+          title={t('admin:finance.payouts.detail.title')}
           icon={Wallet}
           badge={{
-            label: selectedPayout.status === "on_hold" ? "On Hold" : selectedPayout.status.charAt(0).toUpperCase() + selectedPayout.status.slice(1),
+            label: getStatusLabel(selectedPayout.status),
             variant:
               selectedPayout.status === "completed"
                 ? "success"
@@ -727,22 +743,22 @@ export function FinancePayoutsPage() {
               {selectedPayout.status === "pending" && (
                 <>
                   <Button size="sm" className="gap-2" onClick={() => {
-                    toast.success(`Processing ${selectedPayout.id}`);
+                    toast.success(t('admin:finance.payouts.toasts.processingSingle', { id: selectedPayout.id }));
                     setSelectedPayout(null);
                   }}>
                     <Send className="h-4 w-4" />
-                    Process Payout
+                    {t('admin:finance.payouts.actions.processPayout')}
                   </Button>
                   <Button variant="outline" size="sm" className="gap-2">
                     <Ban className="h-4 w-4" />
-                    Hold
+                    {t('admin:finance.payouts.actions.hold')}
                   </Button>
                 </>
               )}
               {selectedPayout.status === "completed" && (
                 <Button variant="outline" size="sm" className="gap-2">
                   <Download className="h-4 w-4" />
-                  Download Receipt
+                  {t('admin:finance.payouts.actions.downloadReceipt')}
                 </Button>
               )}
             </>

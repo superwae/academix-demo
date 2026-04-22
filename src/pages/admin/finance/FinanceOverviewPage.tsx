@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   DollarSign,
   TrendingUp,
@@ -87,20 +88,31 @@ const PENDING_PAYOUTS = [
   { id: "PAY-2026-003", instructor: "Dr. Emily Watson", avatar: "EW", amount: 2890, courses: 1, status: "processing", scheduledDate: "Jan 18, 2026" },
 ];
 
-const TIME_RANGES = [
-  { id: "7d", label: "Last 7 days" },
-  { id: "30d", label: "Last 30 days" },
-  { id: "90d", label: "Last 90 days" },
-  { id: "12m", label: "Last 12 months" },
-];
+const TIME_RANGE_IDS = ["7d", "30d", "90d", "12m"] as const;
+type TimeRangeId = typeof TIME_RANGE_IDS[number];
 
 // =====================
 // COMPONENT
 // =====================
 
 export function FinanceOverviewPage() {
+  const { t } = useTranslation(['admin', 'common', 'errors']);
   const navigate = useNavigate();
-  const [timeRange, setTimeRange] = useState("30d");
+  const [timeRange, setTimeRange] = useState<TimeRangeId>("30d");
+
+  const timeRangeLabels: Record<TimeRangeId, string> = {
+    "7d": t('admin:finance.overview.timeRanges.last7Days'),
+    "30d": t('admin:finance.overview.timeRanges.last30Days'),
+    "90d": t('admin:finance.overview.timeRanges.last90Days'),
+    "12m": t('admin:finance.overview.timeRanges.last12Months'),
+  };
+
+  const revenueCategoryLabels: Record<string, string> = {
+    "Course Sales": t('admin:finance.overview.categories.courseSales'),
+    "Subscriptions": t('admin:finance.overview.categories.subscriptions'),
+    "Certificates": t('admin:finance.overview.categories.certificates'),
+    "Other": t('admin:finance.overview.categories.other'),
+  };
 
   // Format currency
   const formatCurrency = (value: number) =>
@@ -129,16 +141,16 @@ export function FinanceOverviewPage() {
     };
   }, []);
 
-  const timeRangeLabel = TIME_RANGES.find((t) => t.id === timeRange)?.label || "Last 30 days";
+  const timeRangeLabel = timeRangeLabels[timeRange] || timeRangeLabels["30d"];
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Finance Overview</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{t('admin:finance.overview.title')}</h1>
           <p className="text-sm text-muted-foreground">
-            Financial performance and revenue analytics
+            {t('admin:finance.overview.subtitle')}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -151,20 +163,20 @@ export function FinanceOverviewPage() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              {TIME_RANGES.map((range) => (
+              {TIME_RANGE_IDS.map((rangeId) => (
                 <DropdownMenuItem
-                  key={range.id}
-                  onClick={() => setTimeRange(range.id)}
-                  className={cn(timeRange === range.id && "bg-primary/10")}
+                  key={rangeId}
+                  onClick={() => setTimeRange(rangeId)}
+                  className={cn(timeRange === rangeId && "bg-primary/10")}
                 >
-                  {range.label}
+                  {timeRangeLabels[rangeId]}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button variant="outline" size="sm" className="gap-2" onClick={() => toast.info("Exporting report...")}>
+          <Button variant="outline" size="sm" className="gap-2" onClick={() => toast.info(t('admin:finance.overview.exportingReport'))}>
             <Download className="h-4 w-4" />
-            Export
+            {t('admin:finance.overview.export')}
           </Button>
         </div>
       </div>
@@ -172,39 +184,39 @@ export function FinanceOverviewPage() {
       {/* KPI Cards - All Clickable with Drill-Down */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <KPIStatCard
-          title="Total Revenue"
+          title={t('admin:finance.overview.kpi.totalRevenue')}
           value={formatCurrency(kpis.totalRevenue)}
-          change={{ value: 12.5, label: "vs last period" }}
+          change={{ value: 12.5, label: t('admin:finance.overview.kpi.vsLastPeriod') }}
           trend="up"
           icon={DollarSign}
           iconColor="bg-emerald-500/10 text-emerald-500"
           href="/admin/finance/transactions?type=purchase"
-          subtitle="View all purchases"
+          subtitle={t('admin:finance.overview.kpi.viewAllPurchases')}
         />
         <KPIStatCard
-          title="Total Refunds"
+          title={t('admin:finance.overview.kpi.totalRefunds')}
           value={formatCurrency(kpis.totalRefunds)}
-          change={{ value: 5.2, label: "vs last period" }}
+          change={{ value: 5.2, label: t('admin:finance.overview.kpi.vsLastPeriod') }}
           trend="down"
           icon={Receipt}
           iconColor="bg-red-500/10 text-red-500"
           href="/admin/finance/transactions?type=refund"
-          subtitle="View refund history"
+          subtitle={t('admin:finance.overview.kpi.viewRefundHistory')}
         />
         <KPIStatCard
-          title="Net Profit"
+          title={t('admin:finance.overview.kpi.netProfit')}
           value={formatCurrency(kpis.netProfit)}
-          change={{ value: 8.3, label: "vs last period" }}
+          change={{ value: 8.3, label: t('admin:finance.overview.kpi.vsLastPeriod') }}
           trend="up"
           icon={PiggyBank}
           iconColor="bg-blue-500/10 text-blue-500"
           href="/admin/finance/revenue-split"
-          subtitle="View revenue breakdown"
+          subtitle={t('admin:finance.overview.kpi.viewRevenueBreakdown')}
         />
         <KPIStatCard
-          title="Pending Payouts"
+          title={t('admin:finance.overview.kpi.pendingPayouts')}
           value={formatCurrency(kpis.pendingPayoutsTotal)}
-          subtitle={`${kpis.pendingPayoutsCount} instructors awaiting`}
+          subtitle={t('admin:finance.overview.kpi.instructorsAwaiting', { count: kpis.pendingPayoutsCount })}
           icon={Wallet}
           iconColor="bg-amber-500/10 text-amber-500"
           href="/admin/finance/payouts"
@@ -217,8 +229,8 @@ export function FinanceOverviewPage() {
         <div className="lg:col-span-2 rounded-xl border border-border bg-card p-5">
           <div className="mb-4 flex items-center justify-between">
             <div>
-              <h3 className="font-semibold">Revenue Trend</h3>
-              <p className="text-xs text-muted-foreground">Revenue vs Expenses vs Refunds</p>
+              <h3 className="font-semibold">{t('admin:finance.overview.charts.revenueTrend')}</h3>
+              <p className="text-xs text-muted-foreground">{t('admin:finance.overview.charts.revenueTrendDesc')}</p>
             </div>
             <Button
               variant="ghost"
@@ -226,7 +238,7 @@ export function FinanceOverviewPage() {
               onClick={() => navigate("/admin/finance/revenue-split")}
               className="gap-1 text-xs"
             >
-              View Details
+              {t('admin:finance.overview.charts.viewDetails')}
               <ChevronRight className="h-3 w-3" />
             </Button>
           </div>
@@ -281,7 +293,7 @@ export function FinanceOverviewPage() {
                 <Area
                   type="monotone"
                   dataKey="revenue"
-                  name="Revenue"
+                  name={t('admin:finance.overview.charts.revenue')}
                   stroke="#10b981"
                   strokeWidth={2}
                   fill="url(#revenueGradient)"
@@ -289,7 +301,7 @@ export function FinanceOverviewPage() {
                 <Area
                   type="monotone"
                   dataKey="expenses"
-                  name="Expenses"
+                  name={t('admin:finance.overview.charts.expenses')}
                   stroke="#f59e0b"
                   strokeWidth={2}
                   fill="url(#expenseGradient)"
@@ -297,7 +309,7 @@ export function FinanceOverviewPage() {
                 <Area
                   type="monotone"
                   dataKey="refunds"
-                  name="Refunds"
+                  name={t('admin:finance.overview.charts.refunds')}
                   stroke="#ef4444"
                   strokeWidth={2}
                   fill="url(#refundGradient)"
@@ -310,8 +322,8 @@ export function FinanceOverviewPage() {
         {/* Revenue by Category */}
         <div className="rounded-xl border border-border bg-card p-5">
           <div className="mb-4">
-            <h3 className="font-semibold">Revenue by Category</h3>
-            <p className="text-xs text-muted-foreground">Breakdown by source</p>
+            <h3 className="font-semibold">{t('admin:finance.overview.charts.revenueByCategory')}</h3>
+            <p className="text-xs text-muted-foreground">{t('admin:finance.overview.charts.revenueByCategoryDesc')}</p>
           </div>
           <div className="h-52">
             <ResponsiveContainer width="100%" height="100%">
@@ -346,7 +358,7 @@ export function FinanceOverviewPage() {
               <div key={cat.name} className="flex items-center justify-between text-xs">
                 <div className="flex items-center gap-2">
                   <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: cat.color }} />
-                  <span className="text-muted-foreground">{cat.name}</span>
+                  <span className="text-muted-foreground">{revenueCategoryLabels[cat.name] || cat.name}</span>
                 </div>
                 <span className="font-medium">{formatCurrency(cat.value)}</span>
               </div>
@@ -361,8 +373,8 @@ export function FinanceOverviewPage() {
         <div className="rounded-xl border border-border bg-card overflow-hidden">
           <div className="flex items-center justify-between border-b p-4">
             <div>
-              <h3 className="font-semibold">Recent Transactions</h3>
-              <p className="text-xs text-muted-foreground">Latest payment activity</p>
+              <h3 className="font-semibold">{t('admin:finance.overview.recentTransactions.title')}</h3>
+              <p className="text-xs text-muted-foreground">{t('admin:finance.overview.recentTransactions.subtitle')}</p>
             </div>
             <Button
               variant="ghost"
@@ -370,7 +382,7 @@ export function FinanceOverviewPage() {
               onClick={() => navigate("/admin/finance/transactions")}
               className="gap-1 text-xs"
             >
-              View All
+              {t('admin:finance.overview.recentTransactions.viewAll')}
               <ChevronRight className="h-3 w-3" />
             </Button>
           </div>
@@ -419,7 +431,9 @@ export function FinanceOverviewPage() {
                         : "text-amber-500"
                     )}
                   >
-                    {txn.status}
+                    {txn.status === "completed"
+                      ? t('admin:finance.overview.recentTransactions.status.completed')
+                      : t('admin:finance.overview.recentTransactions.status.pending')}
                   </p>
                 </div>
               </div>
@@ -431,8 +445,8 @@ export function FinanceOverviewPage() {
         <div className="rounded-xl border border-border bg-card overflow-hidden">
           <div className="flex items-center justify-between border-b p-4">
             <div>
-              <h3 className="font-semibold">Pending Payouts</h3>
-              <p className="text-xs text-muted-foreground">Instructor payments queue</p>
+              <h3 className="font-semibold">{t('admin:finance.overview.pendingPayouts.title')}</h3>
+              <p className="text-xs text-muted-foreground">{t('admin:finance.overview.pendingPayouts.subtitle')}</p>
             </div>
             <Button
               variant="ghost"
@@ -440,7 +454,7 @@ export function FinanceOverviewPage() {
               onClick={() => navigate("/admin/finance/payouts")}
               className="gap-1 text-xs"
             >
-              Manage
+              {t('admin:finance.overview.pendingPayouts.manage')}
               <ChevronRight className="h-3 w-3" />
             </Button>
           </div>
@@ -458,7 +472,7 @@ export function FinanceOverviewPage() {
                   <div>
                     <p className="text-sm font-medium">{payout.instructor}</p>
                     <p className="text-xs text-muted-foreground">
-                      {payout.courses} courses • {payout.scheduledDate}
+                      {t('admin:finance.overview.pendingPayouts.coursesLine', { count: payout.courses, date: payout.scheduledDate })}
                     </p>
                   </div>
                 </div>
@@ -477,7 +491,9 @@ export function FinanceOverviewPage() {
                     ) : (
                       <AlertCircle className="h-3 w-3" />
                     )}
-                    {payout.status}
+                    {payout.status === "pending"
+                      ? t('admin:finance.overview.pendingPayouts.status.pending')
+                      : t('admin:finance.overview.pendingPayouts.status.processing')}
                   </p>
                 </div>
               </div>
@@ -485,7 +501,7 @@ export function FinanceOverviewPage() {
           </div>
           <div className="border-t p-4 bg-muted/30">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Total Pending</span>
+              <span className="text-sm text-muted-foreground">{t('admin:finance.overview.pendingPayouts.totalPending')}</span>
               <span className="text-lg font-bold">
                 {formatCurrency(kpis.pendingPayoutsTotal)}
               </span>
@@ -498,8 +514,8 @@ export function FinanceOverviewPage() {
       <div className="rounded-xl border border-border bg-card overflow-hidden">
         <div className="flex items-center justify-between border-b p-4">
           <div>
-            <h3 className="font-semibold">Top Performing Courses</h3>
-            <p className="text-xs text-muted-foreground">By revenue generation</p>
+            <h3 className="font-semibold">{t('admin:finance.overview.topCourses.title')}</h3>
+            <p className="text-xs text-muted-foreground">{t('admin:finance.overview.topCourses.subtitle')}</p>
           </div>
           <Button
             variant="ghost"
@@ -507,7 +523,7 @@ export function FinanceOverviewPage() {
             onClick={() => navigate("/admin/courses")}
             className="gap-1 text-xs"
           >
-            View All Courses
+            {t('admin:finance.overview.topCourses.viewAllCourses')}
             <ChevronRight className="h-3 w-3" />
           </Button>
         </div>
@@ -515,21 +531,21 @@ export function FinanceOverviewPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/50">
-                <th className="px-4 py-3 text-start font-medium text-muted-foreground">#</th>
+                <th className="px-4 py-3 text-start font-medium text-muted-foreground">{t('admin:finance.overview.topCourses.columns.number')}</th>
                 <th className="px-4 py-3 text-start font-medium text-muted-foreground">
-                  Course
+                  {t('admin:finance.overview.topCourses.columns.course')}
                 </th>
                 <th className="px-4 py-3 text-start font-medium text-muted-foreground">
-                  Instructor
+                  {t('admin:finance.overview.topCourses.columns.instructor')}
                 </th>
                 <th className="px-4 py-3 text-end font-medium text-muted-foreground">
-                  Revenue
+                  {t('admin:finance.overview.topCourses.columns.revenue')}
                 </th>
                 <th className="px-4 py-3 text-end font-medium text-muted-foreground">
-                  Enrollments
+                  {t('admin:finance.overview.topCourses.columns.enrollments')}
                 </th>
                 <th className="px-4 py-3 text-end font-medium text-muted-foreground">
-                  Growth
+                  {t('admin:finance.overview.topCourses.columns.growth')}
                 </th>
               </tr>
             </thead>

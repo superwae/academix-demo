@@ -1,16 +1,18 @@
 import { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Badge } from '../components/ui/badge';
 import { Select } from '../components/ui/select';
-import { courseService, type CourseDto, type PagedResult } from '../services/courseService';
+import { courseService, type CourseDto } from '../services/courseService';
 import { toast } from 'sonner';
-import { Search, Star, Filter, X } from 'lucide-react';
+import { Search, Star, X } from 'lucide-react';
 
 export function PublicCoursesPage() {
+  const { t } = useTranslation(['public', 'common']);
   const [courses, setCourses] = useState<CourseDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -24,6 +26,7 @@ export function PublicCoursesPage() {
 
   useEffect(() => {
     loadCourses();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageNumber, searchTerm, sortBy, sortDescending, selectedCategory]);
 
   const loadCourses = async () => {
@@ -49,8 +52,8 @@ export function PublicCoursesPage() {
         return combined.sort();
       });
     } catch (error) {
-      toast.error('Failed to load courses', {
-        description: error instanceof Error ? error.message : 'Please try again later',
+      toast.error(t('public:courses.loadError'), {
+        description: error instanceof Error ? error.message : t('public:courses.tryLater'),
       });
     } finally {
       setLoading(false);
@@ -79,9 +82,9 @@ export function PublicCoursesPage() {
       {/* Header */}
       <div className="space-y-4">
         <div>
-          <h1 className="text-4xl font-bold">Course Catalog</h1>
+          <h1 className="text-4xl font-bold">{t('public:courses.catalogHeading')}</h1>
           <p className="text-muted-foreground mt-2">
-            Browse our collection of courses and find the perfect one for you
+            {t('public:courses.catalogSubtitle')}
           </p>
         </div>
 
@@ -92,7 +95,7 @@ export function PublicCoursesPage() {
               <Search className="absolute start-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
               <Input
                 type="text"
-                placeholder="Search courses..."
+                placeholder={t('public:courses.searchShortPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="ps-11"
@@ -105,9 +108,9 @@ export function PublicCoursesPage() {
                 setPageNumber(1);
               }}
               options={[
-                { value: 'rating', label: 'Sort by Rating' },
-                { value: 'title', label: 'Sort by Title' },
-                { value: 'created', label: 'Sort by Date' },
+                { value: 'rating', label: t('public:courses.sortByRating') },
+                { value: 'title', label: t('public:courses.sortByTitle') },
+                { value: 'created', label: t('public:courses.sortByDate') },
               ]}
             />
             {selectedCategory !== 'All' && (
@@ -117,7 +120,7 @@ export function PublicCoursesPage() {
                 onClick={() => setSelectedCategory('All')}
               >
                 <X className="me-2 h-4 w-4" />
-                Clear Filter
+                {t('public:courses.clearFilter')}
               </Button>
             )}
           </div>
@@ -131,7 +134,7 @@ export function PublicCoursesPage() {
               size="sm"
               onClick={() => setSelectedCategory('All')}
             >
-              All
+              {t('public:courses.allCategory')}
             </Button>
             {categories.map((category) => (
               <Button
@@ -152,7 +155,7 @@ export function PublicCoursesPage() {
 
       {/* Results Count */}
       <div className="text-sm text-muted-foreground">
-        Showing {filteredCourses.length} of {totalCount} courses
+        {t('public:courses.showingCountOf', { count: filteredCourses.length, total: totalCount })}
       </div>
 
       {/* Courses Grid */}
@@ -193,7 +196,7 @@ export function PublicCoursesPage() {
                       </div>
                       {course.isFeatured && (
                         <Badge variant="default" className="shrink-0">
-                          Featured
+                          {t('public:courses.featured')}
                         </Badge>
                       )}
                     </div>
@@ -215,7 +218,7 @@ export function PublicCoursesPage() {
                       <Badge variant="secondary">{course.level}</Badge>
                     </div>
                     <div className="text-lg font-bold">
-                      {course.price ? `$${course.price.toFixed(2)}` : <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-500/30">Free</Badge>}
+                      {course.price ? `$${course.price.toFixed(2)}` : <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-500/30">{t('public:courses.free')}</Badge>}
                     </div>
                   </CardContent>
                 </Link>
@@ -225,9 +228,9 @@ export function PublicCoursesPage() {
         </div>
       ) : (
         <div className="text-center py-12">
-          <p className="text-muted-foreground text-lg">No courses found</p>
+          <p className="text-muted-foreground text-lg">{t('public:courses.noResultsTitle')}</p>
           <p className="text-muted-foreground text-sm mt-2">
-            Try adjusting your search or filters
+            {t('public:courses.noResultsAdjust')}
           </p>
         </div>
       )}
@@ -240,17 +243,17 @@ export function PublicCoursesPage() {
             onClick={() => setPageNumber((p) => Math.max(1, p - 1))}
             disabled={pageNumber === 1}
           >
-            Previous
+            {t('public:courses.previous')}
           </Button>
           <span className="text-sm text-muted-foreground">
-            Page {pageNumber} of {totalPages}
+            {t('public:courses.page', { current: pageNumber, total: totalPages })}
           </span>
           <Button
             variant="outline"
             onClick={() => setPageNumber((p) => Math.min(totalPages, p + 1))}
             disabled={pageNumber === totalPages}
           >
-            Next
+            {t('public:courses.next')}
           </Button>
         </div>
       )}

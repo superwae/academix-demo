@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
@@ -12,17 +13,20 @@ import { Star, ArrowLeft, User, BookOpen, Clock, MapPin, Calendar, AlertCircle }
 import { useAuthStore } from '../store/useAuthStore';
 import { useAppStore } from '../store/useAppStore';
 
-/** Format enrollment error for clean display */
-function formatEnrollmentError(msg: string): string {
-  if (msg.includes('Section is full')) return 'This section is full. Please choose another section.';
-  if (msg.includes('already enrolled')) return 'You are already enrolled in this course.';
-  if (msg.includes('overlap') || msg.includes('conflict')) return 'This section conflicts with another class.';
-  if (msg.includes('not active')) return 'This section is not available for enrollment.';
-  if (msg.includes('not published')) return 'This course is not yet available for enrollment.';
-  return msg.replace(/^Cannot enroll:\s*/i, '').trim() || 'Unable to complete enrollment. Please try again.';
-}
 
 export function CourseDetailsPage() {
+  const { t } = useTranslation(['public', 'common']);
+
+  /** Format enrollment error for clean display (inline so it can access t) */
+  const formatEnrollmentError = (msg: string): string => {
+    if (msg.includes('Section is full')) return t('public:courseDetails.errors.sectionFull');
+    if (msg.includes('already enrolled')) return t('public:courseDetails.errors.alreadyEnrolled');
+    if (msg.includes('overlap') || msg.includes('conflict')) return t('public:courseDetails.errors.sectionConflict');
+    if (msg.includes('not active')) return t('public:courseDetails.errors.sectionNotActive');
+    if (msg.includes('not published')) return t('public:courseDetails.errors.courseNotPublished');
+    return msg.replace(/^Cannot enroll:\s*/i, '').trim() || t('public:courseDetails.errors.unableEnroll');
+  };
+
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthStore();
@@ -53,8 +57,8 @@ export function CourseDetailsPage() {
           } catch { /* not enrolled, fine */ }
         }
       } catch (error) {
-        toast.error('Failed to load course', {
-          description: error instanceof Error ? error.message : 'Please try again later',
+        toast.error(t('public:courseDetails.loadErrorTitle'), {
+          description: error instanceof Error ? error.message : t('public:courseDetails.errors.tryLater'),
         });
         navigate('/courses');
       } finally {
@@ -63,18 +67,11 @@ export function CourseDetailsPage() {
     };
 
     loadCourse();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, navigate]);
 
   const formatRating = (rating: number) => {
     return rating.toFixed(1);
-  };
-
-  const formatTime = (minutes: number) => {
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    if (hours === 0) return `${mins}m`;
-    if (mins === 0) return `${hours}h`;
-    return `${hours}h ${mins}m`;
   };
 
   const handleEnroll = async (sectionId: string, sectionName: string) => {
@@ -86,8 +83,10 @@ export function CourseDetailsPage() {
 
     // Block re-enrollment if student is currently active in this course
     if (existingEnrollment && existingEnrollment.status === 'Active') {
-      toast.error('Already enrolled', {
-        description: `You are currently enrolled in this course (${existingEnrollment.sectionName || 'a section'}). Complete or unenroll from your current section first.`,
+      toast.error(t('public:courseDetails.alreadyEnrolledTitle'), {
+        description: t('public:courseDetails.alreadyEnrolledBody', {
+          section: existingEnrollment.sectionName || t('public:courseDetails.alreadyEnrolledFallbackSection'),
+        }),
       });
       return;
     }
@@ -119,8 +118,8 @@ export function CourseDetailsPage() {
         sectionId: sectionId,
       });
 
-      toast.success('Successfully enrolled!', {
-        description: `${course.title} • ${sectionName}`,
+      toast.success(t('public:courseDetails.enrolledSuccessTitle'), {
+        description: t('public:courseDetails.enrolledSuccessBody', { course: course.title, section: sectionName }),
       });
 
       // Update app store
@@ -139,7 +138,7 @@ export function CourseDetailsPage() {
       setCourse(updatedCourse);
       setExistingEnrollment(null); // Reset so we don't show re-enroll dialog again
     } catch (error) {
-      const raw = error instanceof Error ? error.message : 'Please try again later';
+      const raw = error instanceof Error ? error.message : t('public:courseDetails.errors.tryLater');
       setEnrollmentError(formatEnrollmentError(raw));
     } finally {
       setEnrollingSectionId(null);
@@ -160,9 +159,9 @@ export function CourseDetailsPage() {
   if (!course) {
     return (
       <div className="space-y-6 py-8 text-center">
-        <p className="text-muted-foreground">Course not found</p>
+        <p className="text-muted-foreground">{t('public:courseDetails.notFoundTitle')}</p>
         <Button asChild>
-          <Link to="/courses">Back to Courses</Link>
+          <Link to="/courses">{t('public:courseDetails.backToCourses')}</Link>
         </Button>
       </div>
     );
@@ -177,7 +176,7 @@ export function CourseDetailsPage() {
         className="mb-4"
       >
         <ArrowLeft className="me-2 h-4 w-4" />
-        Back
+        {t('public:courseDetails.back')}
       </Button>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -194,7 +193,7 @@ export function CourseDetailsPage() {
                   </CardDescription>
                 </div>
                 {course.isFeatured && (
-                  <Badge variant="default">Featured</Badge>
+                  <Badge variant="default">{t('public:courseDetails.featured')}</Badge>
                 )}
               </div>
             </CardHeader>
@@ -204,13 +203,13 @@ export function CourseDetailsPage() {
                   <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
                   <span className="font-semibold">{formatRating(course.rating)}</span>
                   <span className="text-sm text-muted-foreground">
-                    ({course.ratingCount} reviews)
+                    {t('public:courseDetails.reviewsCount', { count: course.ratingCount })}
                   </span>
                 </div>
                 <Badge variant="secondary">{course.level}</Badge>
                 <Badge variant="outline">{course.modality}</Badge>
                 <Badge variant="default" className={course.price ? "text-lg" : "text-lg bg-emerald-500/15 text-emerald-600 border-emerald-500/30"}>
-                  {course.price ? `$${course.price.toFixed(2)}` : 'Free'}
+                  {course.price ? `$${course.price.toFixed(2)}` : t('public:courseDetails.free')}
                 </Badge>
               </div>
             </CardContent>
@@ -219,7 +218,7 @@ export function CourseDetailsPage() {
           {/* Description */}
           <Card>
             <CardHeader>
-              <CardTitle>Description</CardTitle>
+              <CardTitle>{t('public:courseDetails.description')}</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground whitespace-pre-line">
@@ -233,10 +232,10 @@ export function CourseDetailsPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <BookOpen className="h-5 w-5" />
-                Course Sections
+                {t('public:courseDetails.courseSectionsTitle')}
               </CardTitle>
               <CardDescription>
-                Choose a section that fits your schedule
+                {t('public:courseDetails.courseSectionsSubtitle')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -244,14 +243,14 @@ export function CourseDetailsPage() {
                 <div className="flex items-start gap-3 rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm">
                   <AlertCircle className="h-5 w-5 shrink-0 text-destructive mt-0.5" />
                   <div>
-                    <p className="font-medium text-destructive">Enrollment issue</p>
+                    <p className="font-medium text-destructive">{t('public:courseDetails.enrollmentIssue')}</p>
                     <p className="mt-1 text-muted-foreground">{enrollmentError}</p>
                     <button
                       type="button"
                       onClick={() => setEnrollmentError(null)}
                       className="mt-2 text-primary hover:underline text-xs font-medium"
                     >
-                      Dismiss
+                      {t('public:courseDetails.dismiss')}
                     </button>
                   </div>
                 </div>
@@ -274,17 +273,17 @@ export function CourseDetailsPage() {
                           </div>
                           <div className="flex items-center gap-1">
                             <User className="h-4 w-4" />
-                            {section.seatsRemaining} seats remaining
+                            {t('public:courseDetails.seatsRemainingShort', { count: section.seatsRemaining })}
                           </div>
                         </div>
                       </div>
                       {!section.isActive && (
-                        <Badge variant="destructive">Inactive</Badge>
+                        <Badge variant="destructive">{t('public:courseDetails.inactive')}</Badge>
                       )}
                     </div>
                     {section.meetingTimes.length > 0 && (
                       <div className="space-y-2">
-                        <div className="text-sm font-medium">Meeting Times:</div>
+                        <div className="text-sm font-medium">{t('public:courseDetails.meetingTimes')}</div>
                         {section.meetingTimes.map((mt, idx) => (
                           <div
                             key={idx}
@@ -301,28 +300,28 @@ export function CourseDetailsPage() {
                       </div>
                     )}
                     {isAuthenticated && section.isActive && (
-                      <Button 
+                      <Button
                         className="w-full sm:w-auto"
                         onClick={() => handleEnroll(section.id, section.name)}
                         disabled={enrollingSectionId === section.id || section.seatsRemaining <= 0}
                       >
-                        {enrollingSectionId === section.id 
-                          ? 'Enrolling...' 
+                        {enrollingSectionId === section.id
+                          ? t('public:courseDetails.enrollingDots')
                           : section.seatsRemaining <= 0
-                          ? 'Section Full'
-                          : `Enroll in ${section.name}`}
+                          ? t('public:courseDetails.sectionFull')
+                          : t('public:courseDetails.enrollInSection', { name: section.name })}
                       </Button>
                     )}
                     {!isAuthenticated && (
                       <Button asChild className="w-full sm:w-auto">
-                        <Link to="/login">Sign in to Enroll</Link>
+                        <Link to="/login">{t('public:courseDetails.signInToEnrollCta')}</Link>
                       </Button>
                     )}
                   </motion.div>
                 ))
               ) : (
                 <p className="text-muted-foreground text-center py-4">
-                  No sections available for this course.
+                  {t('public:courseDetails.noSectionsForCourse')}
                 </p>
               )}
             </CardContent>
@@ -332,7 +331,7 @@ export function CourseDetailsPage() {
           {course.tags.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle>Tags</CardTitle>
+                <CardTitle>{t('public:courseDetails.tags')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
@@ -352,28 +351,28 @@ export function CourseDetailsPage() {
           {/* Course Info Card */}
           <Card>
             <CardHeader>
-              <CardTitle>Course Information</CardTitle>
+              <CardTitle>{t('public:courseDetails.courseInformation')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <div className="text-sm font-medium text-muted-foreground">Provider</div>
+                <div className="text-sm font-medium text-muted-foreground">{t('public:courseDetails.provider')}</div>
                 <div>{course.providerName}</div>
               </div>
               <div className="space-y-2">
-                <div className="text-sm font-medium text-muted-foreground">Category</div>
+                <div className="text-sm font-medium text-muted-foreground">{t('public:courseDetails.category')}</div>
                 <div>{course.category}</div>
               </div>
               <div className="space-y-2">
-                <div className="text-sm font-medium text-muted-foreground">Level</div>
+                <div className="text-sm font-medium text-muted-foreground">{t('public:courseDetails.level')}</div>
                 <Badge>{course.level}</Badge>
               </div>
               <div className="space-y-2">
-                <div className="text-sm font-medium text-muted-foreground">Modality</div>
+                <div className="text-sm font-medium text-muted-foreground">{t('public:courseDetails.modality')}</div>
                 <Badge variant="outline">{course.modality}</Badge>
               </div>
               <div className="space-y-2">
-                <div className="text-sm font-medium text-muted-foreground">Price</div>
-                <div className="text-2xl font-bold">{course.price ? `$${course.price.toFixed(2)}` : <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-500/30 text-base">Free</Badge>}</div>
+                <div className="text-sm font-medium text-muted-foreground">{t('public:courseDetails.price')}</div>
+                <div className="text-2xl font-bold">{course.price ? `$${course.price.toFixed(2)}` : <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-500/30 text-base">{t('public:courseDetails.free')}</Badge>}</div>
               </div>
             </CardContent>
           </Card>
@@ -383,7 +382,7 @@ export function CourseDetailsPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <User className="h-5 w-5" />
-                Instructor
+                {t('public:courseDetails.instructor')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -396,9 +395,12 @@ export function CourseDetailsPage() {
       <ConfirmDialog
         open={!!reEnrollConfirm}
         onOpenChange={(open) => { if (!open) setReEnrollConfirm(null); }}
-        title="Re-enroll in this course?"
-        description={`You've already completed "${course?.title}". Your previous progress and grades will be preserved in your history. Would you like to enroll again in the "${reEnrollConfirm?.sectionName}" section?`}
-        confirmLabel="Yes, enroll again"
+        title={t('public:courseDetails.reEnrollDialogTitle')}
+        description={t('public:courseDetails.reEnrollDialogDescription', {
+          course: course?.title ?? '',
+          section: reEnrollConfirm?.sectionName ?? '',
+        })}
+        confirmLabel={t('public:courseDetails.reEnrollConfirmLabel')}
         variant="default"
         onConfirm={async () => {
           if (reEnrollConfirm) {

@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 import { ConfirmDialog } from './ui/confirm-dialog';
-import { MessageSquare, ThumbsUp, Reply, Edit, Trash2, Send, X } from 'lucide-react';
+import { MessageSquare, ThumbsUp, Reply, Edit, Trash2, Send } from 'lucide-react';
 import { discussionService, type DiscussionPost } from '../services/discussionService';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
@@ -19,6 +20,7 @@ interface CourseDiscussionProps {
 }
 
 export function CourseDiscussion({ courseId, lessonId, title }: CourseDiscussionProps) {
+  const { t } = useTranslation(['student', 'common']);
   const { user } = useAuthStore();
   const [posts, setPosts] = useState<DiscussionPost[]>([]);
   const [newPostContent, setNewPostContent] = useState('');
@@ -48,60 +50,60 @@ export function CourseDiscussion({ courseId, lessonId, title }: CourseDiscussion
 
   const handleCreatePost = () => {
     if (!newPostContent.trim()) {
-      toast.error('Please enter a message');
+      toast.error(t('student:components.discussion.toasts.enterMessage'));
       return;
     }
 
     if (!user) {
-      toast.error('You must be logged in to post');
+      toast.error(t('student:components.discussion.toasts.loginToPost'));
       return;
     }
 
-    const userName = user.fullName || 
+    const userName = user.fullName ||
                      (user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.firstName) ||
-                     user.email?.split('@')[0] || 
-                     'Anonymous';
+                     user.email?.split('@')[0] ||
+                     t('student:components.discussion.anonymous');
 
     discussionService.createPost(
-      courseId, 
-      newPostContent, 
-      user.id, 
-      userName, 
+      courseId,
+      newPostContent,
+      user.id,
+      userName,
       lessonId
     );
     setNewPostContent('');
     loadDiscussions();
-    toast.success('Post created');
+    toast.success(t('student:components.discussion.toasts.postCreated'));
   };
 
   const handleReply = (parentId: string) => {
     if (!replyContent.trim()) {
-      toast.error('Please enter a reply');
+      toast.error(t('student:components.discussion.toasts.enterReply'));
       return;
     }
 
     if (!user) {
-      toast.error('You must be logged in to reply');
+      toast.error(t('student:components.discussion.toasts.loginToReply'));
       return;
     }
 
-    const userName = user.fullName || 
+    const userName = user.fullName ||
                      (user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.firstName) ||
-                     user.email?.split('@')[0] || 
-                     'Anonymous';
+                     user.email?.split('@')[0] ||
+                     t('student:components.discussion.anonymous');
 
     discussionService.createPost(
-      courseId, 
-      replyContent, 
-      user.id, 
-      userName, 
-      lessonId, 
+      courseId,
+      replyContent,
+      user.id,
+      userName,
+      lessonId,
       parentId
     );
     setReplyContent('');
     setReplyingTo(null);
     loadDiscussions();
-    toast.success('Reply posted');
+    toast.success(t('student:components.discussion.toasts.replyPosted'));
   };
 
   const handleUpvote = (postId: string) => {
@@ -111,15 +113,15 @@ export function CourseDiscussion({ courseId, lessonId, title }: CourseDiscussion
 
   const handleDelete = (postId: string) => {
     if (!user) {
-      toast.error('You must be logged in to delete posts');
+      toast.error(t('student:components.discussion.toasts.loginToDelete'));
       return;
     }
 
     if (discussionService.deletePost(postId, courseId, lessonId)) {
       loadDiscussions();
-      toast.success('Post deleted successfully');
+      toast.success(t('student:components.discussion.toasts.postDeleted'));
     } else {
-      toast.error('Failed to delete post. You can only delete your own posts.');
+      toast.error(t('student:components.discussion.toasts.deleteFailed'));
     }
   };
 
@@ -130,12 +132,12 @@ export function CourseDiscussion({ courseId, lessonId, title }: CourseDiscussion
 
   const handleSaveEdit = (postId: string) => {
     if (!user) {
-      toast.error('You must be logged in to edit posts');
+      toast.error(t('student:components.discussion.toasts.loginToEdit'));
       return;
     }
 
     if (!editContent.trim()) {
-      toast.error('Please enter content');
+      toast.error(t('student:components.discussion.toasts.enterContent'));
       return;
     }
 
@@ -144,9 +146,9 @@ export function CourseDiscussion({ courseId, lessonId, title }: CourseDiscussion
       setEditingPostId(null);
       setEditContent('');
       loadDiscussions();
-      toast.success('Post updated successfully');
+      toast.success(t('student:components.discussion.toasts.postUpdated'));
     } else {
-      toast.error('Failed to update post. You can only edit your own posts.');
+      toast.error(t('student:components.discussion.toasts.updateFailed'));
     }
   };
 
@@ -177,14 +179,14 @@ export function CourseDiscussion({ courseId, lessonId, title }: CourseDiscussion
                 <span className="font-semibold text-sm">{post.userName}</span>
                 {post.isInstructor && (
                   <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">
-                    Instructor
+                    {t('student:components.discussion.instructor')}
                   </span>
                 )}
                 <span className="text-xs text-muted-foreground">
                   {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
                 </span>
                 {post.updatedAt !== post.createdAt && (
-                  <span className="text-xs text-muted-foreground">(edited)</span>
+                  <span className="text-xs text-muted-foreground">{t('student:components.discussion.edited')}</span>
                 )}
               </div>
               {isEditing ? (
@@ -197,7 +199,7 @@ export function CourseDiscussion({ courseId, lessonId, title }: CourseDiscussion
                   />
                   <div className="flex gap-2">
                     <Button size="sm" onClick={() => handleSaveEdit(post.id)}>
-                      Save
+                      {t('common:save')}
                     </Button>
                     <Button
                       size="sm"
@@ -207,7 +209,7 @@ export function CourseDiscussion({ courseId, lessonId, title }: CourseDiscussion
                         setEditContent('');
                       }}
                     >
-                      Cancel
+                      {t('common:cancel')}
                     </Button>
                   </div>
                 </div>
@@ -237,7 +239,7 @@ export function CourseDiscussion({ courseId, lessonId, title }: CourseDiscussion
                 className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
               >
                 <Reply className="h-4 w-4" />
-                Reply
+                {t('student:components.discussion.reply')}
               </button>
             )}
             {/* Edit and Delete buttons - show for both posts and replies if user is author */}
@@ -246,18 +248,18 @@ export function CourseDiscussion({ courseId, lessonId, title }: CourseDiscussion
                 <button
                   onClick={() => handleEdit(post)}
                   className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
-                  title="Edit your post"
+                  title={t('student:components.discussion.editTooltip')}
                 >
                   <Edit className="h-4 w-4" />
-                  Edit
+                  {t('common:edit')}
                 </button>
                 <button
                   onClick={() => setDeletePostId(post.id)}
                   className="flex items-center gap-1 text-muted-foreground hover:text-destructive transition-colors"
-                  title="Delete your post"
+                  title={t('student:components.discussion.deleteTooltip')}
                 >
                   <Trash2 className="h-4 w-4" />
-                  Delete
+                  {t('common:delete')}
                 </button>
               </>
             )}
@@ -274,7 +276,7 @@ export function CourseDiscussion({ courseId, lessonId, title }: CourseDiscussion
               className="space-y-2 pt-2 border-t"
             >
               <Textarea
-                placeholder="Write your reply..."
+                placeholder={t('student:components.discussion.replyPlaceholder')}
                 value={replyContent}
                 onChange={(e) => setReplyContent(e.target.value)}
                 rows={2}
@@ -282,7 +284,7 @@ export function CourseDiscussion({ courseId, lessonId, title }: CourseDiscussion
               <div className="flex gap-2">
                 <Button size="sm" onClick={() => handleReply(post.id)}>
                   <Send className="h-3 w-3 me-1" />
-                  Post Reply
+                  {t('student:components.discussion.postReply')}
                 </Button>
                 <Button
                   size="sm"
@@ -292,7 +294,7 @@ export function CourseDiscussion({ courseId, lessonId, title }: CourseDiscussion
                     setReplyContent('');
                   }}
                 >
-                  Cancel
+                  {t('common:cancel')}
                 </Button>
               </div>
             </motion.div>
@@ -309,7 +311,9 @@ export function CourseDiscussion({ courseId, lessonId, title }: CourseDiscussion
             <div className="flex items-center gap-2 mb-3">
               <Reply className="h-3.5 w-3.5 text-muted-foreground" />
               <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                {post.replies.length} {post.replies.length === 1 ? 'Reply' : 'Replies'}
+                {post.replies.length === 1
+                  ? t('student:components.discussion.replyCountOne', { count: post.replies.length })
+                  : t('student:components.discussion.replyCountOther', { count: post.replies.length })}
               </span>
             </div>
             <div className="space-y-3 ps-2 border-l-2 border-primary/20">
@@ -326,14 +330,14 @@ export function CourseDiscussion({ courseId, lessonId, title }: CourseDiscussion
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <MessageSquare className="h-5 w-5" />
-          {title || (lessonId ? 'Lesson Discussion' : 'Course Discussion')}
+          {title || (lessonId ? t('student:components.discussion.lessonDiscussionTitle') : t('student:components.discussion.courseDiscussionTitle'))}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* New Post Form */}
         <div className="space-y-2 p-3 border rounded-lg bg-muted/30">
           <Textarea
-            placeholder={lessonId ? 'Ask a question about this lesson...' : 'Start a discussion...'}
+            placeholder={lessonId ? t('student:components.discussion.placeholderLesson') : t('student:components.discussion.placeholderCourse')}
             value={newPostContent}
             onChange={(e) => setNewPostContent(e.target.value)}
             rows={3}
@@ -341,7 +345,7 @@ export function CourseDiscussion({ courseId, lessonId, title }: CourseDiscussion
           <div className="flex justify-end">
             <Button onClick={handleCreatePost} size="sm">
               <Send className="h-4 w-4 me-2" />
-              Post
+              {t('student:components.discussion.post')}
             </Button>
           </div>
         </div>
@@ -351,7 +355,7 @@ export function CourseDiscussion({ courseId, lessonId, title }: CourseDiscussion
           {posts.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <MessageSquare className="h-10 w-10 mx-auto mb-2 opacity-50" />
-              <p className="text-sm">No discussions yet. Be the first to start a conversation!</p>
+              <p className="text-sm">{t('student:components.discussion.noneTitle')}</p>
             </div>
           ) : (
             <div className="space-y-3 pe-4">
@@ -363,9 +367,9 @@ export function CourseDiscussion({ courseId, lessonId, title }: CourseDiscussion
       <ConfirmDialog
         open={deletePostId !== null}
         onOpenChange={(open) => { if (!open) setDeletePostId(null); }}
-        title="Delete Post"
-        description="Are you sure you want to delete this post? This action cannot be undone."
-        confirmLabel="Delete"
+        title={t('student:components.discussion.deleteDialogTitle')}
+        description={t('student:components.discussion.deleteDialogDescription')}
+        confirmLabel={t('common:delete')}
         variant="destructive"
         onConfirm={() => {
           if (deletePostId) handleDelete(deletePostId);

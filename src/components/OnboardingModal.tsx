@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
 import { Button } from './ui/button';
@@ -60,6 +61,7 @@ function getCategoryIcon(iconName: string) {
 }
 
 export function OnboardingModal({ open, onComplete, userId }: OnboardingModalProps) {
+  const { t } = useTranslation(['student', 'common']);
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -88,45 +90,45 @@ export function OnboardingModal({ open, onComplete, userId }: OnboardingModalPro
       const response = await onboardingService.getCategories();
       setCategories(response.categories || []);
       setLearningGoalOptions(response.learningGoalOptions || [
-        'Career advancement',
-        'Learn new skills',
-        'Start a new career',
-        'Personal interest',
-        'Academic requirements',
-        'Stay updated with industry'
+        t('student:components.onboarding.goals.career'),
+        t('student:components.onboarding.goals.newSkills'),
+        t('student:components.onboarding.goals.newCareer'),
+        t('student:components.onboarding.goals.personal'),
+        t('student:components.onboarding.goals.academic'),
+        t('student:components.onboarding.goals.industry'),
       ]);
       setExperienceLevels(response.experienceLevels || [
-        'Complete beginner',
-        'Some experience',
-        'Intermediate',
-        'Advanced',
-        'Expert'
+        t('student:components.onboarding.levels.beginner'),
+        t('student:components.onboarding.levels.some'),
+        t('student:components.onboarding.levels.intermediate'),
+        t('student:components.onboarding.levels.advanced'),
+        t('student:components.onboarding.levels.expert'),
       ]);
     } catch (error) {
       console.error('Failed to load onboarding categories:', error);
       // Use fallback data if API fails
       setCategories([
-        { id: 'programming', name: 'Programming', description: 'Learn coding and software development', icon: 'programming', topics: ['JavaScript', 'Python', 'React', 'Node.js', 'TypeScript'] },
-        { id: 'data-science', name: 'Data Science', description: 'Analytics, ML, and data visualization', icon: 'data-science', topics: ['Machine Learning', 'Python', 'SQL', 'Data Analysis', 'Statistics'] },
-        { id: 'design', name: 'Design', description: 'UI/UX, graphic design, and creativity', icon: 'design', topics: ['UI/UX', 'Figma', 'Adobe XD', 'Graphic Design', 'User Research'] },
-        { id: 'cloud', name: 'Cloud Computing', description: 'AWS, Azure, and cloud infrastructure', icon: 'cloud', topics: ['AWS', 'Azure', 'DevOps', 'Docker', 'Kubernetes'] },
-        { id: 'mobile', name: 'Mobile Development', description: 'iOS, Android, and cross-platform apps', icon: 'mobile', topics: ['Flutter', 'React Native', 'iOS', 'Android', 'Swift'] },
-        { id: 'security', name: 'Cybersecurity', description: 'Security, ethical hacking, and compliance', icon: 'security', topics: ['Ethical Hacking', 'Network Security', 'Penetration Testing', 'Security Compliance'] },
+        { id: 'programming', name: t('student:components.onboarding.fallbackCategories.programmingName'), description: t('student:components.onboarding.fallbackCategories.programmingDesc'), icon: 'programming', topics: ['JavaScript', 'Python', 'React', 'Node.js', 'TypeScript'] },
+        { id: 'data-science', name: t('student:components.onboarding.fallbackCategories.dataScienceName'), description: t('student:components.onboarding.fallbackCategories.dataScienceDesc'), icon: 'data-science', topics: ['Machine Learning', 'Python', 'SQL', 'Data Analysis', 'Statistics'] },
+        { id: 'design', name: t('student:components.onboarding.fallbackCategories.designName'), description: t('student:components.onboarding.fallbackCategories.designDesc'), icon: 'design', topics: ['UI/UX', 'Figma', 'Adobe XD', 'Graphic Design', 'User Research'] },
+        { id: 'cloud', name: t('student:components.onboarding.fallbackCategories.cloudName'), description: t('student:components.onboarding.fallbackCategories.cloudDesc'), icon: 'cloud', topics: ['AWS', 'Azure', 'DevOps', 'Docker', 'Kubernetes'] },
+        { id: 'mobile', name: t('student:components.onboarding.fallbackCategories.mobileName'), description: t('student:components.onboarding.fallbackCategories.mobileDesc'), icon: 'mobile', topics: ['Flutter', 'React Native', 'iOS', 'Android', 'Swift'] },
+        { id: 'security', name: t('student:components.onboarding.fallbackCategories.securityName'), description: t('student:components.onboarding.fallbackCategories.securityDesc'), icon: 'security', topics: ['Ethical Hacking', 'Network Security', 'Penetration Testing', 'Security Compliance'] },
       ]);
       setLearningGoalOptions([
-        'Career advancement',
-        'Learn new skills',
-        'Start a new career',
-        'Personal interest',
-        'Academic requirements',
-        'Stay updated with industry'
+        t('student:components.onboarding.goals.career'),
+        t('student:components.onboarding.goals.newSkills'),
+        t('student:components.onboarding.goals.newCareer'),
+        t('student:components.onboarding.goals.personal'),
+        t('student:components.onboarding.goals.academic'),
+        t('student:components.onboarding.goals.industry'),
       ]);
       setExperienceLevels([
-        'Complete beginner',
-        'Some experience',
-        'Intermediate',
-        'Advanced',
-        'Expert'
+        t('student:components.onboarding.levels.beginner'),
+        t('student:components.onboarding.levels.some'),
+        t('student:components.onboarding.levels.intermediate'),
+        t('student:components.onboarding.levels.advanced'),
+        t('student:components.onboarding.levels.expert'),
       ]);
     } finally {
       setLoading(false);
@@ -195,15 +197,15 @@ export function OnboardingModal({ open, onComplete, userId }: OnboardingModalPro
 
       await onboardingService.completeOnboarding();
 
-      toast.success('Welcome to AcademiX!', {
-        description: 'Your preferences have been saved. We\'ll personalize your experience.',
+      toast.success(t('student:components.onboarding.welcomeTitle'), {
+        description: t('student:components.onboarding.welcomeBody'),
       });
 
       onComplete();
     } catch (error) {
       console.error('Failed to save onboarding data:', error);
-      toast.error('Failed to save preferences', {
-        description: 'Please try again or skip for now.',
+      toast.error(t('student:components.onboarding.saveFailedTitle'), {
+        description: t('student:components.onboarding.saveFailedBody'),
       });
     } finally {
       setSaving(false);
@@ -250,9 +252,9 @@ export function OnboardingModal({ open, onComplete, userId }: OnboardingModalPro
                   <Sparkles className="h-5 w-5" />
                 </div>
                 <div>
-                  <DialogTitle className="text-xl">Personalize Your Experience</DialogTitle>
+                  <DialogTitle className="text-xl">{t('student:components.onboarding.title')}</DialogTitle>
                   <DialogDescription>
-                    Help us recommend the best courses for you
+                    {t('student:components.onboarding.subtitle')}
                   </DialogDescription>
                 </div>
               </div>
@@ -281,8 +283,8 @@ export function OnboardingModal({ open, onComplete, userId }: OnboardingModalPro
                     exit={{ opacity: 0, x: -20 }}
                     className="space-y-4"
                   >
-                    <h3 className="font-semibold text-lg">What are you interested in learning?</h3>
-                    <p className="text-sm text-muted-foreground">Select all categories that interest you</p>
+                    <h3 className="font-semibold text-lg">{t('student:components.onboarding.step1Heading')}</h3>
+                    <p className="text-sm text-muted-foreground">{t('student:components.onboarding.step1Subtitle')}</p>
                     <div className="grid grid-cols-2 gap-3 mt-4">
                       {categories.map((category) => (
                         <button
@@ -329,8 +331,8 @@ export function OnboardingModal({ open, onComplete, userId }: OnboardingModalPro
                     className="space-y-6"
                   >
                     <div>
-                      <h3 className="font-semibold text-lg">Select specific topics</h3>
-                      <p className="text-sm text-muted-foreground">Choose topics within your selected categories</p>
+                      <h3 className="font-semibold text-lg">{t('student:components.onboarding.step2Heading')}</h3>
+                      <p className="text-sm text-muted-foreground">{t('student:components.onboarding.step2Subtitle')}</p>
                     </div>
                     {Array.from(selectedCategories).map((categoryId) => {
                       const category = categories.find(c => c.id === categoryId);
@@ -378,12 +380,12 @@ export function OnboardingModal({ open, onComplete, userId }: OnboardingModalPro
                     className="space-y-6"
                   >
                     <div>
-                      <h3 className="font-semibold text-lg">Tell us about your goals</h3>
-                      <p className="text-sm text-muted-foreground">This helps us recommend the right courses</p>
+                      <h3 className="font-semibold text-lg">{t('student:components.onboarding.step3Heading')}</h3>
+                      <p className="text-sm text-muted-foreground">{t('student:components.onboarding.step3Subtitle')}</p>
                     </div>
 
                     <div className="space-y-3">
-                      <label className="text-sm font-medium">What are your learning goals?</label>
+                      <label className="text-sm font-medium">{t('student:components.onboarding.learningGoalsLabel')}</label>
                       <div className="flex flex-wrap gap-2">
                         {learningGoalOptions.map((goal) => {
                           const isSelected = selectedGoals.has(goal);
@@ -406,7 +408,7 @@ export function OnboardingModal({ open, onComplete, userId }: OnboardingModalPro
                     </div>
 
                     <div className="space-y-3">
-                      <label className="text-sm font-medium">What's your experience level?</label>
+                      <label className="text-sm font-medium">{t('student:components.onboarding.experienceLevelLabel')}</label>
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                         {experienceLevels.map((level) => (
                           <button
@@ -427,7 +429,7 @@ export function OnboardingModal({ open, onComplete, userId }: OnboardingModalPro
 
                     <div className="space-y-3">
                       <label className="text-sm font-medium">
-                        How many hours per week can you dedicate to learning?
+                        {t('student:components.onboarding.weeklyHoursLabel')}
                       </label>
                       <div className="flex items-center gap-4">
                         <input
@@ -439,7 +441,7 @@ export function OnboardingModal({ open, onComplete, userId }: OnboardingModalPro
                           className="flex-1 accent-primary"
                         />
                         <span className="text-sm font-medium w-20 text-end">
-                          {weeklyHours} hrs/week
+                          {t('student:components.onboarding.weeklyHoursValue', { count: weeklyHours })}
                         </span>
                       </div>
                     </div>
@@ -455,7 +457,7 @@ export function OnboardingModal({ open, onComplete, userId }: OnboardingModalPro
                 onClick={handleSkip}
                 disabled={saving}
               >
-                Skip for now
+                {t('student:components.onboarding.skipForNow')}
               </Button>
               <div className="flex gap-2">
                 {step > 1 && (
@@ -465,7 +467,7 @@ export function OnboardingModal({ open, onComplete, userId }: OnboardingModalPro
                     disabled={saving}
                   >
                     <ChevronLeft className="h-4 w-4 me-1" />
-                    Back
+                    {t('student:components.onboarding.back')}
                   </Button>
                 )}
                 {step < totalSteps ? (
@@ -473,7 +475,7 @@ export function OnboardingModal({ open, onComplete, userId }: OnboardingModalPro
                     onClick={() => setStep(step + 1)}
                     disabled={!canProceed()}
                   >
-                    Next
+                    {t('student:components.onboarding.next')}
                     <ChevronRight className="h-4 w-4 ms-1" />
                   </Button>
                 ) : (
@@ -484,11 +486,11 @@ export function OnboardingModal({ open, onComplete, userId }: OnboardingModalPro
                     {saving ? (
                       <>
                         <Loader2 className="h-4 w-4 me-2 animate-spin" />
-                        Saving...
+                        {t('student:components.onboarding.saving')}
                       </>
                     ) : (
                       <>
-                        Get Started
+                        {t('student:components.onboarding.getStarted')}
                         <Sparkles className="h-4 w-4 ms-1" />
                       </>
                     )}

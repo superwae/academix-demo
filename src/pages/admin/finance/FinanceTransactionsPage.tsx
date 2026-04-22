@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   Search,
   Download,
@@ -289,7 +290,27 @@ const getStatusColor = (status: Transaction["status"]) => {
 // =====================
 
 export function FinanceTransactionsPage() {
+  const { t } = useTranslation(['admin', 'common', 'errors']);
   const [searchParams] = useSearchParams();
+
+  // Translated status labels
+  const getStatusLabel = (status: Transaction["status"]) => {
+    switch (status) {
+      case "completed":
+        return t('admin:finance.transactions.status.completed');
+      case "pending":
+        return t('admin:finance.transactions.status.pending');
+      case "processing":
+        return t('admin:finance.transactions.status.processing');
+      case "failed":
+        return t('admin:finance.transactions.status.failed');
+    }
+  };
+
+  const getTypeLabel = (type: Transaction["type"]) =>
+    type === "purchase"
+      ? t('admin:finance.transactions.types.purchase')
+      : t('admin:finance.transactions.types.refund');
 
   // Filter state
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
@@ -343,13 +364,13 @@ export function FinanceTransactionsPage() {
 
   // Statistics
   const stats = useMemo(() => {
-    const purchases = filteredTransactions.filter((t) => t.type === "purchase" && t.status === "completed");
-    const refunds = filteredTransactions.filter((t) => t.type === "refund");
+    const purchases = filteredTransactions.filter((txn) => txn.type === "purchase" && txn.status === "completed");
+    const refunds = filteredTransactions.filter((txn) => txn.type === "refund");
     return {
       total: filteredTransactions.length,
-      totalRevenue: purchases.reduce((sum, t) => sum + t.amount, 0),
-      totalRefunds: refunds.reduce((sum, t) => sum + t.amount, 0),
-      pending: filteredTransactions.filter((t) => t.status === "pending").length,
+      totalRevenue: purchases.reduce((sum, txn) => sum + txn.amount, 0),
+      totalRefunds: refunds.reduce((sum, txn) => sum + txn.amount, 0),
+      pending: filteredTransactions.filter((txn) => txn.status === "pending").length,
     };
   }, [filteredTransactions]);
 
@@ -368,24 +389,24 @@ export function FinanceTransactionsPage() {
   const filters: FilterConfig[] = [
     {
       key: "type",
-      label: "Type",
+      label: t('admin:finance.transactions.filters.type'),
       options: [
-        { id: "all", label: "All Types" },
-        { id: "purchase", label: "Purchase", icon: ArrowUpRight },
-        { id: "refund", label: "Refund", icon: ArrowDownRight },
+        { id: "all", label: t('admin:finance.transactions.filters.allTypes') },
+        { id: "purchase", label: t('admin:finance.transactions.filters.purchase'), icon: ArrowUpRight },
+        { id: "refund", label: t('admin:finance.transactions.filters.refund'), icon: ArrowDownRight },
       ],
       value: typeFilter,
       onChange: setTypeFilter,
     },
     {
       key: "status",
-      label: "Status",
+      label: t('admin:finance.transactions.filters.status'),
       options: [
-        { id: "all", label: "All Statuses" },
-        { id: "completed", label: "Completed" },
-        { id: "pending", label: "Pending" },
-        { id: "processing", label: "Processing" },
-        { id: "failed", label: "Failed" },
+        { id: "all", label: t('admin:finance.transactions.filters.allStatuses') },
+        { id: "completed", label: t('admin:finance.transactions.filters.completed') },
+        { id: "pending", label: t('admin:finance.transactions.filters.pending') },
+        { id: "processing", label: t('admin:finance.transactions.filters.processing') },
+        { id: "failed", label: t('admin:finance.transactions.filters.failed') },
       ],
       value: statusFilter,
       onChange: setStatusFilter,
@@ -396,13 +417,13 @@ export function FinanceTransactionsPage() {
   const columns: Column<Transaction>[] = [
     {
       key: "id",
-      header: "Transaction",
+      header: t('admin:finance.transactions.columns.transaction'),
       sortable: true,
       render: (txn) => <span className="font-mono text-xs">{txn.id}</span>,
     },
     {
       key: "user",
-      header: "Customer",
+      header: t('admin:finance.transactions.columns.customer'),
       sortable: true,
       render: (txn) => (
         <div>
@@ -413,14 +434,14 @@ export function FinanceTransactionsPage() {
     },
     {
       key: "course",
-      header: "Course",
+      header: t('admin:finance.transactions.columns.course'),
       render: (txn) => (
         <p className="font-medium truncate max-w-[200px]">{txn.course.title}</p>
       ),
     },
     {
       key: "amount",
-      header: "Amount",
+      header: t('admin:finance.transactions.columns.amount'),
       sortable: true,
       className: "text-end",
       render: (txn) => (
@@ -437,7 +458,7 @@ export function FinanceTransactionsPage() {
     },
     {
       key: "type",
-      header: "Type",
+      header: t('admin:finance.transactions.columns.type'),
       render: (txn) => {
         const Icon = txn.type === "purchase" ? ArrowUpRight : ArrowDownRight;
         return (
@@ -450,14 +471,14 @@ export function FinanceTransactionsPage() {
             )}
           >
             <Icon className="h-3 w-3" />
-            {txn.type.charAt(0).toUpperCase() + txn.type.slice(1)}
+            {getTypeLabel(txn.type)}
           </span>
         );
       },
     },
     {
       key: "status",
-      header: "Status",
+      header: t('admin:finance.transactions.columns.status'),
       render: (txn) => {
         const StatusIcon = getStatusIcon(txn.status);
         return (
@@ -468,14 +489,14 @@ export function FinanceTransactionsPage() {
             )}
           >
             <StatusIcon className="h-3 w-3" />
-            {txn.status.charAt(0).toUpperCase() + txn.status.slice(1)}
+            {getStatusLabel(txn.status)}
           </span>
         );
       },
     },
     {
       key: "date",
-      header: "Date",
+      header: t('admin:finance.transactions.columns.date'),
       sortable: true,
       render: (txn) => (
         <div>
@@ -489,25 +510,25 @@ export function FinanceTransactionsPage() {
   // Row actions
   const rowActions: RowAction<Transaction>[] = [
     {
-      label: "View Details",
+      label: t('admin:finance.transactions.actions.viewDetails'),
       icon: Eye,
       onClick: (txn) => setSelectedTransaction(txn),
     },
     {
-      label: "Issue Refund",
+      label: t('admin:finance.transactions.actions.issueRefund'),
       icon: RotateCcw,
-      onClick: (txn) => toast.info(`Refund flow for ${txn.id}`),
+      onClick: (txn) => toast.info(t('admin:finance.transactions.toasts.refundFlow', { id: txn.id })),
       show: (txn) => txn.type === "purchase" && txn.status === "completed",
     },
     {
-      label: "Download Receipt",
+      label: t('admin:finance.transactions.actions.downloadReceipt'),
       icon: FileText,
-      onClick: () => toast.info("Downloading receipt..."),
+      onClick: () => toast.info(t('admin:finance.transactions.toasts.downloadingReceipt')),
     },
     {
-      label: "View Audit Trail",
+      label: t('admin:finance.transactions.actions.viewAuditTrail'),
       icon: History,
-      onClick: () => toast.info("Opening audit trail..."),
+      onClick: () => toast.info(t('admin:finance.transactions.toasts.openingAuditTrail')),
     },
   ];
 
@@ -515,35 +536,35 @@ export function FinanceTransactionsPage() {
   const getDetailSections = (txn: Transaction) => [
     {
       items: [
-        { label: "Transaction ID", value: <span className="font-mono text-xs">{txn.id}</span> },
-        { label: "Date & Time", value: formatDateTime(txn.date) },
-        { label: "Type", value: txn.type.charAt(0).toUpperCase() + txn.type.slice(1) },
+        { label: t('admin:finance.transactions.detail.fields.transactionId'), value: <span className="font-mono text-xs">{txn.id}</span> },
+        { label: t('admin:finance.transactions.detail.fields.dateTime'), value: formatDateTime(txn.date) },
+        { label: t('admin:finance.transactions.detail.fields.type'), value: getTypeLabel(txn.type) },
       ],
     },
     {
-      title: "Customer Details",
+      title: t('admin:finance.transactions.detail.sections.customerDetails'),
       items: [
-        { label: "Name", value: txn.user.name },
-        { label: "Email", value: txn.user.email },
-        { label: "IP Address", value: <span className="font-mono text-xs">{txn.ip}</span> },
+        { label: t('admin:finance.transactions.detail.fields.name'), value: txn.user.name },
+        { label: t('admin:finance.transactions.detail.fields.email'), value: txn.user.email },
+        { label: t('admin:finance.transactions.detail.fields.ipAddress'), value: <span className="font-mono text-xs">{txn.ip}</span> },
       ],
     },
     {
-      title: "Course Details",
+      title: t('admin:finance.transactions.detail.sections.courseDetails'),
       items: [
-        { label: "Course", value: txn.course.title },
-        { label: "Instructor", value: txn.course.instructor },
+        { label: t('admin:finance.transactions.detail.fields.course'), value: txn.course.title },
+        { label: t('admin:finance.transactions.detail.fields.instructor'), value: txn.course.instructor },
       ],
     },
     {
-      title: "Payment Details",
+      title: t('admin:finance.transactions.detail.sections.paymentDetails'),
       items: [
-        { label: "Payment Method", value: txn.paymentMethod },
-        ...(txn.refundReason ? [{ label: "Refund Reason", value: txn.refundReason }] : []),
+        { label: t('admin:finance.transactions.detail.fields.paymentMethod'), value: txn.paymentMethod },
+        ...(txn.refundReason ? [{ label: t('admin:finance.transactions.detail.fields.refundReason'), value: txn.refundReason }] : []),
         ...(txn.failureReason
           ? [
               {
-                label: "Failure Reason",
+                label: t('admin:finance.transactions.detail.fields.failureReason'),
                 value: <span className="text-red-500">{txn.failureReason}</span>,
               },
             ]
@@ -557,9 +578,9 @@ export function FinanceTransactionsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Transactions</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{t('admin:finance.transactions.title')}</h1>
           <p className="text-sm text-muted-foreground">
-            View and manage all payment transactions
+            {t('admin:finance.transactions.subtitle')}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -568,20 +589,33 @@ export function FinanceTransactionsPage() {
             size="sm"
             className="gap-2"
             onClick={() => {
-              const headers = ["ID", "User", "Email", "Course", "Instructor", "Amount", "Fee", "Net", "Type", "Status", "Date", "Payment Method"];
-              const rows = filteredTransactions.map((t) => [
-                t.id,
-                t.user.name,
-                t.user.email,
-                t.course.title,
-                t.course.instructor,
-                t.amount.toFixed(2),
-                t.fee.toFixed(2),
-                t.net.toFixed(2),
-                t.type,
-                t.status,
-                formatDateTime(t.date),
-                t.paymentMethod,
+              const headers = [
+                t('admin:finance.transactions.csvHeaders.id'),
+                t('admin:finance.transactions.csvHeaders.user'),
+                t('admin:finance.transactions.csvHeaders.email'),
+                t('admin:finance.transactions.csvHeaders.course'),
+                t('admin:finance.transactions.csvHeaders.instructor'),
+                t('admin:finance.transactions.csvHeaders.amount'),
+                t('admin:finance.transactions.csvHeaders.fee'),
+                t('admin:finance.transactions.csvHeaders.net'),
+                t('admin:finance.transactions.csvHeaders.type'),
+                t('admin:finance.transactions.csvHeaders.status'),
+                t('admin:finance.transactions.csvHeaders.date'),
+                t('admin:finance.transactions.csvHeaders.paymentMethod'),
+              ];
+              const rows = filteredTransactions.map((txn) => [
+                txn.id,
+                txn.user.name,
+                txn.user.email,
+                txn.course.title,
+                txn.course.instructor,
+                txn.amount.toFixed(2),
+                txn.fee.toFixed(2),
+                txn.net.toFixed(2),
+                txn.type,
+                txn.status,
+                formatDateTime(txn.date),
+                txn.paymentMethod,
               ]);
               const escape = (v: string) => (v.includes(",") || v.includes('"') ? `"${v.replace(/"/g, '""')}"` : v);
               const csv = [headers.join(","), ...rows.map((r) => r.map(escape).join(","))].join("\n");
@@ -591,11 +625,11 @@ export function FinanceTransactionsPage() {
               a.download = `transactions-${new Date().toISOString().slice(0, 10)}.csv`;
               a.click();
               URL.revokeObjectURL(a.href);
-              toast.success("Transactions exported", { description: "CSV file downloaded." });
+              toast.success(t('admin:finance.transactions.exportSuccess'), { description: t('admin:finance.transactions.exportSuccessDesc') });
             }}
           >
             <Download className="h-4 w-4" />
-            Export
+            {t('admin:finance.transactions.export')}
           </Button>
         </div>
       </div>
@@ -603,26 +637,26 @@ export function FinanceTransactionsPage() {
       {/* Quick Stats */}
       <div className="grid gap-4 sm:grid-cols-4">
         <div className="rounded-lg border bg-card p-4">
-          <p className="text-xs text-muted-foreground">Total Transactions</p>
+          <p className="text-xs text-muted-foreground">{t('admin:finance.transactions.stats.totalTransactions')}</p>
           <p className="text-2xl font-bold">{stats.total}</p>
         </div>
         <div className="rounded-lg border bg-card p-4">
-          <p className="text-xs text-muted-foreground">Revenue</p>
+          <p className="text-xs text-muted-foreground">{t('admin:finance.transactions.stats.revenue')}</p>
           <p className="text-2xl font-bold text-emerald-500">{formatCurrency(stats.totalRevenue)}</p>
         </div>
         <div className="rounded-lg border bg-card p-4">
-          <p className="text-xs text-muted-foreground">Refunds</p>
+          <p className="text-xs text-muted-foreground">{t('admin:finance.transactions.stats.refunds')}</p>
           <p className="text-2xl font-bold text-red-500">{formatCurrency(stats.totalRefunds)}</p>
         </div>
         <div className="rounded-lg border bg-card p-4">
-          <p className="text-xs text-muted-foreground">Pending</p>
+          <p className="text-xs text-muted-foreground">{t('admin:finance.transactions.stats.pending')}</p>
           <p className="text-2xl font-bold text-amber-500">{stats.pending}</p>
         </div>
       </div>
 
       {/* Filters */}
       <FilterBar
-        searchPlaceholder="Search by ID, customer, or course..."
+        searchPlaceholder={t('admin:finance.transactions.searchPlaceholder')}
         searchValue={searchQuery}
         onSearchChange={setSearchQuery}
         filters={filters}
@@ -637,7 +671,7 @@ export function FinanceTransactionsPage() {
         advancedFilters={
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <label className="text-xs font-medium">Course</label>
+              <label className="text-xs font-medium">{t('admin:finance.transactions.filters.course')}</label>
               <select
                 value={courseFilter}
                 onChange={(e) => setCourseFilter(e.target.value)}
@@ -645,13 +679,13 @@ export function FinanceTransactionsPage() {
               >
                 {COURSE_OPTIONS.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.label}
+                    {c.id === "all" ? t('admin:finance.transactions.filters.allCourses') : c.label}
                   </option>
                 ))}
               </select>
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-medium">Instructor</label>
+              <label className="text-xs font-medium">{t('admin:finance.transactions.filters.instructor')}</label>
               <select
                 value={instructorFilter}
                 onChange={(e) => setInstructorFilter(e.target.value)}
@@ -659,7 +693,7 @@ export function FinanceTransactionsPage() {
               >
                 {INSTRUCTOR_OPTIONS.map((i) => (
                   <option key={i.id} value={i.id}>
-                    {i.label}
+                    {i.id === "all" ? t('admin:finance.transactions.filters.allInstructors') : i.label}
                   </option>
                 ))}
               </select>
@@ -676,10 +710,10 @@ export function FinanceTransactionsPage() {
         rowActions={rowActions}
         onRowClick={(txn) => setSelectedTransaction(txn)}
         emptyIcon={CreditCard}
-        emptyMessage="No transactions found"
+        emptyMessage={t('admin:finance.transactions.empty.message')}
         emptyAction={
           <Button variant="link" size="sm" onClick={clearFilters}>
-            Clear filters
+            {t('admin:finance.transactions.empty.clearFilters')}
           </Button>
         }
         pageSize={10}
@@ -690,10 +724,10 @@ export function FinanceTransactionsPage() {
         <DetailModal
           open={!!selectedTransaction}
           onClose={() => setSelectedTransaction(null)}
-          title="Transaction Details"
+          title={t('admin:finance.transactions.detail.title')}
           icon={CreditCard}
           badge={{
-            label: selectedTransaction.status.charAt(0).toUpperCase() + selectedTransaction.status.slice(1),
+            label: getStatusLabel(selectedTransaction.status),
             variant:
               selectedTransaction.status === "completed"
                 ? "success"
@@ -705,7 +739,7 @@ export function FinanceTransactionsPage() {
           }}
           headerContent={
             <DetailAmount
-              label="Amount"
+              label={t('admin:finance.transactions.detail.amountLabel')}
               amount={`${selectedTransaction.type === "refund" ? "-" : "+"}${formatCurrency(selectedTransaction.amount)}`}
               variant={selectedTransaction.type === "refund" ? "error" : "success"}
             />
@@ -716,16 +750,16 @@ export function FinanceTransactionsPage() {
               {selectedTransaction.type === "purchase" && selectedTransaction.status === "completed" && (
                 <Button variant="outline" size="sm" className="gap-2">
                   <RotateCcw className="h-4 w-4" />
-                  Issue Refund
+                  {t('admin:finance.transactions.actions.issueRefund')}
                 </Button>
               )}
               <Button variant="outline" size="sm" className="gap-2">
                 <Download className="h-4 w-4" />
-                Download Receipt
+                {t('admin:finance.transactions.actions.downloadReceipt')}
               </Button>
               <Button variant="outline" size="sm" className="gap-2">
                 <History className="h-4 w-4" />
-                Audit Trail
+                {t('admin:finance.transactions.actions.auditTrail')}
               </Button>
             </>
           }

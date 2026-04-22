@@ -721,14 +721,448 @@
     }
   },
   "finance": {
-    "overview": "نظرة عامة",
-    "transactions": "المعاملات",
-    "payouts": "المدفوعات الصادرة",
-    "revenueSplit": "تقسيم الإيرادات",
-    "totalRevenue": "إجمالي الإيرادات",
-    "totalTransactions": "إجمالي المعاملات",
-    "pendingPayouts": "المدفوعات المعلّقة",
-    "refunds": "المبالغ المستردّة"
+    "nav": {
+      "overview": "نظرة عامة",
+      "transactions": "المعاملات",
+      "payouts": "المدفوعات الصادرة",
+      "revenueSplit": "تقسيم الإيرادات",
+      "totalRevenue": "إجمالي الإيرادات",
+      "totalTransactions": "إجمالي المعاملات",
+      "pendingPayouts": "المدفوعات المعلّقة",
+      "refunds": "المبالغ المستردّة"
+    },
+    "overview": {
+      "title": "نظرة عامة على المالية",
+      "subtitle": "الأداء المالي وتحليلات الإيرادات",
+      "export": "تصدير",
+      "exportingReport": "جارٍ تصدير التقرير...",
+      "timeRanges": {
+        "last7Days": "آخر 7 أيام",
+        "last30Days": "آخر 30 يومًا",
+        "last90Days": "آخر 90 يومًا",
+        "last12Months": "آخر 12 شهرًا"
+      },
+      "kpi": {
+        "totalRevenue": "إجمالي الإيرادات",
+        "totalRefunds": "إجمالي المبالغ المستردّة",
+        "netProfit": "صافي الربح",
+        "pendingPayouts": "المدفوعات المعلّقة",
+        "vsLastPeriod": "مقارنة بالفترة السابقة",
+        "viewAllPurchases": "عرض جميع المشتريات",
+        "viewRefundHistory": "عرض سجل المبالغ المستردّة",
+        "viewRevenueBreakdown": "عرض تفصيل الإيرادات",
+        "instructorsAwaiting": "{{count}} مدرّبين في انتظار الدفع"
+      },
+      "charts": {
+        "revenueTrend": "اتجاه الإيرادات",
+        "revenueTrendDesc": "الإيرادات مقابل المصروفات والمبالغ المستردّة",
+        "revenueByCategory": "الإيرادات حسب الفئة",
+        "revenueByCategoryDesc": "التفصيل حسب المصدر",
+        "revenue": "الإيرادات",
+        "expenses": "المصروفات",
+        "refunds": "المبالغ المستردّة",
+        "viewDetails": "عرض التفاصيل"
+      },
+      "categories": {
+        "courseSales": "مبيعات الدورات",
+        "subscriptions": "الاشتراكات",
+        "certificates": "الشهادات",
+        "other": "أخرى"
+      },
+      "recentTransactions": {
+        "title": "أحدث المعاملات",
+        "subtitle": "آخر نشاطات الدفع",
+        "viewAll": "عرض الكل",
+        "status": {
+          "completed": "مكتملة",
+          "pending": "معلّقة"
+        }
+      },
+      "pendingPayouts": {
+        "title": "المدفوعات المعلّقة",
+        "subtitle": "قائمة انتظار مدفوعات المدرّبين",
+        "manage": "إدارة",
+        "coursesLine": "{{count}} دورات · {{date}}",
+        "totalPending": "إجمالي المعلّق",
+        "status": {
+          "pending": "معلّقة",
+          "processing": "قيد المعالجة"
+        }
+      },
+      "topCourses": {
+        "title": "أفضل الدورات أداءً",
+        "subtitle": "حسب الإيرادات المحققة",
+        "viewAllCourses": "عرض كل الدورات",
+        "columns": {
+          "number": "#",
+          "course": "الدورة",
+          "instructor": "المدرّب",
+          "revenue": "الإيرادات",
+          "enrollments": "التسجيلات",
+          "growth": "النمو"
+        }
+      }
+    },
+    "payouts": {
+      "title": "المدفوعات الصادرة",
+      "subtitle": "إدارة صرف مدفوعات المدرّبين",
+      "export": "تصدير",
+      "exportingPayouts": "جارٍ تصدير المدفوعات...",
+      "bulkProcess": "معالجة {{count}} دفعات",
+      "selectAllPending": "تحديد كل المعلّقة ({{count}})",
+      "searchPlaceholder": "ابحث بالمدرّب أو رقم الدفعة...",
+      "stats": {
+        "pending": "معلّقة",
+        "processing": "قيد المعالجة",
+        "paidThisMonth": "المدفوع هذا الشهر",
+        "activeInstructors": "المدرّبون النشطون",
+        "payouts": "{{count}} دفعات",
+        "withEarnings": "لديهم أرباح"
+      },
+      "status": {
+        "all": "كل الحالات",
+        "pending": "معلّقة",
+        "processing": "قيد المعالجة",
+        "completed": "مكتملة",
+        "onHold": "موقوفة"
+      },
+      "filterLabels": {
+        "status": "الحالة"
+      },
+      "columns": {
+        "instructor": "المدرّب",
+        "period": "الفترة",
+        "gross": "الإجمالي",
+        "netPayout": "صافي الدفعة",
+        "status": "الحالة",
+        "quickAction": "إجراء سريع"
+      },
+      "instructorMeta": {
+        "courseSingular": "دورة",
+        "coursePlural": "دورات"
+      },
+      "periodTo": "إلى {{date}}",
+      "feeLine": "-{{amount}} رسوم",
+      "dueOn": "مستحقّ في {{date}}",
+      "actions": {
+        "processNow": "معالجة الآن",
+        "processing": "قيد المعالجة...",
+        "releaseHold": "رفع الإيقاف",
+        "receipt": "إيصال",
+        "viewDetails": "عرض التفاصيل",
+        "holdPayout": "إيقاف الدفعة",
+        "downloadReceipt": "تنزيل الإيصال",
+        "viewHistory": "عرض السجل",
+        "processPayout": "معالجة الدفعة",
+        "hold": "إيقاف"
+      },
+      "toasts": {
+        "processingCount": "جارٍ معالجة {{count}} دفعات",
+        "processingCountDesc": "سيتم إرسال الدفعات إلى المدرّبين",
+        "processingSingle": "جارٍ معالجة {{id}}",
+        "processingSingleDesc": "إرسال {{amount}} إلى {{name}}",
+        "releasingHold": "جارٍ رفع الإيقاف عن {{id}}",
+        "downloadingReceipt": "جارٍ تنزيل الإيصال...",
+        "holdingPayout": "جارٍ إيقاف {{id}}",
+        "openingHistory": "جارٍ فتح السجل..."
+      },
+      "empty": {
+        "message": "لا توجد مدفوعات",
+        "clearFilters": "مسح عوامل التصفية"
+      },
+      "detail": {
+        "title": "تفاصيل الدفعة",
+        "sections": {
+          "payoutInformation": "معلومات الدفعة",
+          "amountBreakdown": "تفصيل المبلغ"
+        },
+        "fields": {
+          "payoutId": "رقم الدفعة",
+          "period": "الفترة",
+          "paymentMethod": "طريقة الدفع",
+          "account": "الحساب",
+          "grossEarnings": "الأرباح الإجمالية",
+          "platformFee": "رسوم المنصّة (20%)",
+          "netPayout": "صافي الدفعة"
+        },
+        "timeline": {
+          "created": "أُنشئت",
+          "scheduled": "مجدولة",
+          "processed": "تمّت المعالجة",
+          "completed": "اكتملت"
+        }
+      }
+    },
+    "revenueSplit": {
+      "title": "تقسيم الإيرادات",
+      "subtitle": "تفصيل شامل لتوزيع الإيرادات",
+      "exportReport": "تصدير التقرير",
+      "exportingReport": "جارٍ تصدير التقرير...",
+      "timeRanges": {
+        "last7Days": "آخر 7 أيام",
+        "last30Days": "آخر 30 يومًا",
+        "last90Days": "آخر 90 يومًا",
+        "last12Months": "آخر 12 شهرًا"
+      },
+      "kpi": {
+        "grossRevenue": "الإيرادات الإجمالية",
+        "instructorPayouts": "مدفوعات المدرّبين",
+        "platformRevenue": "إيرادات المنصّة",
+        "netPlatformProfit": "صافي ربح المنصّة",
+        "vsLastPeriod": "مقارنة بالفترة السابقة",
+        "percentOfGross80": "80% من الإيرادات الإجمالية",
+        "percentOfGross20": "20% من الإيرادات الإجمالية",
+        "afterAllExpenses": "بعد خصم جميع المصروفات"
+      },
+      "flow": {
+        "title": "تدفّق الإيرادات",
+        "grossRevenue": "الإيرادات الإجمالية",
+        "grossPercent": "100%",
+        "instructorShare": "حصّة المدرّب (80%)",
+        "platformFee": "رسوم المنصّة (20%)",
+        "refunds": "المبالغ المستردّة",
+        "platformExpenses": "مصروفات المنصّة",
+        "operatingCosts": "التكاليف التشغيلية",
+        "netPlatformProfit": "صافي ربح المنصّة",
+        "finalMargin": "الهامش النهائي"
+      },
+      "charts": {
+        "monthlyBreakdown": "التفصيل الشهري للإيرادات",
+        "monthlyBreakdownDesc": "رسوم المنصّة مقابل حصّة المدرّب عبر الزمن",
+        "expenseBreakdown": "تفصيل مصروفات المنصّة",
+        "expenseBreakdownDesc": "أين تذهب رسوم المنصّة",
+        "instructorShare": "حصّة المدرّب",
+        "platformFee": "رسوم المنصّة",
+        "revenueByCourse": "الإيرادات حسب الدورة",
+        "revenueByCourseDesc": "أفضل الدورات من حيث الإيرادات"
+      },
+      "expenseCategories": {
+        "paymentProcessing": "معالجة المدفوعات",
+        "hostingInfrastructure": "الاستضافة والبنية التحتية",
+        "marketing": "التسويق",
+        "supportOperations": "الدعم والعمليات",
+        "other": "أخرى"
+      },
+      "instructorEarnings": {
+        "title": "أرباح المدرّبين",
+        "subtitle": "أعلى المدرّبين أداءً حسب الإيرادات",
+        "viewAll": "عرض الكل",
+        "columns": {
+          "number": "#",
+          "instructor": "المدرّب",
+          "courses": "الدورات",
+          "grossRevenue": "الإيرادات الإجمالية",
+          "earnings80": "الأرباح (80%)",
+          "percentOfTotal": "% من الإجمالي",
+          "growth": "النمو"
+        }
+      },
+      "policy": {
+        "title": "سياسة تقسيم الإيرادات",
+        "bodyPrefix": "تعمل المنصّة بنظام ",
+        "bodyHighlight": "تقسيم إيرادات 80/20",
+        "bodySuffix": ". يحصل المدرّبون على 80% من إيرادات مبيعات الدورات، بينما تحتفظ المنصّة بـ 20% لتغطية معالجة المدفوعات والاستضافة والتسويق والتكاليف التشغيلية. تُعالَج الدفعات كل أسبوعين لجميع الأرباح التي تتجاوز 50 دولارًا.",
+        "instructorShare": "المدرّب: 80%",
+        "platformShare": "المنصّة: 20%",
+        "minPayout": "الحد الأدنى للدفعة: 50 دولارًا",
+        "payoutCycle": "دورة الدفع: كل أسبوعين"
+      }
+    },
+    "transactions": {
+      "title": "المعاملات",
+      "subtitle": "عرض جميع معاملات الدفع وإدارتها",
+      "export": "تصدير",
+      "exportSuccess": "تم تصدير المعاملات",
+      "exportSuccessDesc": "تم تنزيل ملف CSV.",
+      "csvHeaders": {
+        "id": "المعرّف",
+        "user": "المستخدم",
+        "email": "البريد الإلكتروني",
+        "course": "الدورة",
+        "instructor": "المدرّب",
+        "amount": "المبلغ",
+        "fee": "الرسوم",
+        "net": "الصافي",
+        "type": "النوع",
+        "status": "الحالة",
+        "date": "التاريخ",
+        "paymentMethod": "طريقة الدفع"
+      },
+      "stats": {
+        "totalTransactions": "إجمالي المعاملات",
+        "revenue": "الإيرادات",
+        "refunds": "المبالغ المستردّة",
+        "pending": "المعلّقة"
+      },
+      "searchPlaceholder": "ابحث بالمعرّف أو العميل أو الدورة...",
+      "filters": {
+        "type": "النوع",
+        "status": "الحالة",
+        "allTypes": "كل الأنواع",
+        "purchase": "شراء",
+        "refund": "استرداد",
+        "allStatuses": "كل الحالات",
+        "completed": "مكتملة",
+        "pending": "معلّقة",
+        "processing": "قيد المعالجة",
+        "failed": "فاشلة",
+        "course": "الدورة",
+        "instructor": "المدرّب",
+        "allCourses": "كل الدورات",
+        "allInstructors": "كل المدرّبين"
+      },
+      "status": {
+        "completed": "مكتملة",
+        "pending": "معلّقة",
+        "processing": "قيد المعالجة",
+        "failed": "فاشلة"
+      },
+      "types": {
+        "purchase": "شراء",
+        "refund": "استرداد"
+      },
+      "columns": {
+        "transaction": "المعاملة",
+        "customer": "العميل",
+        "course": "الدورة",
+        "amount": "المبلغ",
+        "type": "النوع",
+        "status": "الحالة",
+        "date": "التاريخ"
+      },
+      "actions": {
+        "viewDetails": "عرض التفاصيل",
+        "issueRefund": "إصدار استرداد",
+        "downloadReceipt": "تنزيل الإيصال",
+        "viewAuditTrail": "عرض سجل التدقيق",
+        "auditTrail": "سجل التدقيق"
+      },
+      "toasts": {
+        "refundFlow": "تدفق الاسترداد للمعاملة {{id}}",
+        "downloadingReceipt": "جارٍ تنزيل الإيصال...",
+        "openingAuditTrail": "جارٍ فتح سجل التدقيق..."
+      },
+      "empty": {
+        "message": "لا توجد معاملات",
+        "clearFilters": "مسح عوامل التصفية"
+      },
+      "detail": {
+        "title": "تفاصيل المعاملة",
+        "amountLabel": "المبلغ",
+        "sections": {
+          "customerDetails": "تفاصيل العميل",
+          "courseDetails": "تفاصيل الدورة",
+          "paymentDetails": "تفاصيل الدفع"
+        },
+        "fields": {
+          "transactionId": "رقم المعاملة",
+          "dateTime": "التاريخ والوقت",
+          "type": "النوع",
+          "name": "الاسم",
+          "email": "البريد الإلكتروني",
+          "ipAddress": "عنوان IP",
+          "course": "الدورة",
+          "instructor": "المدرّب",
+          "paymentMethod": "طريقة الدفع",
+          "refundReason": "سبب الاسترداد",
+          "failureReason": "سبب الفشل"
+        }
+      }
+    },
+    "components": {
+      "dataTable": {
+        "actions": "الإجراءات",
+        "emptyDefault": "لا توجد بيانات",
+        "pagination": {
+          "summary": "عرض {{from}} إلى {{to}} من أصل {{total}} نتيجة"
+        }
+      },
+      "detailModal": {},
+      "filterBar": {
+        "searchPlaceholder": "بحث...",
+        "dateRange": "نطاق التاريخ",
+        "from": "من",
+        "to": "إلى",
+        "clearDates": "مسح التواريخ",
+        "moreFilters": "المزيد من عوامل التصفية",
+        "clearAll": "مسح الكل",
+        "all": "الكل"
+      },
+      "kpiStatCard": {}
+    }
+  },
+  "accountant": {
+    "transactions": {
+      "title": "المعاملات",
+      "subtitle": "سجلّ مالي مع عوامل تصفية للتدقيق والتسوية.",
+      "filters": "عوامل التصفية",
+      "exportCsv": "تصدير CSV",
+      "recentActivity": "النشاط الأخير",
+      "recentActivityDesc": "بيانات تجريبية — اربطها بواجهة برمجة التطبيقات المالية عند الجاهزية.",
+      "columns": {
+        "reference": "المرجع",
+        "counterparty": "الطرف الآخر",
+        "amount": "المبلغ",
+        "type": "النوع",
+        "status": "الحالة",
+        "when": "الوقت"
+      },
+      "types": {
+        "sale": "بيع",
+        "refund": "استرداد",
+        "fee": "رسوم",
+        "chargeback": "ردّ مدين"
+      },
+      "statuses": {
+        "settled": "مُسوّاة",
+        "pending": "معلّقة",
+        "review": "قيد المراجعة"
+      },
+      "when": {
+        "today": "اليوم · {{time}}",
+        "yesterday": "أمس",
+        "onDate": "{{date}}"
+      }
+    }
+  },
+  "secretary": {
+    "calendar": {
+      "title": "التقويم",
+      "subtitle": "نظرة أسبوعية على مواعيد المكتب الأمامي — يُربط بتقويم حقيقي لاحقًا.",
+      "headerTitle": "مارس 2026 — الأسبوع 12",
+      "headerDesc": "شبكة مرئية (عرض تجريبي للقراءة فقط).",
+      "weekdays": {
+        "mon": "الإثنين",
+        "tue": "الثلاثاء",
+        "wed": "الأربعاء",
+        "thu": "الخميس",
+        "fri": "الجمعة",
+        "sat": "السبت",
+        "sun": "الأحد"
+      },
+      "blocks": {
+        "officeHours": "ساعات المكتب",
+        "registrarSync": "مزامنة المسجّل",
+        "certificates": "الشهادات"
+      }
+    },
+    "directory": {
+      "title": "الدليل",
+      "subtitle": "نظام علاقات عملاء مبسّط للاتصالات المرتدّة — يُربط بواجهة المستخدمين عند الجاهزية.",
+      "searchPlaceholder": "ابحث بالاسم أو البريد الإلكتروني أو الدفعة…",
+      "profile": "الملف الشخصي",
+      "roles": {
+        "student": "طالب",
+        "guardian": "وليّ أمر",
+        "instructor": "مدرّب"
+      },
+      "cohorts": {
+        "spring2026": "2026 · ربيع",
+        "fall2025": "2025 · خريف",
+        "faculty": "هيئة التدريس",
+        "none": "—"
+      }
+    }
   },
   "shared": {
     "tryAgain": "إعادة المحاولة"

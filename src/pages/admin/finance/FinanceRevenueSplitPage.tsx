@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   DollarSign,
   TrendingUp,
@@ -83,20 +84,32 @@ const COURSE_REVENUE = [
   { id: "CRS005", name: "UI/UX Design Principles", revenue: 18900, enrollments: 134, instructor: "Jennifer White" },
 ];
 
-const TIME_RANGES = [
-  { id: "7d", label: "Last 7 days" },
-  { id: "30d", label: "Last 30 days" },
-  { id: "90d", label: "Last 90 days" },
-  { id: "12m", label: "Last 12 months" },
-];
+const TIME_RANGE_IDS = ["7d", "30d", "90d", "12m"] as const;
+type TimeRangeId = typeof TIME_RANGE_IDS[number];
 
 // =====================
 // COMPONENT
 // =====================
 
 export function FinanceRevenueSplitPage() {
+  const { t } = useTranslation(['admin', 'common', 'errors']);
   const navigate = useNavigate();
-  const [timeRange, setTimeRange] = useState("30d");
+  const [timeRange, setTimeRange] = useState<TimeRangeId>("30d");
+
+  const timeRangeLabels: Record<TimeRangeId, string> = {
+    "7d": t('admin:finance.revenueSplit.timeRanges.last7Days'),
+    "30d": t('admin:finance.revenueSplit.timeRanges.last30Days'),
+    "90d": t('admin:finance.revenueSplit.timeRanges.last90Days'),
+    "12m": t('admin:finance.revenueSplit.timeRanges.last12Months'),
+  };
+
+  const expenseCategoryLabels: Record<string, string> = {
+    "Payment Processing": t('admin:finance.revenueSplit.expenseCategories.paymentProcessing'),
+    "Hosting & Infrastructure": t('admin:finance.revenueSplit.expenseCategories.hostingInfrastructure'),
+    "Marketing": t('admin:finance.revenueSplit.expenseCategories.marketing'),
+    "Support & Operations": t('admin:finance.revenueSplit.expenseCategories.supportOperations'),
+    "Other": t('admin:finance.revenueSplit.expenseCategories.other'),
+  };
 
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat("en-US", {
@@ -125,16 +138,16 @@ export function FinanceRevenueSplitPage() {
     };
   }, []);
 
-  const timeRangeLabel = TIME_RANGES.find((t) => t.id === timeRange)?.label || "Last 30 days";
+  const timeRangeLabel = timeRangeLabels[timeRange] || timeRangeLabels["30d"];
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Revenue Split</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{t('admin:finance.revenueSplit.title')}</h1>
           <p className="text-sm text-muted-foreground">
-            Detailed breakdown of revenue distribution
+            {t('admin:finance.revenueSplit.subtitle')}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -147,20 +160,20 @@ export function FinanceRevenueSplitPage() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              {TIME_RANGES.map((range) => (
+              {TIME_RANGE_IDS.map((rangeId) => (
                 <DropdownMenuItem
-                  key={range.id}
-                  onClick={() => setTimeRange(range.id)}
-                  className={cn(timeRange === range.id && "bg-primary/10")}
+                  key={rangeId}
+                  onClick={() => setTimeRange(rangeId)}
+                  className={cn(timeRange === rangeId && "bg-primary/10")}
                 >
-                  {range.label}
+                  {timeRangeLabels[rangeId]}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button variant="outline" size="sm" className="gap-2" onClick={() => toast.info("Exporting report...")}>
+          <Button variant="outline" size="sm" className="gap-2" onClick={() => toast.info(t('admin:finance.revenueSplit.exportingReport'))}>
             <Download className="h-4 w-4" />
-            Export Report
+            {t('admin:finance.revenueSplit.exportReport')}
           </Button>
         </div>
       </div>
@@ -168,35 +181,35 @@ export function FinanceRevenueSplitPage() {
       {/* KPI Summary Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <KPIStatCard
-          title="Gross Revenue"
+          title={t('admin:finance.revenueSplit.kpi.grossRevenue')}
           value={formatCurrency(totals.totalRevenue)}
-          change={{ value: 12.5, label: "vs last period" }}
+          change={{ value: 12.5, label: t('admin:finance.revenueSplit.kpi.vsLastPeriod') }}
           trend="up"
           icon={DollarSign}
           iconColor="bg-emerald-500/10 text-emerald-500"
           href="/admin/finance/transactions?type=purchase"
         />
         <KPIStatCard
-          title="Instructor Payouts"
+          title={t('admin:finance.revenueSplit.kpi.instructorPayouts')}
           value={formatCurrency(totals.totalInstructorShare)}
-          subtitle="80% of gross revenue"
+          subtitle={t('admin:finance.revenueSplit.kpi.percentOfGross80')}
           icon={Users}
           iconColor="bg-blue-500/10 text-blue-500"
           href="/admin/finance/payouts"
         />
         <KPIStatCard
-          title="Platform Revenue"
+          title={t('admin:finance.revenueSplit.kpi.platformRevenue')}
           value={formatCurrency(totals.totalPlatformFee)}
-          subtitle="20% of gross revenue"
+          subtitle={t('admin:finance.revenueSplit.kpi.percentOfGross20')}
           icon={PieChartIcon}
           iconColor="bg-purple-500/10 text-purple-500"
         />
         <KPIStatCard
-          title="Net Platform Profit"
+          title={t('admin:finance.revenueSplit.kpi.netPlatformProfit')}
           value={formatCurrency(totals.netPlatformProfit)}
-          change={{ value: 8.3, label: "vs last period" }}
+          change={{ value: 8.3, label: t('admin:finance.revenueSplit.kpi.vsLastPeriod') }}
           trend={totals.netPlatformProfit >= 0 ? "up" : "down"}
-          subtitle="After all expenses"
+          subtitle={t('admin:finance.revenueSplit.kpi.afterAllExpenses')}
           icon={TrendingUp}
           iconColor="bg-amber-500/10 text-amber-500"
         />
@@ -204,13 +217,13 @@ export function FinanceRevenueSplitPage() {
 
       {/* Revenue Flow Diagram */}
       <div className="rounded-xl border border-border bg-card p-6">
-        <h3 className="font-semibold mb-4">Revenue Flow</h3>
+        <h3 className="font-semibold mb-4">{t('admin:finance.revenueSplit.flow.title')}</h3>
         <div className="flex flex-col lg:flex-row items-stretch justify-between gap-4">
           {/* Gross Revenue */}
           <div className="flex-1 text-center p-5 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-            <p className="text-xs text-muted-foreground mb-1">Gross Revenue</p>
+            <p className="text-xs text-muted-foreground mb-1">{t('admin:finance.revenueSplit.flow.grossRevenue')}</p>
             <p className="text-2xl font-bold text-emerald-600">{formatCurrency(totals.totalRevenue)}</p>
-            <p className="text-xs text-emerald-600 mt-1">100%</p>
+            <p className="text-xs text-emerald-600 mt-1">{t('admin:finance.revenueSplit.flow.grossPercent')}</p>
           </div>
 
           <div className="hidden lg:flex items-center justify-center">
@@ -224,7 +237,7 @@ export function FinanceRevenueSplitPage() {
           <div className="flex-1 flex flex-col gap-2">
             <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20">
               <div className="flex justify-between items-center">
-                <span className="text-xs font-medium">Instructor Share (80%)</span>
+                <span className="text-xs font-medium">{t('admin:finance.revenueSplit.flow.instructorShare')}</span>
                 <span className="font-bold text-blue-600">{formatCurrency(totals.totalInstructorShare)}</span>
               </div>
               <div className="mt-2 h-1.5 w-full rounded-full bg-blue-500/20">
@@ -233,7 +246,7 @@ export function FinanceRevenueSplitPage() {
             </div>
             <div className="p-4 rounded-xl bg-purple-500/10 border border-purple-500/20">
               <div className="flex justify-between items-center">
-                <span className="text-xs font-medium">Platform Fee (20%)</span>
+                <span className="text-xs font-medium">{t('admin:finance.revenueSplit.flow.platformFee')}</span>
                 <span className="font-bold text-purple-600">{formatCurrency(totals.totalPlatformFee)}</span>
               </div>
               <div className="mt-2 h-1.5 w-full rounded-full bg-purple-500/20">
@@ -242,7 +255,7 @@ export function FinanceRevenueSplitPage() {
             </div>
             <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20">
               <div className="flex justify-between items-center">
-                <span className="text-xs font-medium">Refunds</span>
+                <span className="text-xs font-medium">{t('admin:finance.revenueSplit.flow.refunds')}</span>
                 <span className="font-bold text-red-600">-{formatCurrency(totals.totalRefunds)}</span>
               </div>
             </div>
@@ -257,9 +270,9 @@ export function FinanceRevenueSplitPage() {
 
           {/* Platform Expenses */}
           <div className="flex-1 text-center p-5 rounded-xl bg-amber-500/10 border border-amber-500/20">
-            <p className="text-xs text-muted-foreground mb-1">Platform Expenses</p>
+            <p className="text-xs text-muted-foreground mb-1">{t('admin:finance.revenueSplit.flow.platformExpenses')}</p>
             <p className="text-2xl font-bold text-amber-600">-{formatCurrency(totals.totalExpenses)}</p>
-            <p className="text-xs text-amber-600 mt-1">Operating costs</p>
+            <p className="text-xs text-amber-600 mt-1">{t('admin:finance.revenueSplit.flow.operatingCosts')}</p>
           </div>
 
           <div className="hidden lg:flex items-center justify-center">
@@ -271,14 +284,14 @@ export function FinanceRevenueSplitPage() {
 
           {/* Net Profit */}
           <div className="flex-1 text-center p-5 rounded-xl bg-primary/10 border border-primary/20">
-            <p className="text-xs text-muted-foreground mb-1">Net Platform Profit</p>
+            <p className="text-xs text-muted-foreground mb-1">{t('admin:finance.revenueSplit.flow.netPlatformProfit')}</p>
             <p className={cn(
               "text-2xl font-bold",
               totals.netPlatformProfit >= 0 ? "text-primary" : "text-red-500"
             )}>
               {formatCurrency(totals.netPlatformProfit)}
             </p>
-            <p className="text-xs text-primary mt-1">Final margin</p>
+            <p className="text-xs text-primary mt-1">{t('admin:finance.revenueSplit.flow.finalMargin')}</p>
           </div>
         </div>
       </div>
@@ -288,8 +301,8 @@ export function FinanceRevenueSplitPage() {
         {/* Monthly Breakdown Chart */}
         <div className="rounded-xl border border-border bg-card p-5">
           <div className="mb-4">
-            <h3 className="font-semibold">Monthly Revenue Breakdown</h3>
-            <p className="text-xs text-muted-foreground">Platform fee vs instructor share over time</p>
+            <h3 className="font-semibold">{t('admin:finance.revenueSplit.charts.monthlyBreakdown')}</h3>
+            <p className="text-xs text-muted-foreground">{t('admin:finance.revenueSplit.charts.monthlyBreakdownDesc')}</p>
           </div>
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
@@ -338,7 +351,7 @@ export function FinanceRevenueSplitPage() {
                 <Area
                   type="monotone"
                   dataKey="instructorShare"
-                  name="Instructor Share"
+                  name={t('admin:finance.revenueSplit.charts.instructorShare')}
                   stroke="#3b82f6"
                   strokeWidth={2}
                   fill="url(#instructorGrad)"
@@ -346,7 +359,7 @@ export function FinanceRevenueSplitPage() {
                 <Area
                   type="monotone"
                   dataKey="platformFee"
-                  name="Platform Fee"
+                  name={t('admin:finance.revenueSplit.charts.platformFee')}
                   stroke="#8b5cf6"
                   strokeWidth={2}
                   fill="url(#platformGrad)"
@@ -359,8 +372,8 @@ export function FinanceRevenueSplitPage() {
         {/* Expense Breakdown */}
         <div className="rounded-xl border border-border bg-card p-5">
           <div className="mb-4">
-            <h3 className="font-semibold">Platform Expense Breakdown</h3>
-            <p className="text-xs text-muted-foreground">Where platform fees go</p>
+            <h3 className="font-semibold">{t('admin:finance.revenueSplit.charts.expenseBreakdown')}</h3>
+            <p className="text-xs text-muted-foreground">{t('admin:finance.revenueSplit.charts.expenseBreakdownDesc')}</p>
           </div>
           <div className="h-52">
             <ResponsiveContainer width="100%" height="100%">
@@ -398,7 +411,7 @@ export function FinanceRevenueSplitPage() {
                     className="h-2.5 w-2.5 rounded-full shrink-0"
                     style={{ backgroundColor: cat.color }}
                   />
-                  <span className="text-muted-foreground">{cat.name}</span>
+                  <span className="text-muted-foreground">{expenseCategoryLabels[cat.name] || cat.name}</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-muted-foreground">{cat.percentage}%</span>
@@ -414,8 +427,8 @@ export function FinanceRevenueSplitPage() {
       <div className="rounded-xl border border-border bg-card overflow-hidden">
         <div className="flex items-center justify-between border-b p-4">
           <div>
-            <h3 className="font-semibold">Instructor Earnings</h3>
-            <p className="text-xs text-muted-foreground">Top performers by revenue</p>
+            <h3 className="font-semibold">{t('admin:finance.revenueSplit.instructorEarnings.title')}</h3>
+            <p className="text-xs text-muted-foreground">{t('admin:finance.revenueSplit.instructorEarnings.subtitle')}</p>
           </div>
           <Button
             variant="ghost"
@@ -423,7 +436,7 @@ export function FinanceRevenueSplitPage() {
             onClick={() => navigate("/admin/finance/payouts")}
             className="gap-1 text-xs"
           >
-            View All
+            {t('admin:finance.revenueSplit.instructorEarnings.viewAll')}
             <ChevronRight className="h-3 w-3" />
           </Button>
         </div>
@@ -431,13 +444,13 @@ export function FinanceRevenueSplitPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/50">
-                <th className="px-4 py-3 text-start font-medium text-muted-foreground">#</th>
-                <th className="px-4 py-3 text-start font-medium text-muted-foreground">Instructor</th>
-                <th className="px-4 py-3 text-center font-medium text-muted-foreground">Courses</th>
-                <th className="px-4 py-3 text-end font-medium text-muted-foreground">Gross Revenue</th>
-                <th className="px-4 py-3 text-end font-medium text-muted-foreground">Earnings (80%)</th>
-                <th className="px-4 py-3 text-end font-medium text-muted-foreground">% of Total</th>
-                <th className="px-4 py-3 text-end font-medium text-muted-foreground">Growth</th>
+                <th className="px-4 py-3 text-start font-medium text-muted-foreground">{t('admin:finance.revenueSplit.instructorEarnings.columns.number')}</th>
+                <th className="px-4 py-3 text-start font-medium text-muted-foreground">{t('admin:finance.revenueSplit.instructorEarnings.columns.instructor')}</th>
+                <th className="px-4 py-3 text-center font-medium text-muted-foreground">{t('admin:finance.revenueSplit.instructorEarnings.columns.courses')}</th>
+                <th className="px-4 py-3 text-end font-medium text-muted-foreground">{t('admin:finance.revenueSplit.instructorEarnings.columns.grossRevenue')}</th>
+                <th className="px-4 py-3 text-end font-medium text-muted-foreground">{t('admin:finance.revenueSplit.instructorEarnings.columns.earnings80')}</th>
+                <th className="px-4 py-3 text-end font-medium text-muted-foreground">{t('admin:finance.revenueSplit.instructorEarnings.columns.percentOfTotal')}</th>
+                <th className="px-4 py-3 text-end font-medium text-muted-foreground">{t('admin:finance.revenueSplit.instructorEarnings.columns.growth')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -504,8 +517,8 @@ export function FinanceRevenueSplitPage() {
       {/* Course Revenue Chart */}
       <div className="rounded-xl border border-border bg-card p-5">
         <div className="mb-4">
-          <h3 className="font-semibold">Revenue by Course</h3>
-          <p className="text-xs text-muted-foreground">Top courses by revenue generation</p>
+          <h3 className="font-semibold">{t('admin:finance.revenueSplit.charts.revenueByCourse')}</h3>
+          <p className="text-xs text-muted-foreground">{t('admin:finance.revenueSplit.charts.revenueByCourseDesc')}</p>
         </div>
         <div className="h-72">
           <ResponsiveContainer width="100%" height="100%">
@@ -548,29 +561,26 @@ export function FinanceRevenueSplitPage() {
         <div className="flex items-start gap-3">
           <Info className="h-5 w-5 text-blue-500 shrink-0 mt-0.5" />
           <div>
-            <p className="font-medium text-blue-600 dark:text-blue-400">Revenue Split Policy</p>
+            <p className="font-medium text-blue-600 dark:text-blue-400">{t('admin:finance.revenueSplit.policy.title')}</p>
             <p className="text-sm text-muted-foreground mt-1">
-              The platform operates on an <strong>80/20 revenue split</strong>. Instructors receive
-              80% of course sales revenue, while the platform retains 20% to cover payment
-              processing, hosting, marketing, and operational costs. Payouts are processed
-              bi-weekly for all earnings above $50.
+              {t('admin:finance.revenueSplit.policy.bodyPrefix')}<strong>{t('admin:finance.revenueSplit.policy.bodyHighlight')}</strong>{t('admin:finance.revenueSplit.policy.bodySuffix')}
             </p>
             <div className="mt-3 flex flex-wrap gap-4 text-xs">
               <div className="flex items-center gap-2">
                 <span className="h-3 w-3 rounded-full bg-blue-500" />
-                <span>Instructor: 80%</span>
+                <span>{t('admin:finance.revenueSplit.policy.instructorShare')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="h-3 w-3 rounded-full bg-purple-500" />
-                <span>Platform: 20%</span>
+                <span>{t('admin:finance.revenueSplit.policy.platformShare')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="h-3 w-3 rounded-full bg-amber-500" />
-                <span>Minimum Payout: $50</span>
+                <span>{t('admin:finance.revenueSplit.policy.minPayout')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="h-3 w-3 rounded-full bg-emerald-500" />
-                <span>Payout Cycle: Bi-weekly</span>
+                <span>{t('admin:finance.revenueSplit.policy.payoutCycle')}</span>
               </div>
             </div>
           </div>

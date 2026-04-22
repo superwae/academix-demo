@@ -1,3 +1,5 @@
+// TODO: Deprecated legacy shim — not imported anywhere. Replaced by components/layouts/StudentLayout.tsx.
+// Skipping i18n migration; remove this file when safe.
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState, useRef, type ComponentType } from "react";
 import {

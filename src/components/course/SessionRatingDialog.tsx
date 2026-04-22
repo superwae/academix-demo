@@ -10,6 +10,7 @@ import { Button } from '../ui/button';
 import { RatingStars } from './RatingStars';
 import { Star } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export type SessionRatingKind = 'lesson' | 'live';
 
@@ -32,6 +33,7 @@ export function SessionRatingDialog({
   initialRating,
   onSubmit,
 }: SessionRatingDialogProps) {
+  const { t } = useTranslation(['student', 'common']);
   const [rating, setRating] = useState(initialRating ?? 0);
   const [saving, setSaving] = useState(false);
 
@@ -40,7 +42,9 @@ export function SessionRatingDialog({
   }, [open, initialRating]);
 
   const headline =
-    kind === 'lesson' ? 'How was this lesson?' : 'How was this live session?';
+    kind === 'lesson'
+      ? t('student:components.sessionRating.headlineLesson')
+      : t('student:components.sessionRating.headlineLive');
 
   const handleSubmit = async () => {
     if (rating < 1 || rating > 5) return;
@@ -70,16 +74,16 @@ export function SessionRatingDialog({
         </DialogHeader>
         <div className="py-2">
           <RatingStars value={rating} onChange={setRating} size="md" />
-          <p className="text-xs text-muted-foreground mt-2">Tap a star to rate from 1 to 5.</p>
+          <p className="text-xs text-muted-foreground mt-2">{t('student:components.sessionRating.tapStars')}</p>
         </div>
         <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
           {kind === 'live' && (
             <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} disabled={saving}>
-              Later
+              {t('student:components.sessionRating.later')}
             </Button>
           )}
           <Button type="button" onClick={handleSubmit} disabled={saving || rating < 1}>
-            {saving ? 'Saving…' : 'Submit'}
+            {saving ? t('student:components.sessionRating.saving') : t('student:components.sessionRating.submit')}
           </Button>
         </DialogFooter>
       </DialogContent>

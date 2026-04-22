@@ -1,3 +1,5 @@
+// TODO: Deprecated legacy shim — not imported anywhere in App.tsx. Replaced by pages/student/MessagesPage.tsx.
+// Skipping i18n migration; remove this file when safe.
 import { useMemo, useState } from 'react'
 import { format } from 'date-fns'
 import { useAppStore } from '../store/useAppStore'

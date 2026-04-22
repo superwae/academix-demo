@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback, useMemo, forwardRef, useImperativeHandle } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Play, Pause, Volume2, VolumeX, Maximize, Minimize, Settings, Bookmark, BookmarkCheck, ExternalLink } from 'lucide-react';
 import { Button } from './ui/button';
 import { Slider } from './ui/slider';
@@ -170,6 +171,7 @@ const EmbeddedVideoPlayer = forwardRef<VideoPlayerHandle, {
   },
   ref,
 ) {
+  const { t } = useTranslation(['student', 'common']);
   const containerRef = useRef<HTMLDivElement>(null);
   const youtubeHostId = useMemo(() => `yt-host-${lessonId.replace(/[^a-zA-Z0-9-]/g, '')}`, [lessonId]);
   const vimeoIframeRef = useRef<HTMLIFrameElement>(null);
@@ -183,16 +185,16 @@ const EmbeddedVideoPlayer = forwardRef<VideoPlayerHandle, {
     ref,
     () => ({
       seekTo: (seconds: number) => {
-        const t = Math.max(0, seconds);
+        const seekTime = Math.max(0, seconds);
         try {
           if (sourceType === 'youtube' && ytPlayerRef.current) {
-            ytPlayerRef.current.seekTo(t, true);
-            onProgressUpdate?.(t);
+            ytPlayerRef.current.seekTo(seekTime, true);
+            onProgressUpdate?.(seekTime);
             return;
           }
           if (sourceType === 'vimeo' && vimeoPlayerRef.current) {
-            void vimeoPlayerRef.current.setCurrentTime(t);
-            onProgressUpdate?.(t);
+            void vimeoPlayerRef.current.setCurrentTime(seekTime);
+            onProgressUpdate?.(seekTime);
             return;
           }
         } catch {
@@ -200,8 +202,8 @@ const EmbeddedVideoPlayer = forwardRef<VideoPlayerHandle, {
         }
         const video = document.querySelector('video');
         if (video) {
-          video.currentTime = t;
-          onProgressUpdate?.(t);
+          video.currentTime = seekTime;
+          onProgressUpdate?.(seekTime);
         }
       },
     }),
@@ -364,9 +366,9 @@ const EmbeddedVideoPlayer = forwardRef<VideoPlayerHandle, {
               <path d="M4 4h10v10H4V4zm12 0v10l4-5-4-5zM4 16h10v4H4v-4zm12 0v4h4v-4h-4z"/>
             </svg>
           </div>
-          <h3 className="text-xl font-semibold text-white mb-2">Zoom Recording</h3>
+          <h3 className="text-xl font-semibold text-white mb-2">{t('student:components.videoPlayer.zoomTitle')}</h3>
           <p className="text-white/80 mb-6 max-w-md">
-            This lesson contains a Zoom recording. Click the button below to open it in a new tab.
+            {t('student:components.videoPlayer.zoomBody')}
           </p>
           <div className="flex gap-3">
             <Button
@@ -374,14 +376,14 @@ const EmbeddedVideoPlayer = forwardRef<VideoPlayerHandle, {
               className="bg-white text-blue-700 hover:bg-white/90"
             >
               <ExternalLink className="h-4 w-4 me-2" />
-              Open Zoom Recording
+              {t('student:components.videoPlayer.openZoomRecording')}
             </Button>
             <Button
               variant="outline"
               onClick={handleMarkComplete}
               className="border-white/30 text-white hover:bg-white/10"
             >
-              Mark as Completed
+              {t('student:components.videoPlayer.markAsCompleted')}
             </Button>
           </div>
         </div>
@@ -390,14 +392,14 @@ const EmbeddedVideoPlayer = forwardRef<VideoPlayerHandle, {
   }
 
   const sourceLabels: Record<VideoSourceType, string> = {
-    youtube: 'YouTube',
-    vimeo: 'Vimeo',
-    zoom: 'Zoom',
-    'google-drive': 'Google Drive',
-    loom: 'Loom',
-    wistia: 'Wistia',
-    direct: 'Video',
-    embed: 'Video',
+    youtube: t('student:components.videoPlayer.sourceYoutube'),
+    vimeo: t('student:components.videoPlayer.sourceVimeo'),
+    zoom: t('student:components.videoPlayer.sourceZoom'),
+    'google-drive': t('student:components.videoPlayer.sourceGoogleDrive'),
+    loom: t('student:components.videoPlayer.sourceLoom'),
+    wistia: t('student:components.videoPlayer.sourceWistia'),
+    direct: t('student:components.videoPlayer.sourceDirect'),
+    embed: t('student:components.videoPlayer.sourceEmbed'),
   };
 
   return (
@@ -416,7 +418,7 @@ const EmbeddedVideoPlayer = forwardRef<VideoPlayerHandle, {
             allow="autoplay; fullscreen; picture-in-picture"
             allowFullScreen
             frameBorder="0"
-            title="Lesson Video"
+            title={t('student:components.videoPlayer.lessonVideoTitle')}
           />
         ) : (
           <iframe
@@ -425,7 +427,7 @@ const EmbeddedVideoPlayer = forwardRef<VideoPlayerHandle, {
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
             allowFullScreen
             frameBorder="0"
-            title="Lesson Video"
+            title={t('student:components.videoPlayer.lessonVideoTitle')}
           />
         )}
       </div>
@@ -445,14 +447,14 @@ const EmbeddedVideoPlayer = forwardRef<VideoPlayerHandle, {
               onClick={handleMarkComplete}
               className="text-white hover:bg-white/20 text-xs"
             >
-              Mark Complete
+              {t('student:components.videoPlayer.markComplete')}
             </Button>
             <Button
               variant="ghost"
               size="icon"
               className="h-8 w-8 text-white hover:bg-white/20"
               onClick={() => window.open(originalUrl, '_blank')}
-              title="Open in new tab"
+              title={t('student:components.videoPlayer.openInNewTab')}
             >
               <ExternalLink className="h-4 w-4" />
             </Button>
@@ -487,6 +489,7 @@ const NativeVideoPlayer = forwardRef<VideoPlayerHandle, {
   { src, lessonId, courseId, totalDuration, onProgressUpdate, onComplete, className },
   ref,
 ) {
+  const { t } = useTranslation(['student', 'common']);
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const completeOnceRef = useRef(false);
@@ -496,9 +499,9 @@ const NativeVideoPlayer = forwardRef<VideoPlayerHandle, {
     () => ({
       seekTo: (seconds: number) => {
         if (!videoRef.current) return;
-        const t = Math.max(0, seconds);
-        videoRef.current.currentTime = t;
-        onProgressUpdate?.(t);
+        const seekTime = Math.max(0, seconds);
+        videoRef.current.currentTime = seekTime;
+        onProgressUpdate?.(seekTime);
       },
     }),
     [onProgressUpdate],
@@ -761,16 +764,16 @@ const NativeVideoPlayer = forwardRef<VideoPlayerHandle, {
           <div className="bg-white/10 backdrop-blur-sm rounded-full p-6 mb-6">
             <Play className="h-12 w-12 text-white" />
           </div>
-          <h3 className="text-xl font-semibold text-white mb-2">Video Unavailable</h3>
+          <h3 className="text-xl font-semibold text-white mb-2">{t('student:components.videoPlayer.unavailableTitle')}</h3>
           <p className="text-white/80 mb-6 max-w-md">
-            Unable to play this video directly. Click below to open it in a new tab.
+            {t('student:components.videoPlayer.unavailableBody')}
           </p>
           <Button
             onClick={() => window.open(src, '_blank')}
             className="bg-white text-gray-900 hover:bg-white/90"
           >
             <ExternalLink className="h-4 w-4 me-2" />
-            Open Video
+            {t('student:components.videoPlayer.openVideo')}
           </Button>
         </div>
       </div>
@@ -836,7 +839,7 @@ const NativeVideoPlayer = forwardRef<VideoPlayerHandle, {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Playback Speed</DropdownMenuLabel>
+              <DropdownMenuLabel>{t('student:components.videoPlayer.playbackSpeed')}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               {[0.5, 0.75, 1, 1.25, 1.5, 1.75, 2].map((rate) => (
                 <DropdownMenuItem

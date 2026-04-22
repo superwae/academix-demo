@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
-import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { ConfirmDialog } from './ui/confirm-dialog';
 import { StickyNote, Plus, Trash2, Clock } from 'lucide-react';
@@ -17,6 +17,7 @@ interface LessonNotesPanelProps {
 }
 
 export function LessonNotesPanel({ lessonId, courseId, currentTime, onSeekToTimestamp }: LessonNotesPanelProps) {
+  const { t } = useTranslation(['student', 'common']);
   const [notes, setNotes] = useState<LessonNote[]>([]);
   const [isAddingNote, setIsAddingNote] = useState(false);
   const [noteContent, setNoteContent] = useState('');
@@ -38,7 +39,7 @@ export function LessonNotesPanel({ lessonId, courseId, currentTime, onSeekToTime
 
   const handleAddNote = () => {
     if (!noteContent.trim()) {
-      toast.error('Please enter a note');
+      toast.error(t('student:components.notesPanel.toasts.enterNote'));
       return;
     }
 
@@ -46,13 +47,13 @@ export function LessonNotesPanel({ lessonId, courseId, currentTime, onSeekToTime
     setNoteContent('');
     setIsAddingNote(false);
     loadNotes();
-    toast.success('Note added');
+    toast.success(t('student:components.notesPanel.toasts.noteAdded'));
   };
 
   const handleDeleteNote = (noteId: string) => {
     notesService.deleteNote(noteId);
     loadNotes();
-    toast.success('Note deleted');
+    toast.success(t('student:components.notesPanel.toasts.noteDeleted'));
   };
 
   const formatTimestamp = (seconds: number): string => {
@@ -65,7 +66,7 @@ export function LessonNotesPanel({ lessonId, courseId, currentTime, onSeekToTime
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <StickyNote className="h-5 w-5" />
-            Notes
+            {t('student:components.notesPanel.title')}
           </CardTitle>
           <Button
             variant="outline"
@@ -73,7 +74,7 @@ export function LessonNotesPanel({ lessonId, courseId, currentTime, onSeekToTime
             onClick={() => setIsAddingNote(!isAddingNote)}
           >
             <Plus className="h-4 w-4 me-2" />
-            Add Note
+            {t('student:components.notesPanel.addNote')}
           </Button>
         </div>
       </CardHeader>
@@ -88,17 +89,17 @@ export function LessonNotesPanel({ lessonId, courseId, currentTime, onSeekToTime
               className="space-y-2 p-3 border rounded-lg bg-muted/50"
             >
               <div className="text-sm text-muted-foreground">
-                At {formatTimestamp(currentTime)}
+                {t('student:components.notesPanel.atTimestamp', { time: formatTimestamp(currentTime) })}
               </div>
               <Textarea
-                placeholder="Write your note here..."
+                placeholder={t('student:components.notesPanel.placeholder')}
                 value={noteContent}
                 onChange={(e) => setNoteContent(e.target.value)}
                 rows={3}
               />
               <div className="flex gap-2">
                 <Button size="sm" onClick={handleAddNote}>
-                  Save Note
+                  {t('student:components.notesPanel.saveNote')}
                 </Button>
                 <Button
                   size="sm"
@@ -108,7 +109,7 @@ export function LessonNotesPanel({ lessonId, courseId, currentTime, onSeekToTime
                     setNoteContent('');
                   }}
                 >
-                  Cancel
+                  {t('common:cancel')}
                 </Button>
               </div>
             </motion.div>
@@ -119,7 +120,7 @@ export function LessonNotesPanel({ lessonId, courseId, currentTime, onSeekToTime
         {notes.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <StickyNote className="h-12 w-12 mx-auto mb-2 opacity-50" />
-            <p>No notes yet. Add a note while watching the lesson!</p>
+            <p>{t('student:components.notesPanel.emptyState')}</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -161,9 +162,9 @@ export function LessonNotesPanel({ lessonId, courseId, currentTime, onSeekToTime
       <ConfirmDialog
         open={deleteNoteId !== null}
         onOpenChange={(open) => { if (!open) setDeleteNoteId(null); }}
-        title="Delete Note"
-        description="Delete this note?"
-        confirmLabel="Delete"
+        title={t('student:components.notesPanel.deleteDialogTitle')}
+        description={t('student:components.notesPanel.deleteDialogDescription')}
+        confirmLabel={t('common:delete')}
         variant="destructive"
         onConfirm={() => {
           if (deleteNoteId) handleDeleteNote(deleteNoteId);

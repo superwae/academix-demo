@@ -721,14 +721,448 @@
     }
   },
   "finance": {
-    "overview": "Overview",
-    "transactions": "Transactions",
-    "payouts": "Payouts",
-    "revenueSplit": "Revenue split",
-    "totalRevenue": "Total revenue",
-    "totalTransactions": "Total transactions",
-    "pendingPayouts": "Pending payouts",
-    "refunds": "Refunds"
+    "nav": {
+      "overview": "Overview",
+      "transactions": "Transactions",
+      "payouts": "Payouts",
+      "revenueSplit": "Revenue split",
+      "totalRevenue": "Total revenue",
+      "totalTransactions": "Total transactions",
+      "pendingPayouts": "Pending payouts",
+      "refunds": "Refunds"
+    },
+    "overview": {
+      "title": "Finance Overview",
+      "subtitle": "Financial performance and revenue analytics",
+      "export": "Export",
+      "exportingReport": "Exporting report...",
+      "timeRanges": {
+        "last7Days": "Last 7 days",
+        "last30Days": "Last 30 days",
+        "last90Days": "Last 90 days",
+        "last12Months": "Last 12 months"
+      },
+      "kpi": {
+        "totalRevenue": "Total Revenue",
+        "totalRefunds": "Total Refunds",
+        "netProfit": "Net Profit",
+        "pendingPayouts": "Pending Payouts",
+        "vsLastPeriod": "vs last period",
+        "viewAllPurchases": "View all purchases",
+        "viewRefundHistory": "View refund history",
+        "viewRevenueBreakdown": "View revenue breakdown",
+        "instructorsAwaiting": "{{count}} instructors awaiting"
+      },
+      "charts": {
+        "revenueTrend": "Revenue Trend",
+        "revenueTrendDesc": "Revenue vs Expenses vs Refunds",
+        "revenueByCategory": "Revenue by Category",
+        "revenueByCategoryDesc": "Breakdown by source",
+        "revenue": "Revenue",
+        "expenses": "Expenses",
+        "refunds": "Refunds",
+        "viewDetails": "View Details"
+      },
+      "categories": {
+        "courseSales": "Course Sales",
+        "subscriptions": "Subscriptions",
+        "certificates": "Certificates",
+        "other": "Other"
+      },
+      "recentTransactions": {
+        "title": "Recent Transactions",
+        "subtitle": "Latest payment activity",
+        "viewAll": "View All",
+        "status": {
+          "completed": "completed",
+          "pending": "pending"
+        }
+      },
+      "pendingPayouts": {
+        "title": "Pending Payouts",
+        "subtitle": "Instructor payments queue",
+        "manage": "Manage",
+        "coursesLine": "{{count}} courses · {{date}}",
+        "totalPending": "Total Pending",
+        "status": {
+          "pending": "pending",
+          "processing": "processing"
+        }
+      },
+      "topCourses": {
+        "title": "Top Performing Courses",
+        "subtitle": "By revenue generation",
+        "viewAllCourses": "View All Courses",
+        "columns": {
+          "number": "#",
+          "course": "Course",
+          "instructor": "Instructor",
+          "revenue": "Revenue",
+          "enrollments": "Enrollments",
+          "growth": "Growth"
+        }
+      }
+    },
+    "payouts": {
+      "title": "Payouts",
+      "subtitle": "Manage instructor payment disbursements",
+      "export": "Export",
+      "exportingPayouts": "Exporting payouts...",
+      "bulkProcess": "Process {{count}} Payouts",
+      "selectAllPending": "Select All Pending ({{count}})",
+      "searchPlaceholder": "Search by instructor or payout ID...",
+      "stats": {
+        "pending": "Pending",
+        "processing": "Processing",
+        "paidThisMonth": "Paid This Month",
+        "activeInstructors": "Active Instructors",
+        "payouts": "{{count}} payouts",
+        "withEarnings": "With earnings"
+      },
+      "status": {
+        "all": "All Statuses",
+        "pending": "Pending",
+        "processing": "Processing",
+        "completed": "Completed",
+        "onHold": "On Hold"
+      },
+      "filterLabels": {
+        "status": "Status"
+      },
+      "columns": {
+        "instructor": "Instructor",
+        "period": "Period",
+        "gross": "Gross",
+        "netPayout": "Net Payout",
+        "status": "Status",
+        "quickAction": "Quick Action"
+      },
+      "instructorMeta": {
+        "courseSingular": "course",
+        "coursePlural": "courses"
+      },
+      "periodTo": "to {{date}}",
+      "feeLine": "-{{amount}} fee",
+      "dueOn": "Due {{date}}",
+      "actions": {
+        "processNow": "Process Now",
+        "processing": "Processing...",
+        "releaseHold": "Release Hold",
+        "receipt": "Receipt",
+        "viewDetails": "View Details",
+        "holdPayout": "Hold Payout",
+        "downloadReceipt": "Download Receipt",
+        "viewHistory": "View History",
+        "processPayout": "Process Payout",
+        "hold": "Hold"
+      },
+      "toasts": {
+        "processingCount": "Processing {{count}} payouts",
+        "processingCountDesc": "Payouts will be sent to instructors",
+        "processingSingle": "Processing {{id}}",
+        "processingSingleDesc": "Sending {{amount}} to {{name}}",
+        "releasingHold": "Releasing hold on {{id}}",
+        "downloadingReceipt": "Downloading receipt...",
+        "holdingPayout": "Holding {{id}}",
+        "openingHistory": "Opening history..."
+      },
+      "empty": {
+        "message": "No payouts found",
+        "clearFilters": "Clear filters"
+      },
+      "detail": {
+        "title": "Payout Details",
+        "sections": {
+          "payoutInformation": "Payout Information",
+          "amountBreakdown": "Amount Breakdown"
+        },
+        "fields": {
+          "payoutId": "Payout ID",
+          "period": "Period",
+          "paymentMethod": "Payment Method",
+          "account": "Account",
+          "grossEarnings": "Gross Earnings",
+          "platformFee": "Platform Fee (20%)",
+          "netPayout": "Net Payout"
+        },
+        "timeline": {
+          "created": "Created",
+          "scheduled": "Scheduled",
+          "processed": "Processed",
+          "completed": "Completed"
+        }
+      }
+    },
+    "revenueSplit": {
+      "title": "Revenue Split",
+      "subtitle": "Detailed breakdown of revenue distribution",
+      "exportReport": "Export Report",
+      "exportingReport": "Exporting report...",
+      "timeRanges": {
+        "last7Days": "Last 7 days",
+        "last30Days": "Last 30 days",
+        "last90Days": "Last 90 days",
+        "last12Months": "Last 12 months"
+      },
+      "kpi": {
+        "grossRevenue": "Gross Revenue",
+        "instructorPayouts": "Instructor Payouts",
+        "platformRevenue": "Platform Revenue",
+        "netPlatformProfit": "Net Platform Profit",
+        "vsLastPeriod": "vs last period",
+        "percentOfGross80": "80% of gross revenue",
+        "percentOfGross20": "20% of gross revenue",
+        "afterAllExpenses": "After all expenses"
+      },
+      "flow": {
+        "title": "Revenue Flow",
+        "grossRevenue": "Gross Revenue",
+        "grossPercent": "100%",
+        "instructorShare": "Instructor Share (80%)",
+        "platformFee": "Platform Fee (20%)",
+        "refunds": "Refunds",
+        "platformExpenses": "Platform Expenses",
+        "operatingCosts": "Operating costs",
+        "netPlatformProfit": "Net Platform Profit",
+        "finalMargin": "Final margin"
+      },
+      "charts": {
+        "monthlyBreakdown": "Monthly Revenue Breakdown",
+        "monthlyBreakdownDesc": "Platform fee vs instructor share over time",
+        "expenseBreakdown": "Platform Expense Breakdown",
+        "expenseBreakdownDesc": "Where platform fees go",
+        "instructorShare": "Instructor Share",
+        "platformFee": "Platform Fee",
+        "revenueByCourse": "Revenue by Course",
+        "revenueByCourseDesc": "Top courses by revenue generation"
+      },
+      "expenseCategories": {
+        "paymentProcessing": "Payment Processing",
+        "hostingInfrastructure": "Hosting & Infrastructure",
+        "marketing": "Marketing",
+        "supportOperations": "Support & Operations",
+        "other": "Other"
+      },
+      "instructorEarnings": {
+        "title": "Instructor Earnings",
+        "subtitle": "Top performers by revenue",
+        "viewAll": "View All",
+        "columns": {
+          "number": "#",
+          "instructor": "Instructor",
+          "courses": "Courses",
+          "grossRevenue": "Gross Revenue",
+          "earnings80": "Earnings (80%)",
+          "percentOfTotal": "% of Total",
+          "growth": "Growth"
+        }
+      },
+      "policy": {
+        "title": "Revenue Split Policy",
+        "bodyPrefix": "The platform operates on an ",
+        "bodyHighlight": "80/20 revenue split",
+        "bodySuffix": ". Instructors receive 80% of course sales revenue, while the platform retains 20% to cover payment processing, hosting, marketing, and operational costs. Payouts are processed bi-weekly for all earnings above $50.",
+        "instructorShare": "Instructor: 80%",
+        "platformShare": "Platform: 20%",
+        "minPayout": "Minimum Payout: $50",
+        "payoutCycle": "Payout Cycle: Bi-weekly"
+      }
+    },
+    "transactions": {
+      "title": "Transactions",
+      "subtitle": "View and manage all payment transactions",
+      "export": "Export",
+      "exportSuccess": "Transactions exported",
+      "exportSuccessDesc": "CSV file downloaded.",
+      "csvHeaders": {
+        "id": "ID",
+        "user": "User",
+        "email": "Email",
+        "course": "Course",
+        "instructor": "Instructor",
+        "amount": "Amount",
+        "fee": "Fee",
+        "net": "Net",
+        "type": "Type",
+        "status": "Status",
+        "date": "Date",
+        "paymentMethod": "Payment Method"
+      },
+      "stats": {
+        "totalTransactions": "Total Transactions",
+        "revenue": "Revenue",
+        "refunds": "Refunds",
+        "pending": "Pending"
+      },
+      "searchPlaceholder": "Search by ID, customer, or course...",
+      "filters": {
+        "type": "Type",
+        "status": "Status",
+        "allTypes": "All Types",
+        "purchase": "Purchase",
+        "refund": "Refund",
+        "allStatuses": "All Statuses",
+        "completed": "Completed",
+        "pending": "Pending",
+        "processing": "Processing",
+        "failed": "Failed",
+        "course": "Course",
+        "instructor": "Instructor",
+        "allCourses": "All Courses",
+        "allInstructors": "All Instructors"
+      },
+      "status": {
+        "completed": "Completed",
+        "pending": "Pending",
+        "processing": "Processing",
+        "failed": "Failed"
+      },
+      "types": {
+        "purchase": "Purchase",
+        "refund": "Refund"
+      },
+      "columns": {
+        "transaction": "Transaction",
+        "customer": "Customer",
+        "course": "Course",
+        "amount": "Amount",
+        "type": "Type",
+        "status": "Status",
+        "date": "Date"
+      },
+      "actions": {
+        "viewDetails": "View Details",
+        "issueRefund": "Issue Refund",
+        "downloadReceipt": "Download Receipt",
+        "viewAuditTrail": "View Audit Trail",
+        "auditTrail": "Audit Trail"
+      },
+      "toasts": {
+        "refundFlow": "Refund flow for {{id}}",
+        "downloadingReceipt": "Downloading receipt...",
+        "openingAuditTrail": "Opening audit trail..."
+      },
+      "empty": {
+        "message": "No transactions found",
+        "clearFilters": "Clear filters"
+      },
+      "detail": {
+        "title": "Transaction Details",
+        "amountLabel": "Amount",
+        "sections": {
+          "customerDetails": "Customer Details",
+          "courseDetails": "Course Details",
+          "paymentDetails": "Payment Details"
+        },
+        "fields": {
+          "transactionId": "Transaction ID",
+          "dateTime": "Date & Time",
+          "type": "Type",
+          "name": "Name",
+          "email": "Email",
+          "ipAddress": "IP Address",
+          "course": "Course",
+          "instructor": "Instructor",
+          "paymentMethod": "Payment Method",
+          "refundReason": "Refund Reason",
+          "failureReason": "Failure Reason"
+        }
+      }
+    },
+    "components": {
+      "dataTable": {
+        "actions": "Actions",
+        "emptyDefault": "No data found",
+        "pagination": {
+          "summary": "Showing {{from}} to {{to}} of {{total}} results"
+        }
+      },
+      "detailModal": {},
+      "filterBar": {
+        "searchPlaceholder": "Search...",
+        "dateRange": "Date Range",
+        "from": "From",
+        "to": "To",
+        "clearDates": "Clear dates",
+        "moreFilters": "More Filters",
+        "clearAll": "Clear all",
+        "all": "All"
+      },
+      "kpiStatCard": {}
+    }
+  },
+  "accountant": {
+    "transactions": {
+      "title": "Transactions",
+      "subtitle": "Ledger-style feed with filters for audit and reconciliation.",
+      "filters": "Filters",
+      "exportCsv": "Export CSV",
+      "recentActivity": "Recent activity",
+      "recentActivityDesc": "Demo data — connect to your finance API when ready.",
+      "columns": {
+        "reference": "Reference",
+        "counterparty": "Counterparty",
+        "amount": "Amount",
+        "type": "Type",
+        "status": "Status",
+        "when": "When"
+      },
+      "types": {
+        "sale": "Sale",
+        "refund": "Refund",
+        "fee": "Fee",
+        "chargeback": "Chargeback"
+      },
+      "statuses": {
+        "settled": "settled",
+        "pending": "pending",
+        "review": "review"
+      },
+      "when": {
+        "today": "Today · {{time}}",
+        "yesterday": "Yesterday",
+        "onDate": "{{date}}"
+      }
+    }
+  },
+  "secretary": {
+    "calendar": {
+      "title": "Calendar",
+      "subtitle": "Week-at-a-glance for front-office commitments — integrate with a real calendar later.",
+      "headerTitle": "March 2026 — week 12",
+      "headerDesc": "Visual grid (read-only demo).",
+      "weekdays": {
+        "mon": "Mon",
+        "tue": "Tue",
+        "wed": "Wed",
+        "thu": "Thu",
+        "fri": "Fri",
+        "sat": "Sat",
+        "sun": "Sun"
+      },
+      "blocks": {
+        "officeHours": "Office hours",
+        "registrarSync": "Registrar sync",
+        "certificates": "Certificates"
+      }
+    },
+    "directory": {
+      "title": "Directory",
+      "subtitle": "Lightweight CRM for callbacks — connect to your users API when ready.",
+      "searchPlaceholder": "Search by name, email, or cohort…",
+      "profile": "Profile",
+      "roles": {
+        "student": "Student",
+        "guardian": "Guardian",
+        "instructor": "Instructor"
+      },
+      "cohorts": {
+        "spring2026": "2026 · Spring",
+        "fall2025": "2025 · Fall",
+        "faculty": "Faculty",
+        "none": "—"
+      }
+    }
   },
   "shared": {
     "tryAgain": "Try Again"

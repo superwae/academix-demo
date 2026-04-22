@@ -9,6 +9,7 @@ import {
   ArrowUp,
   ArrowDown,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { cn } from "../../../lib/cn";
 import { Button } from "../../ui/button";
 import {
@@ -65,7 +66,7 @@ export function DataTable<T>({
   selectedIds = [],
   onSelectionChange,
   emptyIcon: EmptyIcon,
-  emptyMessage = "No data found",
+  emptyMessage,
   emptyAction,
   pageSize = 10,
   sortKey,
@@ -73,7 +74,9 @@ export function DataTable<T>({
   onSort,
   loading = false,
 }: DataTableProps<T>) {
+  const { t } = useTranslation(['admin', 'common', 'errors']);
   const [currentPage, setCurrentPage] = useState(1);
+  const resolvedEmptyMessage = emptyMessage ?? t('admin:finance.components.dataTable.emptyDefault');
 
   const totalPages = Math.ceil(data.length / pageSize);
   const startIndex = (currentPage - 1) * pageSize;
@@ -184,7 +187,7 @@ export function DataTable<T>({
               })}
               {rowActions && rowActions.length > 0 && (
                 <th className="w-12 px-4 py-3 text-end font-medium text-muted-foreground">
-                  Actions
+                  {t('admin:finance.components.dataTable.actions')}
                 </th>
               )}
             </tr>
@@ -228,7 +231,7 @@ export function DataTable<T>({
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuLabel className="text-xs">Actions</DropdownMenuLabel>
+                          <DropdownMenuLabel className="text-xs">{t('admin:finance.components.dataTable.actions')}</DropdownMenuLabel>
                           <DropdownMenuSeparator />
                           {rowActions
                             .filter((action) => !action.show || action.show(item))
@@ -262,7 +265,7 @@ export function DataTable<T>({
           {EmptyIcon && (
             <EmptyIcon className="mx-auto h-12 w-12 text-muted-foreground/50" />
           )}
-          <p className="mt-3 text-sm text-muted-foreground">{emptyMessage}</p>
+          <p className="mt-3 text-sm text-muted-foreground">{resolvedEmptyMessage}</p>
           {emptyAction && <div className="mt-4">{emptyAction}</div>}
         </div>
       )}
@@ -271,7 +274,11 @@ export function DataTable<T>({
       {data.length > pageSize && (
         <div className="flex items-center justify-between border-t px-4 py-3">
           <div className="text-xs text-muted-foreground">
-            Showing {startIndex + 1} to {Math.min(endIndex, data.length)} of {data.length} results
+            {t('admin:finance.components.dataTable.pagination.summary', {
+              from: startIndex + 1,
+              to: Math.min(endIndex, data.length),
+              total: data.length,
+            })}
           </div>
           <div className="flex items-center gap-1">
             <Button
