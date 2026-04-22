@@ -1,22 +1,26 @@
 import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Bell, Shield } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
 import { Label } from "../../components/ui/label";
 import { Switch } from "../../components/ui/switch";
 
 export function StaffSettingsPage() {
   const { pathname } = useLocation();
-  const portal = pathname.startsWith("/accountant") ? "Finance" : "Operations";
+  const { t } = useTranslation(["admin"]);
+  const portalLabel = pathname.startsWith("/accountant")
+    ? t("admin:staff.settings.portalFinance")
+    : t("admin:staff.settings.portalOperations");
   const [digestOn, setDigestOn] = useState(true);
   const [slaOn, setSlaOn] = useState(true);
 
   return (
     <div className="space-y-8 max-w-2xl">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t("admin:staff.settings.title")}</h1>
         <p className="text-muted-foreground mt-1">
-          {portal} portal preferences — extend with profile and security when wired to API.
+          {t("admin:staff.settings.subtitle", { portal: portalLabel })}
         </p>
       </div>
 
@@ -24,15 +28,15 @@ export function StaffSettingsPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <Bell className="h-5 w-5" />
-            Notifications
+            {t("admin:staff.settings.notificationsTitle")}
           </CardTitle>
-          <CardDescription>Control how we surface queue updates and handoffs.</CardDescription>
+          <CardDescription>{t("admin:staff.settings.notificationsDesc")}</CardDescription>
         </CardHeader>
         <CardContent className="space-6">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <Label htmlFor="desk-digest">Daily desk digest</Label>
-              <p className="text-xs text-muted-foreground">Summary each morning</p>
+              <Label htmlFor="desk-digest">{t("admin:staff.settings.dailyDigest")}</Label>
+              <p className="text-xs text-muted-foreground">{t("admin:staff.settings.dailyDigestDesc")}</p>
             </div>
             <Switch
               id="desk-digest"
@@ -42,8 +46,8 @@ export function StaffSettingsPage() {
           </div>
           <div className="flex items-center justify-between gap-4">
             <div>
-              <Label htmlFor="sla-alert">SLA breach alerts</Label>
-              <p className="text-xs text-muted-foreground">In-app and email</p>
+              <Label htmlFor="sla-alert">{t("admin:staff.settings.slaBreachAlerts")}</Label>
+              <p className="text-xs text-muted-foreground">{t("admin:staff.settings.slaBreachAlertsDesc")}</p>
             </div>
             <Switch id="sla-alert" checked={slaOn} onCheckedChange={setSlaOn} />
           </div>
@@ -54,13 +58,13 @@ export function StaffSettingsPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <Shield className="h-5 w-5" />
-            Session
+            {t("admin:staff.settings.sessionTitle")}
           </CardTitle>
-          <CardDescription>Managed by your organization&apos;s SSO policy.</CardDescription>
+          <CardDescription>{t("admin:staff.settings.sessionDesc")}</CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            Password changes and device trust will appear here once connected to auth services.
+            {t("admin:staff.settings.sessionBody")}
           </p>
         </CardContent>
       </Card>

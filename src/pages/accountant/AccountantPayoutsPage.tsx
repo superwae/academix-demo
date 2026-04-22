@@ -1,31 +1,55 @@
 import { motion } from "framer-motion";
 import { CheckCircle2, Clock, Send } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
 import { Badge } from "../../components/ui/badge";
 
-const BATCHES = [
+type BatchStatus = "scheduled" | "sent";
+
+const BATCHES: { id: string; instructors: number; amount: string; status: BatchStatus; date: string }[] = [
   { id: "PAY-2026-03-A", instructors: 14, amount: "$18,240", status: "scheduled", date: "Mar 25" },
   { id: "PAY-2026-02-B", instructors: 22, amount: "$31,880", status: "sent", date: "Feb 28" },
   { id: "PAY-2026-02-A", instructors: 19, amount: "$28,102", status: "sent", date: "Feb 14" },
 ];
 
 export function AccountantPayoutsPage() {
+  const { t } = useTranslation(["admin"]);
+
+  const stats = [
+    {
+      label: t("admin:accountant.payouts.stats.nextRun"),
+      value: t("admin:accountant.payouts.stats.nextRunValue"),
+      sub: t("admin:accountant.payouts.stats.nextRunSub"),
+    },
+    {
+      label: t("admin:accountant.payouts.stats.onHold"),
+      value: t("admin:accountant.payouts.stats.onHoldValue"),
+      sub: t("admin:accountant.payouts.stats.onHoldSub"),
+    },
+    {
+      label: t("admin:accountant.payouts.stats.avgProcessing"),
+      value: t("admin:accountant.payouts.stats.avgProcessingValue"),
+      sub: t("admin:accountant.payouts.stats.avgProcessingSub"),
+    },
+  ];
+
+  const statusLabel = (status: BatchStatus) =>
+    status === "sent"
+      ? t("admin:accountant.payouts.statuses.sent")
+      : t("admin:accountant.payouts.statuses.scheduled");
+
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Instructor payouts</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t("admin:accountant.payouts.title")}</h1>
         <p className="text-muted-foreground mt-1 max-w-2xl">
-          Review batches before release, confirm amounts, and keep a clear payout history.
+          {t("admin:accountant.payouts.subtitle")}
         </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        {[
-          { label: "Next run", value: "Mar 25", sub: "Auto-scheduled" },
-          { label: "On hold", value: "$0", sub: "No blocks" },
-          { label: "Avg. processing", value: "1.2d", sub: "From submission" },
-        ].map((s, i) => (
+        {stats.map((s, i) => (
           <motion.div
             key={s.label}
             initial={{ opacity: 0, y: 10 }}
@@ -48,12 +72,12 @@ export function AccountantPayoutsPage() {
       <Card className="border-border/60">
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle>Payout batches</CardTitle>
-            <CardDescription>Operational view — not wired to live payroll yet.</CardDescription>
+            <CardTitle>{t("admin:accountant.payouts.batchesTitle")}</CardTitle>
+            <CardDescription>{t("admin:accountant.payouts.batchesSubtitle")}</CardDescription>
           </div>
           <Button size="sm" className="gap-2">
             <Send className="h-4 w-4" />
-            New batch
+            {t("admin:accountant.payouts.newBatch")}
           </Button>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -65,7 +89,7 @@ export function AccountantPayoutsPage() {
               <div>
                 <p className="font-mono text-sm font-semibold">{b.id}</p>
                 <p className="text-sm text-muted-foreground">
-                  {b.instructors} instructors · {b.date}
+                  {t("admin:accountant.payouts.instructorsMeta", { count: b.instructors, date: b.date })}
                 </p>
               </div>
               <div className="flex items-center gap-3">
@@ -79,7 +103,7 @@ export function AccountantPayoutsPage() {
                   ) : (
                     <Clock className="h-3 w-3" />
                   )}
-                  {b.status}
+                  {statusLabel(b.status)}
                 </Badge>
               </div>
             </div>

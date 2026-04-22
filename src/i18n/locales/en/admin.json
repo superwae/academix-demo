@@ -1092,6 +1092,97 @@
     }
   },
   "accountant": {
+    "dashboard": {
+      "title": "Finance workspace",
+      "subtitle": "High-level cash position, settlement health, and what needs your attention today.",
+      "kpi": {
+        "netRevenue": "Net revenue (MTD)",
+        "netRevenueDelta": "+12.4%",
+        "pendingPayouts": "Pending payouts",
+        "pendingPayoutsDelta": "4 batches",
+        "invoicesDue": "Invoices due",
+        "invoicesDueDelta": "This week",
+        "reconciliation": "Reconciliation",
+        "reconciliationDelta": "Matched"
+      },
+      "pipeline": {
+        "title": "Settlement pipeline",
+        "subtitle": "Volume by processing stage",
+        "authorized": "Authorized",
+        "settled": "Settled",
+        "awaitingReview": "Awaiting review",
+        "items": "{{count}} items"
+      },
+      "compliance": {
+        "title": "Compliance checklist",
+        "subtitle": "Recurring controls for this period",
+        "items": {
+          "vatExport": "VAT export locked for Q1",
+          "payoutRates": "Instructor payout rates verified",
+          "refundQueue": "Refund queue reconciled",
+          "chargebackWindow": "Chargeback window monitored"
+        }
+      }
+    },
+    "invoices": {
+      "title": "Invoices",
+      "subtitle": "B2B and institutional billing — track what is outstanding and what is closed.",
+      "draftInvoice": "Draft invoice",
+      "outstanding": "Outstanding",
+      "outstandingAmount": "$5,090",
+      "collected30d": "Collected (30d)",
+      "collectedAmount": "$38,120",
+      "demoNote": "Demo figures for layout preview.",
+      "latestTitle": "Latest invoices",
+      "latestSubtitle": "Status and key dates at a glance.",
+      "dueLabel": "Due {{date}}",
+      "statuses": {
+        "open": "open",
+        "paid": "paid"
+      }
+    },
+    "payouts": {
+      "title": "Instructor payouts",
+      "subtitle": "Review batches before release, confirm amounts, and keep a clear payout history.",
+      "stats": {
+        "nextRun": "Next run",
+        "nextRunValue": "Mar 25",
+        "nextRunSub": "Auto-scheduled",
+        "onHold": "On hold",
+        "onHoldValue": "$0",
+        "onHoldSub": "No blocks",
+        "avgProcessing": "Avg. processing",
+        "avgProcessingValue": "1.2d",
+        "avgProcessingSub": "From submission"
+      },
+      "batchesTitle": "Payout batches",
+      "batchesSubtitle": "Operational view — not wired to live payroll yet.",
+      "newBatch": "New batch",
+      "instructorsMeta": "{{count}} instructors · {{date}}",
+      "statuses": {
+        "scheduled": "scheduled",
+        "sent": "sent"
+      }
+    },
+    "reports": {
+      "title": "Reports & exports",
+      "subtitle": "Packaged views for auditors and regulators. Wire these to your reporting engine when ready.",
+      "items": {
+        "monthlyRevenueTitle": "Monthly revenue summary",
+        "monthlyRevenueDesc": "Platform fees, gross sales, refunds.",
+        "monthlyRevenuePeriod": "March 2026",
+        "instructorLiabilityTitle": "Instructor liability",
+        "instructorLiabilityDesc": "Accrued vs paid — by region.",
+        "instructorLiabilityPeriod": "Q1 2026",
+        "taxExportTitle": "Tax export (VAT)",
+        "taxExportDesc": "Line-level transactions for filing.",
+        "taxExportPeriod": "Feb 2026"
+      },
+      "pdf": "PDF",
+      "builderTitle": "Custom report builder",
+      "builderDesc": "Coming soon — drag dimensions, filters, and saved schedules for recurring exports.",
+      "builderPlaceholder": "Placeholder for advanced reporting builder."
+    },
     "transactions": {
       "title": "Transactions",
       "subtitle": "Ledger-style feed with filters for audit and reconciliation.",
@@ -1126,6 +1217,64 @@
     }
   },
   "secretary": {
+    "dashboard": {
+      "title": "Operations desk",
+      "subtitle": "Front-office snapshot: queues, touchpoints, and today's rhythm.",
+      "queue": {
+        "enrollmentRequests": "Enrollment requests",
+        "documentFollowUps": "Document follow-ups",
+        "messagesAwaitingReply": "Messages awaiting reply",
+        "needsAttention": "Needs attention"
+      },
+      "today": {
+        "title": "Today",
+        "subtitle": "Structured day — demo schedule.",
+        "items": {
+          "registrarSync": "Registrar sync — cohort A",
+          "walkIn": "Walk-in office hours",
+          "certificateDispatch": "Certificate batch dispatch"
+        }
+      },
+      "serviceLevel": {
+        "title": "Service level",
+        "subtitle": "How the desk is performing (sample KPIs).",
+        "firstResponse": "First response (median)",
+        "firstResponseValue": "2h 10m",
+        "slaBreaches": "SLA breaches (7d)",
+        "slaBreachesValue": "0",
+        "openTickets": "Open enrollment tickets",
+        "openTicketsValue": "6"
+      },
+      "quickEnrollment": {
+        "title": "Quick: new enrollment",
+        "subtitle": "Jump to the enrollments queue with filters applied.",
+        "action": "Open enrollments →"
+      },
+      "directoryCard": {
+        "title": "Directory",
+        "subtitle": "Search learners and guardians for callbacks.",
+        "action": "Open directory →"
+      }
+    },
+    "enrollments": {
+      "title": "Enrollments",
+      "subtitle": "Intake queue for new registrations — triage, verify, and route to academic teams.",
+      "activeQueueTitle": "Active queue",
+      "activeQueueSubtitle": "Demo records for UI preview.",
+      "export": "Export",
+      "emailOnFile": "email on file",
+      "phoneOptional": "optional",
+      "open": "Open",
+      "statuses": {
+        "pending": "pending",
+        "review": "review",
+        "approved": "approved"
+      },
+      "channels": {
+        "web": "Web",
+        "referral": "Referral"
+      }
+    },
     "calendar": {
       "title": "Calendar",
       "subtitle": "Week-at-a-glance for front-office commitments — integrate with a real calendar later.",
@@ -1162,6 +1311,78 @@
         "faculty": "Faculty",
         "none": "—"
       }
+    }
+  },
+  "staff": {
+    "settings": {
+      "title": "Settings",
+      "subtitle": "{{portal}} portal preferences — extend with profile and security when wired to API.",
+      "portalFinance": "Finance",
+      "portalOperations": "Operations",
+      "notificationsTitle": "Notifications",
+      "notificationsDesc": "Control how we surface queue updates and handoffs.",
+      "dailyDigest": "Daily desk digest",
+      "dailyDigestDesc": "Summary each morning",
+      "slaBreachAlerts": "SLA breach alerts",
+      "slaBreachAlertsDesc": "In-app and email",
+      "sessionTitle": "Session",
+      "sessionDesc": "Managed by your organization's SSO policy.",
+      "sessionBody": "Password changes and device trust will appear here once connected to auth services."
+    }
+  },
+  "staffLayout": {
+    "appName": "AcademiX",
+    "portals": {
+      "financeSubtitle": "Finance & Accounting",
+      "financeBadge": "Finance",
+      "opsSubtitle": "Operations & Front Office",
+      "opsBadge": "Ops"
+    },
+    "nav": {
+      "overview": "Overview",
+      "finance": "Finance",
+      "compliance": "Compliance",
+      "workspace": "Workspace",
+      "account": "Account",
+      "operations": "Operations",
+      "scheduling": "Scheduling",
+      "dashboard": "Dashboard",
+      "transactions": "Transactions",
+      "payouts": "Payouts",
+      "invoices": "Invoices",
+      "reports": "Reports",
+      "messages": "Messages",
+      "settings": "Settings",
+      "enrollments": "Enrollments",
+      "directory": "Directory",
+      "calendar": "Calendar",
+      "mainNavigationLabel": "Main navigation",
+      "sidebarLabel": "Navigation sidebar"
+    },
+    "search": {
+      "placeholderAccountant": "Search transactions, invoices, payees…",
+      "placeholderSecretary": "Search people, enrollments, messages…",
+      "descriptionAccountant": "Find transactions, invoices, or payees.",
+      "descriptionSecretary": "Find people, enrollments, or messages."
+    },
+    "header": {
+      "openNavigation": "Open navigation",
+      "openSearch": "Open search"
+    },
+    "menu": {
+      "portalHome": "Portal home",
+      "logout": "Log out",
+      "logoutToast": "Logged out successfully",
+      "chooseTheme": "Choose Theme",
+      "customColor": "Custom Color",
+      "themeLabelFallback": "Theme",
+      "switchToLightMode": "Switch to light mode",
+      "switchToDarkMode": "Switch to dark mode",
+      "switchedToMode": "Switched to {{mode}} mode",
+      "customThemeEnabled": "Custom theme enabled",
+      "customThemeEnabledDesc": "Use the color picker to choose your color",
+      "themeUpdated": "Theme updated",
+      "switchedToTheme": "Switched to {{theme}}"
     }
   },
   "shared": {

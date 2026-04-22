@@ -1,5 +1,6 @@
 import type { FormEvent, ReactNode } from "react";
 import { Search } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { Input } from "../ui/input";
 import { ScrollArea } from "../ui/scroll-area";
@@ -42,6 +43,7 @@ export function MobileSearchDialog({
 }: Props) {
   const q = search.trim();
   const ready = q.length >= minQueryLength;
+  const { t } = useTranslation(["common"]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -52,7 +54,7 @@ export function MobileSearchDialog({
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <DialogHeader className="border-b border-border/60 px-4 py-3 text-start sm:px-5">
-          <DialogTitle className="text-base font-semibold">Search</DialogTitle>
+          <DialogTitle className="text-base font-semibold">{t("common:mobileSearch.title")}</DialogTitle>
         </DialogHeader>
         <form onSubmit={onSubmit} className="border-b border-border/40 px-4 py-3 sm:px-5">
           <div className="relative">
@@ -72,17 +74,17 @@ export function MobileSearchDialog({
           <div className="px-2 py-2 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
             {!ready && (
               <p className="px-3 py-6 text-center text-sm text-muted-foreground">
-                Type at least {minQueryLength} characters to search.
+                {t("common:mobileSearch.typeAtLeast", { count: minQueryLength })}
               </p>
             )}
             {ready && isSearching && (
               <p className="px-3 py-6 text-center text-sm text-muted-foreground">
-                Searching…
+                {t("common:mobileSearch.searching")}
               </p>
             )}
             {ready && !isSearching && results.length === 0 && (
               <p className="px-3 py-6 text-center text-sm text-muted-foreground">
-                No results found.
+                {t("common:mobileSearch.noResults")}
               </p>
             )}
             {ready &&

@@ -2,6 +2,7 @@ import { Component, type ErrorInfo, type ReactNode } from 'react'
 import { Button } from './ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { AlertCircle } from 'lucide-react'
+import i18next from '../i18n'
 
 interface Props {
   children: ReactNode
@@ -56,16 +57,18 @@ export class ErrorBoundary extends Component<Props, State> {
         return this.props.fallback
       }
 
+      const t = i18next.t.bind(i18next)
+
       return (
         <div className="min-h-screen flex items-center justify-center p-6 bg-background">
           <Card className="max-w-2xl w-full">
             <CardHeader>
               <div className="flex items-center gap-2">
                 <AlertCircle className="h-5 w-5 text-destructive" />
-                <CardTitle>Something went wrong</CardTitle>
+                <CardTitle>{t('common:errorBoundary.title')}</CardTitle>
               </div>
               <CardDescription>
-                An unexpected error occurred. Please try refreshing the page.
+                {t('common:errorBoundary.description')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -76,7 +79,7 @@ export class ErrorBoundary extends Component<Props, State> {
                   </div>
                   {this.state.errorInfo && (
                     <details className="mt-2">
-                      <summary className="text-sm cursor-pointer">Stack trace</summary>
+                      <summary className="text-sm cursor-pointer">{t('common:errorBoundary.stackTrace')}</summary>
                       <pre className="mt-2 text-xs overflow-auto">
                         {this.state.errorInfo.componentStack}
                       </pre>
@@ -85,14 +88,14 @@ export class ErrorBoundary extends Component<Props, State> {
                 </div>
               )}
               <div className="flex gap-2">
-                <Button onClick={this.handleReset}>Reload Page</Button>
+                <Button onClick={this.handleReset}>{t('common:errorBoundary.reloadPage')}</Button>
                 <Button
                   variant="outline"
                   onClick={() => {
                     window.location.href = '/dashboard'
                   }}
                 >
-                  Go to Dashboard
+                  {t('common:errorBoundary.goToDashboard')}
                 </Button>
               </div>
             </CardContent>

@@ -1,28 +1,38 @@
 import { motion } from "framer-motion";
 import { FileText, Plus } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
 import { Badge } from "../../components/ui/badge";
 
-const INVOICES = [
+type InvoiceStatus = "open" | "paid";
+
+const INVOICES: { no: string; client: string; total: string; due: string; status: InvoiceStatus }[] = [
   { no: "INV-2026-0142", client: "Bright Minds Academy", total: "$4,200", due: "Apr 02", status: "open" },
   { no: "INV-2026-0141", client: "TechSkills NGO", total: "$890", due: "Mar 28", status: "open" },
   { no: "INV-2026-0138", client: "Northwind Tutors", total: "$12,450", due: "Mar 15", status: "paid" },
 ];
 
 export function AccountantInvoicesPage() {
+  const { t } = useTranslation(["admin"]);
+
+  const statusLabel = (status: InvoiceStatus) =>
+    status === "paid"
+      ? t("admin:accountant.invoices.statuses.paid")
+      : t("admin:accountant.invoices.statuses.open");
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Invoices</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{t("admin:accountant.invoices.title")}</h1>
           <p className="text-muted-foreground mt-1">
-            B2B and institutional billing — track what is outstanding and what is closed.
+            {t("admin:accountant.invoices.subtitle")}
           </p>
         </div>
         <Button className="gap-2 h-9">
           <Plus className="h-4 w-4" />
-          Draft invoice
+          {t("admin:accountant.invoices.draftInvoice")}
         </Button>
       </div>
 
@@ -37,8 +47,8 @@ export function AccountantInvoicesPage() {
               <FileText className="h-6 w-6" />
             </div>
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Outstanding</p>
-              <p className="text-3xl font-bold tracking-tight">$5,090</p>
+              <p className="text-sm font-medium text-muted-foreground">{t("admin:accountant.invoices.outstanding")}</p>
+              <p className="text-3xl font-bold tracking-tight">{t("admin:accountant.invoices.outstandingAmount")}</p>
             </div>
           </div>
         </motion.div>
@@ -48,16 +58,16 @@ export function AccountantInvoicesPage() {
           transition={{ delay: 0.05 }}
           className="rounded-2xl border border-border/60 bg-muted/30 p-6"
         >
-          <p className="text-sm font-medium text-muted-foreground">Collected (30d)</p>
-          <p className="text-3xl font-bold tracking-tight mt-1">$38,120</p>
-          <p className="text-xs text-muted-foreground mt-2">Demo figures for layout preview.</p>
+          <p className="text-sm font-medium text-muted-foreground">{t("admin:accountant.invoices.collected30d")}</p>
+          <p className="text-3xl font-bold tracking-tight mt-1">{t("admin:accountant.invoices.collectedAmount")}</p>
+          <p className="text-xs text-muted-foreground mt-2">{t("admin:accountant.invoices.demoNote")}</p>
         </motion.div>
       </div>
 
       <Card className="border-border/60">
         <CardHeader>
-          <CardTitle>Latest invoices</CardTitle>
-          <CardDescription>Status and key dates at a glance.</CardDescription>
+          <CardTitle>{t("admin:accountant.invoices.latestTitle")}</CardTitle>
+          <CardDescription>{t("admin:accountant.invoices.latestSubtitle")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           {INVOICES.map((inv) => (
@@ -71,9 +81,11 @@ export function AccountantInvoicesPage() {
               </div>
               <div className="flex items-center gap-4">
                 <span className="font-semibold tabular-nums">{inv.total}</span>
-                <span className="text-xs text-muted-foreground w-24">Due {inv.due}</span>
+                <span className="text-xs text-muted-foreground w-24">
+                  {t("admin:accountant.invoices.dueLabel", { date: inv.due })}
+                </span>
                 <Badge variant={inv.status === "paid" ? "secondary" : "default"}>
-                  {inv.status}
+                  {statusLabel(inv.status)}
                 </Badge>
               </div>
             </div>

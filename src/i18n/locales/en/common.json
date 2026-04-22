@@ -64,5 +64,47 @@
   "searchTeacherPlaceholder": "Search courses, assignments, students…",
   "searchAdminPlaceholder": "Search users, courses, reports...",
   "searchAdminTitle": "Search admin",
-  "searchAdminDescription": "Search users, courses, or reports — same as the bar on larger screens."
+  "searchAdminDescription": "Search users, courses, or reports — same as the bar on larger screens.",
+  "errorBoundary": {
+    "title": "Something went wrong",
+    "description": "An unexpected error occurred. Please try refreshing the page.",
+    "stackTrace": "Stack trace",
+    "reloadPage": "Reload Page",
+    "goToDashboard": "Go to Dashboard"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No notifications",
+    "markAllRead": "Mark all read",
+    "markAllReadToast": "All notifications marked as read",
+    "enableLabel": "Enable notifications",
+    "enableButton": "Enable browser notifications",
+    "enableTitle": "Show desktop alerts when new notifications arrive",
+    "blockedTitle": "Notifications are blocked — enable them in your browser site settings",
+    "promptBlocked": "Notifications are blocked by the browser. Open site settings and allow notifications.",
+    "promptEnable": "Enable browser alerts so you get notifications even when this tab is in the background.",
+    "enabledToast": "Browser notifications enabled",
+    "enabledToastDesc": "You will get alerts when new notifications arrive.",
+    "enabledBodyText": "Notifications have been enabled.",
+    "appName": "Academix",
+    "blockedToast": "Notifications blocked",
+    "blockedToastDesc": "Open your browser site settings and allow notifications for this site.",
+    "systemAdmin": "System admin",
+    "systemAdminTitle": "Official notice from platform administrators",
+    "newMessageFallback": "New message",
+    "messageFrom": "Message from {{name}}",
+    "openAction": "Open"
+  },
+  "protectedRoute": {
+    "loading": "Loading..."
+  },
+  "ratingStars": {
+    "groupLabel": "Rating"
+  },
+  "mobileSearch": {
+    "title": "Search",
+    "typeAtLeast": "Type at least {{count}} characters to search.",
+    "searching": "Searching…",
+    "noResults": "No results found."
+  }
 }

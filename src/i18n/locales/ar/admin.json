@@ -1092,6 +1092,97 @@
     }
   },
   "accountant": {
+    "dashboard": {
+      "title": "مساحة العمل المالية",
+      "subtitle": "نظرة عامة على الوضع النقدي وسلامة التسويات وما يستدعي اهتمامك اليوم.",
+      "kpi": {
+        "netRevenue": "صافي الإيرادات (منذ بداية الشهر)",
+        "netRevenueDelta": "+12.4%",
+        "pendingPayouts": "المدفوعات المعلّقة",
+        "pendingPayoutsDelta": "4 دفعات",
+        "invoicesDue": "فواتير مستحقّة",
+        "invoicesDueDelta": "هذا الأسبوع",
+        "reconciliation": "التسوية",
+        "reconciliationDelta": "مطابقة"
+      },
+      "pipeline": {
+        "title": "خط أنابيب التسوية",
+        "subtitle": "الحجم حسب مرحلة المعالجة",
+        "authorized": "مُصرّح به",
+        "settled": "مُسوّاة",
+        "awaitingReview": "بانتظار المراجعة",
+        "items": "{{count}} عنصراً"
+      },
+      "compliance": {
+        "title": "قائمة الامتثال",
+        "subtitle": "الضوابط المتكرّرة لهذه الفترة",
+        "items": {
+          "vatExport": "تصدير ضريبة القيمة المضافة مُقفل للربع الأول",
+          "payoutRates": "التحقّق من معدّلات مدفوعات المدرّسين",
+          "refundQueue": "تمّت تسوية قائمة الاستردادات",
+          "chargebackWindow": "مراقبة نافذة ردّ المدين"
+        }
+      }
+    },
+    "invoices": {
+      "title": "الفواتير",
+      "subtitle": "فوترة الأعمال والمؤسسات — تابع ما هو مستحقّ وما تمّ إغلاقه.",
+      "draftInvoice": "مسودّة فاتورة",
+      "outstanding": "المستحقّ",
+      "outstandingAmount": "$5,090",
+      "collected30d": "المحصّل (30 يوماً)",
+      "collectedAmount": "$38,120",
+      "demoNote": "أرقام تجريبية لمعاينة التصميم.",
+      "latestTitle": "أحدث الفواتير",
+      "latestSubtitle": "الحالة والتواريخ الرئيسية في لمحة.",
+      "dueLabel": "مستحقّة {{date}}",
+      "statuses": {
+        "open": "مفتوحة",
+        "paid": "مدفوعة"
+      }
+    },
+    "payouts": {
+      "title": "مدفوعات المدرّسين",
+      "subtitle": "راجع الدفعات قبل الإصدار، وأكّد المبالغ، واحتفظ بسجلّ واضح للمدفوعات.",
+      "stats": {
+        "nextRun": "التشغيل التالي",
+        "nextRunValue": "25 مارس",
+        "nextRunSub": "مجدول تلقائياً",
+        "onHold": "مُعلّق",
+        "onHoldValue": "$0",
+        "onHoldSub": "لا توجد عوائق",
+        "avgProcessing": "متوسّط المعالجة",
+        "avgProcessingValue": "1.2 يوم",
+        "avgProcessingSub": "من وقت الإرسال"
+      },
+      "batchesTitle": "دفعات المدفوعات",
+      "batchesSubtitle": "عرض تشغيلي — لم يُربط بعد بنظام الرواتب الفعلي.",
+      "newBatch": "دفعة جديدة",
+      "instructorsMeta": "{{count}} مدرّسين · {{date}}",
+      "statuses": {
+        "scheduled": "مجدولة",
+        "sent": "مرسلة"
+      }
+    },
+    "reports": {
+      "title": "التقارير والتصديرات",
+      "subtitle": "عروض جاهزة للمدقّقين والجهات التنظيمية. اربطها بمحرّك إعداد التقارير لديك عند الجاهزية.",
+      "items": {
+        "monthlyRevenueTitle": "ملخّص الإيرادات الشهرية",
+        "monthlyRevenueDesc": "رسوم المنصّة وإجمالي المبيعات والاستردادات.",
+        "monthlyRevenuePeriod": "مارس 2026",
+        "instructorLiabilityTitle": "الالتزامات تجاه المدرّسين",
+        "instructorLiabilityDesc": "المستحقّ مقابل المدفوع — بحسب المنطقة.",
+        "instructorLiabilityPeriod": "الربع الأول 2026",
+        "taxExportTitle": "تصدير ضريبي (VAT)",
+        "taxExportDesc": "معاملات على مستوى البنود لغايات التقديم.",
+        "taxExportPeriod": "فبراير 2026"
+      },
+      "pdf": "PDF",
+      "builderTitle": "أداة إنشاء التقارير المخصّصة",
+      "builderDesc": "قريباً — اسحب الأبعاد وعوامل التصفية وجداول التصدير المتكرّرة المحفوظة.",
+      "builderPlaceholder": "مكان مخصّص لأداة التقارير المتقدّمة."
+    },
     "transactions": {
       "title": "المعاملات",
       "subtitle": "سجلّ مالي مع عوامل تصفية للتدقيق والتسوية.",
@@ -1126,6 +1217,64 @@
     }
   },
   "secretary": {
+    "dashboard": {
+      "title": "مكتب العمليات",
+      "subtitle": "لقطة سريعة عن المكتب الأمامي: الطوابير ونقاط التواصل وإيقاع اليوم.",
+      "queue": {
+        "enrollmentRequests": "طلبات التسجيل",
+        "documentFollowUps": "متابعات الوثائق",
+        "messagesAwaitingReply": "رسائل بانتظار الردّ",
+        "needsAttention": "بحاجة إلى اهتمام"
+      },
+      "today": {
+        "title": "اليوم",
+        "subtitle": "يوم منظّم — جدول تجريبي.",
+        "items": {
+          "registrarSync": "مزامنة المسجّل — الفوج أ",
+          "walkIn": "ساعات استقبال المراجعين",
+          "certificateDispatch": "إرسال دفعة الشهادات"
+        }
+      },
+      "serviceLevel": {
+        "title": "مستوى الخدمة",
+        "subtitle": "أداء المكتب (مؤشرات تجريبية).",
+        "firstResponse": "وقت الردّ الأوّل (الوسيط)",
+        "firstResponseValue": "2س 10د",
+        "slaBreaches": "مخالفات اتفاقية مستوى الخدمة (7 أيام)",
+        "slaBreachesValue": "0",
+        "openTickets": "تذاكر تسجيل مفتوحة",
+        "openTicketsValue": "6"
+      },
+      "quickEnrollment": {
+        "title": "اختصار: تسجيل جديد",
+        "subtitle": "انتقل إلى قائمة التسجيلات مع تطبيق عوامل التصفية.",
+        "action": "فتح التسجيلات ←"
+      },
+      "directoryCard": {
+        "title": "الدليل",
+        "subtitle": "ابحث عن المتعلّمين وأولياء الأمور للاتصال بهم.",
+        "action": "فتح الدليل ←"
+      }
+    },
+    "enrollments": {
+      "title": "التسجيلات",
+      "subtitle": "قائمة استقبال التسجيلات الجديدة — قم بالفرز والتحقّق والتحويل إلى الفرق الأكاديمية.",
+      "activeQueueTitle": "الطابور النشط",
+      "activeQueueSubtitle": "سجلّات تجريبية لمعاينة الواجهة.",
+      "export": "تصدير",
+      "emailOnFile": "بريد إلكتروني مسجّل",
+      "phoneOptional": "اختياري",
+      "open": "فتح",
+      "statuses": {
+        "pending": "معلّقة",
+        "review": "قيد المراجعة",
+        "approved": "موافق عليها"
+      },
+      "channels": {
+        "web": "الويب",
+        "referral": "إحالة"
+      }
+    },
     "calendar": {
       "title": "التقويم",
       "subtitle": "نظرة أسبوعية على مواعيد المكتب الأمامي — يُربط بتقويم حقيقي لاحقًا.",
@@ -1162,6 +1311,78 @@
         "faculty": "هيئة التدريس",
         "none": "—"
       }
+    }
+  },
+  "staff": {
+    "settings": {
+      "title": "الإعدادات",
+      "subtitle": "تفضيلات بوّابة {{portal}} — ستُوسَّع بالملف الشخصي والأمان عند الربط بواجهة برمجة التطبيقات.",
+      "portalFinance": "الماليّة",
+      "portalOperations": "العمليات",
+      "notificationsTitle": "الإشعارات",
+      "notificationsDesc": "تحكّم في كيفية إبراز تحديثات الطوابير وعمليات التسليم.",
+      "dailyDigest": "ملخّص المكتب اليومي",
+      "dailyDigestDesc": "ملخّص كل صباح",
+      "slaBreachAlerts": "تنبيهات مخالفة اتفاقية مستوى الخدمة",
+      "slaBreachAlertsDesc": "داخل التطبيق وبالبريد الإلكتروني",
+      "sessionTitle": "الجلسة",
+      "sessionDesc": "تُدار عبر سياسة الدخول الموحّد في منظّمتك.",
+      "sessionBody": "ستظهر هنا تغييرات كلمة المرور وموثوقية الأجهزة بعد الربط بخدمات المصادقة."
+    }
+  },
+  "staffLayout": {
+    "appName": "أكاديميكس",
+    "portals": {
+      "financeSubtitle": "الماليّة والمحاسبة",
+      "financeBadge": "ماليّة",
+      "opsSubtitle": "العمليات والمكتب الأمامي",
+      "opsBadge": "عمليات"
+    },
+    "nav": {
+      "overview": "نظرة عامّة",
+      "finance": "الماليّة",
+      "compliance": "الامتثال",
+      "workspace": "مساحة العمل",
+      "account": "الحساب",
+      "operations": "العمليات",
+      "scheduling": "الجدولة",
+      "dashboard": "لوحة التحكم",
+      "transactions": "المعاملات",
+      "payouts": "المدفوعات",
+      "invoices": "الفواتير",
+      "reports": "التقارير",
+      "messages": "الرسائل",
+      "settings": "الإعدادات",
+      "enrollments": "التسجيلات",
+      "directory": "الدليل",
+      "calendar": "التقويم",
+      "mainNavigationLabel": "التنقّل الرئيسي",
+      "sidebarLabel": "الشريط الجانبي للتنقّل"
+    },
+    "search": {
+      "placeholderAccountant": "ابحث في المعاملات والفواتير والمستفيدين…",
+      "placeholderSecretary": "ابحث عن الأشخاص والتسجيلات والرسائل…",
+      "descriptionAccountant": "ابحث عن المعاملات أو الفواتير أو المستفيدين.",
+      "descriptionSecretary": "ابحث عن الأشخاص أو التسجيلات أو الرسائل."
+    },
+    "header": {
+      "openNavigation": "فتح التنقّل",
+      "openSearch": "فتح البحث"
+    },
+    "menu": {
+      "portalHome": "الرئيسية للبوّابة",
+      "logout": "تسجيل الخروج",
+      "logoutToast": "تمّ تسجيل الخروج بنجاح",
+      "chooseTheme": "اختر السمة",
+      "customColor": "لون مخصّص",
+      "themeLabelFallback": "السمة",
+      "switchToLightMode": "التبديل إلى الوضع الفاتح",
+      "switchToDarkMode": "التبديل إلى الوضع الداكن",
+      "switchedToMode": "تمّ التبديل إلى وضع {{mode}}",
+      "customThemeEnabled": "تمّ تفعيل السمة المخصّصة",
+      "customThemeEnabledDesc": "استخدم منتقي الألوان لاختيار لونك",
+      "themeUpdated": "تمّ تحديث السمة",
+      "switchedToTheme": "تمّ التبديل إلى {{theme}}"
     }
   },
   "shared": {

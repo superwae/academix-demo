@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Bell, BellRing, MessageSquare, Shield, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Button } from './ui/button';
 import {
   DropdownMenu,
@@ -36,10 +37,13 @@ function getInitialPushPermission(): NotificationPermission {
   return Notification.permission;
 }
 
-function formatMessagePreviewForToast(content: string | undefined | null): string {
-  const t = (content ?? '').trim();
-  if (!t) return 'New message';
-  return t.length > 120 ? `${t.slice(0, 117)}…` : t;
+function formatMessagePreviewForToast(
+  content: string | undefined | null,
+  fallback: string,
+): string {
+  const text = (content ?? '').trim();
+  if (!text) return fallback;
+  return text.length > 120 ? `${text.slice(0, 117)}…` : text;
 }
 
 export function NotificationBell() {
@@ -47,6 +51,7 @@ export function NotificationBell() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [pushPermission, setPushPermission] = useState<NotificationPermission>(getInitialPushPermission);
   const navigate = useNavigate();
+  const { t } = useTranslation(['common']);
   const unsubConversationRef = useRef<(() => void) | null>(null);
   const unsubMessageRef = useRef<(() => void) | null>(null);
   const unsubNotificationRef = useRef<(() => void) | null>(null);
@@ -91,10 +96,14 @@ export function NotificationBell() {
         seenMessageToastIdsRef.current = new Set([...seenMessageToastIdsRef.current].slice(-120));
       }
 
-      const preview = formatMessagePreviewForToast(message.content);
+      const preview = formatMessagePreviewForToast(
+        message.content,
+        t('common:notifications.newMessageFallback'),
+      );
       const path = getMessagesPath(me.roles);
+      const titleText = t('common:notifications.messageFrom', { name: message.senderName });
 
-      toast.message(`Message from ${message.senderName}`, {
+      toast.message(titleText, {
         description: preview,
         duration: 10_000,
         position: 'bottom-right',
@@ -112,18 +121,18 @@ export function NotificationBell() {
             '!rounded-lg !bg-primary !px-3 !py-2 !text-xs !font-semibold !text-primary-foreground',
         },
         action: {
-          label: 'Open',
+          label: t('common:notifications.openAction'),
           onClick: () => navigate(`${path}?conversation=${message.conversationId}`),
         },
       });
 
       notificationService.notifyBrowserIfPermitted(
-        `Message from ${message.senderName}`,
+        titleText,
         preview
       );
     };
 
-    const t = setTimeout(() => {
+    const connectTimeout = setTimeout(() => {
       connectMessagingHub().then(() => {
         unsubConversationRef.current = onConversationUpdated((raw) => {
           window.dispatchEvent(new Event('notificationUpdate'));
@@ -174,7 +183,7 @@ export function NotificationBell() {
     });
 
     return () => {
-      clearTimeout(t);
+      clearTimeout(connectTimeout);
       clearInterval(interval);
       window.removeEventListener('notificationUpdate', handleNotificationUpdate);
       window.removeEventListener('focus', syncPushPermission);
@@ -193,16 +202,16 @@ export function NotificationBell() {
     const ok = await notificationService.requestPermission();
     syncPushPermission();
     if (ok) {
-      toast.success('Browser notifications enabled', {
-        description: 'You will get alerts when new notifications arrive.',
+      toast.success(t('common:notifications.enabledToast'), {
+        description: t('common:notifications.enabledToastDesc'),
       });
       notificationService.notifyBrowserIfPermitted(
-        'Academix',
-        'Notifications have been enabled.'
+        t('common:notifications.appName'),
+        t('common:notifications.enabledBodyText'),
       );
     } else if (notificationService.getBrowserPushPermission() === 'denied') {
-      toast.error('Notifications blocked', {
-        description: 'Open your browser site settings and allow notifications for this site.',
+      toast.error(t('common:notifications.blockedToast'), {
+        description: t('common:notifications.blockedToastDesc'),
       });
     }
   };
@@ -227,7 +236,7 @@ export function NotificationBell() {
   const handleMarkAllRead = () => {
     notificationService.markAllAsRead();
     loadNotifications();
-    toast.success('All notifications marked as read');
+    toast.success(t('common:notifications.markAllReadToast'));
   };
 
   const handleDelete = (id: string, e: React.MouseEvent) => {
@@ -279,12 +288,12 @@ export function NotificationBell() {
           disabled={pushPermission === 'denied'}
           title={
             pushPermission === 'denied'
-              ? 'Notifications are blocked — enable them in your browser site settings'
-              : 'Show desktop alerts when new notifications arrive'
+              ? t('common:notifications.blockedTitle')
+              : t('common:notifications.enableTitle')
           }
         >
           <BellRing className="h-3.5 w-3.5" />
-          <span className="max-w-[9rem] truncate">Enable notifications</span>
+          <span className="max-w-[9rem] truncate">{t('common:notifications.enableLabel')}</span>
         </Button>
       )}
       <DropdownMenu>
@@ -309,8 +318,8 @@ export function NotificationBell() {
           <div className="p-3 border-b bg-muted/30">
             <p className="text-xs text-muted-foreground mb-2">
               {pushPermission === 'denied'
-                ? 'Notifications are blocked by the browser. Open site settings and allow notifications.'
-                : 'Enable browser alerts so you get notifications even when this tab is in the background.'}
+                ? t('common:notifications.promptBlocked')
+                : t('common:notifications.promptEnable')}
             </p>
             <Button
               type="button"
@@ -324,12 +333,12 @@ export function NotificationBell() {
               disabled={pushPermission === 'denied'}
             >
               <BellRing className="h-4 w-4" />
-              Enable browser notifications
+              {t('common:notifications.enableButton')}
             </Button>
           </div>
         )}
         <div className="flex items-center justify-between p-4 border-b">
-          <DropdownMenuLabel className="p-0">Notifications</DropdownMenuLabel>
+          <DropdownMenuLabel className="p-0">{t('common:notifications.title')}</DropdownMenuLabel>
           {unreadCount > 0 && (
             <Button
               variant="ghost"
@@ -337,7 +346,7 @@ export function NotificationBell() {
               onClick={handleMarkAllRead}
               className="h-8 text-xs"
             >
-              Mark all read
+              {t('common:notifications.markAllRead')}
             </Button>
           )}
         </div>
@@ -346,7 +355,7 @@ export function NotificationBell() {
             {notifications.length === 0 ? (
               <div className="p-8 text-center text-muted-foreground">
                 <Bell className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                <p>No notifications</p>
+                <p>{t('common:notifications.empty')}</p>
               </div>
             ) : (
               notifications.map((notification) => (
@@ -372,9 +381,9 @@ export function NotificationBell() {
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1">
                           {isPlatformStaffNotification(notification.type) && (
-                            <p className="mb-0.5 inline-flex items-center gap-1 rounded-full border border-amber-500/35 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-900 dark:text-amber-200" title="Official notice from platform administrators">
+                            <p className="mb-0.5 inline-flex items-center gap-1 rounded-full border border-amber-500/35 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-900 dark:text-amber-200" title={t('common:notifications.systemAdminTitle')}>
                               <Shield className="h-3 w-3 shrink-0" aria-hidden />
-                              System admin
+                              {t('common:notifications.systemAdmin')}
                             </p>
                           )}
                           <p className="font-medium text-sm">{notification.title}</p>

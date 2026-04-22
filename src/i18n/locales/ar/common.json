@@ -64,5 +64,47 @@
   "searchTeacherPlaceholder": "ابحث عن الدورات والواجبات والطلاب…",
   "searchAdminPlaceholder": "ابحث عن المستخدمين والدورات والتقارير...",
   "searchAdminTitle": "البحث في لوحة المسؤول",
-  "searchAdminDescription": "ابحث عن المستخدمين أو الدورات أو التقارير — نفس الشريط الظاهر على الشاشات الأكبر."
+  "searchAdminDescription": "ابحث عن المستخدمين أو الدورات أو التقارير — نفس الشريط الظاهر على الشاشات الأكبر.",
+  "errorBoundary": {
+    "title": "حدث خطأ ما",
+    "description": "حدث خطأ غير متوقع. يرجى تحديث الصفحة.",
+    "stackTrace": "تتبُّع المكدّس",
+    "reloadPage": "إعادة تحميل الصفحة",
+    "goToDashboard": "الانتقال إلى لوحة التحكم"
+  },
+  "notifications": {
+    "title": "الإشعارات",
+    "empty": "لا توجد إشعارات",
+    "markAllRead": "تعليم الكل كمقروء",
+    "markAllReadToast": "تم تعليم كل الإشعارات كمقروءة",
+    "enableLabel": "تفعيل الإشعارات",
+    "enableButton": "تفعيل إشعارات المتصفّح",
+    "enableTitle": "عرض تنبيهات على سطح المكتب عند وصول إشعارات جديدة",
+    "blockedTitle": "الإشعارات محظورة — قم بتفعيلها من إعدادات الموقع في المتصفّح",
+    "promptBlocked": "الإشعارات محظورة من قبل المتصفّح. افتح إعدادات الموقع واسمح بالإشعارات.",
+    "promptEnable": "فعّل تنبيهات المتصفّح لتصلك الإشعارات حتى عندما تكون هذه النافذة في الخلفية.",
+    "enabledToast": "تم تفعيل إشعارات المتصفّح",
+    "enabledToastDesc": "ستصلك تنبيهات عند وصول إشعارات جديدة.",
+    "enabledBodyText": "تم تفعيل الإشعارات.",
+    "appName": "أكاديميكس",
+    "blockedToast": "الإشعارات محظورة",
+    "blockedToastDesc": "افتح إعدادات الموقع في المتصفّح واسمح بالإشعارات لهذا الموقع.",
+    "systemAdmin": "مسؤول النظام",
+    "systemAdminTitle": "إشعار رسمي من مسؤولي المنصّة",
+    "newMessageFallback": "رسالة جديدة",
+    "messageFrom": "رسالة من {{name}}",
+    "openAction": "فتح"
+  },
+  "protectedRoute": {
+    "loading": "جارٍ التحميل..."
+  },
+  "ratingStars": {
+    "groupLabel": "التقييم"
+  },
+  "mobileSearch": {
+    "title": "بحث",
+    "typeAtLeast": "اكتب {{count}} أحرف على الأقل للبحث.",
+    "searching": "جارٍ البحث…",
+    "noResults": "لا توجد نتائج."
+  }
 }

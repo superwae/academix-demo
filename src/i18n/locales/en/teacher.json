@@ -6,6 +6,31 @@
     "unknown": "Unknown",
     "invalidDate": "Invalid date"
   },
+  "calendar": {
+    "pageTitle": "My Schedule",
+    "pageSubtitleShort": "Your lecture schedule",
+    "pageSubtitle": "Weekly recurring lectures; navigate weeks or switch to month. Optional course start/end dates clip the range.",
+    "loading": "Loading calendar...",
+    "viewWeek": "Week",
+    "viewMonth": "Month",
+    "previousPeriod": "Previous period",
+    "nextPeriod": "Next period",
+    "goToToday": "Go to today",
+    "today": "Today",
+    "weekViewTitle": "Week view",
+    "monthViewTitle": "Month view",
+    "viewDescription": "Meeting times repeat every week in the visible range. Set course start/end on create or edit to limit occurrences.",
+    "emptyTitle": "No lectures scheduled",
+    "emptyBody": "Add meeting times to your course sections (Edit Course → Sections → Edit) to see your schedule here.",
+    "myCourses": "My Courses",
+    "lectureDetails": "Lecture details",
+    "location": "Location",
+    "section": "Section",
+    "editCourse": "Edit Course",
+    "errors": {
+      "loadFailed": "Failed to load calendar"
+    }
+  },
   "dashboard": {
     "welcome": "Welcome back, {{name}}",
     "pageTitle": "Teacher Dashboard",

@@ -1,33 +1,55 @@
 import { motion } from "framer-motion";
 import { Mail, Phone } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
 import { Badge } from "../../components/ui/badge";
 
-const ROWS = [
+type RowStatus = "pending" | "review" | "approved";
+type RowChannel = "Web" | "Referral";
+
+const ROWS: { id: string; name: string; course: string; channel: RowChannel; status: RowStatus }[] = [
   { id: "ENR-8821", name: "Haya Al-Masri", course: "Data Literacy 101", channel: "Web", status: "pending" },
   { id: "ENR-8820", name: "Marcus Lee", course: "UX Fundamentals", channel: "Referral", status: "review" },
   { id: "ENR-8819", name: "Sofia Ivanova", course: "Python Basics", channel: "Web", status: "approved" },
 ];
 
 export function SecretaryEnrollmentsPage() {
+  const { t } = useTranslation(["admin"]);
+
+  const channelLabel = (channel: RowChannel) =>
+    channel === "Web"
+      ? t("admin:secretary.enrollments.channels.web")
+      : t("admin:secretary.enrollments.channels.referral");
+
+  const statusLabel = (status: RowStatus) => {
+    switch (status) {
+      case "approved":
+        return t("admin:secretary.enrollments.statuses.approved");
+      case "review":
+        return t("admin:secretary.enrollments.statuses.review");
+      default:
+        return t("admin:secretary.enrollments.statuses.pending");
+    }
+  };
+
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Enrollments</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t("admin:secretary.enrollments.title")}</h1>
         <p className="text-muted-foreground mt-1">
-          Intake queue for new registrations — triage, verify, and route to academic teams.
+          {t("admin:secretary.enrollments.subtitle")}
         </p>
       </div>
 
       <Card className="border-border/60">
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle>Active queue</CardTitle>
-            <CardDescription>Demo records for UI preview.</CardDescription>
+            <CardTitle>{t("admin:secretary.enrollments.activeQueueTitle")}</CardTitle>
+            <CardDescription>{t("admin:secretary.enrollments.activeQueueSubtitle")}</CardDescription>
           </div>
           <Button variant="outline" size="sm">
-            Export
+            {t("admin:secretary.enrollments.export")}
           </Button>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -45,15 +67,15 @@ export function SecretaryEnrollmentsPage() {
                 <p className="text-sm text-muted-foreground">{r.course}</p>
                 <div className="mt-2 flex gap-3 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1">
-                    <Mail className="h-3 w-3" /> email on file
+                    <Mail className="h-3 w-3" /> {t("admin:secretary.enrollments.emailOnFile")}
                   </span>
                   <span className="flex items-center gap-1">
-                    <Phone className="h-3 w-3" /> optional
+                    <Phone className="h-3 w-3" /> {t("admin:secretary.enrollments.phoneOptional")}
                   </span>
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <Badge variant="outline">{r.channel}</Badge>
+                <Badge variant="outline">{channelLabel(r.channel)}</Badge>
                 <Badge
                   variant={
                     r.status === "approved"
@@ -63,9 +85,9 @@ export function SecretaryEnrollmentsPage() {
                         : "outline"
                   }
                 >
-                  {r.status}
+                  {statusLabel(r.status)}
                 </Badge>
-                <Button size="sm">Open</Button>
+                <Button size="sm">{t("admin:secretary.enrollments.open")}</Button>
               </div>
             </motion.div>
           ))}

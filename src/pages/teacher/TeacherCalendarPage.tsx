@@ -13,6 +13,7 @@ import { Calendar, Clock, MapPin, ChevronLeft, ChevronRight } from 'lucide-react
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
+import { useTranslation } from 'react-i18next'
 
 const DOW_TO_INDEX: Record<string, number> = {
   Sun: 0,
@@ -169,6 +170,7 @@ function buildCalendarEvents(
 
 export function TeacherCalendarPage() {
   const calendarRef = useRef<FullCalendar | null>(null)
+  const { t } = useTranslation(['teacher'])
   const [courses, setCourses] = useState<CourseDto[]>([])
   const [loading, setLoading] = useState(true)
   const [eventOpen, setEventOpen] = useState(false)
@@ -191,8 +193,8 @@ export function TeacherCalendarPage() {
       const result = await teacherService.getMyCourses({ pageSize: 100 })
       setCourses(result.items)
     } catch (error) {
-      toast.error('Failed to load calendar', {
-        description: error instanceof Error ? error.message : 'Please try again later',
+      toast.error(t('teacher:calendar.errors.loadFailed'), {
+        description: error instanceof Error ? error.message : t('teacher:shared.tryAgainLater'),
       })
     } finally {
       setLoading(false)
@@ -248,13 +250,13 @@ export function TeacherCalendarPage() {
       <div className="space-y-6">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <div className="text-2xl font-semibold">My Schedule</div>
-            <div className="text-sm text-muted-foreground">Your lecture schedule</div>
+            <div className="text-2xl font-semibold">{t('teacher:calendar.pageTitle')}</div>
+            <div className="text-sm text-muted-foreground">{t('teacher:calendar.pageSubtitleShort')}</div>
           </div>
         </div>
         <Card>
           <CardContent className="flex items-center justify-center py-12">
-            <div className="text-sm text-muted-foreground">Loading calendar...</div>
+            <div className="text-sm text-muted-foreground">{t('teacher:calendar.loading')}</div>
           </CardContent>
         </Card>
       </div>
@@ -265,9 +267,9 @@ export function TeacherCalendarPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <div className="text-2xl font-semibold">My Schedule</div>
+          <div className="text-2xl font-semibold">{t('teacher:calendar.pageTitle')}</div>
           <div className="text-sm text-muted-foreground">
-            Weekly recurring lectures; navigate weeks or switch to month. Optional course start/end dates clip the range.
+            {t('teacher:calendar.pageSubtitle')}
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -279,7 +281,7 @@ export function TeacherCalendarPage() {
               className="h-8"
               onClick={() => setCalendarView('week')}
             >
-              Week
+              {t('teacher:calendar.viewWeek')}
             </Button>
             <Button
               type="button"
@@ -288,14 +290,14 @@ export function TeacherCalendarPage() {
               className="h-8"
               onClick={() => setCalendarView('month')}
             >
-              Month
+              {t('teacher:calendar.viewMonth')}
             </Button>
           </div>
           <Button
             variant="outline"
             size="sm"
             onClick={() => calendarRef.current?.getApi().prev()}
-            aria-label="Previous period"
+            aria-label={t('teacher:calendar.previousPeriod')}
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
@@ -303,15 +305,15 @@ export function TeacherCalendarPage() {
             variant="outline"
             size="sm"
             onClick={() => calendarRef.current?.getApi().today()}
-            aria-label="Go to today"
+            aria-label={t('teacher:calendar.goToToday')}
           >
-            Today
+            {t('teacher:calendar.today')}
           </Button>
           <Button
             variant="outline"
             size="sm"
             onClick={() => calendarRef.current?.getApi().next()}
-            aria-label="Next period"
+            aria-label={t('teacher:calendar.nextPeriod')}
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
@@ -320,10 +322,9 @@ export function TeacherCalendarPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{calendarView === 'week' ? 'Week view' : 'Month view'}</CardTitle>
+          <CardTitle>{calendarView === 'week' ? t('teacher:calendar.weekViewTitle') : t('teacher:calendar.monthViewTitle')}</CardTitle>
           <CardDescription>
-            Meeting times repeat every week in the visible range. Set course start/end on create or edit to limit
-            occurrences.
+            {t('teacher:calendar.viewDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -337,12 +338,12 @@ export function TeacherCalendarPage() {
                 >
                   <Calendar className="h-8 w-8 text-muted-foreground" />
                 </motion.div>
-                <CardTitle className="text-xl mb-2">No lectures scheduled</CardTitle>
+                <CardTitle className="text-xl mb-2">{t('teacher:calendar.emptyTitle')}</CardTitle>
                 <CardDescription className="max-w-md mb-4">
-                  Add meeting times to your course sections (Edit Course → Sections → Edit) to see your schedule here.
+                  {t('teacher:calendar.emptyBody')}
                 </CardDescription>
                 <Button variant="default" asChild>
-                  <Link to="/teacher/courses">My Courses</Link>
+                  <Link to="/teacher/courses">{t('teacher:calendar.myCourses')}</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -402,7 +403,7 @@ export function TeacherCalendarPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{eventInfo?.title}</DialogTitle>
-            <DialogDescription>Lecture details</DialogDescription>
+            <DialogDescription>{t('teacher:calendar.lectureDetails')}</DialogDescription>
           </DialogHeader>
           {eventInfo && (
             <div className="mt-4 space-y-4">
@@ -413,7 +414,7 @@ export function TeacherCalendarPage() {
                   </div>
                   <div>
                     <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      Location
+                      {t('teacher:calendar.location')}
                     </div>
                     <div className="text-sm font-medium mt-1">{eventInfo.location}</div>
                   </div>
@@ -424,7 +425,7 @@ export function TeacherCalendarPage() {
                   </div>
                   <div>
                     <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      Section
+                      {t('teacher:calendar.section')}
                     </div>
                     <div className="text-sm font-medium mt-1">{eventInfo.sectionName}</div>
                   </div>
@@ -432,7 +433,7 @@ export function TeacherCalendarPage() {
               </div>
               <div className="pt-2 border-t border-border">
                 <Button variant="outline" size="sm" asChild>
-                  <Link to={`/teacher/courses/${eventInfo.courseId}/edit`}>Edit Course</Link>
+                  <Link to={`/teacher/courses/${eventInfo.courseId}/edit`}>{t('teacher:calendar.editCourse')}</Link>
                 </Button>
               </div>
             </div>

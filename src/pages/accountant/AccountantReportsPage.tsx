@@ -1,33 +1,36 @@
 import { motion } from "framer-motion";
 import { Download, FileSpreadsheet } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
 
-const REPORTS = [
-  {
-    title: "Monthly revenue summary",
-    desc: "Platform fees, gross sales, refunds.",
-    period: "March 2026",
-  },
-  {
-    title: "Instructor liability",
-    desc: "Accrued vs paid — by region.",
-    period: "Q1 2026",
-  },
-  {
-    title: "Tax export (VAT)",
-    desc: "Line-level transactions for filing.",
-    period: "Feb 2026",
-  },
-];
-
 export function AccountantReportsPage() {
+  const { t } = useTranslation(["admin"]);
+
+  const REPORTS = [
+    {
+      title: t("admin:accountant.reports.items.monthlyRevenueTitle"),
+      desc: t("admin:accountant.reports.items.monthlyRevenueDesc"),
+      period: t("admin:accountant.reports.items.monthlyRevenuePeriod"),
+    },
+    {
+      title: t("admin:accountant.reports.items.instructorLiabilityTitle"),
+      desc: t("admin:accountant.reports.items.instructorLiabilityDesc"),
+      period: t("admin:accountant.reports.items.instructorLiabilityPeriod"),
+    },
+    {
+      title: t("admin:accountant.reports.items.taxExportTitle"),
+      desc: t("admin:accountant.reports.items.taxExportDesc"),
+      period: t("admin:accountant.reports.items.taxExportPeriod"),
+    },
+  ];
+
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Reports & exports</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t("admin:accountant.reports.title")}</h1>
         <p className="text-muted-foreground mt-1 max-w-2xl">
-          Packaged views for auditors and regulators. Wire these to your reporting engine when ready.
+          {t("admin:accountant.reports.subtitle")}
         </p>
       </div>
 
@@ -51,7 +54,7 @@ export function AccountantReportsPage() {
                 <span className="text-xs font-medium text-muted-foreground">{r.period}</span>
                 <Button variant="outline" size="sm" className="gap-1.5">
                   <Download className="h-3.5 w-3.5" />
-                  PDF
+                  {t("admin:accountant.reports.pdf")}
                 </Button>
               </CardContent>
             </Card>
@@ -61,14 +64,14 @@ export function AccountantReportsPage() {
 
       <Card className="border-border/60 border-dashed">
         <CardHeader>
-          <CardTitle>Custom report builder</CardTitle>
+          <CardTitle>{t("admin:accountant.reports.builderTitle")}</CardTitle>
           <CardDescription>
-            Coming soon — drag dimensions, filters, and saved schedules for recurring exports.
+            {t("admin:accountant.reports.builderDesc")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="rounded-xl bg-muted/40 p-8 text-center text-sm text-muted-foreground">
-            Placeholder for advanced reporting builder.
+            {t("admin:accountant.reports.builderPlaceholder")}
           </div>
         </CardContent>
       </Card>

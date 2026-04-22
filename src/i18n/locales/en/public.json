@@ -1,4 +1,9 @@
 {
+  "notFound": {
+    "code": "404",
+    "message": "That page doesn't exist in this demo.",
+    "goToDashboard": "Go to Dashboard"
+  },
   "landing": {
     "heroTitle": "Learn. Teach. Grow with AcademiX.",
     "heroSubtitle": "A modern platform for live and on-demand learning — built for students, instructors, and institutions.",

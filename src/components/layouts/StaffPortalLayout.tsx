@@ -28,6 +28,7 @@ import {
   GraduationCap,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import { cn } from "../../lib/cn";
 import { Button } from "../ui/button";
 import {
@@ -62,61 +63,61 @@ import { Badge } from "../ui/badge";
 
 type NavItem = {
   to: string;
-  label: string;
+  labelKey: string;
   icon: ComponentType<{ className?: string }>;
 };
 
-type NavSection = { title: string; items: NavItem[] };
+type NavSection = { titleKey: string; items: NavItem[] };
 
 export type StaffPortalVariant = "accountant" | "secretary";
 
 const ACCOUNTANT_NAV: NavSection[] = [
   {
-    title: "Overview",
-    items: [{ to: "/accountant/dashboard", label: "Dashboard", icon: LayoutDashboard }],
+    titleKey: "admin:staffLayout.nav.overview",
+    items: [{ to: "/accountant/dashboard", labelKey: "admin:staffLayout.nav.dashboard", icon: LayoutDashboard }],
   },
   {
-    title: "Finance",
+    titleKey: "admin:staffLayout.nav.finance",
     items: [
-      { to: "/accountant/transactions", label: "Transactions", icon: CreditCard },
-      { to: "/accountant/payouts", label: "Payouts", icon: Wallet },
-      { to: "/accountant/invoices", label: "Invoices", icon: Receipt },
+      { to: "/accountant/transactions", labelKey: "admin:staffLayout.nav.transactions", icon: CreditCard },
+      { to: "/accountant/payouts", labelKey: "admin:staffLayout.nav.payouts", icon: Wallet },
+      { to: "/accountant/invoices", labelKey: "admin:staffLayout.nav.invoices", icon: Receipt },
     ],
   },
   {
-    title: "Compliance",
-    items: [{ to: "/accountant/reports", label: "Reports", icon: FileText }],
+    titleKey: "admin:staffLayout.nav.compliance",
+    items: [{ to: "/accountant/reports", labelKey: "admin:staffLayout.nav.reports", icon: FileText }],
   },
   {
-    title: "Workspace",
-    items: [{ to: "/accountant/messages", label: "Messages", icon: MessageSquare }],
+    titleKey: "admin:staffLayout.nav.workspace",
+    items: [{ to: "/accountant/messages", labelKey: "admin:staffLayout.nav.messages", icon: MessageSquare }],
   },
   {
-    title: "Account",
-    items: [{ to: "/accountant/settings", label: "Settings", icon: Settings }],
+    titleKey: "admin:staffLayout.nav.account",
+    items: [{ to: "/accountant/settings", labelKey: "admin:staffLayout.nav.settings", icon: Settings }],
   },
 ];
 
 const SECRETARY_NAV: NavSection[] = [
   {
-    title: "Overview",
-    items: [{ to: "/secretary/dashboard", label: "Dashboard", icon: LayoutDashboard }],
+    titleKey: "admin:staffLayout.nav.overview",
+    items: [{ to: "/secretary/dashboard", labelKey: "admin:staffLayout.nav.dashboard", icon: LayoutDashboard }],
   },
   {
-    title: "Operations",
+    titleKey: "admin:staffLayout.nav.operations",
     items: [
-      { to: "/secretary/messages", label: "Messages", icon: MessageSquare },
-      { to: "/secretary/enrollments", label: "Enrollments", icon: UserPlus },
-      { to: "/secretary/directory", label: "Directory", icon: Users },
+      { to: "/secretary/messages", labelKey: "admin:staffLayout.nav.messages", icon: MessageSquare },
+      { to: "/secretary/enrollments", labelKey: "admin:staffLayout.nav.enrollments", icon: UserPlus },
+      { to: "/secretary/directory", labelKey: "admin:staffLayout.nav.directory", icon: Users },
     ],
   },
   {
-    title: "Scheduling",
-    items: [{ to: "/secretary/calendar", label: "Calendar", icon: CalendarDays }],
+    titleKey: "admin:staffLayout.nav.scheduling",
+    items: [{ to: "/secretary/calendar", labelKey: "admin:staffLayout.nav.calendar", icon: CalendarDays }],
   },
   {
-    title: "Account",
-    items: [{ to: "/secretary/settings", label: "Settings", icon: Settings }],
+    titleKey: "admin:staffLayout.nav.account",
+    items: [{ to: "/secretary/settings", labelKey: "admin:staffLayout.nav.settings", icon: Settings }],
   },
 ];
 
@@ -124,8 +125,8 @@ const PORTAL_META: Record<
   StaffPortalVariant,
   {
     home: string;
-    subtitle: string;
-    badge: string;
+    subtitleKey: string;
+    badgeKey: string;
     BrandIcon: ComponentType<{ className?: string }>;
     nav: NavSection[];
     gradient: string;
@@ -133,16 +134,16 @@ const PORTAL_META: Record<
 > = {
   accountant: {
     home: "/accountant/dashboard",
-    subtitle: "Finance & Accounting",
-    badge: "Finance",
+    subtitleKey: "admin:staffLayout.portals.financeSubtitle",
+    badgeKey: "admin:staffLayout.portals.financeBadge",
     BrandIcon: Calculator,
     nav: ACCOUNTANT_NAV,
     gradient: "from-violet-600 to-indigo-600",
   },
   secretary: {
     home: "/secretary/dashboard",
-    subtitle: "Operations & Front Office",
-    badge: "Ops",
+    subtitleKey: "admin:staffLayout.portals.opsSubtitle",
+    badgeKey: "admin:staffLayout.portals.opsBadge",
     BrandIcon: Building2,
     nav: SECRETARY_NAV,
     gradient: "from-sky-600 to-cyan-600",
@@ -159,15 +160,16 @@ function StaffNavList({
   unreadMessages: number;
 }) {
   const meta = PORTAL_META[variant];
+  const { t } = useTranslation(["admin", "common"]);
   const messagesPath =
     variant === "accountant" ? "/accountant/messages" : "/secretary/messages";
 
   return (
-    <nav className="flex flex-col gap-4" aria-label="Main navigation">
+    <nav className="flex flex-col gap-4" aria-label={t("admin:staffLayout.nav.mainNavigationLabel")}>
       {meta.nav.map((section) => (
-        <div key={section.title}>
+        <div key={section.titleKey}>
           <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-            {section.title}
+            {t(section.titleKey)}
           </div>
           <div className="mt-1 flex flex-col gap-0.5">
             {section.items.map((item) => {
@@ -196,7 +198,7 @@ function StaffNavList({
                           isActive ? "text-primary" : "text-muted-foreground"
                         )}
                       />
-                      <span className="flex-1 truncate">{item.label}</span>
+                      <span className="flex-1 truncate">{t(item.labelKey)}</span>
                       {showBadge && (
                         <Badge
                           variant="destructive"
@@ -232,6 +234,7 @@ export function StaffPortalShell({
   const setCustomThemeColor = useAppStore((s) => s.setCustomThemeColor);
   const { logout, user } = useAuthStore();
   const navigate = useNavigate();
+  const { t } = useTranslation(["admin", "common"]);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -241,19 +244,19 @@ export function StaffPortalShell({
 
   const handleLogout = () => {
     logout();
-    toast.success("Logged out successfully");
+    toast.success(t("admin:staffLayout.menu.logoutToast"));
     navigate("/");
   };
 
   const toggleDarkMode = () => {
     const newTheme = isDarkMode ? "light" : "dark";
     setTheme(newTheme);
-    toast.success(`Switched to ${newTheme} mode`);
+    toast.success(t("admin:staffLayout.menu.switchedToMode", { mode: newTheme }));
   };
 
   const themeLabel = useMemo(
-    () => THEMES.find((t) => t.id === theme)?.label ?? "Theme",
-    [theme]
+    () => THEMES.find((th) => th.id === theme)?.label ?? t("admin:staffLayout.menu.themeLabelFallback"),
+    [theme, t]
   );
 
   useEffect(() => {
@@ -276,14 +279,14 @@ export function StaffPortalShell({
                   variant="ghost"
                   size="icon"
                   className="lg:hidden"
-                  aria-label="Open navigation"
+                  aria-label={t("admin:staffLayout.header.openNavigation")}
                 >
                   <Menu className="h-5 w-5" />
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-sm p-0">
                 <DialogHeader className="p-6 border-b">
-                  <DialogTitle className="text-xl">AcademiX</DialogTitle>
+                  <DialogTitle className="text-xl">{t("admin:staffLayout.appName")}</DialogTitle>
                 </DialogHeader>
                 <div className="max-h-[min(70dvh,560px)] overflow-y-auto px-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))] pt-2">
                   <StaffNavList
@@ -305,15 +308,15 @@ export function StaffPortalShell({
                 <meta.BrandIcon className="h-5 w-5" />
               </div>
               <div className="hidden sm:block leading-tight">
-                <div className="text-base font-bold tracking-tight">AcademiX</div>
+                <div className="text-base font-bold tracking-tight">{t("admin:staffLayout.appName")}</div>
                 <div className="text-[10px] text-muted-foreground font-medium -mt-0.5">
-                  {meta.subtitle}
+                  {t(meta.subtitleKey)}
                 </div>
               </div>
             </NavLink>
 
             <div className="hidden sm:flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary border border-primary/15">
-              {meta.badge}
+              {t(meta.badgeKey)}
             </div>
           </div>
 
@@ -324,8 +327,8 @@ export function StaffPortalShell({
                 type="search"
                 placeholder={
                   variant === "accountant"
-                    ? "Search transactions, invoices, payees…"
-                    : "Search people, enrollments, messages…"
+                    ? t("admin:staffLayout.search.placeholderAccountant")
+                    : t("admin:staffLayout.search.placeholderSecretary")
                 }
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -340,7 +343,7 @@ export function StaffPortalShell({
               variant="ghost"
               size="icon"
               className="h-10 w-10 md:hidden"
-              aria-label="Open search"
+              aria-label={t("admin:staffLayout.header.openSearch")}
               onClick={() => setMobileSearchOpen(true)}
             >
               <Search className="h-4 w-4" />
@@ -373,7 +376,7 @@ export function StaffPortalShell({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-44">
                   <DropdownMenuLabel className="text-xs font-semibold">
-                    Choose Theme
+                    {t("admin:staffLayout.menu.chooseTheme")}
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuRadioGroup
@@ -398,37 +401,37 @@ export function StaffPortalShell({
                           }
                         }
                         setTheme("custom");
-                        toast.success("Custom theme enabled", {
-                          description: "Use the color picker to choose your color",
+                        toast.success(t("admin:staffLayout.menu.customThemeEnabled"), {
+                          description: t("admin:staffLayout.menu.customThemeEnabledDesc"),
                         });
                       } else {
                         setTheme(next);
-                        toast.success("Theme updated", {
-                          description: `Switched to ${
-                            THEMES.find((t) => t.id === next)?.label
-                          }`,
+                        toast.success(t("admin:staffLayout.menu.themeUpdated"), {
+                          description: t("admin:staffLayout.menu.switchedToTheme", {
+                            theme: THEMES.find((th) => th.id === next)?.label ?? "",
+                          }),
                         });
                       }
                     }}
                   >
-                    {THEMES.filter((t) => t.id !== "custom").map((t) => (
+                    {THEMES.filter((th) => th.id !== "custom").map((th) => (
                       <DropdownMenuRadioItem
-                        key={t.id}
-                        value={t.id}
+                        key={th.id}
+                        value={th.id}
                         className="text-xs"
                       >
                         <div className="flex items-center gap-2">
                           <span
                             className={cn(
                               "h-3 w-3 rounded-full border border-border shadow-sm",
-                              t.id === "light" && "bg-white",
-                              t.id === "dark" && "bg-black",
-                              t.id === "emerald" && "bg-[#10b981]",
-                              t.id === "sky" && "bg-[#06b6d4]",
-                              t.id === "indigo" && "bg-[#6366f1]"
+                              th.id === "light" && "bg-white",
+                              th.id === "dark" && "bg-black",
+                              th.id === "emerald" && "bg-[#10b981]",
+                              th.id === "sky" && "bg-[#06b6d4]",
+                              th.id === "indigo" && "bg-[#6366f1]"
                             )}
                           />
-                          <span>{t.label}</span>
+                          <span>{th.label}</span>
                         </div>
                       </DropdownMenuRadioItem>
                     ))}
@@ -442,7 +445,7 @@ export function StaffPortalShell({
                               customThemeColor || "hsl(222, 84%, 60%)",
                           }}
                         />
-                        <span>Custom Color</span>
+                        <span>{t("admin:staffLayout.menu.customColor")}</span>
                       </div>
                     </DropdownMenuRadioItem>
                   </DropdownMenuRadioGroup>
@@ -455,7 +458,7 @@ export function StaffPortalShell({
               size="icon"
               onClick={toggleDarkMode}
               className="h-9 w-9"
-              title={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+              title={isDarkMode ? t("admin:staffLayout.menu.switchToLightMode") : t("admin:staffLayout.menu.switchToDarkMode")}
             >
               {isDarkMode ? (
                 <Sun className="h-4 w-4" />
@@ -478,7 +481,7 @@ export function StaffPortalShell({
                       {user?.firstName} {user?.lastName}
                     </p>
                     <p className="text-[10px] text-muted-foreground truncate">
-                      {meta.subtitle}
+                      {t(meta.subtitleKey)}
                     </p>
                   </div>
                   <ChevronDown className="h-3 w-3 text-muted-foreground hidden lg:block" />
@@ -496,14 +499,14 @@ export function StaffPortalShell({
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => navigate(meta.home)}>
                   <GraduationCap className="me-2 h-4 w-4" />
-                  Portal home
+                  {t("admin:staffLayout.menu.portalHome")}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={handleLogout}
                   className="text-destructive focus:text-destructive"
                 >
                   <LogOut className="me-2 h-4 w-4" />
-                  Log out
+                  {t("admin:staffLayout.menu.logout")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -514,11 +517,11 @@ export function StaffPortalShell({
       <Dialog open={mobileSearchOpen} onOpenChange={setMobileSearchOpen}>
         <DialogContent className="max-w-md gap-4">
           <DialogHeader>
-            <DialogTitle>Search</DialogTitle>
+            <DialogTitle>{t("common:search")}</DialogTitle>
             <DialogDescription>
               {variant === "accountant"
-                ? "Find transactions, invoices, or payees."
-                : "Find people, enrollments, or messages."}
+                ? t("admin:staffLayout.search.descriptionAccountant")
+                : t("admin:staffLayout.search.descriptionSecretary")}
             </DialogDescription>
           </DialogHeader>
           <form
@@ -538,8 +541,8 @@ export function StaffPortalShell({
               type="search"
               placeholder={
                 variant === "accountant"
-                  ? "Search transactions, invoices, payees…"
-                  : "Search people, enrollments, messages…"
+                  ? t("admin:staffLayout.search.placeholderAccountant")
+                  : t("admin:staffLayout.search.placeholderSecretary")
               }
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -547,7 +550,7 @@ export function StaffPortalShell({
               autoComplete="off"
             />
             <Button type="submit" className="h-11 w-full">
-              Search
+              {t("common:search")}
             </Button>
           </form>
         </DialogContent>
@@ -557,7 +560,7 @@ export function StaffPortalShell({
         <aside
           className="hidden lg:block"
           role="complementary"
-          aria-label="Navigation sidebar"
+          aria-label={t("admin:staffLayout.nav.sidebarLabel")}
         >
           <motion.div
             initial={{ opacity: 0, x: -20 }}

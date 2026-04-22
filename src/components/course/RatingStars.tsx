@@ -1,6 +1,7 @@
 import { Star } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface RatingStarsProps {
   value: number;
@@ -13,9 +14,10 @@ export function RatingStars({ value, onChange, disabled, size = 'sm' }: RatingSt
   const [hover, setHover] = useState(0);
   const display = hover || value;
   const dim = size === 'md' ? 'h-5 w-5' : 'h-4 w-4';
+  const { t } = useTranslation(['common']);
 
   return (
-    <div className="flex gap-0.5 items-center" role="group" aria-label="Rating">
+    <div className="flex gap-0.5 items-center" role="group" aria-label={t('common:ratingStars.groupLabel')}>
       {[1, 2, 3, 4, 5].map((n) => (
         <button
           key={n}
