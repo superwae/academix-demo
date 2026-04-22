@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   Users,
   BookOpen,
@@ -71,12 +72,6 @@ const systemHealth = {
 
 // Time Range Options
 type TimeRange = "7d" | "30d" | "90d" | "12m";
-const TIME_RANGES: { value: TimeRange; label: string }[] = [
-  { value: "7d", label: "Last 7 days" },
-  { value: "30d", label: "Last 30 days" },
-  { value: "90d", label: "Last 90 days" },
-  { value: "12m", label: "Last 12 months" },
-];
 
 // Time Range Selector Component
 function TimeRangeSelector({
@@ -86,6 +81,13 @@ function TimeRangeSelector({
   value: TimeRange;
   onChange: (value: TimeRange) => void;
 }) {
+  const { t } = useTranslation(['admin']);
+  const TIME_RANGES: { value: TimeRange; label: string }[] = [
+    { value: "7d", label: t('admin:dashboard.timeRanges.last7Days') },
+    { value: "30d", label: t('admin:dashboard.timeRanges.last30Days') },
+    { value: "90d", label: t('admin:dashboard.timeRanges.last90Days') },
+    { value: "12m", label: t('admin:dashboard.timeRanges.last12Months') },
+  ];
   const selected = TIME_RANGES.find((r) => r.value === value);
   return (
     <DropdownMenu>
@@ -235,6 +237,7 @@ function SectionHeader({
 }
 
 export function AdminDashboardPage() {
+  const { t } = useTranslation(['admin', 'common', 'errors']);
   const navigate = useNavigate();
   const [analytics, setAnalytics] = useState<AnalyticsDashboardDto | null>(null);
   const [loading, setLoading] = useState(true);
@@ -255,9 +258,9 @@ export function AdminDashboardPage() {
             ? err.message
             : err && typeof err === "object" && "error" in err
               ? String((err as { error?: string }).error)
-              : "Failed to load analytics";
+              : t('admin:dashboard.errors.analyticsFailed');
         setError(msg);
-        toast.error('Failed to load dashboard analytics');
+        toast.error(t('admin:dashboard.errors.analyticsFailed'));
       } finally {
         setLoading(false);
       }
@@ -341,25 +344,25 @@ export function AdminDashboardPage() {
 
   // User distribution from real data
   const userRolesDistribution = [
-    { name: "Students", value: analytics?.totalStudents || 0, color: "#3b82f6" },
-    { name: "Instructors", value: analytics?.totalInstructors || 0, color: "#10b981" },
+    { name: t('admin:dashboard.totalStudents'), value: analytics?.totalStudents || 0, color: "#3b82f6" },
+    { name: t('admin:dashboard.totalInstructors'), value: analytics?.totalInstructors || 0, color: "#10b981" },
   ];
 
   // Risk distribution
   const riskDistribution = [
-    { name: "Critical", value: analytics?.criticalRiskCount || 0, color: "#ef4444" },
-    { name: "High", value: analytics?.highRiskCount || 0, color: "#f97316" },
-    { name: "Medium", value: analytics?.mediumRiskCount || 0, color: "#eab308" },
+    { name: t('admin:dashboard.riskLevels.critical'), value: analytics?.criticalRiskCount || 0, color: "#ef4444" },
+    { name: t('admin:dashboard.riskLevels.high'), value: analytics?.highRiskCount || 0, color: "#f97316" },
+    { name: t('admin:dashboard.riskLevels.medium'), value: analytics?.mediumRiskCount || 0, color: "#eab308" },
   ];
 
   if (error && !analytics) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
         <AlertCircle className="h-12 w-12 text-destructive mb-4" />
-        <h2 className="text-lg font-semibold">Failed to load dashboard</h2>
+        <h2 className="text-lg font-semibold">{t('admin:dashboard.errors.loadFailed')}</h2>
         <p className="text-muted-foreground mt-1">{error}</p>
         <Button onClick={() => window.location.reload()} className="mt-4">
-          Try Again
+          {t('admin:dashboard.errors.tryAgain')}
         </Button>
       </div>
     );
@@ -371,16 +374,16 @@ export function AdminDashboardPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">
-            Dashboard
+            {t('admin:dashboard.title')}
           </h1>
           <p className="text-sm text-muted-foreground">
-            Welcome back! Here's what's happening with AcademiX.
+            {t('admin:dashboard.welcome')}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => navigate("/admin/reports")}>
             <FileCheck className="me-2 h-4 w-4" />
-            Generate Report
+            {t('admin:dashboard.generateReport')}
           </Button>
         </div>
       </div>
@@ -388,51 +391,51 @@ export function AdminDashboardPage() {
       {/* ==================== SECTION 1: EXECUTIVE OVERVIEW ==================== */}
       <section>
         <SectionHeader
-          title="Executive Overview"
-          description="Key performance metrics at a glance"
+          title={t('admin:dashboard.sections.executiveOverview')}
+          description={t('admin:dashboard.sections.executiveOverviewDesc')}
         />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <StatCard
-            title="Total Students"
+            title={t('admin:dashboard.totalStudents')}
             value={analytics?.totalStudents?.toLocaleString() || "0"}
             icon={Users}
-            change={{ value: 12.5, label: "vs last month" }}
+            change={{ value: 12.5, label: t('admin:dashboard.vsLastMonth') }}
             trend="up"
             iconColor="text-blue-500"
             href="/admin/users"
             loading={loading}
           />
           <StatCard
-            title="Total Courses"
+            title={t('admin:dashboard.totalCourses')}
             value={analytics?.totalCourses?.toLocaleString() || "0"}
             icon={BookOpen}
-            change={{ value: 8.2, label: "vs last month" }}
+            change={{ value: 8.2, label: t('admin:dashboard.vsLastMonth') }}
             trend="up"
             iconColor="text-emerald-500"
             href="/admin/courses"
             loading={loading}
           />
           <StatCard
-            title="Total Enrollments"
+            title={t('admin:dashboard.totalEnrollments')}
             value={analytics?.totalEnrollments?.toLocaleString() || "0"}
             icon={GraduationCap}
-            change={{ value: 15.3, label: "vs last month" }}
+            change={{ value: 15.3, label: t('admin:dashboard.vsLastMonth') }}
             trend="up"
             iconColor="text-purple-500"
             loading={loading}
           />
           <StatCard
-            title="At-Risk Students"
+            title={t('admin:dashboard.atRiskStudents')}
             value={analytics?.atRiskStudentCount?.toLocaleString() || "0"}
             icon={AlertTriangle}
-            change={{ value: analytics?.criticalRiskCount || 0, label: "critical" }}
+            change={{ value: analytics?.criticalRiskCount || 0, label: t('admin:dashboard.critical') }}
             trend="neutral"
             iconColor="text-orange-500"
             href="/admin/reports"
             loading={loading}
           />
           <StatCard
-            title="System Health"
+            title={t('admin:dashboard.systemHealth')}
             value={systemHealth.uptime}
             icon={Activity}
             change={{ value: 0, label: systemHealth.status }}
@@ -446,14 +449,14 @@ export function AdminDashboardPage() {
       {/* ==================== SECTION 2: PERFORMANCE METRICS ==================== */}
       <section>
         <SectionHeader
-          title="Performance Metrics"
-          description="Student engagement and course completion"
+          title={t('admin:dashboard.sections.performanceMetrics')}
+          description={t('admin:dashboard.sections.performanceMetricsDesc')}
         />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="rounded-xl border border-border bg-card p-5">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Platform Engagement</p>
+                <p className="text-sm text-muted-foreground">{t('admin:dashboard.metrics.platformEngagement')}</p>
                 {loading ? (
                   <div className="mt-1 h-8 w-16 animate-pulse rounded bg-muted" />
                 ) : (
@@ -468,7 +471,7 @@ export function AdminDashboardPage() {
           <div className="rounded-xl border border-border bg-card p-5">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Avg. Completion Rate</p>
+                <p className="text-sm text-muted-foreground">{t('admin:dashboard.metrics.avgCompletion')}</p>
                 {loading ? (
                   <div className="mt-1 h-8 w-16 animate-pulse rounded bg-muted" />
                 ) : (
@@ -483,7 +486,7 @@ export function AdminDashboardPage() {
           <div className="rounded-xl border border-border bg-card p-5">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Avg. Student Grade</p>
+                <p className="text-sm text-muted-foreground">{t('admin:dashboard.metrics.avgGrade')}</p>
                 {loading ? (
                   <div className="mt-1 h-8 w-16 animate-pulse rounded bg-muted" />
                 ) : (
@@ -498,7 +501,7 @@ export function AdminDashboardPage() {
           <div className="rounded-xl border border-border bg-card p-5">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Active This Week</p>
+                <p className="text-sm text-muted-foreground">{t('admin:dashboard.metrics.activeThisWeek')}</p>
                 {loading ? (
                   <div className="mt-1 h-8 w-16 animate-pulse rounded bg-muted" />
                 ) : (
@@ -516,8 +519,8 @@ export function AdminDashboardPage() {
       {/* ==================== SECTION 3: TRENDS & ANALYTICS ==================== */}
       <section>
         <SectionHeader
-          title="Trends & Analytics"
-          description="Platform growth and activity insights"
+          title={t('admin:dashboard.sections.trendsAnalytics')}
+          description={t('admin:dashboard.sections.trendsAnalyticsDesc')}
         />
 
         <div className="grid gap-6 lg:grid-cols-2">
@@ -525,9 +528,9 @@ export function AdminDashboardPage() {
           <div className="rounded-xl border border-border bg-card p-5">
             <div className="mb-4 flex items-center justify-between">
               <div>
-                <h3 className="font-semibold">Enrollment Trend</h3>
+                <h3 className="font-semibold">{t('admin:dashboard.charts.enrollmentTrend')}</h3>
                 <p className="text-xs text-muted-foreground">
-                  New enrollments over the last 30 days
+                  {t('admin:dashboard.charts.enrollmentTrendDesc')}
                 </p>
               </div>
             </div>
@@ -583,7 +586,7 @@ export function AdminDashboardPage() {
                 </ResponsiveContainer>
               ) : (
                 <div className="h-full flex items-center justify-center text-muted-foreground">
-                  No enrollment data available
+                  {t('admin:dashboard.charts.noEnrollmentData')}
                 </div>
               )}
             </div>
@@ -593,9 +596,9 @@ export function AdminDashboardPage() {
           <div className="rounded-xl border border-border bg-card p-5">
             <div className="mb-4 flex items-center justify-between">
               <div>
-                <h3 className="font-semibold">Activity Trend</h3>
+                <h3 className="font-semibold">{t('admin:dashboard.charts.activityTrend')}</h3>
                 <p className="text-xs text-muted-foreground">
-                  Daily active students over the last 30 days
+                  {t('admin:dashboard.charts.activityTrendDesc')}
                 </p>
               </div>
             </div>
@@ -643,7 +646,7 @@ export function AdminDashboardPage() {
                 </ResponsiveContainer>
               ) : (
                 <div className="h-full flex items-center justify-center text-muted-foreground">
-                  No activity data available
+                  {t('admin:dashboard.charts.noActivityData')}
                 </div>
               )}
             </div>
@@ -655,8 +658,8 @@ export function AdminDashboardPage() {
           {/* User Roles Distribution */}
           <div className="rounded-xl border border-border bg-card p-5">
             <div className="mb-3">
-              <h3 className="font-semibold">User Distribution</h3>
-              <p className="text-xs text-muted-foreground">Students vs Instructors</p>
+              <h3 className="font-semibold">{t('admin:dashboard.charts.userDistribution')}</h3>
+              <p className="text-xs text-muted-foreground">{t('admin:dashboard.charts.userDistributionDesc')}</p>
             </div>
             <div className="h-52">
               {loading ? (
@@ -704,9 +707,9 @@ export function AdminDashboardPage() {
           <div className="rounded-xl border border-border bg-card p-5 lg:col-span-2">
             <div className="mb-3 flex items-center justify-between">
               <div>
-                <h3 className="font-semibold">Top Performing Courses</h3>
+                <h3 className="font-semibold">{t('admin:dashboard.charts.topCourses')}</h3>
                 <p className="text-xs text-muted-foreground">
-                  Most enrolled courses on the platform
+                  {t('admin:dashboard.charts.topCoursesDesc')}
                 </p>
               </div>
               <Button
@@ -715,7 +718,7 @@ export function AdminDashboardPage() {
                 className="h-7 text-xs"
                 onClick={() => navigate("/admin/courses")}
               >
-                View all
+                {t('common:viewAll')}
                 <ArrowRight className="ms-1 h-3 w-3" />
               </Button>
             </div>
@@ -750,13 +753,13 @@ export function AdminDashboardPage() {
                       {course.metricValue?.toLocaleString() ?? 0}
                     </span>
                     <span className="text-[10px] text-muted-foreground">
-                      {course.metricLabel || 'enrollments'}
+                      {course.metricLabel || t('admin:dashboard.charts.enrollmentsLabel')}
                     </span>
                   </div>
                 </div>
               )) || (
                 <div className="py-8 text-center text-muted-foreground">
-                  No course data available
+                  {t('admin:dashboard.charts.noCourseData')}
                 </div>
               )}
             </div>
@@ -768,15 +771,15 @@ export function AdminDashboardPage() {
       {analytics?.needsAttention && analytics.needsAttention.length > 0 && (
         <section>
           <SectionHeader
-            title="Students Needing Attention"
-            description="Students with declining engagement or performance"
+            title={t('admin:dashboard.sections.attention')}
+            description={t('admin:dashboard.sections.attentionDesc')}
             action={
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => navigate("/admin/reports")}
               >
-                View Details
+                {t('common:viewDetails')}
                 <ArrowRight className="ms-1 h-3 w-3" />
               </Button>
             }
@@ -786,11 +789,11 @@ export function AdminDashboardPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b bg-muted/50">
-                    <th className="px-4 py-3 text-start font-medium text-muted-foreground">Student</th>
-                    <th className="px-4 py-3 text-start font-medium text-muted-foreground">Risk Level</th>
-                    <th className="px-4 py-3 text-start font-medium text-muted-foreground">Engagement</th>
-                    <th className="px-4 py-3 text-start font-medium text-muted-foreground">Completion</th>
-                    <th className="px-4 py-3 text-start font-medium text-muted-foreground">Risk Factors</th>
+                    <th className="px-4 py-3 text-start font-medium text-muted-foreground">{t('admin:dashboard.riskTable.student')}</th>
+                    <th className="px-4 py-3 text-start font-medium text-muted-foreground">{t('admin:dashboard.riskTable.riskLevel')}</th>
+                    <th className="px-4 py-3 text-start font-medium text-muted-foreground">{t('admin:dashboard.riskTable.engagement')}</th>
+                    <th className="px-4 py-3 text-start font-medium text-muted-foreground">{t('admin:dashboard.riskTable.completion')}</th>
+                    <th className="px-4 py-3 text-start font-medium text-muted-foreground">{t('admin:dashboard.riskTable.riskFactors')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -836,12 +839,12 @@ export function AdminDashboardPage() {
       {/* ==================== SECTION 5: OPERATIONS & SYSTEM HEALTH ==================== */}
       <section>
         <SectionHeader
-          title="Operations & System Health"
-          description="Infrastructure and service status"
+          title={t('admin:dashboard.sections.operations')}
+          description={t('admin:dashboard.sections.operationsDesc')}
           action={
             <span className="flex items-center gap-2 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-500">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              All Systems Operational
+              {t('admin:dashboard.allSystemsOperational')}
             </span>
           }
         />
@@ -896,11 +899,11 @@ export function AdminDashboardPage() {
         {/* Quick Stats Row */}
         <div className="mt-4 grid gap-4 sm:grid-cols-4">
           <div className="rounded-xl border border-border bg-card p-4">
-            <p className="text-xs text-muted-foreground">Server Uptime</p>
+            <p className="text-xs text-muted-foreground">{t('admin:dashboard.services.serverUptime')}</p>
             <p className="text-xl font-bold text-emerald-500">{systemHealth.uptime}</p>
           </div>
           <div className="rounded-xl border border-border bg-card p-4">
-            <p className="text-xs text-muted-foreground">Total Instructors</p>
+            <p className="text-xs text-muted-foreground">{t('admin:dashboard.totalInstructors')}</p>
             {loading ? (
               <div className="h-7 w-12 animate-pulse rounded bg-muted mt-1" />
             ) : (
@@ -908,7 +911,7 @@ export function AdminDashboardPage() {
             )}
           </div>
           <div className="rounded-xl border border-border bg-card p-4">
-            <p className="text-xs text-muted-foreground">Active Today</p>
+            <p className="text-xs text-muted-foreground">{t('admin:dashboard.metrics.activeToday')}</p>
             {loading ? (
               <div className="h-7 w-12 animate-pulse rounded bg-muted mt-1" />
             ) : (
@@ -916,7 +919,7 @@ export function AdminDashboardPage() {
             )}
           </div>
           <div className="rounded-xl border border-border bg-card p-4">
-            <p className="text-xs text-muted-foreground">Active Enrollments</p>
+            <p className="text-xs text-muted-foreground">{t('admin:dashboard.activeEnrollments')}</p>
             {loading ? (
               <div className="h-7 w-12 animate-pulse rounded bg-muted mt-1" />
             ) : (

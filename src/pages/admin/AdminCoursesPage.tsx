@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   BookOpen,
   Search,
@@ -47,11 +48,11 @@ import {
 } from "../../services/courseExtrasService";
 import { formatMeetingSlot } from "../../lib/meetingTimeFormat";
 
-const STATUS_CONFIG = {
-  Draft: { label: "Draft", color: "bg-gray-500/10 text-gray-600 dark:text-gray-400" },
-  PendingReview: { label: "Pending Review", color: "bg-amber-500/10 text-amber-600 dark:text-amber-400" },
-  Published: { label: "Published", color: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" },
-  Archived: { label: "Archived", color: "bg-red-500/10 text-red-600 dark:text-red-400" },
+const STATUS_COLORS = {
+  Draft: "bg-gray-500/10 text-gray-600 dark:text-gray-400",
+  PendingReview: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
+  Published: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+  Archived: "bg-red-500/10 text-red-600 dark:text-red-400",
 };
 
 function StatCard({ title, value, icon: Icon, iconColor, loading }: {
@@ -81,6 +82,7 @@ function StatCard({ title, value, icon: Icon, iconColor, loading }: {
 }
 
 export function AdminCoursesPage() {
+  const { t } = useTranslation(['admin', 'common', 'errors']);
   const navigate = useNavigate();
   const [courses, setCourses] = useState<AdminCourseDto[]>([]);
   const [loading, setLoading] = useState(true);
@@ -106,6 +108,13 @@ export function AdminCoursesPage() {
   const [insightsMeetR, setInsightsMeetR] = useState<MeetingTimeRatingSummaryDto[]>([]);
   const [insightsLoading, setInsightsLoading] = useState(false);
 
+  const STATUS_LABELS: Record<string, string> = {
+    Draft: t('admin:courses.statuses.draft'),
+    PendingReview: t('admin:courses.statuses.pendingReview'),
+    Published: t('admin:courses.statuses.published'),
+    Archived: t('admin:courses.statuses.archived'),
+  };
+
   const openCourseInsights = async (course: AdminCourseDto) => {
     setInsightsCourse(course);
     setInsightsOpen(true);
@@ -125,7 +134,7 @@ export function AdminCoursesPage() {
       setInsightsLessonR(lr);
       setInsightsMeetR(mr);
     } catch {
-      toast.error("Could not load course insights");
+      toast.error(t('admin:courses.toasts.insightsFailed'));
     } finally {
       setInsightsLoading(false);
     }
@@ -144,8 +153,8 @@ export function AdminCoursesPage() {
       setTotalPages(result.totalPages);
       setTotalCount(result.totalCount);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load courses');
-      toast.error('Failed to load courses');
+      setError(err instanceof Error ? err.message : t('admin:courses.errors.loadFailed'));
+      toast.error(t('admin:courses.errors.loadFailed'));
     } finally {
       setLoading(false);
     }
@@ -174,13 +183,13 @@ export function AdminCoursesPage() {
     try {
       setActionLoading(course.id);
       await adminService.publishCourse(course.id);
-      toast.success(`"${course.title}" has been published`);
+      toast.success(t('admin:courses.toasts.published', { title: course.title }));
       setCourses((prev) =>
         prev.map((c) => c.id === course.id ? { ...c, status: 'Published' } : c)
       );
     } catch (err) {
-      toast.error('Failed to publish course', {
-        description: err instanceof Error ? err.message : 'Please try again',
+      toast.error(t('admin:courses.errors.publishFailed'), {
+        description: err instanceof Error ? err.message : t('admin:courses.errors.tryAgain'),
       });
     } finally {
       setActionLoading(null);
@@ -191,13 +200,13 @@ export function AdminCoursesPage() {
     try {
       setActionLoading(course.id);
       await adminService.archiveCourse(course.id);
-      toast.success(`"${course.title}" has been archived`);
+      toast.success(t('admin:courses.toasts.archived', { title: course.title }));
       setCourses((prev) =>
         prev.map((c) => c.id === course.id ? { ...c, status: 'Archived' } : c)
       );
     } catch (err) {
-      toast.error('Failed to archive course', {
-        description: err instanceof Error ? err.message : 'Please try again',
+      toast.error(t('admin:courses.errors.archiveFailed'), {
+        description: err instanceof Error ? err.message : t('admin:courses.errors.tryAgain'),
       });
     } finally {
       setActionLoading(null);
@@ -215,13 +224,13 @@ export function AdminCoursesPage() {
     try {
       setActionLoading(courseToDelete.id);
       await adminService.deleteCourse(courseToDelete.id);
-      toast.success(`"${courseToDelete.title}" has been deleted`);
+      toast.success(t('admin:courses.toasts.deleted', { title: courseToDelete.title }));
       setCourses((prev) => prev.filter((c) => c.id !== courseToDelete.id));
       setDeleteDialogOpen(false);
       setCourseToDelete(null);
     } catch (err) {
-      toast.error('Failed to delete course', {
-        description: err instanceof Error ? err.message : 'Please try again',
+      toast.error(t('admin:courses.errors.deleteFailed'), {
+        description: err instanceof Error ? err.message : t('admin:courses.errors.tryAgain'),
       });
     } finally {
       setActionLoading(null);
@@ -232,10 +241,10 @@ export function AdminCoursesPage() {
     return (
       <div className="flex flex-col items-center justify-center py-12">
         <AlertCircle className="h-12 w-12 text-destructive mb-4" />
-        <h2 className="text-lg font-semibold">Failed to load courses</h2>
+        <h2 className="text-lg font-semibold">{t('admin:courses.errors.loadFailed')}</h2>
         <p className="text-muted-foreground mt-1">{error}</p>
         <Button onClick={fetchCourses} className="mt-4">
-          Try Again
+          {t('admin:shared.tryAgain')}
         </Button>
       </div>
     );
@@ -245,18 +254,18 @@ export function AdminCoursesPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Courses</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t('admin:courses.title')}</h1>
         <p className="text-sm text-muted-foreground">
-          Manage and review all courses on the platform
+          {t('admin:courses.subtitle')}
         </p>
       </div>
 
       {/* Stats */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard title="Total Courses" value={totalCourses} icon={BookOpen} iconColor="text-blue-500" loading={loading} />
-        <StatCard title="Published" value={publishedCourses} icon={CheckCircle} iconColor="text-emerald-500" loading={loading} />
-        <StatCard title="Pending Review" value={pendingCourses} icon={Clock} iconColor="text-amber-500" loading={loading} />
-        <StatCard title="Draft" value={draftCourses} icon={BookOpen} iconColor="text-gray-500" loading={loading} />
+        <StatCard title={t('admin:courses.stats.totalCourses')} value={totalCourses} icon={BookOpen} iconColor="text-blue-500" loading={loading} />
+        <StatCard title={t('admin:courses.stats.published')} value={publishedCourses} icon={CheckCircle} iconColor="text-emerald-500" loading={loading} />
+        <StatCard title={t('admin:courses.stats.pendingReview')} value={pendingCourses} icon={Clock} iconColor="text-amber-500" loading={loading} />
+        <StatCard title={t('admin:courses.stats.draft')} value={draftCourses} icon={BookOpen} iconColor="text-gray-500" loading={loading} />
       </div>
 
       {/* Filters */}
@@ -264,7 +273,7 @@ export function AdminCoursesPage() {
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search courses or instructors..."
+            placeholder={t('admin:courses.searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="ps-9"
@@ -274,17 +283,17 @@ export function AdminCoursesPage() {
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="gap-2">
               <Filter className="h-4 w-4" />
-              Status: {statusFilter === "all" ? "All" : STATUS_CONFIG[statusFilter as keyof typeof STATUS_CONFIG]?.label}
+              {t('admin:courses.filters.statusLabel')} {statusFilter === "all" ? t('admin:courses.filters.all') : STATUS_LABELS[statusFilter]}
               <ChevronDown className="h-3 w-3 opacity-50" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem onClick={() => setStatusFilter("all")}>All</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setStatusFilter("all")}>{t('admin:courses.filters.all')}</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => setStatusFilter("Published")}>Published</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setStatusFilter("PendingReview")}>Pending Review</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setStatusFilter("Draft")}>Draft</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setStatusFilter("Archived")}>Archived</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setStatusFilter("Published")}>{t('admin:courses.statuses.published')}</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setStatusFilter("PendingReview")}>{t('admin:courses.statuses.pendingReview')}</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setStatusFilter("Draft")}>{t('admin:courses.statuses.draft')}</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setStatusFilter("Archived")}>{t('admin:courses.statuses.archived')}</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -295,13 +304,13 @@ export function AdminCoursesPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/50">
-                <th className="px-4 py-3 text-start font-medium text-muted-foreground">Course</th>
-                <th className="px-4 py-3 text-start font-medium text-muted-foreground">Instructor</th>
-                <th className="px-4 py-3 text-start font-medium text-muted-foreground">Category</th>
-                <th className="px-4 py-3 text-start font-medium text-muted-foreground">Price</th>
-                <th className="px-4 py-3 text-start font-medium text-muted-foreground">Rating</th>
-                <th className="px-4 py-3 text-start font-medium text-muted-foreground">Status</th>
-                <th className="px-4 py-3 text-end font-medium text-muted-foreground">Actions</th>
+                <th className="px-4 py-3 text-start font-medium text-muted-foreground">{t('admin:courses.table.course')}</th>
+                <th className="px-4 py-3 text-start font-medium text-muted-foreground">{t('admin:courses.table.instructor')}</th>
+                <th className="px-4 py-3 text-start font-medium text-muted-foreground">{t('admin:courses.table.category')}</th>
+                <th className="px-4 py-3 text-start font-medium text-muted-foreground">{t('admin:courses.table.price')}</th>
+                <th className="px-4 py-3 text-start font-medium text-muted-foreground">{t('admin:courses.table.rating')}</th>
+                <th className="px-4 py-3 text-start font-medium text-muted-foreground">{t('admin:courses.table.status')}</th>
+                <th className="px-4 py-3 text-end font-medium text-muted-foreground">{t('admin:courses.table.actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -346,7 +355,7 @@ export function AdminCoursesPage() {
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">{course.instructorName}</td>
                     <td className="px-4 py-3 text-muted-foreground">{course.category}</td>
-                    <td className="px-4 py-3">{course.price != null ? `$${course.price.toFixed(2)}` : 'Free'}</td>
+                    <td className="px-4 py-3">{course.price != null ? `$${course.price.toFixed(2)}` : t('admin:courses.free')}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1">
                         <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
@@ -357,9 +366,9 @@ export function AdminCoursesPage() {
                     <td className="px-4 py-3">
                       <span className={cn(
                         "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
-                        STATUS_CONFIG[course.status as keyof typeof STATUS_CONFIG]?.color
+                        STATUS_COLORS[course.status as keyof typeof STATUS_COLORS]
                       )}>
-                        {STATUS_CONFIG[course.status as keyof typeof STATUS_CONFIG]?.label}
+                        {STATUS_LABELS[course.status]}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-end">
@@ -381,11 +390,11 @@ export function AdminCoursesPage() {
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => navigate(`/courses/${course.id}`)}>
                             <Eye className="me-2 h-4 w-4" />
-                            View Course
+                            {t('admin:courses.viewCourse')}
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => openCourseInsights(course)}>
                             <FileText className="me-2 h-4 w-4" />
-                            Materials & ratings
+                            {t('admin:courses.materialsRatings')}
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           {(course.status === "Draft" || course.status === "PendingReview") && (
@@ -394,7 +403,7 @@ export function AdminCoursesPage() {
                               onClick={() => handlePublish(course)}
                             >
                               <CheckCircle className="me-2 h-4 w-4" />
-                              Publish
+                              {t('admin:courses.publish')}
                             </DropdownMenuItem>
                           )}
                           {course.status === "Published" && (
@@ -403,7 +412,7 @@ export function AdminCoursesPage() {
                               onClick={() => handleArchive(course)}
                             >
                               <Archive className="me-2 h-4 w-4" />
-                              Archive
+                              {t('admin:courses.archive')}
                             </DropdownMenuItem>
                           )}
                           <DropdownMenuItem
@@ -411,7 +420,7 @@ export function AdminCoursesPage() {
                             onClick={() => handleDeleteClick(course)}
                           >
                             <Trash2 className="me-2 h-4 w-4" />
-                            Delete
+                            {t('admin:courses.delete')}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -426,7 +435,7 @@ export function AdminCoursesPage() {
         {!loading && filteredCourses.length === 0 && (
           <div className="py-12 text-center">
             <BookOpen className="mx-auto h-12 w-12 text-muted-foreground/50" />
-            <p className="mt-2 text-sm text-muted-foreground">No courses found</p>
+            <p className="mt-2 text-sm text-muted-foreground">{t('admin:courses.empty')}</p>
           </div>
         )}
 
@@ -434,7 +443,11 @@ export function AdminCoursesPage() {
         {totalPages > 1 && (
           <div className="flex items-center justify-between border-t px-4 py-3">
             <p className="text-sm text-muted-foreground">
-              Showing {((pageNumber - 1) * pageSize) + 1} to {Math.min(pageNumber * pageSize, totalCount)} of {totalCount} courses
+              {t('admin:courses.pagination.showing', {
+                from: ((pageNumber - 1) * pageSize) + 1,
+                to: Math.min(pageNumber * pageSize, totalCount),
+                total: totalCount,
+              })}
             </p>
             <div className="flex items-center gap-2">
               <Button
@@ -446,7 +459,7 @@ export function AdminCoursesPage() {
                 <ChevronLeft className="h-4 w-4" />
               </Button>
               <span className="text-sm">
-                Page {pageNumber} of {totalPages}
+                {t('admin:courses.pagination.page', { current: pageNumber, total: totalPages })}
               </span>
               <Button
                 variant="outline"
@@ -464,9 +477,9 @@ export function AdminCoursesPage() {
       <Dialog open={insightsOpen} onOpenChange={setInsightsOpen}>
         <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Materials & ratings</DialogTitle>
+            <DialogTitle>{t('admin:courses.materialsRatings')}</DialogTitle>
             <DialogDescription>
-              {insightsCourse?.title ?? "Course"} — read-only overview
+              {t('admin:courses.readOnlyOverview', { title: insightsCourse?.title ?? t('admin:courses.fallbackCourse') })}
             </DialogDescription>
           </DialogHeader>
           {insightsLoading ? (
@@ -476,17 +489,17 @@ export function AdminCoursesPage() {
           ) : (
             <div className="space-y-6 text-sm">
               <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase mb-2">Materials</p>
+                <p className="text-xs font-medium text-muted-foreground uppercase mb-2">{t('admin:courses.materials')}</p>
                 {insightsMaterials.length === 0 ? (
-                  <p className="text-muted-foreground">No materials uploaded.</p>
+                  <p className="text-muted-foreground">{t('admin:courses.noMaterials')}</p>
                 ) : (
                   <ul className="space-y-2">
                     {insightsMaterials.map((m) => (
                       <li key={m.id} className="rounded-md border px-3 py-2">
                         <div className="font-medium">{m.title}</div>
                         <div className="text-xs text-muted-foreground">
-                          {m.kind === 1 ? "Book" : "File"}
-                          {m.lessonTitle ? ` · ${m.lessonTitle}` : " · Whole course"}
+                          {m.kind === 1 ? t('admin:courses.materialKindBook') : t('admin:courses.materialKindFile')}
+                          {m.lessonTitle ? ` · ${m.lessonTitle}` : ` · ${t('admin:courses.wholeCourse')}`}
                         </div>
                       </li>
                     ))}
@@ -494,9 +507,9 @@ export function AdminCoursesPage() {
                 )}
               </div>
               <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase mb-2">Lesson ratings</p>
+                <p className="text-xs font-medium text-muted-foreground uppercase mb-2">{t('admin:courses.lessonRatings')}</p>
                 {insightsLessonR.length === 0 ? (
-                  <p className="text-muted-foreground">No lesson ratings yet.</p>
+                  <p className="text-muted-foreground">{t('admin:courses.noLessonRatings')}</p>
                 ) : (
                   <ul className="space-y-1">
                     {insightsLessonR.map((r) => (
@@ -511,9 +524,9 @@ export function AdminCoursesPage() {
                 )}
               </div>
               <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase mb-2">Session ratings</p>
+                <p className="text-xs font-medium text-muted-foreground uppercase mb-2">{t('admin:courses.sessionRatings')}</p>
                 {insightsMeetR.length === 0 ? (
-                  <p className="text-muted-foreground">No session ratings yet.</p>
+                  <p className="text-muted-foreground">{t('admin:courses.noSessionRatings')}</p>
                 ) : (
                   <ul className="space-y-1">
                     {insightsMeetR.map((r) => (
@@ -538,15 +551,14 @@ export function AdminCoursesPage() {
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Course</DialogTitle>
+            <DialogTitle>{t('admin:courses.deleteDialog.title')}</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete "{courseToDelete?.title}"? This action cannot be undone.
-              All enrollments and student progress will be permanently removed.
+              {t('admin:courses.deleteDialog.description', { title: courseToDelete?.title ?? '' })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
-              Cancel
+              {t('common:cancel')}
             </Button>
             <Button
               variant="destructive"
@@ -556,10 +568,10 @@ export function AdminCoursesPage() {
               {actionLoading === courseToDelete?.id ? (
                 <>
                   <Loader2 className="me-2 h-4 w-4 animate-spin" />
-                  Deleting...
+                  {t('admin:courses.deleting')}
                 </>
               ) : (
-                'Delete Course'
+                t('admin:courses.deleteCourse')
               )}
             </Button>
           </DialogFooter>

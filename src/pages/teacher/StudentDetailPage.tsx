@@ -33,8 +33,10 @@ import {
   type StudentInstructorCourses,
   type StudentCourseStats,
 } from '../../services/analyticsService'
+import { useTranslation } from 'react-i18next'
 
 export function StudentDetailPage() {
+  const { t } = useTranslation(['teacher', 'common', 'errors'])
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [data, setData] = useState<StudentInstructorCourses | null>(null)
@@ -52,7 +54,7 @@ export function StudentDetailPage() {
           setSelectedCourseId(result.activeCourses[0].courseId)
         }
       } catch (error) {
-        toast.error('Failed to load student profile', {
+        toast.error(t('teacher:studentDetail.errors.loadFailed'), {
           description: error instanceof Error ? error.message : undefined,
         })
       } finally {
@@ -79,12 +81,12 @@ export function StudentDetailPage() {
     return (
       <div className="space-y-6">
         <Button variant="ghost" onClick={() => navigate(-1)} className="gap-2">
-          <ArrowLeft className="h-4 w-4" /> Back
+          <ArrowLeft className="h-4 w-4" /> {t('common:back')}
         </Button>
         <Card>
           <CardContent className="py-16 text-center">
             <User className="mx-auto h-12 w-12 text-muted-foreground/50" />
-            <h2 className="mt-4 text-xl font-semibold">Student not found</h2>
+            <h2 className="mt-4 text-xl font-semibold">{t('teacher:studentDetail.notFound')}</h2>
           </CardContent>
         </Card>
       </div>
@@ -101,7 +103,7 @@ export function StudentDetailPage() {
       className="space-y-6 pb-12"
     >
       <Button variant="ghost" onClick={() => navigate(-1)} className="gap-2 w-fit">
-        <ArrowLeft className="h-4 w-4" /> Back to students
+        <ArrowLeft className="h-4 w-4" /> {t('teacher:atRiskStudents.backToStudents')}
       </Button>
 
       {/* Profile header */}
@@ -128,13 +130,13 @@ export function StudentDetailPage() {
             {data.activeCourses.length > 0 && (
               <Badge variant="secondary" className="px-3 py-1.5">
                 <Activity className="me-1.5 h-3.5 w-3.5" />
-                {data.activeCourses.length} active
+                {t('teacher:studentDetail.activeCount', { count: data.activeCourses.length })}
               </Badge>
             )}
             {data.completedCourses.length > 0 && (
               <Badge variant="secondary" className="px-3 py-1.5">
                 <CheckCircle2 className="me-1.5 h-3.5 w-3.5" />
-                {data.completedCourses.length} completed
+                {t('teacher:studentDetail.completedCount', { count: data.completedCourses.length })}
               </Badge>
             )}
           </div>
@@ -144,7 +146,7 @@ export function StudentDetailPage() {
       {!hasAnyCourses && (
         <Card>
           <CardContent className="py-16 text-center text-sm text-muted-foreground">
-            This student is not enrolled in any of your courses.
+            {t('teacher:studentDetail.notEnrolled')}
           </CardContent>
         </Card>
       )}
@@ -156,14 +158,14 @@ export function StudentDetailPage() {
             <div>
               <CardTitle className="flex items-center gap-2">
                 <BookOpen className="h-5 w-5 text-primary" />
-                Current Course
+                {t('teacher:studentDetail.currentCourse')}
               </CardTitle>
-              <CardDescription>Stats for this student in your active courses</CardDescription>
+              <CardDescription>{t('teacher:studentDetail.currentCourseDescription')}</CardDescription>
             </div>
             {data.activeCourses.length > 1 && (
               <SelectRoot value={selectedCourseId} onValueChange={setSelectedCourseId}>
                 <SelectTrigger className="w-[260px]">
-                  <SelectValue placeholder="Select course" />
+                  <SelectValue placeholder={t('teacher:studentDetail.selectCourse')} />
                 </SelectTrigger>
                 <SelectContent>
                   {data.activeCourses.map((c) => (
@@ -187,10 +189,10 @@ export function StudentDetailPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <History className="h-5 w-5 text-emerald-500" />
-              Completed with you
+              {t('teacher:studentDetail.completedWithYou')}
             </CardTitle>
             <CardDescription>
-              Courses this student finished with you previously
+              {t('teacher:studentDetail.completedWithYouDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -207,6 +209,7 @@ export function StudentDetailPage() {
 }
 
 function CourseStatsView({ stats }: { stats: StudentCourseStats }) {
+  const { t } = useTranslation(['teacher', 'common'])
   return (
     <div className="space-y-6">
       <div>
@@ -216,7 +219,7 @@ function CourseStatsView({ stats }: { stats: StudentCourseStats }) {
         </div>
         <div className="mt-3">
           <div className="mb-1.5 flex items-center justify-between text-xs">
-            <span className="text-muted-foreground">Course progress</span>
+            <span className="text-muted-foreground">{t('teacher:studentDetail.courseProgress')}</span>
             <span className="font-mono font-semibold">{Math.round(stats.progressPercentage)}%</span>
           </div>
           <Progress value={stats.progressPercentage} className="h-2" />
@@ -227,39 +230,39 @@ function CourseStatsView({ stats }: { stats: StudentCourseStats }) {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           icon={<BookOpen className="h-5 w-5 text-blue-500" />}
-          label="Lessons"
+          label={t('teacher:studentDetail.lessons')}
           value={`${stats.lessonsCompleted}/${stats.totalLessons || 0}`}
           hint={
             stats.totalLessons
-              ? `${Math.round((stats.lessonsCompleted / stats.totalLessons) * 100)}% complete`
-              : 'No lessons yet'
+              ? t('teacher:studentDetail.percentComplete', { percent: Math.round((stats.lessonsCompleted / stats.totalLessons) * 100) })
+              : t('teacher:studentDetail.noLessonsYet')
           }
         />
         <StatCard
           icon={<Award className="h-5 w-5 text-emerald-500" />}
-          label="Assignments"
+          label={t('teacher:studentDetail.assignments')}
           value={`${stats.assignmentsSubmitted}/${stats.totalAssignments || 0}`}
           hint={
             stats.averageAssignmentScore != null
-              ? `Avg score: ${stats.averageAssignmentScore.toFixed(1)}`
-              : 'Not graded yet'
+              ? t('teacher:studentDetail.avgScore', { score: stats.averageAssignmentScore.toFixed(1) })
+              : t('teacher:studentDetail.notGradedYet')
           }
         />
         <StatCard
           icon={<GraduationCap className="h-5 w-5 text-violet-500" />}
-          label="Exams"
+          label={t('teacher:studentDetail.examsLabel')}
           value={`${stats.examsTaken}/${stats.totalExams || 0}`}
           hint={
             stats.averageExamScore != null
-              ? `Avg score: ${stats.averageExamScore.toFixed(1)}%`
-              : 'Not taken yet'
+              ? t('teacher:studentDetail.avgScorePercent', { score: stats.averageExamScore.toFixed(1) })
+              : t('teacher:studentDetail.notTakenYet')
           }
         />
         <StatCard
           icon={<TrendingUp className="h-5 w-5 text-amber-500" />}
-          label="Overall Grade"
+          label={t('teacher:studentDetail.overallGrade')}
           value={stats.overallGrade != null ? `${stats.overallGrade.toFixed(1)}%` : '—'}
-          hint="Combined assignments + exams"
+          hint={t('teacher:studentDetail.overallGradeHint')}
         />
       </div>
 
@@ -267,17 +270,17 @@ function CourseStatsView({ stats }: { stats: StudentCourseStats }) {
       <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
         <span className="flex items-center gap-1.5">
           <Clock className="h-3.5 w-3.5" />
-          Enrolled: {format(new Date(stats.enrolledAt), 'MMM d, yyyy')}
+          {t('teacher:studentDetail.enrolled', { date: format(new Date(stats.enrolledAt), 'MMM d, yyyy') })}
         </span>
         {stats.lastActivityAt && (
           <span className="flex items-center gap-1.5">
             <Activity className="h-3.5 w-3.5" />
-            Last active{' '}
+            {t('teacher:studentDetail.lastActiveLabel')}{' '}
             {formatDistanceToNow(new Date(stats.lastActivityAt), { addSuffix: true })}
           </span>
         )}
         <Badge variant="outline" className="ms-auto">
-          {stats.status}
+          {t(`teacher:courseStudents.status.${(stats.status || 'Active').toLowerCase()}`)}
         </Badge>
       </div>
     </div>
@@ -285,6 +288,7 @@ function CourseStatsView({ stats }: { stats: StudentCourseStats }) {
 }
 
 function CompletedCourseCard({ stats }: { stats: StudentCourseStats }) {
+  const { t } = useTranslation(['teacher', 'common'])
   return (
     <div className="rounded-xl border border-border/60 bg-muted/20 p-4 transition-colors hover:border-emerald-500/30 hover:bg-muted/40">
       <div className="flex items-start justify-between gap-3">
@@ -294,28 +298,28 @@ function CompletedCourseCard({ stats }: { stats: StudentCourseStats }) {
         </div>
         <Badge className="shrink-0 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-0">
           <CheckCircle2 className="me-1 h-3 w-3" />
-          Completed
+          {t('teacher:courseStudents.status.completed')}
         </Badge>
       </div>
       <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
         <div>
-          <div className="text-muted-foreground">Final grade</div>
+          <div className="text-muted-foreground">{t('teacher:studentDetail.finalGrade')}</div>
           <div className="font-semibold text-base">
             {stats.overallGrade != null ? `${stats.overallGrade.toFixed(1)}%` : '—'}
           </div>
         </div>
         <div>
-          <div className="text-muted-foreground">Completion</div>
+          <div className="text-muted-foreground">{t('teacher:dashboard.completion')}</div>
           <div className="font-semibold text-base">{Math.round(stats.progressPercentage)}%</div>
         </div>
         <div>
-          <div className="text-muted-foreground">Assignments</div>
+          <div className="text-muted-foreground">{t('teacher:studentDetail.assignments')}</div>
           <div className="font-medium">
             {stats.assignmentsSubmitted}/{stats.totalAssignments}
           </div>
         </div>
         <div>
-          <div className="text-muted-foreground">Exams</div>
+          <div className="text-muted-foreground">{t('teacher:studentDetail.examsLabel')}</div>
           <div className="font-medium">
             {stats.examsTaken}/{stats.totalExams}
           </div>
@@ -323,7 +327,7 @@ function CompletedCourseCard({ stats }: { stats: StudentCourseStats }) {
       </div>
       {stats.completedAt && (
         <div className="mt-3 text-[11px] text-muted-foreground">
-          Finished {format(new Date(stats.completedAt), 'MMM d, yyyy')}
+          {t('teacher:studentDetail.finished', { date: format(new Date(stats.completedAt), 'MMM d, yyyy') })}
         </div>
       )}
     </div>

@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Settings,
   Flag,
@@ -52,36 +53,36 @@ import {
 // Settings tabs
 type SettingsTab = "general" | "appearance" | "security" | "email" | "notifications" | "integrations" | "backup" | "advanced";
 
-const SETTINGS_TABS: { id: SettingsTab; label: string; icon: React.ElementType; description: string }[] = [
-  { id: "general", label: "General", icon: Settings, description: "Platform name, timezone, and basic settings" },
-  { id: "appearance", label: "Appearance", icon: Palette, description: "Theme, colors, and branding" },
-  { id: "security", label: "Security", icon: Shield, description: "Authentication, passwords, and access control" },
-  { id: "email", label: "Email", icon: Mail, description: "SMTP configuration and email templates" },
-  { id: "notifications", label: "Notifications", icon: Bell, description: "Alert preferences and channels" },
-  { id: "integrations", label: "Integrations", icon: Zap, description: "Third-party services and APIs" },
-  { id: "backup", label: "Backup & Data", icon: Database, description: "Data export, import, and backup" },
-  { id: "advanced", label: "Advanced", icon: Server, description: "Feature flags and system config" },
+const SETTINGS_TABS: { id: SettingsTab; labelKey: string; icon: React.ElementType; descKey: string }[] = [
+  { id: "general", labelKey: "admin:settings.tabs.general", icon: Settings, descKey: "admin:settings.tabs.generalDesc" },
+  { id: "appearance", labelKey: "admin:settings.tabs.appearance", icon: Palette, descKey: "admin:settings.tabs.appearanceDesc" },
+  { id: "security", labelKey: "admin:settings.tabs.security", icon: Shield, descKey: "admin:settings.tabs.securityDesc" },
+  { id: "email", labelKey: "admin:settings.tabs.email", icon: Mail, descKey: "admin:settings.tabs.emailDesc" },
+  { id: "notifications", labelKey: "admin:settings.tabs.notifications", icon: Bell, descKey: "admin:settings.tabs.notificationsDesc" },
+  { id: "integrations", labelKey: "admin:settings.tabs.integrations", icon: Zap, descKey: "admin:settings.tabs.integrationsDesc" },
+  { id: "backup", labelKey: "admin:settings.tabs.backup", icon: Database, descKey: "admin:settings.tabs.backupDesc" },
+  { id: "advanced", labelKey: "admin:settings.tabs.advanced", icon: Server, descKey: "admin:settings.tabs.advancedDesc" },
 ];
 
 // Mock Feature Flags
 const initialFeatureFlags = [
-  { id: "ff1", name: "New Dashboard", description: "Enable the redesigned admin dashboard", enabled: true, category: "general" },
-  { id: "ff2", name: "AI Course Recommendations", description: "ML-powered course recommendations for students", enabled: false, category: "experimental" },
-  { id: "ff3", name: "Live Streaming", description: "Allow instructors to live stream classes", enabled: true, category: "beta" },
-  { id: "ff4", name: "Payment Installments", description: "Enable course payment in installments", enabled: false, category: "beta" },
-  { id: "ff5", name: "Two-Factor Authentication", description: "Require 2FA for all admin accounts", enabled: true, category: "security" },
-  { id: "ff6", name: "API Rate Limiting", description: "Enable advanced API rate limiting", enabled: true, category: "security" },
-  { id: "ff7", name: "Course Analytics", description: "Advanced analytics for course performance", enabled: true, category: "general" },
-  { id: "ff8", name: "Social Login", description: "Login with Google, Microsoft, and GitHub", enabled: false, category: "beta" },
+  { id: "ff1", nameKey: "admin:settings.advanced.flags.newDashboard", descKey: "admin:settings.advanced.flags.newDashboardDesc", enabled: true, category: "general" },
+  { id: "ff2", nameKey: "admin:settings.advanced.flags.aiRecommendations", descKey: "admin:settings.advanced.flags.aiRecommendationsDesc", enabled: false, category: "experimental" },
+  { id: "ff3", nameKey: "admin:settings.advanced.flags.liveStreaming", descKey: "admin:settings.advanced.flags.liveStreamingDesc", enabled: true, category: "beta" },
+  { id: "ff4", nameKey: "admin:settings.advanced.flags.paymentInstallments", descKey: "admin:settings.advanced.flags.paymentInstallmentsDesc", enabled: false, category: "beta" },
+  { id: "ff5", nameKey: "admin:settings.advanced.flags.twoFactor", descKey: "admin:settings.advanced.flags.twoFactorDesc", enabled: true, category: "security" },
+  { id: "ff6", nameKey: "admin:settings.advanced.flags.apiRateLimiting", descKey: "admin:settings.advanced.flags.apiRateLimitingDesc", enabled: true, category: "security" },
+  { id: "ff7", nameKey: "admin:settings.advanced.flags.courseAnalytics", descKey: "admin:settings.advanced.flags.courseAnalyticsDesc", enabled: true, category: "general" },
+  { id: "ff8", nameKey: "admin:settings.advanced.flags.socialLogin", descKey: "admin:settings.advanced.flags.socialLoginDesc", enabled: false, category: "beta" },
 ];
 
 // Mock Integrations
 const INTEGRATIONS = [
-  { id: "stripe", name: "Stripe", description: "Payment processing", connected: true, icon: CreditCard },
-  { id: "google", name: "Google Analytics", description: "Website analytics", connected: true, icon: Globe },
-  { id: "slack", name: "Slack", description: "Team notifications", connected: false, icon: Bell },
-  { id: "zoom", name: "Zoom", description: "Video conferencing", connected: true, icon: Monitor },
-  { id: "mailchimp", name: "Mailchimp", description: "Email marketing", connected: false, icon: Mail },
+  { id: "stripe", nameKey: "admin:settings.integrations.services.stripe", descKey: "admin:settings.integrations.services.stripeDesc", connected: true, icon: CreditCard },
+  { id: "google", nameKey: "admin:settings.integrations.services.google", descKey: "admin:settings.integrations.services.googleDesc", connected: true, icon: Globe },
+  { id: "slack", nameKey: "admin:settings.integrations.services.slack", descKey: "admin:settings.integrations.services.slackDesc", connected: false, icon: Bell },
+  { id: "zoom", nameKey: "admin:settings.integrations.services.zoom", descKey: "admin:settings.integrations.services.zoomDesc", connected: true, icon: Monitor },
+  { id: "mailchimp", nameKey: "admin:settings.integrations.services.mailchimp", descKey: "admin:settings.integrations.services.mailchimpDesc", connected: false, icon: Mail },
 ];
 
 function SettingSection({ title, description, children, icon: Icon }: {
@@ -128,6 +129,7 @@ function SettingRow({ label, description, children, className }: {
 }
 
 export function AdminSettingsPage() {
+  const { t } = useTranslation(['admin', 'common', 'errors']);
   const [activeTab, setActiveTab] = useState<SettingsTab>("general");
   const [featureFlags, setFeatureFlags] = useState(initialFeatureFlags);
   const [maintenanceMode, setMaintenanceMode] = useState(false);
@@ -194,7 +196,7 @@ export function AdminSettingsPage() {
         flag.id === flagId ? { ...flag, enabled: !flag.enabled } : flag
       )
     );
-    toast.success("Feature flag updated");
+    toast.success(t('admin:settings.flagUpdated'));
   };
 
   const getCategoryColor = (category: string) => {
@@ -208,13 +210,13 @@ export function AdminSettingsPage() {
   };
 
   const themeLabel = useMemo(
-    () => THEMES.find((t) => t.id === theme)?.label ?? "Theme",
-    [theme]
+    () => THEMES.find((th) => th.id === theme)?.label ?? t('common:theme'),
+    [theme, t]
   );
 
   const handleSaveSettings = () => {
-    toast.success("Settings saved successfully", {
-      description: "Your changes have been applied",
+    toast.success(t('admin:settings.saveToast'), {
+      description: t('admin:settings.saveToastDesc'),
     });
   };
 
@@ -223,17 +225,17 @@ export function AdminSettingsPage() {
       case "general":
         return (
           <div className="space-y-6">
-            <SettingSection title="Platform Identity" description="Basic platform information" icon={Building}>
+            <SettingSection title={t('admin:settings.general.platformIdentity')} description={t('admin:settings.general.platformIdentityDesc')} icon={Building}>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Platform Name</label>
+                  <label className="text-sm font-medium">{t('admin:settings.general.platformName')}</label>
                   <Input
                     value={generalSettings.platformName}
                     onChange={(e) => setGeneralSettings((p) => ({ ...p, platformName: e.target.value }))}
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Tagline</label>
+                  <label className="text-sm font-medium">{t('admin:settings.general.tagline')}</label>
                   <Input
                     value={generalSettings.tagline}
                     onChange={(e) => setGeneralSettings((p) => ({ ...p, tagline: e.target.value }))}
@@ -242,37 +244,37 @@ export function AdminSettingsPage() {
               </div>
             </SettingSection>
 
-            <SettingSection title="Regional Settings" description="Localization preferences" icon={Globe}>
+            <SettingSection title={t('admin:settings.general.regional')} description={t('admin:settings.general.regionalDesc')} icon={Globe}>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Timezone</label>
+                  <label className="text-sm font-medium">{t('admin:settings.general.timezone')}</label>
                   <select
                     value={generalSettings.timezone}
                     onChange={(e) => setGeneralSettings((p) => ({ ...p, timezone: e.target.value }))}
                     className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
                   >
-                    <option value="UTC">UTC</option>
-                    <option value="America/New_York">Eastern Time</option>
-                    <option value="America/Los_Angeles">Pacific Time</option>
-                    <option value="Europe/London">London</option>
-                    <option value="Asia/Dubai">Dubai</option>
+                    <option value="UTC">{t('admin:settings.general.timezones.utc')}</option>
+                    <option value="America/New_York">{t('admin:settings.general.timezones.eastern')}</option>
+                    <option value="America/Los_Angeles">{t('admin:settings.general.timezones.pacific')}</option>
+                    <option value="Europe/London">{t('admin:settings.general.timezones.london')}</option>
+                    <option value="Asia/Dubai">{t('admin:settings.general.timezones.dubai')}</option>
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Language</label>
+                  <label className="text-sm font-medium">{t('admin:settings.general.language')}</label>
                   <select
                     value={generalSettings.language}
                     onChange={(e) => setGeneralSettings((p) => ({ ...p, language: e.target.value }))}
                     className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
                   >
-                    <option value="en">English</option>
-                    <option value="ar">Arabic</option>
-                    <option value="es">Español</option>
-                    <option value="fr">Français</option>
+                    <option value="en">{t('admin:settings.general.languages.en')}</option>
+                    <option value="ar">{t('admin:settings.general.languages.ar')}</option>
+                    <option value="es">{t('admin:settings.general.languages.es')}</option>
+                    <option value="fr">{t('admin:settings.general.languages.fr')}</option>
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Date Format</label>
+                  <label className="text-sm font-medium">{t('admin:settings.general.dateFormat')}</label>
                   <select
                     value={generalSettings.dateFormat}
                     onChange={(e) => setGeneralSettings((p) => ({ ...p, dateFormat: e.target.value }))}
@@ -284,25 +286,25 @@ export function AdminSettingsPage() {
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Currency</label>
+                  <label className="text-sm font-medium">{t('admin:settings.general.currency')}</label>
                   <select
                     value={generalSettings.currency}
                     onChange={(e) => setGeneralSettings((p) => ({ ...p, currency: e.target.value }))}
                     className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
                   >
-                    <option value="USD">USD ($)</option>
-                    <option value="EUR">EUR (€)</option>
-                    <option value="GBP">GBP (£)</option>
-                    <option value="AED">AED (UAE Dirham)</option>
+                    <option value="USD">{t('admin:settings.general.currencies.usd')}</option>
+                    <option value="EUR">{t('admin:settings.general.currencies.eur')}</option>
+                    <option value="GBP">{t('admin:settings.general.currencies.gbp')}</option>
+                    <option value="AED">{t('admin:settings.general.currencies.aed')}</option>
                   </select>
                 </div>
               </div>
             </SettingSection>
 
-            <SettingSection title="Maintenance Mode" description="Restrict platform access" icon={AlertTriangle}>
+            <SettingSection title={t('admin:settings.general.maintenance')} description={t('admin:settings.general.maintenanceDesc')} icon={AlertTriangle}>
               <SettingRow
-                label="Enable Maintenance Mode"
-                description="Only administrators can access the platform when enabled"
+                label={t('admin:settings.general.enableMaintenance')}
+                description={t('admin:settings.general.enableMaintenanceDesc')}
               >
                 <Switch checked={maintenanceMode} onCheckedChange={setMaintenanceMode} />
               </SettingRow>
@@ -310,10 +312,10 @@ export function AdminSettingsPage() {
                 <div className="mt-4 rounded-lg border border-amber-500/20 bg-amber-500/5 p-4">
                   <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
                     <AlertTriangle className="h-4 w-4" />
-                    <span className="text-sm font-medium">Maintenance mode is active</span>
+                    <span className="text-sm font-medium">{t('admin:settings.general.maintenanceActive')}</span>
                   </div>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    Users will see a maintenance page. Only admin accounts can access the platform.
+                    {t('admin:settings.general.maintenanceActiveDesc')}
                   </p>
                 </div>
               )}
@@ -324,10 +326,10 @@ export function AdminSettingsPage() {
       case "appearance":
         return (
           <div className="space-y-6">
-            <SettingSection title="Theme" description="Choose your preferred color scheme" icon={Palette}>
+            <SettingSection title={t('admin:settings.appearance.theme')} description={t('admin:settings.appearance.themeDesc')} icon={Palette}>
               <div className="space-y-4">
                 <div className="flex items-center gap-4">
-                  <span className="text-sm font-medium w-24">Mode</span>
+                  <span className="text-sm font-medium w-24">{t('admin:settings.appearance.mode')}</span>
                   <div className="flex gap-2">
                     <Button
                       variant={theme === "light" ? "default" : "outline"}
@@ -336,7 +338,7 @@ export function AdminSettingsPage() {
                       className="gap-2"
                     >
                       <Sun className="h-4 w-4" />
-                      Light
+                      {t('admin:settings.appearance.light')}
                     </Button>
                     <Button
                       variant={theme === "dark" ? "default" : "outline"}
@@ -345,24 +347,24 @@ export function AdminSettingsPage() {
                       className="gap-2"
                     >
                       <Moon className="h-4 w-4" />
-                      Dark
+                      {t('admin:settings.appearance.dark')}
                     </Button>
                   </div>
                 </div>
-                
+
                 <div className="border-t pt-4">
-                  <p className="text-sm font-medium mb-3">Color Theme</p>
+                  <p className="text-sm font-medium mb-3">{t('admin:settings.appearance.colorTheme')}</p>
                   <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-12 gap-2">
-                    {THEMES.filter(t => t.id !== 'custom' && t.id !== 'light' && t.id !== 'dark').map((t) => (
+                    {THEMES.filter(th => th.id !== 'custom' && th.id !== 'light' && th.id !== 'dark').map((th) => (
                       <button
-                        key={t.id}
+                        key={th.id}
                         onClick={() => {
-                          setTheme(t.id);
-                          toast.success(`Theme changed to ${t.label}`);
+                          setTheme(th.id);
+                          toast.success(t('admin:settings.appearance.themeChanged', { theme: th.label }));
                         }}
                         className={cn(
                           "flex flex-col items-center gap-1.5 p-2 rounded-lg border-2 transition-all",
-                          theme === t.id
+                          theme === th.id
                             ? "border-primary bg-primary/5"
                             : "border-transparent hover:border-border hover:bg-muted/50"
                         )}
@@ -370,19 +372,19 @@ export function AdminSettingsPage() {
                         <span
                           className={cn(
                             "h-8 w-8 rounded-full border-2 border-white shadow-md",
-                            t.id === "purple" && "bg-[#a855f7]",
-                            t.id === "sky" && "bg-[#06b6d4]",
-                            t.id === "green" && "bg-[#22c55e]",
-                            t.id === "emerald" && "bg-[#10b981]",
-                            t.id === "orange" && "bg-[#f97316]",
-                            t.id === "amber" && "bg-[#f59e0b]",
-                            t.id === "red" && "bg-[#ef4444]",
-                            t.id === "rose" && "bg-[#f43f5e]",
-                            t.id === "pink" && "bg-[#ec4899]",
-                            t.id === "indigo" && "bg-[#6366f1]"
+                            th.id === "purple" && "bg-[#a855f7]",
+                            th.id === "sky" && "bg-[#06b6d4]",
+                            th.id === "green" && "bg-[#22c55e]",
+                            th.id === "emerald" && "bg-[#10b981]",
+                            th.id === "orange" && "bg-[#f97316]",
+                            th.id === "amber" && "bg-[#f59e0b]",
+                            th.id === "red" && "bg-[#ef4444]",
+                            th.id === "rose" && "bg-[#f43f5e]",
+                            th.id === "pink" && "bg-[#ec4899]",
+                            th.id === "indigo" && "bg-[#6366f1]"
                           )}
                         />
-                        <span className="text-[10px] font-medium">{t.label}</span>
+                        <span className="text-[10px] font-medium">{th.label}</span>
                       </button>
                     ))}
                   </div>
@@ -391,8 +393,8 @@ export function AdminSettingsPage() {
                 <div className="border-t pt-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium">Custom Color</p>
-                      <p className="text-xs text-muted-foreground">Pick your own brand color</p>
+                      <p className="text-sm font-medium">{t('admin:settings.appearance.customColor')}</p>
+                      <p className="text-xs text-muted-foreground">{t('admin:settings.appearance.customColorDesc')}</p>
                     </div>
                     <div className="flex items-center gap-3">
                       <ColorPicker
@@ -400,11 +402,11 @@ export function AdminSettingsPage() {
                         onChange={(color) => {
                           setCustomThemeColor(color);
                           setTheme('custom');
-                          toast.success("Custom color applied");
+                          toast.success(t('admin:settings.appearance.customColorApplied'));
                         }}
                       />
                       {theme === 'custom' && (
-                        <span className="text-xs text-primary font-medium">Active</span>
+                        <span className="text-xs text-primary font-medium">{t('admin:settings.appearance.active')}</span>
                       )}
                     </div>
                   </div>
@@ -412,24 +414,24 @@ export function AdminSettingsPage() {
               </div>
             </SettingSection>
 
-            <SettingSection title="Branding" description="Logo and brand assets" icon={Building}>
+            <SettingSection title={t('admin:settings.appearance.branding')} description={t('admin:settings.appearance.brandingDesc')} icon={Building}>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Platform Logo</label>
+                  <label className="text-sm font-medium">{t('admin:settings.appearance.platformLogo')}</label>
                   <div className="flex items-center gap-3">
                     <div className="h-16 w-16 rounded-lg border-2 border-dashed border-border flex items-center justify-center bg-muted/50">
                       <Upload className="h-6 w-6 text-muted-foreground" />
                     </div>
-                    <Button variant="outline" size="sm">Upload Logo</Button>
+                    <Button variant="outline" size="sm">{t('admin:settings.appearance.uploadLogo')}</Button>
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Favicon</label>
+                  <label className="text-sm font-medium">{t('admin:settings.appearance.favicon')}</label>
                   <div className="flex items-center gap-3">
                     <div className="h-16 w-16 rounded-lg border-2 border-dashed border-border flex items-center justify-center bg-muted/50">
                       <Upload className="h-6 w-6 text-muted-foreground" />
                     </div>
-                    <Button variant="outline" size="sm">Upload Favicon</Button>
+                    <Button variant="outline" size="sm">{t('admin:settings.appearance.uploadFavicon')}</Button>
                   </div>
                 </div>
               </div>
@@ -440,21 +442,21 @@ export function AdminSettingsPage() {
       case "security":
         return (
           <div className="space-y-6">
-            <SettingSection title="Authentication" description="Login and session settings" icon={Lock}>
+            <SettingSection title={t('admin:settings.security.authentication')} description={t('admin:settings.security.authenticationDesc')} icon={Lock}>
               <div className="space-y-4">
-                <SettingRow label="Force HTTPS" description="Redirect all HTTP traffic to HTTPS">
+                <SettingRow label={t('admin:settings.security.forceHttps')} description={t('admin:settings.security.forceHttpsDesc')}>
                   <Switch
                     checked={securitySettings.forceHttps}
                     onCheckedChange={(v) => setSecuritySettings((p) => ({ ...p, forceHttps: v }))}
                   />
                 </SettingRow>
-                <SettingRow label="Two-Factor Authentication" description="Require 2FA for all admin accounts">
+                <SettingRow label={t('admin:settings.security.twoFactor')} description={t('admin:settings.security.twoFactorDesc')}>
                   <Switch
                     checked={securitySettings.twoFactorRequired}
                     onCheckedChange={(v) => setSecuritySettings((p) => ({ ...p, twoFactorRequired: v }))}
                   />
                 </SettingRow>
-                <SettingRow label="Remember Me Option" description="Allow users to stay logged in">
+                <SettingRow label={t('admin:settings.security.rememberMe')} description={t('admin:settings.security.rememberMeDesc')}>
                   <Switch
                     checked={securitySettings.allowRememberMe}
                     onCheckedChange={(v) => setSecuritySettings((p) => ({ ...p, allowRememberMe: v }))}
@@ -463,42 +465,42 @@ export function AdminSettingsPage() {
               </div>
             </SettingSection>
 
-            <SettingSection title="Session Management" description="Session timeout and security" icon={Clock}>
+            <SettingSection title={t('admin:settings.security.session')} description={t('admin:settings.security.sessionDesc')} icon={Clock}>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Session Timeout (minutes)</label>
+                  <label className="text-sm font-medium">{t('admin:settings.security.sessionTimeout')}</label>
                   <Input
                     type="number"
                     value={securitySettings.sessionTimeout}
                     onChange={(e) => setSecuritySettings((p) => ({ ...p, sessionTimeout: parseInt(e.target.value) || 30 }))}
                   />
-                  <p className="text-xs text-muted-foreground">Auto-logout after inactivity</p>
+                  <p className="text-xs text-muted-foreground">{t('admin:settings.security.autoLogout')}</p>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Max Login Attempts</label>
+                  <label className="text-sm font-medium">{t('admin:settings.security.maxLogin')}</label>
                   <Input
                     type="number"
                     value={securitySettings.maxLoginAttempts}
                     onChange={(e) => setSecuritySettings((p) => ({ ...p, maxLoginAttempts: parseInt(e.target.value) || 5 }))}
                   />
-                  <p className="text-xs text-muted-foreground">Before account lockout</p>
+                  <p className="text-xs text-muted-foreground">{t('admin:settings.security.beforeLockout')}</p>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Lockout Duration (minutes)</label>
+                  <label className="text-sm font-medium">{t('admin:settings.security.lockoutDuration')}</label>
                   <Input
                     type="number"
                     value={securitySettings.lockoutDuration}
                     onChange={(e) => setSecuritySettings((p) => ({ ...p, lockoutDuration: parseInt(e.target.value) || 15 }))}
                   />
-                  <p className="text-xs text-muted-foreground">Time before unlock</p>
+                  <p className="text-xs text-muted-foreground">{t('admin:settings.security.timeBeforeUnlock')}</p>
                 </div>
               </div>
             </SettingSection>
 
-            <SettingSection title="Password Policy" description="Password strength requirements" icon={Key}>
+            <SettingSection title={t('admin:settings.security.passwordPolicy')} description={t('admin:settings.security.passwordPolicyDesc')} icon={Key}>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Minimum Password Length</label>
+                  <label className="text-sm font-medium">{t('admin:settings.security.minLength')}</label>
                   <Input
                     type="number"
                     value={securitySettings.passwordMinLength}
@@ -507,25 +509,25 @@ export function AdminSettingsPage() {
                   />
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <SettingRow label="Require Uppercase" description="At least one uppercase letter">
+                  <SettingRow label={t('admin:settings.security.requireUppercase')} description={t('admin:settings.security.requireUppercaseDesc')}>
                     <Switch
                       checked={securitySettings.passwordRequireUppercase}
                       onCheckedChange={(v) => setSecuritySettings((p) => ({ ...p, passwordRequireUppercase: v }))}
                     />
                   </SettingRow>
-                  <SettingRow label="Require Lowercase" description="At least one lowercase letter">
+                  <SettingRow label={t('admin:settings.security.requireLowercase')} description={t('admin:settings.security.requireLowercaseDesc')}>
                     <Switch
                       checked={securitySettings.passwordRequireLowercase}
                       onCheckedChange={(v) => setSecuritySettings((p) => ({ ...p, passwordRequireLowercase: v }))}
                     />
                   </SettingRow>
-                  <SettingRow label="Require Numbers" description="At least one numeric digit">
+                  <SettingRow label={t('admin:settings.security.requireNumbers')} description={t('admin:settings.security.requireNumbersDesc')}>
                     <Switch
                       checked={securitySettings.passwordRequireNumbers}
                       onCheckedChange={(v) => setSecuritySettings((p) => ({ ...p, passwordRequireNumbers: v }))}
                     />
                   </SettingRow>
-                  <SettingRow label="Require Special Characters" description="At least one special character">
+                  <SettingRow label={t('admin:settings.security.requireSpecial')} description={t('admin:settings.security.requireSpecialDesc')}>
                     <Switch
                       checked={securitySettings.passwordRequireSpecial}
                       onCheckedChange={(v) => setSecuritySettings((p) => ({ ...p, passwordRequireSpecial: v }))}
@@ -535,16 +537,16 @@ export function AdminSettingsPage() {
               </div>
             </SettingSection>
 
-            <SettingSection title="IP Whitelist" description="Restrict admin access by IP" icon={Shield}>
+            <SettingSection title={t('admin:settings.security.ipWhitelist')} description={t('admin:settings.security.ipWhitelistDesc')} icon={Shield}>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Allowed IP Addresses</label>
+                <label className="text-sm font-medium">{t('admin:settings.security.allowedIps')}</label>
                 <Input
-                  placeholder="e.g., 192.168.1.1, 10.0.0.0/24"
+                  placeholder={t('admin:settings.security.ipPlaceholder')}
                   value={securitySettings.ipWhitelist}
                   onChange={(e) => setSecuritySettings((p) => ({ ...p, ipWhitelist: e.target.value }))}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Comma-separated list of IPs or CIDR ranges. Leave empty to allow all.
+                  {t('admin:settings.security.ipHelp')}
                 </p>
               </div>
             </SettingSection>
@@ -554,31 +556,31 @@ export function AdminSettingsPage() {
       case "email":
         return (
           <div className="space-y-6">
-            <SettingSection title="SMTP Configuration" description="Email server settings" icon={Mail}>
+            <SettingSection title={t('admin:settings.email.smtp')} description={t('admin:settings.email.smtpDesc')} icon={Mail}>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">SMTP Host</label>
+                  <label className="text-sm font-medium">{t('admin:settings.email.smtpHost')}</label>
                   <Input
                     value={emailSettings.smtpHost}
                     onChange={(e) => setEmailSettings((p) => ({ ...p, smtpHost: e.target.value }))}
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">SMTP Port</label>
+                  <label className="text-sm font-medium">{t('admin:settings.email.smtpPort')}</label>
                   <Input
                     value={emailSettings.smtpPort}
                     onChange={(e) => setEmailSettings((p) => ({ ...p, smtpPort: e.target.value }))}
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Username</label>
+                  <label className="text-sm font-medium">{t('admin:settings.email.username')}</label>
                   <Input
                     value={emailSettings.smtpUsername}
                     onChange={(e) => setEmailSettings((p) => ({ ...p, smtpUsername: e.target.value }))}
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Password</label>
+                  <label className="text-sm font-medium">{t('admin:settings.email.password')}</label>
                   <div className="relative">
                     <Input
                       type={showApiKey ? "text" : "password"}
@@ -596,7 +598,7 @@ export function AdminSettingsPage() {
                 </div>
               </div>
               <div className="mt-4 flex items-center gap-3">
-                <SettingRow label="Enable SSL/TLS" description="Secure email transmission" className="flex-1">
+                <SettingRow label={t('admin:settings.email.enableSsl')} description={t('admin:settings.email.enableSslDesc')} className="flex-1">
                   <Switch
                     checked={emailSettings.enableSsl}
                     onCheckedChange={(v) => setEmailSettings((p) => ({ ...p, enableSsl: v }))}
@@ -606,22 +608,22 @@ export function AdminSettingsPage() {
               <div className="mt-4">
                 <Button variant="outline" className="gap-2">
                   <Mail className="h-4 w-4" />
-                  Send Test Email
+                  {t('admin:settings.email.sendTest')}
                 </Button>
               </div>
             </SettingSection>
 
-            <SettingSection title="Sender Information" description="Email sender details" icon={Users}>
+            <SettingSection title={t('admin:settings.email.senderInfo')} description={t('admin:settings.email.senderInfoDesc')} icon={Users}>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Sender Name</label>
+                  <label className="text-sm font-medium">{t('admin:settings.email.senderName')}</label>
                   <Input
                     value={emailSettings.senderName}
                     onChange={(e) => setEmailSettings((p) => ({ ...p, senderName: e.target.value }))}
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Sender Email</label>
+                  <label className="text-sm font-medium">{t('admin:settings.email.senderEmail')}</label>
                   <Input
                     type="email"
                     value={emailSettings.senderEmail}
@@ -631,16 +633,22 @@ export function AdminSettingsPage() {
               </div>
             </SettingSection>
 
-            <SettingSection title="Email Templates" description="Customize system emails" icon={FileText}>
+            <SettingSection title={t('admin:settings.email.templates')} description={t('admin:settings.email.templatesDesc')} icon={FileText}>
               <div className="space-y-2">
-                {["Welcome Email", "Password Reset", "Course Enrollment", "Payment Receipt", "Account Verification"].map((template) => (
+                {[
+                  { key: 'welcome', label: t('admin:settings.email.templateNames.welcome') },
+                  { key: 'passwordReset', label: t('admin:settings.email.templateNames.passwordReset') },
+                  { key: 'courseEnrollment', label: t('admin:settings.email.templateNames.courseEnrollment') },
+                  { key: 'paymentReceipt', label: t('admin:settings.email.templateNames.paymentReceipt') },
+                  { key: 'accountVerification', label: t('admin:settings.email.templateNames.accountVerification') },
+                ].map((template) => (
                   <div
-                    key={template}
+                    key={template.key}
                     className="flex items-center justify-between rounded-lg border border-border bg-background/50 p-4"
                   >
-                    <span className="font-medium">{template}</span>
+                    <span className="font-medium">{template.label}</span>
                     <Button variant="ghost" size="sm" className="gap-1">
-                      Edit
+                      {t('common:edit')}
                       <ChevronRight className="h-4 w-4" />
                     </Button>
                   </div>
@@ -653,21 +661,21 @@ export function AdminSettingsPage() {
       case "notifications":
         return (
           <div className="space-y-6">
-            <SettingSection title="Notification Channels" description="How notifications are delivered" icon={Bell}>
+            <SettingSection title={t('admin:settings.notifications.channels')} description={t('admin:settings.notifications.channelsDesc')} icon={Bell}>
               <div className="space-y-4">
-                <SettingRow label="Email Notifications" description="Receive notifications via email">
+                <SettingRow label={t('admin:settings.notifications.email')} description={t('admin:settings.notifications.emailDesc')}>
                   <Switch
                     checked={notificationSettings.emailNotifications}
                     onCheckedChange={(v) => setNotificationSettings((p) => ({ ...p, emailNotifications: v }))}
                   />
                 </SettingRow>
-                <SettingRow label="Push Notifications" description="Browser and mobile push alerts">
+                <SettingRow label={t('admin:settings.notifications.push')} description={t('admin:settings.notifications.pushDesc')}>
                   <Switch
                     checked={notificationSettings.pushNotifications}
                     onCheckedChange={(v) => setNotificationSettings((p) => ({ ...p, pushNotifications: v }))}
                   />
                 </SettingRow>
-                <SettingRow label="SMS Notifications" description="Critical alerts via text message">
+                <SettingRow label={t('admin:settings.notifications.sms')} description={t('admin:settings.notifications.smsDesc')}>
                   <Switch
                     checked={notificationSettings.smsNotifications}
                     onCheckedChange={(v) => setNotificationSettings((p) => ({ ...p, smsNotifications: v }))}
@@ -676,33 +684,33 @@ export function AdminSettingsPage() {
               </div>
             </SettingSection>
 
-            <SettingSection title="Notification Types" description="What you get notified about" icon={Settings}>
+            <SettingSection title={t('admin:settings.notifications.types')} description={t('admin:settings.notifications.typesDesc')} icon={Settings}>
               <div className="space-y-4">
-                <SettingRow label="Course Updates" description="New lessons, materials, announcements">
+                <SettingRow label={t('admin:settings.notifications.courseUpdates')} description={t('admin:settings.notifications.courseUpdatesDesc')}>
                   <Switch
                     checked={notificationSettings.courseUpdates}
                     onCheckedChange={(v) => setNotificationSettings((p) => ({ ...p, courseUpdates: v }))}
                   />
                 </SettingRow>
-                <SettingRow label="Payment Alerts" description="Transactions, refunds, payouts">
+                <SettingRow label={t('admin:settings.notifications.paymentAlerts')} description={t('admin:settings.notifications.paymentAlertsDesc')}>
                   <Switch
                     checked={notificationSettings.paymentAlerts}
                     onCheckedChange={(v) => setNotificationSettings((p) => ({ ...p, paymentAlerts: v }))}
                   />
                 </SettingRow>
-                <SettingRow label="Security Alerts" description="Login attempts, password changes">
+                <SettingRow label={t('admin:settings.notifications.securityAlerts')} description={t('admin:settings.notifications.securityAlertsDesc')}>
                   <Switch
                     checked={notificationSettings.securityAlerts}
                     onCheckedChange={(v) => setNotificationSettings((p) => ({ ...p, securityAlerts: v }))}
                   />
                 </SettingRow>
-                <SettingRow label="Weekly Digest" description="Weekly summary of platform activity">
+                <SettingRow label={t('admin:settings.notifications.weeklyDigest')} description={t('admin:settings.notifications.weeklyDigestDesc')}>
                   <Switch
                     checked={notificationSettings.weeklyDigest}
                     onCheckedChange={(v) => setNotificationSettings((p) => ({ ...p, weeklyDigest: v }))}
                   />
                 </SettingRow>
-                <SettingRow label="Marketing Emails" description="Promotional content and offers">
+                <SettingRow label={t('admin:settings.notifications.marketing')} description={t('admin:settings.notifications.marketingDesc')}>
                   <Switch
                     checked={notificationSettings.marketingEmails}
                     onCheckedChange={(v) => setNotificationSettings((p) => ({ ...p, marketingEmails: v }))}
@@ -716,7 +724,7 @@ export function AdminSettingsPage() {
       case "integrations":
         return (
           <div className="space-y-6">
-            <SettingSection title="Connected Services" description="Third-party integrations" icon={Zap}>
+            <SettingSection title={t('admin:settings.integrations.connected')} description={t('admin:settings.integrations.connectedDesc')} icon={Zap}>
               <div className="space-y-4">
                 {INTEGRATIONS.map((integration) => (
                   <div
@@ -728,8 +736,8 @@ export function AdminSettingsPage() {
                         <integration.icon className="h-5 w-5" />
                       </div>
                       <div>
-                        <p className="font-medium">{integration.name}</p>
-                        <p className="text-sm text-muted-foreground">{integration.description}</p>
+                        <p className="font-medium">{t(integration.nameKey)}</p>
+                        <p className="text-sm text-muted-foreground">{t(integration.descKey)}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
@@ -737,12 +745,12 @@ export function AdminSettingsPage() {
                         <>
                           <span className="flex items-center gap-1.5 text-sm text-emerald-500">
                             <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                            Connected
+                            {t('admin:settings.integrations.statusConnected')}
                           </span>
-                          <Button variant="outline" size="sm">Configure</Button>
+                          <Button variant="outline" size="sm">{t('admin:settings.integrations.configure')}</Button>
                         </>
                       ) : (
-                        <Button size="sm">Connect</Button>
+                        <Button size="sm">{t('admin:settings.integrations.connect')}</Button>
                       )}
                     </div>
                   </div>
@@ -750,13 +758,13 @@ export function AdminSettingsPage() {
               </div>
             </SettingSection>
 
-            <SettingSection title="API Keys" description="Manage API access" icon={Key}>
+            <SettingSection title={t('admin:settings.integrations.apiKeys')} description={t('admin:settings.integrations.apiKeysDesc')} icon={Key}>
               <div className="space-y-4">
                 <div className="rounded-lg border border-border bg-background/50 p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium">Production API Key</p>
-                      <p className="text-sm text-muted-foreground">For live environment</p>
+                      <p className="font-medium">{t('admin:settings.integrations.prodKey')}</p>
+                      <p className="text-sm text-muted-foreground">{t('admin:settings.integrations.prodKeyDesc')}</p>
                     </div>
                     <div className="flex items-center gap-2">
                       <code className="rounded bg-muted px-2 py-1 font-mono text-xs">
@@ -773,18 +781,18 @@ export function AdminSettingsPage() {
                 </div>
                 <Button variant="outline" size="sm" className="gap-2">
                   <RefreshCw className="h-4 w-4" />
-                  Regenerate API Key
+                  {t('admin:settings.integrations.regenerate')}
                 </Button>
               </div>
             </SettingSection>
 
-            <SettingSection title="Webhooks" description="Event notifications to external services" icon={ExternalLink}>
+            <SettingSection title={t('admin:settings.integrations.webhooks')} description={t('admin:settings.integrations.webhooksDesc')} icon={ExternalLink}>
               <div className="space-y-4">
                 <div className="rounded-lg border-2 border-dashed border-border p-8 text-center">
                   <Zap className="mx-auto h-8 w-8 text-muted-foreground" />
-                  <p className="mt-2 text-sm text-muted-foreground">No webhooks configured</p>
+                  <p className="mt-2 text-sm text-muted-foreground">{t('admin:settings.integrations.noWebhooks')}</p>
                   <Button variant="outline" size="sm" className="mt-4">
-                    Add Webhook
+                    {t('admin:settings.integrations.addWebhook')}
                   </Button>
                 </div>
               </div>
@@ -795,62 +803,69 @@ export function AdminSettingsPage() {
       case "backup":
         return (
           <div className="space-y-6">
-            <SettingSection title="Data Export" description="Download platform data" icon={Download}>
+            <SettingSection title={t('admin:settings.backup.export')} description={t('admin:settings.backup.exportDesc')} icon={Download}>
               <div className="grid gap-4 sm:grid-cols-2">
-                {["Users", "Courses", "Enrollments", "Transactions", "Audit Logs", "Full Backup"].map((item) => (
+                {[
+                  { key: 'users', label: t('admin:settings.backup.items.users') },
+                  { key: 'courses', label: t('admin:settings.backup.items.courses') },
+                  { key: 'enrollments', label: t('admin:settings.backup.items.enrollments') },
+                  { key: 'transactions', label: t('admin:settings.backup.items.transactions') },
+                  { key: 'auditLogs', label: t('admin:settings.backup.items.auditLogs') },
+                  { key: 'fullBackup', label: t('admin:settings.backup.items.fullBackup') },
+                ].map((item) => (
                   <div
-                    key={item}
+                    key={item.key}
                     className="flex items-center justify-between rounded-lg border border-border bg-background/50 p-4"
                   >
-                    <span className="font-medium">{item}</span>
+                    <span className="font-medium">{item.label}</span>
                     <Button variant="outline" size="sm" className="gap-2">
                       <Download className="h-4 w-4" />
-                      Export
+                      {t('admin:users.export')}
                     </Button>
                   </div>
                 ))}
               </div>
             </SettingSection>
 
-            <SettingSection title="Data Import" description="Import data from external sources" icon={Upload}>
+            <SettingSection title={t('admin:settings.backup.import')} description={t('admin:settings.backup.importDesc')} icon={Upload}>
               <div className="rounded-lg border-2 border-dashed border-border p-8 text-center">
                 <Upload className="mx-auto h-8 w-8 text-muted-foreground" />
-                <p className="mt-2 font-medium">Drop files here or click to upload</p>
-                <p className="text-sm text-muted-foreground">Supports CSV, JSON, and Excel files</p>
+                <p className="mt-2 font-medium">{t('admin:settings.backup.dropFiles')}</p>
+                <p className="text-sm text-muted-foreground">{t('admin:settings.backup.dropFilesDesc')}</p>
                 <Button variant="outline" size="sm" className="mt-4">
-                  Select Files
+                  {t('admin:settings.backup.selectFiles')}
                 </Button>
               </div>
             </SettingSection>
 
-            <SettingSection title="Automated Backups" description="Schedule automatic backups" icon={Clock}>
+            <SettingSection title={t('admin:settings.backup.automated')} description={t('admin:settings.backup.automatedDesc')} icon={Clock}>
               <div className="space-y-4">
-                <SettingRow label="Enable Automated Backups" description="Daily backup at 3:00 AM UTC">
+                <SettingRow label={t('admin:settings.backup.enableAutomated')} description={t('admin:settings.backup.enableAutomatedDesc')}>
                   <Switch checked onCheckedChange={() => {}} />
                 </SettingRow>
-                <SettingRow label="Backup Retention" description="Keep backups for 30 days">
-                  <select className="h-9 rounded-md border border-input bg-background px-3 text-sm">
-                    <option>7 days</option>
-                    <option>14 days</option>
-                    <option selected>30 days</option>
-                    <option>90 days</option>
+                <SettingRow label={t('admin:settings.backup.retention')} description={t('admin:settings.backup.retentionDesc')}>
+                  <select className="h-9 rounded-md border border-input bg-background px-3 text-sm" defaultValue="30">
+                    <option value="7">{t('admin:settings.backup.retentionOptions.7days')}</option>
+                    <option value="14">{t('admin:settings.backup.retentionOptions.14days')}</option>
+                    <option value="30">{t('admin:settings.backup.retentionOptions.30days')}</option>
+                    <option value="90">{t('admin:settings.backup.retentionOptions.90days')}</option>
                   </select>
                 </SettingRow>
               </div>
             </SettingSection>
 
-            <SettingSection title="Danger Zone" description="Irreversible actions" icon={Trash2}>
+            <SettingSection title={t('admin:settings.backup.dangerZone')} description={t('admin:settings.backup.dangerZoneDesc')} icon={Trash2}>
               <div className="space-y-4">
                 <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium text-red-600 dark:text-red-400">Delete All Data</p>
+                      <p className="font-medium text-red-600 dark:text-red-400">{t('admin:settings.backup.deleteAll')}</p>
                       <p className="text-sm text-muted-foreground">
-                        Permanently delete all platform data. This cannot be undone.
+                        {t('admin:settings.backup.deleteAllDesc')}
                       </p>
                     </div>
                     <Button variant="destructive" size="sm">
-                      Delete All
+                      {t('admin:settings.backup.deleteAllButton')}
                     </Button>
                   </div>
                 </div>
@@ -862,7 +877,7 @@ export function AdminSettingsPage() {
       case "advanced":
         return (
           <div className="space-y-6">
-            <SettingSection title="Feature Flags" description="Toggle experimental features" icon={Flag}>
+            <SettingSection title={t('admin:settings.advanced.featureFlags')} description={t('admin:settings.advanced.featureFlagsDesc')} icon={Flag}>
               <div className="space-y-3">
                 {featureFlags.map((flag) => (
                   <div
@@ -871,17 +886,17 @@ export function AdminSettingsPage() {
                   >
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium">{flag.name}</span>
+                        <span className="font-medium">{t(flag.nameKey)}</span>
                         <span
                           className={cn(
                             "rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase",
                             getCategoryColor(flag.category)
                           )}
                         >
-                          {flag.category}
+                          {t(`admin:settings.advanced.categories.${flag.category}`)}
                         </span>
                       </div>
-                      <p className="mt-1 text-sm text-muted-foreground">{flag.description}</p>
+                      <p className="mt-1 text-sm text-muted-foreground">{t(flag.descKey)}</p>
                     </div>
                     <Switch checked={flag.enabled} onCheckedChange={() => toggleFeatureFlag(flag.id)} />
                   </div>
@@ -889,34 +904,34 @@ export function AdminSettingsPage() {
               </div>
             </SettingSection>
 
-            <SettingSection title="Performance" description="Caching and optimization" icon={Zap}>
+            <SettingSection title={t('admin:settings.advanced.performance')} description={t('admin:settings.advanced.performanceDesc')} icon={Zap}>
               <div className="space-y-4">
-                <SettingRow label="Enable Caching" description="Cache frequently accessed data">
+                <SettingRow label={t('admin:settings.advanced.enableCaching')} description={t('admin:settings.advanced.enableCachingDesc')}>
                   <Switch checked onCheckedChange={() => {}} />
                 </SettingRow>
-                <SettingRow label="CDN for Assets" description="Serve static files via CDN">
+                <SettingRow label={t('admin:settings.advanced.cdn')} description={t('admin:settings.advanced.cdnDesc')}>
                   <Switch checked onCheckedChange={() => {}} />
                 </SettingRow>
-                <SettingRow label="Lazy Load Images" description="Load images on demand">
+                <SettingRow label={t('admin:settings.advanced.lazyLoad')} description={t('admin:settings.advanced.lazyLoadDesc')}>
                   <Switch checked onCheckedChange={() => {}} />
                 </SettingRow>
                 <div className="pt-2">
                   <Button variant="outline" size="sm" className="gap-2">
                     <RefreshCw className="h-4 w-4" />
-                    Clear All Caches
+                    {t('admin:settings.advanced.clearCaches')}
                   </Button>
                 </div>
               </div>
             </SettingSection>
 
-            <SettingSection title="Rate Limiting" description="API request limits" icon={Shield}>
+            <SettingSection title={t('admin:settings.advanced.rateLimiting')} description={t('admin:settings.advanced.rateLimitingDesc')} icon={Shield}>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Requests per minute (authenticated)</label>
+                  <label className="text-sm font-medium">{t('admin:settings.advanced.requestsAuth')}</label>
                   <Input type="number" defaultValue={100} />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Requests per minute (anonymous)</label>
+                  <label className="text-sm font-medium">{t('admin:settings.advanced.requestsAnon')}</label>
                   <Input type="number" defaultValue={20} />
                 </div>
               </div>
@@ -934,19 +949,19 @@ export function AdminSettingsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{t('admin:settings.title')}</h1>
           <p className="text-sm text-muted-foreground">
-            Manage platform configuration and preferences
+            {t('admin:settings.subtitle')}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" className="gap-2">
             <RotateCcw className="h-4 w-4" />
-            Reset
+            {t('admin:settings.reset')}
           </Button>
           <Button size="sm" className="gap-2" onClick={handleSaveSettings}>
             <Save className="h-4 w-4" />
-            Save Changes
+            {t('admin:settings.saveChanges')}
           </Button>
         </div>
       </div>
@@ -967,7 +982,7 @@ export function AdminSettingsPage() {
                 )}
               >
                 <tab.icon className="h-4 w-4 shrink-0" />
-                <span className="truncate">{tab.label}</span>
+                <span className="truncate">{t(tab.labelKey)}</span>
               </button>
             ))}
           </div>

@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState, useCallback } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { format } from 'date-fns'
+import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../../components/ui/card'
 import { Badge } from '../../components/ui/badge'
 import { Button } from '../../components/ui/button'
@@ -23,6 +24,7 @@ type RunningExam = {
 }
 
 export function ExamsPage() {
+  const { t } = useTranslation(['student', 'common', 'errors'])
   const location = useLocation()
   const navigate = useNavigate()
   const [exams, setExams] = useState<ExamDto[]>([])
@@ -78,17 +80,17 @@ export function ExamsPage() {
         setCourses(courseMap)
       } catch (error) {
         console.error('Failed to load exams:', error);
-        const errorMessage = error instanceof Error 
-          ? error.message 
-          : 'Network error - please check if the backend API is running';
-        
+        const errorMessage = error instanceof Error
+          ? error.message
+          : t('student:exams.errors.networkError');
+
         // Check if it's a network error
         if (errorMessage.includes('NetworkError') || errorMessage.includes('Failed to fetch')) {
-          toast.error('Failed to load exams', {
-            description: 'Cannot connect to the server. Please ensure the backend API is running on http://localhost:5261',
+          toast.error(t('student:exams.errors.loadFailed'), {
+            description: t('student:exams.errors.networkError'),
           });
         } else {
-          toast.error('Failed to load exams', {
+          toast.error(t('student:exams.errors.loadFailed'), {
             description: errorMessage,
           });
         }
@@ -152,10 +154,10 @@ export function ExamsPage() {
         answers: {},
         answerTexts: {},
       })
-      toast.success('Exam started', { description: `You have ${response.durationMinutes} minutes to complete.` })
+      toast.success(t('student:exams.examStarted'), { description: t('student:exams.durationNotice', { minutes: response.durationMinutes }) })
     } catch (error) {
-      toast.error('Failed to start exam', {
-        description: error instanceof Error ? error.message : 'Please try again later',
+      toast.error(t('student:exams.errors.startFailed'), {
+        description: error instanceof Error ? error.message : t('student:exams.errors.tryLater'),
       })
     }
   }
@@ -188,12 +190,12 @@ export function ExamsPage() {
       const attemptsResult = await examService.getMyAttempts({ pageSize: 100 })
       setAttempts(attemptsResult.items)
 
-      toast.success('Exam submitted successfully. Good luck!', {
-        description: 'Your answers have been saved. Your instructor may publish your grade later.',
+      toast.success(t('student:exams.examSubmitted'), {
+        description: t('student:exams.savedAnswers'),
       })
     } catch (error) {
-      toast.error('Failed to submit exam', {
-        description: error instanceof Error ? error.message : 'Please try again later',
+      toast.error(t('student:exams.errors.submitFailed'), {
+        description: error instanceof Error ? error.message : t('student:exams.errors.tryLater'),
       })
     }
   }
@@ -298,8 +300,8 @@ export function ExamsPage() {
     return (
       <div className="space-y-6">
         <div>
-          <div className="text-2xl font-semibold">Exams</div>
-          <div className="text-sm text-muted-foreground">View and take your exams</div>
+          <div className="text-2xl font-semibold">{t('student:exams.pageTitle')}</div>
+          <div className="text-sm text-muted-foreground">{t('student:exams.subtitle')}</div>
         </div>
         <div className="grid gap-4 md:grid-cols-2">
           {[1, 2].map((i) => (
@@ -321,15 +323,15 @@ export function ExamsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <div className="text-2xl font-semibold">Exams</div>
-        <div className="text-sm text-muted-foreground">Exams grouped by course</div>
+        <div className="text-2xl font-semibold">{t('student:exams.pageTitle')}</div>
+        <div className="text-sm text-muted-foreground">{t('student:exams.subtitleGrouped')}</div>
       </div>
 
       {displayExams.length === 0 ? (
         <Card className="border-dashed">
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="text-sm font-medium">No exams yet</div>
-            <div className="mt-1 text-sm text-muted-foreground">You're all caught up.</div>
+            <div className="text-sm font-medium">{t('student:exams.noExamsYet')}</div>
+            <div className="mt-1 text-sm text-muted-foreground">{t('student:exams.allCaughtUp')}</div>
           </CardContent>
         </Card>
       ) : (
@@ -341,7 +343,9 @@ export function ExamsPage() {
                 <AccordionTrigger className="flex items-center gap-2">
                   <span className="font-medium">{courseTitle}</span>
                   <Badge variant="secondary" className="ms-2 text-xs">
-                    {courseExams.length} exam{courseExams.length !== 1 ? 's' : ''}
+                    {courseExams.length === 1
+                      ? t('student:exams.examCountOne', { count: courseExams.length })
+                      : t('student:exams.examCountOther', { count: courseExams.length })}
                   </Badge>
                 </AccordionTrigger>
                 <AccordionContent>
@@ -368,16 +372,20 @@ export function ExamsPage() {
                             </CardHeader>
                             <CardContent className="space-y-2">
                               <div className="flex flex-wrap gap-2">
-                                <Badge variant="outline">Starts {format(new Date(e.startsAt), 'MMM d, p')}</Badge>
-                                <Badge variant="subtle">{e.durationMinutes} min</Badge>
-                                {e.allowRetake && <Badge variant="outline">Retake allowed</Badge>}
+                                <Badge variant="outline">{t('student:exams.starts', { when: format(new Date(e.startsAt), 'MMM d, p') })}</Badge>
+                                <Badge variant="subtle">{t('student:exams.minDuration', { count: e.durationMinutes })}</Badge>
+                                {e.allowRetake && <Badge variant="outline">{t('student:exams.retakeAllowed')}</Badge>}
                               </div>
                               {e.description && (
                                 <div className="text-sm text-muted-foreground">{e.description}</div>
                               )}
                               {lastAttemptForExam && (
                                 <div className="text-xs text-muted-foreground">
-                                  Last attempt: {lastAttemptForExam.score}/{lastAttemptForExam.total} ({typeof lastAttemptForExam.percentage === 'number' ? lastAttemptForExam.percentage.toFixed(1) : '—'}%)
+                                  {t('student:exams.lastAttempt', {
+                                    score: lastAttemptForExam.score,
+                                    total: lastAttemptForExam.total,
+                                    percent: typeof lastAttemptForExam.percentage === 'number' ? lastAttemptForExam.percentage.toFixed(1) : '—',
+                                  })}
                                 </div>
                               )}
                             </CardContent>
@@ -394,7 +402,7 @@ export function ExamsPage() {
                                   setCurrentQuestionIndex(0)
                                 }}
                               >
-                                Details
+                                {t('student:exams.details')}
                               </Button>
                             </CardFooter>
                           </Card>
@@ -435,7 +443,9 @@ export function ExamsPage() {
                     open.courseTitle
                   )}
                   {' • '}
-                  {open.durationMinutes} min • {open.questionCount} questions
+                  {t('student:exams.minDuration', { count: open.durationMinutes })} • {open.questionCount === 1
+                    ? t('student:dashboard.examQuestionsOne', { count: open.questionCount })
+                    : t('student:dashboard.examQuestionsOther', { count: open.questionCount })}
                 </DialogDescription>
               </DialogHeader>
 
@@ -445,16 +455,16 @@ export function ExamsPage() {
                     <div className="text-sm text-muted-foreground">{open.description}</div>
                   )}
                   <div className="text-sm text-muted-foreground">
-                    This exam has {open.questionCount} questions and a duration of {open.durationMinutes} minutes.
-                    {open.allowRetake && ' You can retake this exam.'}
-                    {open.maxAttempts && ` Maximum attempts: ${open.maxAttempts}`}
+                    {t('student:exams.examBrief', { questions: open.questionCount, minutes: open.durationMinutes })}
+                    {open.allowRetake && t('student:exams.canRetake')}
+                    {open.maxAttempts && t('student:exams.maxAttempts', { count: open.maxAttempts })}
                   </div>
 
                   {attemptsForOpenExam.length > 0 && (
                     <div className="rounded-xl border border-border bg-muted/30 p-4 space-y-3">
                       <div className="flex items-center gap-2 font-semibold text-sm">
                         <FileText className="h-4 w-4" />
-                        Your attempts
+                        {t('student:exams.yourAttempts')}
                       </div>
                       <ul className="space-y-2">
                         {attemptsForOpenExam.map((a) => (
@@ -472,7 +482,7 @@ export function ExamsPage() {
                                   {a.score}/{a.total} ({a.percentage.toFixed(0)}%)
                                 </Badge>
                               ) : (
-                                <Badge variant="outline" className="text-xs">Grade pending</Badge>
+                                <Badge variant="outline" className="text-xs">{t('student:exams.gradePending')}</Badge>
                               )}
                             </div>
                             <Button
@@ -487,8 +497,8 @@ export function ExamsPage() {
                                   setExamResult(result)
                                   setMode('summary')
                                 } catch (err) {
-                                  toast.error('Could not load summary', {
-                                    description: err instanceof Error ? err.message : 'Try again later.',
+                                  toast.error(t('student:exams.couldNotLoadSummary'), {
+                                    description: err instanceof Error ? err.message : t('student:exams.tryLater'),
                                   })
                                 } finally {
                                   setLoadingResults(false)
@@ -496,7 +506,7 @@ export function ExamsPage() {
                               }}
                               disabled={loadingResults}
                             >
-                              View summary
+                              {t('student:exams.viewSummary')}
                               <ChevronRight className="h-4 w-4 ms-0.5" />
                             </Button>
                           </li>
@@ -507,7 +517,7 @@ export function ExamsPage() {
 
                   <div className="flex justify-end">
                     <Button onClick={() => startExam(open.id)} disabled={!open.isActive}>
-                      Start Exam
+                      {t('student:exams.startExam')}
                     </Button>
                   </div>
                 </div>
@@ -518,13 +528,13 @@ export function ExamsPage() {
                   {/* Timer and Progress */}
                   <div className="flex items-center justify-between gap-4">
                     <div className="flex items-center justify-between flex-1 rounded-md border border-border bg-background p-3 text-sm">
-                      <div className="font-medium">Time left</div>
+                      <div className="font-medium">{t('student:exams.timeLeft')}</div>
                       <div className={`tabular-nums font-semibold ${secondsLeft < 60 ? 'text-destructive' : ''}`}>
                         {formatSeconds(secondsLeft)}
                       </div>
                     </div>
                     <div className="rounded-md border border-border bg-background px-4 py-2 text-sm">
-                      <div className="font-medium text-muted-foreground">Question</div>
+                      <div className="font-medium text-muted-foreground">{t('student:exams.question')}</div>
                       <div className="tabular-nums font-semibold">
                         {currentQuestionIndex + 1} / {questions.length}
                       </div>
@@ -548,7 +558,7 @@ export function ExamsPage() {
                       {questions[currentQuestionIndex].type === 'ShortAnswer' ? (
                         <textarea
                           className="w-full min-h-[120px] rounded-lg border-2 border-border px-4 py-3 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                          placeholder="Type your answer here..."
+                          placeholder={t('student:exams.typeYourAnswer')}
                           value={running.answerTexts[questions[currentQuestionIndex].id] ?? ''}
                           onChange={(e) =>
                             setRunning((r) =>
@@ -603,7 +613,7 @@ export function ExamsPage() {
                       onClick={() => setShowExitConfirm(true)}
                       className="flex-shrink-0"
                     >
-                      Exit
+                      {t('student:exams.exit')}
                     </Button>
                     <div className="flex gap-2">
                       <Button
@@ -615,7 +625,7 @@ export function ExamsPage() {
                         }}
                         disabled={currentQuestionIndex === 0}
                       >
-                        Previous
+                        {t('student:exams.previous')}
                       </Button>
                       {currentQuestionIndex < questions.length - 1 ? (
                         <Button
@@ -625,10 +635,10 @@ export function ExamsPage() {
                             }
                           }}
                         >
-                          Next
+                          {t('student:exams.next')}
                         </Button>
                       ) : (
-                        <Button onClick={handleSubmitExam}>Submit</Button>
+                        <Button onClick={handleSubmitExam}>{t('student:exams.submit')}</Button>
                       )}
                     </div>
                   </div>
@@ -648,7 +658,7 @@ export function ExamsPage() {
                                 ? 'w-2 bg-primary/50'
                                 : 'w-2 bg-muted hover:bg-muted-foreground/50'
                           }`}
-                          aria-label={`Go to question ${idx + 1}`}
+                          aria-label={t('student:exams.goToQuestion', { num: idx + 1 })}
                         />
                       )
                     })}
@@ -664,15 +674,15 @@ export function ExamsPage() {
                         <CheckCircle2 className="h-6 w-6 text-green-600 dark:text-green-400" />
                       </div>
                       <div>
-                        <div className="font-semibold text-green-800 dark:text-green-200">Exam submitted successfully. Good luck!</div>
+                        <div className="font-semibold text-green-800 dark:text-green-200">{t('student:exams.examSubmitted')}</div>
                         <div className="mt-1 text-sm text-green-700 dark:text-green-300">
-                      Your answers have been saved. Your instructor may publish your grade later — you can check back here or we’ll notify you when it’s available.
+                      {t('student:exams.savedAnswersExtra')}
                     </div>
                       </div>
                     </div>
                   </div>
                   <div className="rounded-md border border-border bg-background p-4">
-                    <div className="text-sm text-muted-foreground">Score</div>
+                    <div className="text-sm text-muted-foreground">{t('student:exams.score')}</div>
                     {score.scorePublishedAt ? (
                       <>
                         <div className="text-3xl font-semibold">
@@ -684,16 +694,16 @@ export function ExamsPage() {
                       </>
                     ) : (
                       <div className="text-muted-foreground">
-                        Your grade will be available when your instructor publishes it. You can check back here or we’ll notify you.
+                        {t('student:exams.gradeLater')}
                       </div>
                     )}
                     <div className="mt-1 text-sm text-muted-foreground">
-                      Your attempt has been saved.
+                      {t('student:exams.attemptSaved')}
                     </div>
                   </div>
                   <div className="flex justify-end gap-2">
                     <Button variant="outline" onClick={() => setOpenId(null)}>
-                      Close
+                      {t('student:exams.close')}
                     </Button>
                     <Button 
                       onClick={async () => {
@@ -716,13 +726,13 @@ export function ExamsPage() {
                               setExamResult(result)
                               setMode('summary')
                             } else {
-                              toast.error('Failed to load exam results', {
-                                description: 'Could not find the submitted attempt.',
+                              toast.error(t('student:exams.errors.loadResultsFailed'), {
+                                description: t('student:exams.errors.couldNotFindAttempt'),
                               })
                             }
                           } catch (error) {
-                            toast.error('Failed to load exam results', {
-                              description: error instanceof Error ? error.message : 'Please try again later',
+                            toast.error(t('student:exams.errors.loadResultsFailed'), {
+                              description: error instanceof Error ? error.message : t('student:exams.errors.tryLater'),
                             })
                           } finally {
                             setLoadingResults(false)
@@ -736,7 +746,7 @@ export function ExamsPage() {
                           console.log('[ExamsPage] Score object:', score)
                           
                           if (!score.attemptId) {
-                            throw new Error('Attempt ID is missing from score data')
+                            throw new Error(t('student:exams.errors.attemptIdMissing'))
                           }
                           
 setSummaryFrom('score')
@@ -745,13 +755,13 @@ setSummaryFrom('score')
                               setMode('summary')
                         } catch (error) {
                           console.error('[ExamsPage] Error loading exam results:', error)
-                          const errorMessage = error instanceof Error 
-                            ? error.message 
+                          const errorMessage = error instanceof Error
+                            ? error.message
                             : typeof error === 'object' && error !== null && 'error' in error
                             ? (error as { error: string }).error
-                            : 'Please try again later'
-                          
-                          toast.error('Failed to load exam results', {
+                            : t('student:exams.errors.tryLater')
+
+                          toast.error(t('student:exams.errors.loadResultsFailed'), {
                             description: errorMessage,
                           })
                         } finally {
@@ -760,7 +770,7 @@ setSummaryFrom('score')
                       }}
                       disabled={loadingResults}
                     >
-                      {loadingResults ? 'Loading...' : 'View summary'}
+                      {loadingResults ? t('student:exams.loading') : t('student:exams.viewSummary')}
                     </Button>
                   </div>
                 </div>
@@ -771,7 +781,7 @@ setSummaryFrom('score')
                   <div className="rounded-xl border-2 border-primary/20 bg-primary/5 p-5">
                     <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-1">
                       <Award className="h-4 w-4" />
-                      Score
+                      {t('student:exams.score')}
                     </div>
                     <div className="flex items-baseline gap-3">
                       <span className="text-4xl font-bold tabular-nums">{examResult.score}/{examResult.total}</span>
@@ -782,7 +792,7 @@ setSummaryFrom('score')
                   <div className="space-y-4">
                     <div className="flex items-center gap-2 text-lg font-semibold">
                       <FileText className="h-5 w-5" />
-                      Question Review
+                      {t('student:exams.questionReview')}
                     </div>
                     {examResult.questions.map((question, idx) => {
                       const isShortAnswer = question.type === 'ShortAnswer'
@@ -804,23 +814,23 @@ setSummaryFrom('score')
                             </div>
                             {isShortAnswer ? (
                               <span className="text-xs font-medium px-2 py-1 rounded bg-amber-500/20 text-amber-700 dark:text-amber-400 shrink-0">
-                                Short answer · Graded by instructor
+                                {t('student:exams.shortAnswer')}
                               </span>
                             ) : (
                               <div className={`text-sm font-medium px-2 py-1 rounded shrink-0 ${
                                 isCorrect ? 'bg-green-500/20 text-green-700 dark:text-green-400' : 'bg-red-500/20 text-red-700 dark:text-red-400'
                               }`}>
                                 {isCorrect ? (
-                                  <span className="flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3" /> Correct</span>
+                                  <span className="flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3" /> {t('student:exams.correct')}</span>
                                 ) : (
-                                  <span className="flex items-center gap-1"><XCircle className="h-3.5 w-3" /> Incorrect</span>
+                                  <span className="flex items-center gap-1"><XCircle className="h-3.5 w-3" /> {t('student:exams.incorrect')}</span>
                                 )}
                               </div>
                             )}
                           </div>
                           {isShortAnswer ? (
                             <div className="rounded-lg border border-border bg-background p-3 mt-2">
-                              <div className="text-xs font-medium text-muted-foreground mb-1">Your answer</div>
+                              <div className="text-xs font-medium text-muted-foreground mb-1">{t('student:exams.yourAnswer')}</div>
                               <div className="text-sm">{question.userAnswerText ?? '—'}</div>
                             </div>
                           ) : (
@@ -837,8 +847,8 @@ setSummaryFrom('score')
                                   >
                                     <div className="flex items-center gap-2">
                                       <span className="font-medium">{choice}</span>
-                                      {isCorrectChoice && <span className="text-xs font-semibold text-green-700 dark:text-green-400">(Correct)</span>}
-                                      {isUserAnswer && !isCorrectChoice && <span className="text-xs font-semibold text-red-700 dark:text-red-400">(Your answer)</span>}
+                                      {isCorrectChoice && <span className="text-xs font-semibold text-green-700 dark:text-green-400">{t('student:exams.correctLabel')}</span>}
+                                      {isUserAnswer && !isCorrectChoice && <span className="text-xs font-semibold text-red-700 dark:text-red-400">{t('student:exams.yourAnswerLabel')}</span>}
                                     </div>
                                   </div>
                                 )
@@ -846,8 +856,11 @@ setSummaryFrom('score')
                             </div>
                           )}
                           <div className="mt-2 text-sm text-muted-foreground">
-                            Points: {question.points} {!isShortAnswer && (isCorrect ? '(Earned)' : '(Not earned)')}
-                            {isShortAnswer && '(Instructor graded)'}
+                            {isShortAnswer
+                              ? t('student:exams.pointsInstructor', { points: question.points })
+                              : isCorrect
+                                ? t('student:exams.pointsEarned', { points: question.points })
+                                : t('student:exams.pointsNotEarned', { points: question.points })}
                           </div>
                         </div>
                       )
@@ -859,9 +872,9 @@ setSummaryFrom('score')
                       setMode(summaryFrom === 'score' ? 'score' : 'details')
                       setExamResult(null)
                     }}>
-                      Back
+                      {t('student:exams.back')}
                     </Button>
-                    <Button variant="outline" onClick={() => setOpenId(null)}>Close</Button>
+                    <Button variant="outline" onClick={() => setOpenId(null)}>{t('student:exams.close')}</Button>
                   </div>
                 </div>
               )}
@@ -873,9 +886,9 @@ setSummaryFrom('score')
       <ConfirmDialog
         open={showExitConfirm}
         onOpenChange={setShowExitConfirm}
-        title="Exit Exam"
-        description="Are you sure you want to exit? Your progress will be saved."
-        confirmLabel="Exit"
+        title={t('student:exams.exitDialogTitle')}
+        description={t('student:exams.exitDialogDescription')}
+        confirmLabel={t('student:exams.exit')}
         variant="default"
         onConfirm={() => {
           setOpenId(null)

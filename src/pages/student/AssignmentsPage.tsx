@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { format } from 'date-fns'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../../components/ui/card'
 import { Badge } from '../../components/ui/badge'
 import { Button } from '../../components/ui/button'
@@ -18,6 +19,7 @@ import { notificationApiService } from '../../services/notificationApiService'
 import { notificationService } from '../../services/notificationService'
 
 export function AssignmentsPage() {
+  const { t } = useTranslation(['student', 'common', 'errors'])
   const { unreadCount: unreadNewGrades, refetch: refetchGradeNotifications } = useUnreadGradeNotifications()
   const [assignments, setAssignments] = useState<AssignmentDto[]>([])
   const [enrollments, setEnrollments] = useState<EnrollmentDto[]>([])
@@ -100,8 +102,8 @@ export function AssignmentsPage() {
         setSubmissions(submissionMap)
       } catch (error) {
         console.error('Failed to load assignments:', error)
-        toast.error('Failed to load assignments', {
-          description: error instanceof Error ? error.message : 'Please try again later',
+        toast.error(t('student:assignments.errors.loadFailed'), {
+          description: error instanceof Error ? error.message : t('student:assignments.errors.tryLater'),
         })
         // Set empty arrays to prevent blank page
         setAssignments([])
@@ -139,7 +141,7 @@ export function AssignmentsPage() {
       window.dispatchEvent(new Event('notificationUpdate'))
       await refetchGradeNotifications()
     } catch {
-      toast.error('Could not clear grade alerts', { description: 'Try again from the bell menu.' })
+      toast.error(t('student:assignments.couldNotClearGrades'), { description: t('student:assignments.tryFromBell') })
     }
   }
 
@@ -186,28 +188,28 @@ export function AssignmentsPage() {
   const getAssignmentStatus = (assignment: AssignmentDto, submission?: AssignmentSubmissionDto) => {
     try {
       if (!assignment || !assignment.dueAt) {
-        return { label: 'Pending', variant: 'secondary' as const, icon: Clock }
+        return { label: t('student:assignments.statusPending'), variant: 'secondary' as const, icon: Clock }
       }
-      
+
       const now = new Date()
       const dueDate = new Date(assignment.dueAt)
       const isOverdue = now > dueDate
 
       if (submission) {
         if (submission.gradedAt) {
-          return { label: 'Graded', variant: 'default' as const, icon: CheckCircle }
+          return { label: t('student:assignments.statusGraded'), variant: 'default' as const, icon: CheckCircle }
         }
-        return { label: 'Submitted', variant: 'default' as const, icon: CheckCircle }
+        return { label: t('student:assignments.statusSubmitted'), variant: 'default' as const, icon: CheckCircle }
       }
 
       if (isOverdue) {
-        return { label: 'Overdue', variant: 'destructive' as const, icon: AlertCircle }
+        return { label: t('student:assignments.statusOverdue'), variant: 'destructive' as const, icon: AlertCircle }
       }
 
-      return { label: 'Pending', variant: 'secondary' as const, icon: Clock }
+      return { label: t('student:assignments.statusPending'), variant: 'secondary' as const, icon: Clock }
     } catch (error) {
       console.error('Error computing assignment status:', error)
-      return { label: 'Pending', variant: 'secondary' as const, icon: Clock }
+      return { label: t('student:assignments.statusPending'), variant: 'secondary' as const, icon: Clock }
     }
   }
 
@@ -244,7 +246,7 @@ export function AssignmentsPage() {
   const handleSubmit = async () => {
     if (!open) return
     if (!text.trim()) {
-      toast.error('Submission is empty', { description: 'Please add some text before submitting.' })
+      toast.error(t('student:assignments.errors.submissionEmpty'), { description: t('student:assignments.errors.addText') })
       return
     }
 
@@ -274,7 +276,7 @@ export function AssignmentsPage() {
 
       // Validate submission response
       if (!submission || !submission.id) {
-        throw new Error('Invalid submission response from server')
+        throw new Error(t('student:assignments.errors.invalidResponse'))
       }
 
       // Update submissions map
@@ -302,20 +304,20 @@ export function AssignmentsPage() {
         // Don't show error to user, just log it
       }
 
-      toast.success('Assignment submitted', { description: open.title })
+      toast.success(t('student:assignments.submitted'), { description: open.title })
       setOpenId(null)
       setText('')
       setFileMeta({})
       setSelectedFile(null)
     } catch (error) {
       console.error('Assignment submission error:', error)
-      const errorMessage = error instanceof Error 
-        ? error.message 
+      const errorMessage = error instanceof Error
+        ? error.message
         : (typeof error === 'object' && error !== null && 'error' in error)
           ? String((error as any).error)
-          : 'Please try again later'
-      
-      toast.error('Failed to submit assignment', {
+          : t('student:assignments.errors.tryLater')
+
+      toast.error(t('student:assignments.errors.submitFailed'), {
         description: errorMessage,
       })
       
@@ -329,8 +331,8 @@ export function AssignmentsPage() {
     return (
       <div className="space-y-6">
         <div>
-          <div className="text-2xl font-semibold">Assignments</div>
-          <div className="text-sm text-muted-foreground">View and submit your assignments</div>
+          <div className="text-2xl font-semibold">{t('student:assignments.pageTitle')}</div>
+          <div className="text-sm text-muted-foreground">{t('student:assignments.subtitle')}</div>
         </div>
         <div className="grid gap-4 md:grid-cols-2">
           {[1, 2, 3, 4].map((i) => (
@@ -353,8 +355,8 @@ export function AssignmentsPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <div className="text-2xl font-semibold">Assignments</div>
-          <div className="text-sm text-muted-foreground">View and submit your assignments</div>
+          <div className="text-2xl font-semibold">{t('student:assignments.pageTitle')}</div>
+          <div className="text-sm text-muted-foreground">{t('student:assignments.subtitle')}</div>
         </div>
         {courses.length > 0 && (
           <select
@@ -362,7 +364,7 @@ export function AssignmentsPage() {
             value={courseFilter}
             onChange={(e) => setCourseFilter(e.target.value)}
           >
-            <option value="All">All courses</option>
+            <option value="All">{t('student:assignments.allCourses')}</option>
             {courses.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.title}
@@ -383,11 +385,11 @@ export function AssignmentsPage() {
             </span>
             <div className="min-w-0">
               <div className="font-semibold text-foreground">
-                New graded work
+                {t('student:assignments.newGradedWork')}
                 {unreadNewGrades > 1 ? ` (${unreadNewGrades})` : ''}
               </div>
               <div className="text-muted-foreground mt-0.5">
-                Your instructor posted a grade. Open an assignment below to view your score and feedback.
+                {t('student:assignments.newGradedWorkBody')}
               </div>
             </div>
           </div>
@@ -398,7 +400,7 @@ export function AssignmentsPage() {
             className="shrink-0"
             onClick={() => void dismissNewGradesBanner()}
           >
-            Mark as seen
+            {t('student:assignments.markAsSeen')}
           </Button>
         </div>
       )}
@@ -413,11 +415,11 @@ export function AssignmentsPage() {
             >
               <FileText className="h-8 w-8 text-muted-foreground" />
             </motion.div>
-            <CardTitle className="text-xl mb-2">No assignments</CardTitle>
+            <CardTitle className="text-xl mb-2">{t('student:assignments.noAssignments')}</CardTitle>
             <CardDescription className="max-w-md">
               {enrollments.length === 0
-                ? 'Enroll in a course to see assignments here.'
-                : 'No assignments have been assigned to your enrolled courses yet.'}
+                ? t('student:assignments.enrollFirst')
+                : t('student:assignments.noAssignmentsCourse')}
             </CardDescription>
           </CardContent>
         </Card>
@@ -459,25 +461,25 @@ export function AssignmentsPage() {
                       </Badge>
                       <Badge variant="outline">
                         <Clock className="h-3 w-3 me-1" />
-                        Due {format(new Date(assignment.dueAt), 'MMM d, p')}
+                        {t('student:assignments.due', { when: format(new Date(assignment.dueAt), 'MMM d, p') })}
                       </Badge>
                       {submission?.score != null && typeof submission.score === 'number' && (
                         <Badge variant="default">
-                          Score: {submission.score.toFixed(1)}/{assignment.maxScore}
+                          {t('student:assignments.score', { score: submission.score.toFixed(1), max: assignment.maxScore })}
                         </Badge>
                       )}
                     </div>
                     <div className="text-sm text-muted-foreground line-clamp-2">{assignment.prompt}</div>
                     {submission?.feedback && (
                       <div className="rounded-md border border-primary/20 bg-primary/5 p-3 text-sm">
-                        <div className="font-medium mb-1">Feedback:</div>
+                        <div className="font-medium mb-1">{t('student:assignments.feedbackLabel')}</div>
                         <div className="text-muted-foreground">{submission.feedback}</div>
                       </div>
                     )}
                   </CardContent>
                   <CardFooter className="justify-end">
                     <Button variant="outline" size="sm" onClick={() => handleOpenAssignment(assignment.id)}>
-                      {submission ? 'View Submission' : 'Submit'}
+                      {submission ? t('student:assignments.viewSubmission') : t('student:assignments.submit')}
                     </Button>
                   </CardFooter>
                 </Card>
@@ -498,11 +500,11 @@ export function AssignmentsPage() {
                     {open.courseTitle}
                   </Link>
                   {' • '}
-                  Due {format(new Date(open.dueAt), 'MMM d, p')}
+                  {t('student:assignments.due', { when: format(new Date(open.dueAt), 'MMM d, p') })}
                   {existingSub && (
                     <>
                       {' • '}
-                      <span className="text-primary">Submitted {format(new Date(existingSub.submittedAt), 'MMM d, p')}</span>
+                      <span className="text-primary">{t('student:assignments.submittedAt', { when: format(new Date(existingSub.submittedAt), 'MMM d, p') })}</span>
                     </>
                   )}
                 </DialogDescription>
@@ -510,21 +512,21 @@ export function AssignmentsPage() {
 
               <div className="mt-4 space-y-4">
                 <div className="rounded-md border border-border bg-muted/30 p-4 text-sm whitespace-pre-wrap">
-                  <div className="font-medium mb-2">Assignment Prompt:</div>
+                  <div className="font-medium mb-2">{t('student:assignments.assignmentPrompt')}</div>
                   <div className="text-muted-foreground">{open.prompt}</div>
                 </div>
 
                 {existingSub?.score != null && typeof existingSub.score === 'number' && (
                   <div className="rounded-md border border-primary/20 bg-primary/5 p-4">
                     <div className="flex items-center justify-between mb-2">
-                      <div className="font-medium">Grade</div>
+                      <div className="font-medium">{t('student:assignments.grade')}</div>
                       <div className="text-2xl font-bold text-primary">
                         {existingSub.score.toFixed(1)}/{open.maxScore}
                       </div>
                     </div>
                     {existingSub.feedback && (
                       <div className="mt-2 text-sm text-muted-foreground">
-                        <div className="font-medium mb-1">Feedback:</div>
+                        <div className="font-medium mb-1">{t('student:assignments.feedbackLabel')}</div>
                         <div>{existingSub.feedback}</div>
                       </div>
                     )}
@@ -532,23 +534,23 @@ export function AssignmentsPage() {
                 )}
 
                 <div className="space-y-2">
-                  <div className="text-sm font-medium">Your Submission</div>
+                  <div className="text-sm font-medium">{t('student:assignments.yourSubmission')}</div>
                   <textarea
                     className="min-h-[200px] w-full rounded-md border border-input bg-background p-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     value={text}
                     onChange={(e) => setText(e.target.value)}
-                    placeholder="Write your submission…"
+                    placeholder={t('student:assignments.writeYourSubmission')}
                     disabled={!!existingSub?.gradedAt}
                   />
                   {existingSub?.gradedAt && (
                     <div className="text-xs text-muted-foreground">
-                      This assignment has been graded. You cannot modify your submission.
+                      {t('student:assignments.gradedNotice')}
                     </div>
                   )}
                 </div>
 
                 <div className="space-y-2">
-                  <div className="text-sm font-medium">Attachment</div>
+                  <div className="text-sm font-medium">{t('student:assignments.attachment')}</div>
                   <Input
                     type="file"
                     accept=".pdf,.doc,.docx,.txt,.rtf,.odt,.xls,.xlsx,.ppt,.pptx,.zip,.rar,.7z,.png,.jpg,.jpeg,.gif"
@@ -556,7 +558,7 @@ export function AssignmentsPage() {
                       const file = e.target.files?.[0]
                       if (!file) return
                       if (file.size > 25 * 1024 * 1024) {
-                        toast.error('File too large', { description: 'Maximum size is 25 MB' })
+                        toast.error(t('student:assignments.errors.fileTooLarge'), { description: t('student:assignments.errors.maxSize25') })
                         return
                       }
                       setSelectedFile(file)
@@ -566,7 +568,7 @@ export function AssignmentsPage() {
                   />
                   {(fileMeta.name || existingSub?.fileName) && (
                     <div className="text-xs text-muted-foreground">
-                      Attached: {fileMeta.name ?? existingSub?.fileName}
+                      {t('student:assignments.attached', { name: fileMeta.name ?? existingSub?.fileName })}
                       {fileMeta.size !== undefined || existingSub?.fileSize !== undefined
                         ? ` (${Math.round((fileMeta.size ?? existingSub?.fileSize ?? 0) / 1024)} KB)`
                         : ''}
@@ -577,11 +579,11 @@ export function AssignmentsPage() {
 
               <div className="mt-5 flex items-center justify-end gap-2">
                 <Button variant="outline" onClick={() => setOpenId(null)}>
-                  Close
+                  {t('student:assignments.close')}
                 </Button>
                 {!existingSub?.gradedAt && (
                   <Button onClick={handleSubmit} disabled={submitting || !text.trim()}>
-                    {existingSub ? 'Update Submission' : 'Submit'}
+                    {existingSub ? t('student:assignments.updateSubmission') : t('student:assignments.submit')}
                   </Button>
                 )}
               </div>

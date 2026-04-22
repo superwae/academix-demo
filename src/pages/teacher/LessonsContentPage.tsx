@@ -53,6 +53,7 @@ import { teacherService } from '../../services/teacherService'
 import { lessonService, type LessonDto, type CourseSectionDto } from '../../services/lessonService'
 import { ConfirmDialog } from '../../components/ui/confirm-dialog'
 import { cn } from '../../lib/cn'
+import { useTranslation } from 'react-i18next'
 
 /** Keeps drag movement vertical so rows cannot be pulled sideways out of the list. */
 const restrictDragToVerticalAxis: Modifier = ({ transform }) => ({
@@ -69,6 +70,7 @@ function SortableLessonRow({
   onSelect: (lesson: LessonDto) => void
   disabled: boolean
 }) {
+  const { t } = useTranslation(['teacher', 'common'])
   const {
     attributes,
     listeners,
@@ -104,7 +106,7 @@ function SortableLessonRow({
         {...listeners}
         {...attributes}
         disabled={disabled}
-        aria-label="Drag to reorder lesson"
+        aria-label={t('teacher:lessonsContent.dragToReorder')}
       >
         <GripVertical className="h-4 w-4 pointer-events-none" />
       </button>
@@ -116,12 +118,12 @@ function SortableLessonRow({
       >
         <div className="text-sm font-medium truncate">{lesson.title}</div>
         <div className="text-xs text-muted-foreground">
-          {lesson.videoUrl ? 'Video' : 'Text'} • {lesson.durationMinutes || 0} min
+          {lesson.videoUrl ? t('teacher:lessonsContent.video') : t('teacher:lessonsContent.text')} • {t('teacher:courseLessonsManagement.minutes', { count: lesson.durationMinutes || 0 })}
         </div>
       </button>
       {lesson.isPreview && (
         <Badge variant="outline" className="text-xs shrink-0">
-          Preview
+          {t('teacher:courseLessonsManagement.preview')}
         </Badge>
       )}
     </div>
@@ -129,6 +131,7 @@ function SortableLessonRow({
 }
 
 export function LessonsContentPage() {
+  const { t } = useTranslation(['teacher', 'common', 'errors'])
   const [courses, setCourses] = useState<CourseDto[]>([])
   const [sections, setSections] = useState<CourseSectionDto[]>([])
   const [lessons, setLessons] = useState<LessonDto[]>([])
@@ -201,8 +204,8 @@ export function LessonsContentPage() {
       try {
         await Promise.all(toUpdate.map(l => lessonService.updateLesson(l.id, { order: l.order })))
       } catch {
-        toast.error('Failed to update lesson order', {
-          description: 'Refreshing lessons...',
+        toast.error(t('teacher:lessonsContent.errors.orderUpdateFailed'), {
+          description: t('teacher:lessonsContent.refreshingLessons'),
         })
         if (selectedSection) {
           const sectionLessons = await lessonService.getSectionLessons(selectedSection)
@@ -220,8 +223,8 @@ export function LessonsContentPage() {
         const result = await teacherService.getMyCourses({ pageSize: 100 })
         setCourses(result.items)
       } catch (error) {
-        toast.error('Failed to load courses', {
-          description: error instanceof Error ? error.message : 'Please try again later',
+        toast.error(t('teacher:teacherMyCourses.errors.loadFailed'), {
+          description: error instanceof Error ? error.message : t('teacher:shared.tryAgainLater'),
         })
       }
     }
@@ -239,8 +242,8 @@ export function LessonsContentPage() {
           setSelectedSection('') // Reset section selection
           setLessons([]) // Clear lessons
         } catch (error) {
-          toast.error('Failed to load sections', {
-            description: error instanceof Error ? error.message : 'Please try again later',
+          toast.error(t('teacher:teacherMyCourses.errors.sectionsLoadFailed'), {
+            description: error instanceof Error ? error.message : t('teacher:shared.tryAgainLater'),
           })
         } finally {
           setLoading(false)
@@ -262,8 +265,8 @@ export function LessonsContentPage() {
           const sectionLessons = await lessonService.getSectionLessons(selectedSection)
           setLessons(sectionLessons)
         } catch (error) {
-          toast.error('Failed to load lessons', {
-            description: error instanceof Error ? error.message : 'Please try again later',
+          toast.error(t('teacher:courseLessonsManagement.errors.lessonsLoadFailed'), {
+            description: error instanceof Error ? error.message : t('teacher:shared.tryAgainLater'),
           })
         } finally {
           setLoading(false)
@@ -277,7 +280,7 @@ export function LessonsContentPage() {
 
   const handleAddLesson = async () => {
     if (!selectedCourse || !selectedSection) {
-      toast.error('Please select a course and section first')
+      toast.error(t('teacher:lessonsContent.errors.selectCourseAndSection'))
       return
     }
 
@@ -286,7 +289,7 @@ export function LessonsContentPage() {
       const newLesson = await lessonService.createLesson({
         courseId: selectedCourse,
         sectionId: selectedSection,
-        title: 'New Lesson',
+        title: t('teacher:courseLessonsManagement.newLessonDefaultTitle'),
         description: '',
         videoUrl: '',
         durationMinutes: 0,
@@ -296,10 +299,10 @@ export function LessonsContentPage() {
       setLessons([...lessons, newLesson])
       setEditingLesson(newLesson)
       setShowAddForm(false)
-      toast.success('Lesson created successfully')
+      toast.success(t('teacher:lessonsContent.toasts.lessonCreated'))
     } catch (error) {
-      toast.error('Failed to create lesson', {
-        description: error instanceof Error ? error.message : 'Please try again later',
+      toast.error(t('teacher:courseLessonsManagement.errors.createFailed'), {
+        description: error instanceof Error ? error.message : t('teacher:shared.tryAgainLater'),
       })
     } finally {
       setLoading(false)
@@ -314,10 +317,10 @@ export function LessonsContentPage() {
       if (editingLesson?.id === id) {
         setEditingLesson(null)
       }
-      toast.success('Lesson deleted successfully')
+      toast.success(t('teacher:lessonsContent.toasts.lessonDeleted'))
     } catch (error) {
-      toast.error('Failed to delete lesson', {
-        description: error instanceof Error ? error.message : 'Please try again later',
+      toast.error(t('teacher:courseLessonsManagement.errors.deleteLessonFailed'), {
+        description: error instanceof Error ? error.message : t('teacher:shared.tryAgainLater'),
       })
     } finally {
       setLoading(false)
@@ -339,10 +342,10 @@ export function LessonsContentPage() {
       })
       setLessons(lessons.map(l => l.id === updated.id ? updated : l))
       setEditingLesson(null)
-      toast.success('Lesson updated successfully')
+      toast.success(t('teacher:lessonsContent.toasts.lessonUpdated'))
     } catch (error) {
-      toast.error('Failed to update lesson', {
-        description: error instanceof Error ? error.message : 'Please try again later',
+      toast.error(t('teacher:courseLessonsManagement.errors.updateFailed'), {
+        description: error instanceof Error ? error.message : t('teacher:shared.tryAgainLater'),
       })
     } finally {
       setLoading(false)
@@ -381,8 +384,8 @@ export function LessonsContentPage() {
         lessonService.updateLesson(reindexed[j].id, { order: reindexed[j].order }),
       ])
     } catch (error) {
-      toast.error('Failed to update lesson order', {
-        description: 'Refreshing lessons...',
+      toast.error(t('teacher:lessonsContent.errors.orderUpdateFailed'), {
+        description: t('teacher:lessonsContent.refreshingLessons'),
       })
       if (selectedSection) {
         const sectionLessons = await lessonService.getSectionLessons(selectedSection)
@@ -393,7 +396,7 @@ export function LessonsContentPage() {
 
   const handleAddSection = () => {
     if (!selectedCourse) {
-      toast.error('Please select a course first')
+      toast.error(t('teacher:lessonsContent.errors.selectCourseFirst'))
       return
     }
     setNewSectionName('')
@@ -406,7 +409,7 @@ export function LessonsContentPage() {
     }
 
     if (!newSectionName || !newSectionName.trim()) {
-      toast.error('Please enter a section name')
+      toast.error(t('teacher:lessonsContent.errors.enterSectionName'))
       return
     }
 
@@ -427,10 +430,10 @@ export function LessonsContentPage() {
       
       setShowAddSectionDialog(false)
       setNewSectionName('')
-      toast.success('Section created successfully')
+      toast.success(t('teacher:teacherMyCourses.toasts.sectionCreated'))
     } catch (error) {
-      toast.error('Failed to create section', {
-        description: error instanceof Error ? error.message : 'Please try again later',
+      toast.error(t('teacher:lessonsContent.errors.sectionCreateFailed'), {
+        description: error instanceof Error ? error.message : t('teacher:shared.tryAgainLater'),
       })
     } finally {
       setLoading(false)
@@ -446,16 +449,16 @@ export function LessonsContentPage() {
       {/* Header */}
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight gradient-text">Lessons & Content</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Manage course lessons and content</p>
+          <h1 className="text-3xl font-bold tracking-tight gradient-text">{t('teacher:lessonsContent.pageTitle')}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{t('teacher:lessonsContent.pageSubtitle')}</p>
         </div>
-        <Button 
-          onClick={handleAddLesson} 
+        <Button
+          onClick={handleAddLesson}
           variant="gradient"
           disabled={!selectedCourse || !selectedSection || loading}
         >
           <PlusCircle className="h-4 w-4 me-2" />
-          Add Lesson
+          {t('teacher:courseLessonsManagement.addLesson')}
         </Button>
       </div>
 
@@ -463,22 +466,22 @@ export function LessonsContentPage() {
         {/* Lesson List — h-fit + items-start so this column does not stretch to editor height */}
         <Card className="h-fit w-full min-w-0 max-w-full hover:!translate-y-0 hover:shadow-lg">
           <CardHeader className="pb-2 pt-4">
-            <CardTitle className="text-lg">Lessons</CardTitle>
+            <CardTitle className="text-lg">{t('teacher:courseLessonsManagement.lessons')}</CardTitle>
             <CardDescription className="text-xs mt-0.5">
-              <span className="block">Select course and section</span>
+              <span className="block">{t('teacher:lessonsContent.selectCourseAndSection')}</span>
               {selectedSection && lessonsSorted.length > 1 && (
                 <span className="block mt-1 text-muted-foreground">
-                  اسحب المقبض (النقاط الست) لإعادة ترتيب الدروس.
+                  {t('teacher:lessonsContent.dragHandleHint')}
                 </span>
               )}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3 pt-2">
             <div className="space-y-1.5">
-              <label className="text-xs font-medium">Course</label>
+              <label className="text-xs font-medium">{t('teacher:editAssignment.course')}</label>
               <SelectRoot value={selectedCourse} onValueChange={setSelectedCourse}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select course" />
+                  <SelectValue placeholder={t('teacher:studentDetail.selectCourse')} />
                 </SelectTrigger>
                 <SelectContent>
                   {courses.map(course => (
@@ -487,7 +490,7 @@ export function LessonsContentPage() {
                     </SelectItem>
                   ))}
                   {courses.length === 0 && (
-                    <div className="px-3 py-2 text-sm text-muted-foreground">No courses available</div>
+                    <div className="px-3 py-2 text-sm text-muted-foreground">{t('teacher:lessonsContent.noCoursesAvailable')}</div>
                   )}
                 </SelectContent>
               </SelectRoot>
@@ -495,7 +498,7 @@ export function LessonsContentPage() {
 
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-medium">Section</label>
+                <label className="text-xs font-medium">{t('teacher:courseLessonsManagement.section')}</label>
                 {selectedCourse && (
                   <Button
                     variant="ghost"
@@ -505,7 +508,7 @@ export function LessonsContentPage() {
                     className="h-6 px-2 text-xs"
                   >
                     <FolderPlus className="h-3 w-3 me-1" />
-                    Add Section
+                    {t('teacher:teacherMyCourses.addSection')}
                   </Button>
                 )}
               </div>
@@ -515,7 +518,7 @@ export function LessonsContentPage() {
                 disabled={!selectedCourse}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select section" />
+                  <SelectValue placeholder={t('teacher:lessonsContent.selectSection')} />
                 </SelectTrigger>
                 <SelectContent>
                   {sections.map(section => (
@@ -525,7 +528,7 @@ export function LessonsContentPage() {
                   ))}
                   {sections.length === 0 && selectedCourse && (
                     <div className="px-3 py-2 text-sm text-muted-foreground">
-                      No sections yet. Click "Add Section" above to create one.
+                      {t('teacher:lessonsContent.noSectionsYet')}
                     </div>
                   )}
                 </SelectContent>
@@ -535,9 +538,9 @@ export function LessonsContentPage() {
             {selectedSection && (
               <div className="pt-2 border-t">
                 {loading ? (
-                  <div className="text-center py-4 text-sm text-muted-foreground">Loading lessons...</div>
+                  <div className="text-center py-4 text-sm text-muted-foreground">{t('teacher:courseLessonsManagement.loadingLessons')}</div>
                 ) : lessons.length === 0 ? (
-                  <div className="text-center py-4 text-sm text-muted-foreground">No lessons in this section</div>
+                  <div className="text-center py-4 text-sm text-muted-foreground">{t('teacher:lessonsContent.noLessonsInSection')}</div>
                 ) : (
                   <div className="h-fit min-h-0 w-full max-w-full overflow-hidden rounded-md">
                     <DndContext
@@ -586,48 +589,48 @@ export function LessonsContentPage() {
         <Card className="hover:!translate-y-0 hover:shadow-lg">
           <CardHeader className="pb-2 pt-4">
             <CardTitle className="text-lg">
-              {editingLesson ? 'Edit Lesson' : 'Lesson Details'}
+              {editingLesson ? t('teacher:courseLessonsManagement.editLesson') : t('teacher:lessonsContent.lessonDetails')}
             </CardTitle>
             <CardDescription className="text-xs mt-0.5">
-              {editingLesson ? 'Update lesson information' : 'Select a lesson to edit'}
+              {editingLesson ? t('teacher:lessonsContent.updateLessonInfo') : t('teacher:lessonsContent.selectLessonToEdit')}
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-2">
             {editingLesson ? (
               <div className="space-y-3">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium">Lesson Title</label>
+                  <label className="text-xs font-medium">{t('teacher:lessonsContent.lessonTitle')}</label>
                   <Input
                     value={editingLesson.title}
                     onChange={(e) => setEditingLesson({ ...editingLesson, title: e.target.value })}
-                    placeholder="Enter lesson title"
+                    placeholder={t('teacher:lessonsContent.lessonTitlePlaceholder')}
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium">Description</label>
+                  <label className="text-xs font-medium">{t('teacher:courseLessonsManagement.description')}</label>
                   <Input
                     value={editingLesson.description || ''}
                     onChange={(e) => setEditingLesson({ ...editingLesson, description: e.target.value })}
-                    placeholder="Enter lesson description"
+                    placeholder={t('teacher:lessonsContent.lessonDescriptionPlaceholder')}
                   />
                 </div>
 
                 <div className="grid gap-3 md:grid-cols-2">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-medium">Video URL</label>
+                    <label className="text-xs font-medium">{t('teacher:lessonsContent.videoUrl')}</label>
                     <Input
                       value={editingLesson.videoUrl || ''}
                       onChange={(e) => setEditingLesson({ ...editingLesson, videoUrl: e.target.value })}
-                      placeholder="YouTube, Vimeo, Zoom, Google Drive, or direct video URL"
+                      placeholder={t('teacher:lessonsContent.videoUrlPlaceholder')}
                     />
                     <p className="text-xs text-muted-foreground">
-                      Supports: YouTube, Vimeo, Zoom recordings, Google Drive, Loom, Wistia, or direct MP4/WebM links
+                      {t('teacher:courseLessonsManagement.videoUrlHint')}
                     </p>
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-medium">Duration (minutes)</label>
+                    <label className="text-xs font-medium">{t('teacher:lessonsContent.durationMinutes')}</label>
                     <Input
                       type="number"
                       min="0"
@@ -641,9 +644,9 @@ export function LessonsContentPage() {
 
                 <div className="flex items-center justify-between p-3 rounded-lg border border-border/50 bg-muted/20">
                   <div>
-                    <div className="text-sm font-medium">Preview Lesson</div>
+                    <div className="text-sm font-medium">{t('teacher:courseLessonsManagement.previewLesson')}</div>
                     <div className="text-xs text-muted-foreground">
-                      {editingLesson.isPreview ? 'Students can preview this lesson' : 'Regular lesson'}
+                      {editingLesson.isPreview ? t('teacher:lessonsContent.previewOn') : t('teacher:lessonsContent.regularLesson')}
                     </div>
                   </div>
                   <Button
@@ -654,12 +657,12 @@ export function LessonsContentPage() {
                     {editingLesson.isPreview ? (
                       <>
                         <EyeOff className="h-3 w-3 me-1" />
-                        Remove Preview
+                        {t('teacher:lessonsContent.removePreview')}
                       </>
                     ) : (
                       <>
                         <Eye className="h-3 w-3 me-1" />
-                        Make Preview
+                        {t('teacher:courseLessonsManagement.makePreview')}
                       </>
                     )}
                   </Button>
@@ -673,7 +676,7 @@ export function LessonsContentPage() {
                     disabled={lessonsSorted.findIndex(l => l.id === editingLesson.id) === 0 || loading}
                   >
                     <ArrowUp className="h-3 w-3 me-1" />
-                    Move Up
+                    {t('teacher:lessonsContent.moveUp')}
                   </Button>
                   <Button
                     variant="outline"
@@ -682,7 +685,7 @@ export function LessonsContentPage() {
                     disabled={lessonsSorted.findIndex(l => l.id === editingLesson.id) === lessonsSorted.length - 1 || loading}
                   >
                     <ArrowDown className="h-3 w-3 me-1" />
-                    Move Down
+                    {t('teacher:lessonsContent.moveDown')}
                   </Button>
                   <Button
                     variant="destructive"
@@ -692,7 +695,7 @@ export function LessonsContentPage() {
                     className="ms-auto"
                   >
                     <Trash2 className="h-3 w-3 me-1" />
-                    Delete
+                    {t('common:delete')}
                   </Button>
                 </div>
 
@@ -703,21 +706,21 @@ export function LessonsContentPage() {
                     onClick={handleSaveLesson}
                     disabled={loading}
                   >
-                    {loading ? 'Saving...' : 'Save Changes'}
+                    {loading ? t('common:saving') : t('teacher:courseLessonsManagement.saveChanges')}
                   </Button>
                   <Button
                     variant="outline"
                     onClick={() => setEditingLesson(null)}
                     disabled={loading}
                   >
-                    Cancel
+                    {t('common:cancel')}
                   </Button>
                 </div>
               </div>
             ) : (
               <div className="text-center py-12 text-muted-foreground">
                 <Video className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                <p className="text-sm">Select a lesson from the list to edit</p>
+                <p className="text-sm">{t('teacher:lessonsContent.selectLessonFromListHint')}</p>
               </div>
             )}
           </CardContent>
@@ -727,9 +730,9 @@ export function LessonsContentPage() {
       <ConfirmDialog
         open={deleteLessonId !== null}
         onOpenChange={(open) => { if (!open) setDeleteLessonId(null) }}
-        title="Delete Lesson"
-        description="Delete this lesson? This action cannot be undone."
-        confirmLabel="Delete"
+        title={t('teacher:courseLessonsManagement.deleteLesson')}
+        description={t('teacher:lessonsContent.deleteLessonConfirm')}
+        confirmLabel={t('common:delete')}
         variant="destructive"
         onConfirm={async () => {
           if (deleteLessonId) {
@@ -743,18 +746,18 @@ export function LessonsContentPage() {
       <Dialog open={showAddSectionDialog} onOpenChange={setShowAddSectionDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add New Section</DialogTitle>
+            <DialogTitle>{t('teacher:lessonsContent.addNewSection')}</DialogTitle>
             <DialogDescription>
-              Create a new section for organizing lessons in this course.
+              {t('teacher:lessonsContent.addNewSectionDescription')}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 pt-2">
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">Section Name</label>
+              <label className="text-sm font-medium">{t('teacher:lessonsContent.sectionName')}</label>
               <Input
                 value={newSectionName}
                 onChange={(e) => setNewSectionName(e.target.value)}
-                placeholder="Enter section name"
+                placeholder={t('teacher:lessonsContent.enterSectionName')}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !loading) {
                     handleCreateSection()
@@ -772,14 +775,14 @@ export function LessonsContentPage() {
                 }}
                 disabled={loading}
               >
-                Cancel
+                {t('common:cancel')}
               </Button>
               <Button
                 variant="gradient"
                 onClick={handleCreateSection}
                 disabled={loading || !newSectionName.trim()}
               >
-                {loading ? 'Creating...' : 'Create Section'}
+                {loading ? t('common:creating') : t('teacher:teacherMyCourses.createSection')}
               </Button>
             </div>
           </div>

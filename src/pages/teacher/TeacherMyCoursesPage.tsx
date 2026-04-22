@@ -57,6 +57,7 @@ import { apiClient } from '../../lib/api'
 import { enrollmentService } from '../../services/enrollmentService'
 import { ConfirmDialog } from '../../components/ui/confirm-dialog'
 import type { CourseSectionDto, MeetingTimeDto } from '../../services/courseService'
+import { useTranslation } from 'react-i18next'
 
 /** Active + completed enrollments only — used for class size and average progress. */
 const COUNTABLE_ENROLLMENT_STATUSES = new Set(['Active', 'Completed'])
@@ -87,6 +88,7 @@ interface SectionFormData {
 }
 
 export function TeacherMyCoursesPage() {
+  const { t } = useTranslation(['teacher', 'common', 'errors'])
   const [courses, setCourses] = useState<CourseDto[]>([])
   const [courseStatsById, setCourseStatsById] = useState<
     Record<string, { studentCount: number; averageProgress: number }>
@@ -137,8 +139,8 @@ export function TeacherMyCoursesPage() {
         )
         setCourseStatsById(Object.fromEntries(statsEntries))
       } catch (error) {
-        toast.error('Failed to load courses', {
-          description: error instanceof Error ? error.message : 'Please try again later',
+        toast.error(t('teacher:teacherMyCourses.errors.loadFailed'), {
+          description: error instanceof Error ? error.message : t('teacher:shared.tryAgainLater'),
         })
       } finally {
         setLoading(false)
@@ -181,8 +183,8 @@ export function TeacherMyCoursesPage() {
       const course = await courseService.getCourseById(courseId)
       setSections(course.sections || [])
     } catch (error) {
-      toast.error('Failed to load sections', {
-        description: error instanceof Error ? error.message : 'Please try again later',
+      toast.error(t('teacher:teacherMyCourses.errors.sectionsLoadFailed'), {
+        description: error instanceof Error ? error.message : t('teacher:shared.tryAgainLater'),
       })
     } finally {
       setSectionsLoading(false)
@@ -216,36 +218,36 @@ export function TeacherMyCoursesPage() {
 
   const handleSaveSection = async () => {
     if (!selectedCourse || !editingSection) {
-      toast.error('Please fill in all required fields')
+      toast.error(t('teacher:teacherMyCourses.errors.fillRequired'))
       return
     }
 
     // Validate required fields
     if (!editingSection.name.trim()) {
-      toast.error('Section name is required')
+      toast.error(t('teacher:teacherMyCourses.errors.sectionNameRequired'))
       return
     }
 
     if (!editingSection.locationLabel.trim()) {
-      toast.error('Location/Modality is required')
+      toast.error(t('teacher:teacherMyCourses.errors.locationRequired'))
       return
     }
 
     if (editingSection.maxSeats < 1) {
-      toast.error('Max seats must be at least 1')
+      toast.error(t('teacher:teacherMyCourses.errors.maxSeatsAtLeastOne'))
       return
     }
 
     // Validate meeting times
     for (const mt of editingSection.meetingTimes) {
       if (!mt.startTime || !mt.endTime) {
-        toast.error('Please fill in all meeting times')
+        toast.error(t('teacher:teacherMyCourses.errors.fillMeetingTimes'))
         return
       }
       const start = timeToMinutes(mt.startTime)
       const end = timeToMinutes(mt.endTime)
       if (start >= end) {
-        toast.error('End time must be after start time')
+        toast.error(t('teacher:teacherMyCourses.errors.endAfterStart'))
         return
       }
     }
@@ -285,20 +287,20 @@ export function TeacherMyCoursesPage() {
         // Update existing section
         const response = await apiClient.put(`/courses/${selectedCourse.id}/sections/${editingSection.id}`, requestBody)
         console.log('Section updated:', response)
-        toast.success('Section updated successfully')
+        toast.success(t('teacher:teacherMyCourses.toasts.sectionUpdated'))
       } else {
         // Create new section
         const response = await apiClient.post(`/courses/${selectedCourse.id}/sections`, requestBody)
         console.log('Section created:', response)
-        toast.success('Section created successfully')
+        toast.success(t('teacher:teacherMyCourses.toasts.sectionCreated'))
       }
 
       setEditingSection(null)
       await loadSections(selectedCourse.id)
     } catch (error: any) {
       console.error('Failed to save section:', error)
-      const errorMessage = error?.error || error?.detail || error?.message || 'Please try again later'
-      toast.error('Failed to save section', {
+      const errorMessage = error?.error || error?.detail || error?.message || t('teacher:shared.tryAgainLater')
+      toast.error(t('teacher:teacherMyCourses.errors.saveSectionFailed'), {
         description: errorMessage,
       })
     } finally {
@@ -312,11 +314,11 @@ export function TeacherMyCoursesPage() {
     try {
       setSectionsLoading(true)
       await apiClient.delete(`/courses/${selectedCourse.id}/sections/${sectionId}`)
-      toast.success('Section deleted successfully')
+      toast.success(t('teacher:teacherMyCourses.toasts.sectionDeleted'))
       await loadSections(selectedCourse.id)
     } catch (error) {
-      toast.error('Failed to delete section', {
-        description: error instanceof Error ? error.message : 'Please try again later',
+      toast.error(t('teacher:teacherMyCourses.errors.deleteSectionFailed'), {
+        description: error instanceof Error ? error.message : t('teacher:shared.tryAgainLater'),
       })
     } finally {
       setSectionsLoading(false)
@@ -355,7 +357,7 @@ export function TeacherMyCoursesPage() {
   const openCloneDialog = (course: CourseDto) => {
     setCloneCourse(course)
     setCloneForm({
-      title: `${course.title} (New Batch)`,
+      title: t('teacher:teacherMyCourses.newBatchTitle', { title: course.title }),
       courseStartDate: '',
       courseEndDate: '',
       copyLessons: true,
@@ -383,11 +385,11 @@ export function TeacherMyCoursesPage() {
       setShowCloneDialog(false)
       // Navigate first, then show toast on the destination page so it isn't unmounted
       navigate(`/teacher/courses/${newCourse.id}/edit`, {
-        state: { successMessage: `New batch "${newCourse.title}" created!` },
+        state: { successMessage: t('teacher:teacherMyCourses.toasts.newBatchCreated', { title: newCourse.title }) },
       })
     } catch (error) {
-      toast.error('Failed to create new batch', {
-        description: error instanceof Error ? error.message : 'Please try again later',
+      toast.error(t('teacher:teacherMyCourses.errors.createBatchFailed'), {
+        description: error instanceof Error ? error.message : t('teacher:shared.tryAgainLater'),
       })
     } finally {
       setCloneLoading(false)
@@ -424,13 +426,13 @@ export function TeacherMyCoursesPage() {
       {/* Header */}
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight gradient-text">My Courses</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Manage your courses and content</p>
+          <h1 className="text-3xl font-bold tracking-tight gradient-text">{t('teacher:myCourses.title')}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{t('teacher:teacherMyCourses.pageSubtitle')}</p>
         </div>
         <Button asChild variant="gradient">
           <Link to="/teacher/create-course">
             <PlusCircle className="h-4 w-4 me-2" />
-            Create Course
+            {t('teacher:teacherMyCourses.createCourse')}
           </Link>
         </Button>
       </div>
@@ -440,14 +442,14 @@ export function TeacherMyCoursesPage() {
         <Card>
           <CardContent className="p-12 text-center">
             <BookOpen className="h-16 w-16 mx-auto mb-4 text-muted-foreground/50" />
-            <h3 className="text-lg font-semibold mb-2">No courses yet</h3>
+            <h3 className="text-lg font-semibold mb-2">{t('teacher:exams.noCoursesYet')}</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              Create your first course to get started
+              {t('teacher:teacherMyCourses.createFirstHint')}
             </p>
             <Button asChild variant="gradient">
               <Link to="/teacher/create-course">
                 <PlusCircle className="h-4 w-4 me-2" />
-                Create Your First Course
+                {t('teacher:teacherMyCourses.createFirstCourse')}
               </Link>
             </Button>
           </CardContent>
@@ -500,34 +502,34 @@ export function TeacherMyCoursesPage() {
                           <DropdownMenuItem asChild>
                             <Link to={`/teacher/courses/${course.id}/edit`}>
                               <Edit className="h-4 w-4 me-2" />
-                              Edit Course
+                              {t('teacher:myCourses.editCourse')}
                             </Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem asChild>
                             <Link to={`/teacher/courses/${course.id}/lessons`}>
                               <BookOpen className="h-4 w-4 me-2" />
-                              Manage Lessons
+                              {t('teacher:myCourses.manageLessons')}
                             </Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => openSectionsDialog(course)}>
                             <Calendar className="h-4 w-4 me-2" />
-                            Manage Sections
+                            {t('teacher:teacherMyCourses.manageSections')}
                           </DropdownMenuItem>
                           <DropdownMenuItem asChild>
                             <Link to={`/teacher/courses/${course.id}/students`}>
                               <Users className="h-4 w-4 me-2" />
-                              View Students
+                              {t('teacher:myCourses.viewStudents')}
                             </Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem asChild>
                             <Link to={`/teacher/courses/${course.id}/discounts`}>
                               <Tag className="h-4 w-4 me-2" />
-                              Discounts
+                              {t('teacher:myCourses.discounts')}
                             </Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => openCloneDialog(course)}>
                             <Copy className="h-4 w-4 me-2" />
-                            Start New Batch
+                            {t('teacher:myCourses.startNewBatch')}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -540,7 +542,7 @@ export function TeacherMyCoursesPage() {
                       <div className="flex items-center justify-between text-xs">
                         <div className="flex items-center gap-1.5 text-muted-foreground">
                           <Users className="h-3 w-3" />
-                          <span>{stats.studentCount} students</span>
+                          <span>{t('teacher:teacherMyCourses.studentCount', { count: stats.studentCount })}</span>
                         </div>
                         <Badge
                           variant={
@@ -552,14 +554,14 @@ export function TeacherMyCoursesPage() {
                           }
                           className="text-xs"
                         >
-                          {stats.status}
+                          {t(`teacher:teacherMyCourses.courseStatus.${(stats.status || 'Draft').toLowerCase()}`)}
                         </Badge>
                       </div>
-                      
+
                       {/* Progress Bar */}
                       <div className="space-y-1">
                         <div className="flex items-center justify-between text-xs">
-                          <span className="text-muted-foreground">Avg. student progress</span>
+                          <span className="text-muted-foreground">{t('teacher:teacherMyCourses.avgStudentProgress')}</span>
                           <span className="font-medium">{stats.averageProgress}%</span>
                         </div>
                         <Progress value={stats.averageProgress} className="h-1.5" />
@@ -571,13 +573,13 @@ export function TeacherMyCoursesPage() {
                       <Button variant="outline" size="sm" className="flex-1" asChild>
                         <Link to={`/teacher/courses/${course.id}`}>
                           <Eye className="h-3 w-3 me-1" />
-                          View
+                          {t('teacher:assignments.viewAction')}
                         </Link>
                       </Button>
                       <Button variant="outline" size="sm" className="flex-1" asChild>
                         <Link to={`/teacher/courses/${course.id}/edit`}>
                           <Settings className="h-3 w-3 me-1" />
-                          Manage
+                          {t('teacher:teacherMyCourses.manage')}
                         </Link>
                       </Button>
                     </div>
@@ -594,9 +596,9 @@ export function TeacherMyCoursesPage() {
       <Dialog open={showSectionsDialog} onOpenChange={setShowSectionsDialog}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Manage Course Sections</DialogTitle>
+            <DialogTitle>{t('teacher:teacherMyCourses.manageSectionsTitle')}</DialogTitle>
             <DialogDescription>
-              {selectedCourse?.title ? `Manage enrollment sections for "${selectedCourse.title}"` : 'Add and manage course sections for student enrollment'}
+              {selectedCourse?.title ? t('teacher:teacherMyCourses.manageSectionsDescription', { title: selectedCourse.title }) : t('teacher:teacherMyCourses.manageSectionsGenericDescription')}
             </DialogDescription>
           </DialogHeader>
 
@@ -604,30 +606,30 @@ export function TeacherMyCoursesPage() {
             <div className="space-y-4">
               <div className="space-y-3">
                 <div className="space-y-1.5">
-                  <Label>Section Name *</Label>
+                  <Label>{t('teacher:teacherMyCourses.sectionNameRequired')}</Label>
                   <Input
                     value={editingSection.name}
                     onChange={(e) =>
                       setEditingSection({ ...editingSection, name: e.target.value })
                     }
-                    placeholder="e.g., Weekend Intensive, Part-Time Evening"
+                    placeholder={t('teacher:teacherMyCourses.sectionNamePlaceholder')}
                   />
                 </div>
 
                 <div className="grid gap-3 md:grid-cols-2">
                   <div className="space-y-1.5">
-                    <Label>Location/Modality *</Label>
+                    <Label>{t('teacher:teacherMyCourses.locationModality')}</Label>
                     <Input
                       value={editingSection.locationLabel}
                       onChange={(e) =>
                         setEditingSection({ ...editingSection, locationLabel: e.target.value })
                       }
-                      placeholder="e.g., Online - Live Coding, Room 201"
+                      placeholder={t('teacher:teacherMyCourses.locationPlaceholder')}
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label>Max Seats</Label>
+                    <Label>{t('teacher:teacherMyCourses.maxSeats')}</Label>
                     <Input
                       type="number"
                       min="1"
@@ -643,7 +645,7 @@ export function TeacherMyCoursesPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label>Join URL (Optional)</Label>
+                  <Label>{t('teacher:teacherMyCourses.joinUrlOptional')}</Label>
                   <Input
                     value={editingSection.joinUrl}
                     onChange={(e) =>
@@ -655,16 +657,16 @@ export function TeacherMyCoursesPage() {
 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <Label>Meeting Times</Label>
+                    <Label>{t('teacher:teacherMyCourses.meetingTimes')}</Label>
                     <Button type="button" variant="outline" size="sm" onClick={addMeetingTime}>
                       <Plus className="h-4 w-4 me-1" />
-                      Add Time
+                      {t('teacher:teacherMyCourses.addTime')}
                     </Button>
                   </div>
 
                   {editingSection.meetingTimes.length === 0 ? (
                     <div className="text-sm text-muted-foreground text-center py-4 border border-dashed rounded">
-                      No meeting times added
+                      {t('teacher:teacherMyCourses.noMeetingTimesAdded')}
                     </div>
                   ) : (
                     <div className="space-y-2">
@@ -682,13 +684,13 @@ export function TeacherMyCoursesPage() {
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="Monday">Monday</SelectItem>
-                                <SelectItem value="Tuesday">Tuesday</SelectItem>
-                                <SelectItem value="Wednesday">Wednesday</SelectItem>
-                                <SelectItem value="Thursday">Thursday</SelectItem>
-                                <SelectItem value="Friday">Friday</SelectItem>
-                                <SelectItem value="Saturday">Saturday</SelectItem>
-                                <SelectItem value="Sunday">Sunday</SelectItem>
+                                <SelectItem value="Monday">{t('teacher:teacherMyCourses.days.monday')}</SelectItem>
+                                <SelectItem value="Tuesday">{t('teacher:teacherMyCourses.days.tuesday')}</SelectItem>
+                                <SelectItem value="Wednesday">{t('teacher:teacherMyCourses.days.wednesday')}</SelectItem>
+                                <SelectItem value="Thursday">{t('teacher:teacherMyCourses.days.thursday')}</SelectItem>
+                                <SelectItem value="Friday">{t('teacher:teacherMyCourses.days.friday')}</SelectItem>
+                                <SelectItem value="Saturday">{t('teacher:teacherMyCourses.days.saturday')}</SelectItem>
+                                <SelectItem value="Sunday">{t('teacher:teacherMyCourses.days.sunday')}</SelectItem>
                               </SelectContent>
                             </SelectRoot>
                           </div>
@@ -699,7 +701,7 @@ export function TeacherMyCoursesPage() {
                               onChange={(e) => updateMeetingTime(index, { startTime: e.target.value })}
                             />
                           </div>
-                          <span className="text-sm text-muted-foreground">to</span>
+                          <span className="text-sm text-muted-foreground">{t('teacher:teacherMyCourses.to')}</span>
                           <div className="flex-1">
                             <Input
                               type="time"
@@ -728,10 +730,10 @@ export function TeacherMyCoursesPage() {
                   onClick={() => setEditingSection(null)}
                   disabled={sectionsLoading}
                 >
-                  Cancel
+                  {t('common:cancel')}
                 </Button>
                 <Button variant="gradient" onClick={handleSaveSection} disabled={sectionsLoading}>
-                  {sectionsLoading ? 'Saving...' : editingSection.id ? 'Update Section' : 'Create Section'}
+                  {sectionsLoading ? t('common:saving') : editingSection.id ? t('teacher:teacherMyCourses.updateSection') : t('teacher:teacherMyCourses.createSection')}
                 </Button>
               </div>
             </div>
@@ -740,22 +742,22 @@ export function TeacherMyCoursesPage() {
               <div className="flex justify-end">
                 <Button onClick={handleAddSection}>
                   <Plus className="h-4 w-4 me-2" />
-                  Add Section
+                  {t('teacher:teacherMyCourses.addSection')}
                 </Button>
               </div>
 
               {sectionsLoading ? (
-                <div className="text-center py-8 text-muted-foreground">Loading sections...</div>
+                <div className="text-center py-8 text-muted-foreground">{t('teacher:teacherMyCourses.loadingSections')}</div>
               ) : sections.length === 0 ? (
                 <div className="border-2 border-dashed border-border/50 rounded-lg p-8 text-center">
                   <Calendar className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground mb-2">No sections added yet</p>
+                  <p className="text-sm text-muted-foreground mb-2">{t('teacher:teacherMyCourses.noSectionsYet')}</p>
                   <p className="text-xs text-muted-foreground mb-4">
-                    Add sections so students can choose their preferred schedule
+                    {t('teacher:teacherMyCourses.addSectionsHint')}
                   </p>
                   <Button onClick={handleAddSection} variant="outline">
                     <Plus className="h-4 w-4 me-2" />
-                    Add First Section
+                    {t('teacher:teacherMyCourses.addFirstSection')}
                   </Button>
                 </div>
               ) : (
@@ -776,11 +778,11 @@ export function TeacherMyCoursesPage() {
                             {section.joinUrl && (
                               <div className="flex items-center gap-1">
                                 <LinkIcon className="h-3 w-3" />
-                                Online meeting available
+                                {t('teacher:teacherMyCourses.onlineMeetingAvailable')}
                               </div>
                             )}
                             <div>
-                              {section.seatsRemaining} / {section.maxSeats} seats left
+                              {t('teacher:teacherMyCourses.seatsLeft', { remaining: section.seatsRemaining, max: section.maxSeats })}
                             </div>
                           </div>
                           {section.meetingTimes && section.meetingTimes.length > 0 && (
@@ -802,7 +804,7 @@ export function TeacherMyCoursesPage() {
                             disabled={sectionsLoading}
                           >
                             <Edit className="h-3 w-3 me-1" />
-                            Edit
+                            {t('common:edit')}
                           </Button>
                           <Button
                             variant="destructive"
@@ -826,9 +828,9 @@ export function TeacherMyCoursesPage() {
       <ConfirmDialog
         open={deleteSectionId !== null}
         onOpenChange={(open) => { if (!open) setDeleteSectionId(null) }}
-        title="Delete Section"
-        description="Are you sure you want to delete this section?"
-        confirmLabel="Delete"
+        title={t('teacher:teacherMyCourses.deleteSection')}
+        description={t('teacher:teacherMyCourses.deleteSectionConfirm')}
+        confirmLabel={t('common:delete')}
         variant="destructive"
         onConfirm={() => {
           if (deleteSectionId) return handleDeleteSection(deleteSectionId)
@@ -839,26 +841,26 @@ export function TeacherMyCoursesPage() {
       <Dialog open={showCloneDialog} onOpenChange={setShowCloneDialog}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Start New Batch</DialogTitle>
+            <DialogTitle>{t('teacher:myCourses.startNewBatch')}</DialogTitle>
             <DialogDescription>
-              Create a fresh copy of this course with new dates and zero enrollments. All lessons, assignments, and exams will be copied.
+              {t('teacher:teacherMyCourses.cloneDescription')}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
-              <Label htmlFor="clone-title">Title</Label>
+              <Label htmlFor="clone-title">{t('teacher:teacherMyCourses.titleLabel')}</Label>
               <Input
                 id="clone-title"
                 value={cloneForm.title}
                 onChange={(e) => setCloneForm({ ...cloneForm, title: e.target.value })}
-                placeholder="New course title"
+                placeholder={t('teacher:teacherMyCourses.newCourseTitlePlaceholder')}
               />
             </div>
 
             <div className="grid gap-3 grid-cols-2">
               <div className="space-y-1.5">
-                <Label htmlFor="clone-start-date">Start Date</Label>
+                <Label htmlFor="clone-start-date">{t('teacher:discounts.form.startDate')}</Label>
                 <Input
                   id="clone-start-date"
                   type="date"
@@ -867,7 +869,7 @@ export function TeacherMyCoursesPage() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="clone-end-date">End Date</Label>
+                <Label htmlFor="clone-end-date">{t('teacher:discounts.form.endDate')}</Label>
                 <Input
                   id="clone-end-date"
                   type="date"
@@ -878,10 +880,10 @@ export function TeacherMyCoursesPage() {
             </div>
 
             <div className="space-y-3">
-              <Label>Content to Copy</Label>
+              <Label>{t('teacher:teacherMyCourses.contentToCopy')}</Label>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="clone-lessons" className="font-normal cursor-pointer">Copy Lessons</Label>
+                  <Label htmlFor="clone-lessons" className="font-normal cursor-pointer">{t('teacher:teacherMyCourses.copyLessons')}</Label>
                   <Switch
                     id="clone-lessons"
                     checked={cloneForm.copyLessons}
@@ -889,7 +891,7 @@ export function TeacherMyCoursesPage() {
                   />
                 </div>
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="clone-assignments" className="font-normal cursor-pointer">Copy Assignments</Label>
+                  <Label htmlFor="clone-assignments" className="font-normal cursor-pointer">{t('teacher:teacherMyCourses.copyAssignments')}</Label>
                   <Switch
                     id="clone-assignments"
                     checked={cloneForm.copyAssignments}
@@ -897,7 +899,7 @@ export function TeacherMyCoursesPage() {
                   />
                 </div>
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="clone-exams" className="font-normal cursor-pointer">Copy Exams</Label>
+                  <Label htmlFor="clone-exams" className="font-normal cursor-pointer">{t('teacher:teacherMyCourses.copyExams')}</Label>
                   <Switch
                     id="clone-exams"
                     checked={cloneForm.copyExams}
@@ -905,7 +907,7 @@ export function TeacherMyCoursesPage() {
                   />
                 </div>
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="clone-sections" className="font-normal cursor-pointer">Copy Sections</Label>
+                  <Label htmlFor="clone-sections" className="font-normal cursor-pointer">{t('teacher:teacherMyCourses.copySections')}</Label>
                   <Switch
                     id="clone-sections"
                     checked={cloneForm.copySections}
@@ -918,10 +920,10 @@ export function TeacherMyCoursesPage() {
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowCloneDialog(false)} disabled={cloneLoading}>
-              Cancel
+              {t('common:cancel')}
             </Button>
             <Button variant="gradient" onClick={handleCloneCourse} disabled={cloneLoading}>
-              {cloneLoading ? 'Creating...' : 'Create New Batch'}
+              {cloneLoading ? t('common:creating') : t('teacher:teacherMyCourses.createNewBatch')}
             </Button>
           </DialogFooter>
         </DialogContent>

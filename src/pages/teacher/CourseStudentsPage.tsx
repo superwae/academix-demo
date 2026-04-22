@@ -26,6 +26,7 @@ import {
 } from '../../components/ui/table'
 import { courseService, type CourseDto } from '../../services/courseService'
 import { teacherService } from '../../services/teacherService'
+import { useTranslation } from 'react-i18next'
 
 interface Enrollment {
   id: string
@@ -38,6 +39,7 @@ interface Enrollment {
 }
 
 export function CourseStudentsPage() {
+  const { t } = useTranslation(['teacher', 'common', 'errors'])
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [course, setCourse] = useState<CourseDto | null>(null)
@@ -48,7 +50,7 @@ export function CourseStudentsPage() {
   useEffect(() => {
     const loadData = async () => {
       if (!id) {
-        toast.error('Course ID is required')
+        toast.error(t('teacher:courseStudents.errors.idRequired'))
         navigate('/teacher/courses')
         return
       }
@@ -63,7 +65,7 @@ export function CourseStudentsPage() {
         const enrollmentData: Enrollment[] = enrollmentsResult.items.map((enrollment) => ({
           id: enrollment.id,
           studentId: enrollment.userId,
-          studentName: enrollment.userName || 'Unknown',
+          studentName: enrollment.userName || t('teacher:shared.unknown'),
           studentEmail: enrollment.userEmail || '',
           enrolledAt: enrollment.enrolledAt,
           progress: enrollment.progressPercentage ?? 0,
@@ -71,8 +73,8 @@ export function CourseStudentsPage() {
         }))
         setEnrollments(enrollmentData)
       } catch (error) {
-        toast.error('Failed to load course data', {
-          description: error instanceof Error ? error.message : 'Please try again later',
+        toast.error(t('teacher:courseStudents.errors.loadFailed'), {
+          description: error instanceof Error ? error.message : t('teacher:shared.tryAgainLater'),
         })
         navigate('/teacher/courses')
       } finally {
@@ -100,9 +102,9 @@ export function CourseStudentsPage() {
   if (!course) {
     return (
       <div className="text-center py-12">
-        <p className="text-muted-foreground">Course not found</p>
+        <p className="text-muted-foreground">{t('teacher:courseStudents.notFound')}</p>
         <Button onClick={() => navigate('/teacher/courses')} className="mt-4">
-          Back to Courses
+          {t('teacher:courseStudents.backToCourses')}
         </Button>
       </div>
     )
@@ -121,7 +123,7 @@ export function CourseStudentsPage() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight gradient-text">Course Students</h1>
+            <h1 className="text-3xl font-bold tracking-tight gradient-text">{t('teacher:courseStudents.pageTitle')}</h1>
             <p className="mt-1 text-sm text-muted-foreground">{course.title}</p>
           </div>
         </div>
@@ -137,7 +139,7 @@ export function CourseStudentsPage() {
               </div>
               <div>
                 <div className="text-2xl font-bold">{enrollments.length}</div>
-                <div className="text-sm text-muted-foreground">Total Students</div>
+                <div className="text-sm text-muted-foreground">{t('teacher:dashboard.totalStudents')}</div>
               </div>
             </div>
           </CardContent>
@@ -152,7 +154,7 @@ export function CourseStudentsPage() {
                 <div className="text-2xl font-bold">
                   {enrollments.filter((e) => e.status === 'Active').length}
                 </div>
-                <div className="text-sm text-muted-foreground">Active</div>
+                <div className="text-sm text-muted-foreground">{t('teacher:courseStudents.active')}</div>
               </div>
             </div>
           </CardContent>
@@ -170,7 +172,7 @@ export function CourseStudentsPage() {
                   )}
                   %
                 </div>
-                <div className="text-sm text-muted-foreground">Avg. Progress</div>
+                <div className="text-sm text-muted-foreground">{t('teacher:courseStudents.avgProgress')}</div>
               </div>
             </div>
           </CardContent>
@@ -182,15 +184,15 @@ export function CourseStudentsPage() {
         <CardHeader className="pb-2 pt-4">
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-lg">Students</CardTitle>
+              <CardTitle className="text-lg">{t('teacher:students.title')}</CardTitle>
               <CardDescription className="text-xs mt-0.5">
-                {filteredEnrollments.length} student{filteredEnrollments.length !== 1 ? 's' : ''}
+                {t('teacher:courseStudents.studentCount', { count: filteredEnrollments.length })}
               </CardDescription>
             </div>
             <div className="relative w-64">
               <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Search students..."
+                placeholder={t('teacher:courseStudents.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="ps-9"
@@ -201,19 +203,19 @@ export function CourseStudentsPage() {
         <CardContent className="pt-2">
           {filteredEnrollments.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              {searchQuery ? 'No students found matching your search' : 'No students enrolled yet'}
+              {searchQuery ? t('teacher:courseStudents.noSearchResults') : t('teacher:courseStudents.noStudents')}
             </div>
           ) : (
             <div className="overflow-x-auto max-h-[60vh] overflow-y-auto scroll-fancy">
               <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Student</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Progress</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Enrolled</TableHead>
-                  <TableHead className="text-end">Actions</TableHead>
+                  <TableHead>{t('teacher:courseStudents.columns.student')}</TableHead>
+                  <TableHead>{t('teacher:courseStudents.columns.email')}</TableHead>
+                  <TableHead>{t('teacher:courseStudents.columns.progress')}</TableHead>
+                  <TableHead>{t('teacher:courseStudents.columns.status')}</TableHead>
+                  <TableHead>{t('teacher:courseStudents.columns.enrolled')}</TableHead>
+                  <TableHead className="text-end">{t('teacher:courseStudents.columns.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -242,7 +244,7 @@ export function CourseStudentsPage() {
                             : 'outline'
                         }
                       >
-                        {enrollment.status}
+                        {t(`teacher:courseStudents.status.${enrollment.status.toLowerCase()}`)}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">

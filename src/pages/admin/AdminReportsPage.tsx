@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import {
   FileText,
   Download,
@@ -44,13 +45,14 @@ import { toast } from "sonner";
 
 // Report types
 const REPORT_TYPES = [
-  { id: "users", label: "User Analytics", icon: Users, description: "User registrations, activity, and demographics" },
-  { id: "courses", label: "Course Performance", icon: BookOpen, description: "Enrollments, completions, and ratings" },
-  { id: "engagement", label: "Engagement Metrics", icon: TrendingUp, description: "Platform usage and engagement stats" },
-  { id: "at-risk", label: "At-Risk Students", icon: AlertTriangle, description: "Students needing attention" },
+  { id: "users", labelKey: "admin:reports.types.users", icon: Users, descKey: "admin:reports.types.usersDesc" },
+  { id: "courses", labelKey: "admin:reports.types.courses", icon: BookOpen, descKey: "admin:reports.types.coursesDesc" },
+  { id: "engagement", labelKey: "admin:reports.types.engagement", icon: TrendingUp, descKey: "admin:reports.types.engagementDesc" },
+  { id: "at-risk", labelKey: "admin:reports.types.atRisk", icon: AlertTriangle, descKey: "admin:reports.types.atRiskDesc" },
 ];
 
 export function AdminReportsPage() {
+  const { t } = useTranslation(['admin', 'common', 'errors']);
   const [selectedReport, setSelectedReport] = useState("users");
   const [dateRange, setDateRange] = useState("30d");
   const [analytics, setAnalytics] = useState<AnalyticsDashboardDto | null>(null);
@@ -70,8 +72,8 @@ export function AdminReportsPage() {
         setAnalytics(analyticsData);
         setAtRiskStudents(riskData);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load report data');
-        toast.error('Failed to load report data');
+        setError(err instanceof Error ? err.message : t('admin:reports.errors.reportDataFailed'));
+        toast.error(t('admin:reports.errors.reportDataFailed'));
       } finally {
         setLoading(false);
       }
@@ -108,18 +110,18 @@ export function AdminReportsPage() {
       try {
         if (selectedReport === 'users') {
           await adminService.exportUsersCsv();
-          toast.success('Users exported', { description: 'CSV file downloaded.' });
+          toast.success(t('admin:reports.toasts.usersExported'), { description: t('admin:reports.toasts.csvDownloaded') });
         } else if (selectedReport === 'at-risk') {
           await adminService.exportAtRiskStudentsCsv();
-          toast.success('At-risk students exported', { description: 'CSV file downloaded.' });
+          toast.success(t('admin:reports.toasts.atRiskExported'), { description: t('admin:reports.toasts.csvDownloaded') });
         } else {
-          toast.info('Export coming soon', { description: `CSV export for ${selectedReport} will be available shortly.` });
+          toast.info(t('admin:reports.toasts.comingSoon'), { description: t('admin:reports.toasts.comingSoonDesc', { report: selectedReport }) });
         }
       } catch (err) {
-        toast.error('Export failed', { description: err instanceof Error ? err.message : 'Please try again.' });
+        toast.error(t('admin:reports.toasts.exportFailed'), { description: err instanceof Error ? err.message : t('admin:reports.toasts.exportFailedDesc') });
       }
     } else {
-      toast.info(`Export as ${format.toUpperCase()}`, { description: 'Coming soon.' });
+      toast.info(t('admin:reports.toasts.exportAs', { format: format.toUpperCase() }), { description: t('admin:reports.toasts.exportAsDesc') });
     }
   };
 
@@ -127,10 +129,10 @@ export function AdminReportsPage() {
     return (
       <div className="flex flex-col items-center justify-center py-12">
         <AlertCircle className="h-12 w-12 text-destructive mb-4" />
-        <h2 className="text-lg font-semibold">Failed to load reports</h2>
+        <h2 className="text-lg font-semibold">{t('admin:reports.errors.loadFailed')}</h2>
         <p className="text-muted-foreground mt-1">{error}</p>
         <Button onClick={() => window.location.reload()} className="mt-4">
-          Try Again
+          {t('admin:reports.errors.tryAgain')}
         </Button>
       </div>
     );
@@ -141,9 +143,9 @@ export function AdminReportsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Reports</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{t('admin:reports.title')}</h1>
           <p className="text-sm text-muted-foreground">
-            Generate and export platform analytics
+            {t('admin:reports.subtitle')}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -151,15 +153,15 @@ export function AdminReportsPage() {
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="gap-2">
                 <Calendar className="h-4 w-4" />
-                {dateRange === "7d" ? "Last 7 days" : dateRange === "30d" ? "Last 30 days" : dateRange === "90d" ? "Last 90 days" : "Last 12 months"}
+                {dateRange === "7d" ? t('admin:reports.dateRanges.last7Days') : dateRange === "30d" ? t('admin:reports.dateRanges.last30Days') : dateRange === "90d" ? t('admin:reports.dateRanges.last90Days') : t('admin:reports.dateRanges.last12Months')}
                 <ChevronDown className="h-3 w-3 opacity-50" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuItem onClick={() => setDateRange("7d")}>Last 7 days</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setDateRange("30d")}>Last 30 days</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setDateRange("90d")}>Last 90 days</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setDateRange("12m")}>Last 12 months</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setDateRange("7d")}>{t('admin:reports.dateRanges.last7Days')}</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setDateRange("30d")}>{t('admin:reports.dateRanges.last30Days')}</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setDateRange("90d")}>{t('admin:reports.dateRanges.last90Days')}</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setDateRange("12m")}>{t('admin:reports.dateRanges.last12Months')}</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -185,8 +187,8 @@ export function AdminReportsPage() {
               <report.icon className="h-5 w-5" />
             </div>
             <div>
-              <p className="font-medium">{report.label}</p>
-              <p className="text-xs text-muted-foreground">{report.description}</p>
+              <p className="font-medium">{t(report.labelKey)}</p>
+              <p className="text-xs text-muted-foreground">{t(report.descKey)}</p>
             </div>
           </button>
         ))}
@@ -197,32 +199,32 @@ export function AdminReportsPage() {
         <div className="flex items-center justify-between border-b p-5">
           <div>
             <h3 className="font-semibold">
-              {REPORT_TYPES.find((r) => r.id === selectedReport)?.label}
+              {t(REPORT_TYPES.find((r) => r.id === selectedReport)?.labelKey ?? 'admin:reports.types.users')}
             </h3>
             <p className="text-xs text-muted-foreground">
-              Preview of report data
+              {t('admin:reports.previewTitle')}
             </p>
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button size="sm" className="gap-2">
                 <Download className="h-4 w-4" />
-                Export
+                {t('admin:reports.exports.label')}
                 <ChevronDown className="h-3 w-3" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => handleExport('csv')}>
                 <FileSpreadsheet className="me-2 h-4 w-4" />
-                Export as CSV
+                {t('admin:reports.exports.csv')}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleExport('pdf')}>
                 <FileText className="me-2 h-4 w-4" />
-                Export as PDF
+                {t('admin:reports.exports.pdf')}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleExport('json')}>
                 <FileJson className="me-2 h-4 w-4" />
-                Export as JSON
+                {t('admin:reports.exports.json')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -240,26 +242,26 @@ export function AdminReportsPage() {
                   {/* Summary Stats */}
                   <div className="grid gap-4 sm:grid-cols-4">
                     <div className="rounded-lg border bg-muted/30 p-4">
-                      <p className="text-xs text-muted-foreground">Total Students</p>
+                      <p className="text-xs text-muted-foreground">{t('admin:reports.sections.totalStudents')}</p>
                       <p className="text-2xl font-bold">{analytics?.totalStudents?.toLocaleString() || 0}</p>
                     </div>
                     <div className="rounded-lg border bg-muted/30 p-4">
-                      <p className="text-xs text-muted-foreground">Total Instructors</p>
+                      <p className="text-xs text-muted-foreground">{t('admin:reports.sections.totalInstructors')}</p>
                       <p className="text-2xl font-bold">{analytics?.totalInstructors?.toLocaleString() || 0}</p>
                     </div>
                     <div className="rounded-lg border bg-muted/30 p-4">
-                      <p className="text-xs text-muted-foreground">Active This Week</p>
+                      <p className="text-xs text-muted-foreground">{t('admin:reports.sections.activeThisWeek')}</p>
                       <p className="text-2xl font-bold text-emerald-500">{analytics?.studentsActiveThisWeek?.toLocaleString() || 0}</p>
                     </div>
                     <div className="rounded-lg border bg-muted/30 p-4">
-                      <p className="text-xs text-muted-foreground">Active This Month</p>
+                      <p className="text-xs text-muted-foreground">{t('admin:reports.sections.activeThisMonth')}</p>
                       <p className="text-2xl font-bold">{analytics?.studentsActiveThisMonth?.toLocaleString() || 0}</p>
                     </div>
                   </div>
 
                   {/* Activity Chart */}
                   <div>
-                    <h4 className="text-sm font-medium mb-3">Daily Active Users (Last 30 Days)</h4>
+                    <h4 className="text-sm font-medium mb-3">{t('admin:reports.sections.dailyActiveUsers')}</h4>
                     <div className="h-64">
                       {activityChartData.length > 0 ? (
                         <ResponsiveContainer width="100%" height="100%">
@@ -281,12 +283,12 @@ export function AdminReportsPage() {
                                 fontSize: "12px",
                               }}
                             />
-                            <Area type="monotone" dataKey="activity" stroke="#3b82f6" strokeWidth={2} fill="url(#activityGradient)" name="Active Users" />
+                            <Area type="monotone" dataKey="activity" stroke="#3b82f6" strokeWidth={2} fill="url(#activityGradient)" name={t('admin:reports.charts.activeUsersLabel')} />
                           </AreaChart>
                         </ResponsiveContainer>
                       ) : (
                         <div className="h-full flex items-center justify-center text-muted-foreground">
-                          No activity data available
+                          {t('admin:reports.charts.noActivityData')}
                         </div>
                       )}
                     </div>
@@ -299,26 +301,26 @@ export function AdminReportsPage() {
                   {/* Summary Stats */}
                   <div className="grid gap-4 sm:grid-cols-4">
                     <div className="rounded-lg border bg-muted/30 p-4">
-                      <p className="text-xs text-muted-foreground">Total Courses</p>
+                      <p className="text-xs text-muted-foreground">{t('admin:reports.sections.totalCourses')}</p>
                       <p className="text-2xl font-bold">{analytics?.totalCourses?.toLocaleString() || 0}</p>
                     </div>
                     <div className="rounded-lg border bg-muted/30 p-4">
-                      <p className="text-xs text-muted-foreground">Total Enrollments</p>
+                      <p className="text-xs text-muted-foreground">{t('admin:reports.sections.totalEnrollments')}</p>
                       <p className="text-2xl font-bold">{analytics?.totalEnrollments?.toLocaleString() || 0}</p>
                     </div>
                     <div className="rounded-lg border bg-muted/30 p-4">
-                      <p className="text-xs text-muted-foreground">Active Enrollments</p>
+                      <p className="text-xs text-muted-foreground">{t('admin:reports.sections.activeEnrollments')}</p>
                       <p className="text-2xl font-bold text-emerald-500">{analytics?.activeEnrollments?.toLocaleString() || 0}</p>
                     </div>
                     <div className="rounded-lg border bg-muted/30 p-4">
-                      <p className="text-xs text-muted-foreground">Avg. Completion Rate</p>
+                      <p className="text-xs text-muted-foreground">{t('admin:reports.sections.avgCompletion')}</p>
                       <p className="text-2xl font-bold">{analytics?.averageCourseCompletion?.toFixed(1) || 0}%</p>
                     </div>
                   </div>
 
                   {/* Enrollment Trend */}
                   <div>
-                    <h4 className="text-sm font-medium mb-3">Enrollment Trend (Last 30 Days)</h4>
+                    <h4 className="text-sm font-medium mb-3">{t('admin:reports.sections.enrollmentTrend')}</h4>
                     <div className="h-64">
                       {enrollmentChartData.length > 0 ? (
                         <ResponsiveContainer width="100%" height="100%">
@@ -340,12 +342,12 @@ export function AdminReportsPage() {
                                 fontSize: "12px",
                               }}
                             />
-                            <Area type="monotone" dataKey="enrollments" stroke="#10b981" strokeWidth={2} fill="url(#enrollGradient)" name="Enrollments" />
+                            <Area type="monotone" dataKey="enrollments" stroke="#10b981" strokeWidth={2} fill="url(#enrollGradient)" name={t('admin:reports.charts.enrollmentsLabel')} />
                           </AreaChart>
                         </ResponsiveContainer>
                       ) : (
                         <div className="h-full flex items-center justify-center text-muted-foreground">
-                          No enrollment data available
+                          {t('admin:reports.charts.noEnrollmentData')}
                         </div>
                       )}
                     </div>
@@ -354,7 +356,7 @@ export function AdminReportsPage() {
                   {/* Top Courses */}
                   {coursePerformanceData.length > 0 && (
                     <div>
-                      <h4 className="text-sm font-medium mb-3">Most Enrolled Courses</h4>
+                      <h4 className="text-sm font-medium mb-3">{t('admin:reports.sections.mostEnrolledCourses')}</h4>
                       <div className="h-64">
                         <ResponsiveContainer width="100%" height="100%">
                           <BarChart data={coursePerformanceData} layout="vertical">
@@ -369,7 +371,7 @@ export function AdminReportsPage() {
                                 fontSize: "12px",
                               }}
                             />
-                            <Bar dataKey="enrollments" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} name="Enrollments" />
+                            <Bar dataKey="enrollments" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} name={t('admin:reports.charts.enrollmentsLabel')} />
                           </BarChart>
                         </ResponsiveContainer>
                       </div>
@@ -383,26 +385,26 @@ export function AdminReportsPage() {
                   {/* Summary Stats */}
                   <div className="grid gap-4 sm:grid-cols-4">
                     <div className="rounded-lg border bg-muted/30 p-4">
-                      <p className="text-xs text-muted-foreground">Platform Engagement</p>
+                      <p className="text-xs text-muted-foreground">{t('admin:reports.sections.platformEngagement')}</p>
                       <p className="text-2xl font-bold">{analytics?.platformEngagementScore?.toFixed(1) || 0}%</p>
                     </div>
                     <div className="rounded-lg border bg-muted/30 p-4">
-                      <p className="text-xs text-muted-foreground">Active Today</p>
+                      <p className="text-xs text-muted-foreground">{t('admin:reports.sections.activeToday')}</p>
                       <p className="text-2xl font-bold text-emerald-500">{analytics?.studentsActiveToday?.toLocaleString() || 0}</p>
                     </div>
                     <div className="rounded-lg border bg-muted/30 p-4">
-                      <p className="text-xs text-muted-foreground">Avg. Student Grade</p>
+                      <p className="text-xs text-muted-foreground">{t('admin:reports.sections.avgGrade')}</p>
                       <p className="text-2xl font-bold">{analytics?.averageStudentGrade?.toFixed(1) || 0}%</p>
                     </div>
                     <div className="rounded-lg border bg-muted/30 p-4">
-                      <p className="text-xs text-muted-foreground">At-Risk Students</p>
+                      <p className="text-xs text-muted-foreground">{t('admin:reports.sections.atRiskStudents')}</p>
                       <p className="text-2xl font-bold text-orange-500">{analytics?.atRiskStudentCount || 0}</p>
                     </div>
                   </div>
 
                   {/* Completion Trend */}
                   <div>
-                    <h4 className="text-sm font-medium mb-3">Course Completions (Last 30 Days)</h4>
+                    <h4 className="text-sm font-medium mb-3">{t('admin:reports.sections.courseCompletions')}</h4>
                     <div className="h-64">
                       {completionChartData.length > 0 ? (
                         <ResponsiveContainer width="100%" height="100%">
@@ -418,12 +420,12 @@ export function AdminReportsPage() {
                                 fontSize: "12px",
                               }}
                             />
-                            <Bar dataKey="completions" fill="#8b5cf6" radius={[4, 4, 0, 0]} name="Completions" />
+                            <Bar dataKey="completions" fill="#8b5cf6" radius={[4, 4, 0, 0]} name={t('admin:reports.charts.completionsLabel')} />
                           </BarChart>
                         </ResponsiveContainer>
                       ) : (
                         <div className="h-full flex items-center justify-center text-muted-foreground">
-                          No completion data available
+                          {t('admin:reports.charts.noCompletionData')}
                         </div>
                       )}
                     </div>
@@ -432,15 +434,15 @@ export function AdminReportsPage() {
                   {/* Top Performers */}
                   {analytics?.topPerformers && analytics.topPerformers.length > 0 && (
                     <div>
-                      <h4 className="text-sm font-medium mb-3">Top Performing Students</h4>
+                      <h4 className="text-sm font-medium mb-3">{t('admin:reports.sections.topPerformers')}</h4>
                       <div className="rounded-lg border overflow-hidden">
                         <table className="w-full text-sm">
                           <thead>
                             <tr className="border-b bg-muted/50">
-                              <th className="px-4 py-2 text-start font-medium text-muted-foreground">Student</th>
-                              <th className="px-4 py-2 text-start font-medium text-muted-foreground">Engagement</th>
-                              <th className="px-4 py-2 text-start font-medium text-muted-foreground">Completion</th>
-                              <th className="px-4 py-2 text-start font-medium text-muted-foreground">Avg. Grade</th>
+                              <th className="px-4 py-2 text-start font-medium text-muted-foreground">{t('admin:reports.table.student')}</th>
+                              <th className="px-4 py-2 text-start font-medium text-muted-foreground">{t('admin:reports.table.engagement')}</th>
+                              <th className="px-4 py-2 text-start font-medium text-muted-foreground">{t('admin:reports.table.completion')}</th>
+                              <th className="px-4 py-2 text-start font-medium text-muted-foreground">{t('admin:reports.table.avgGrade')}</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -468,37 +470,37 @@ export function AdminReportsPage() {
                   {/* Risk Overview */}
                   <div className="grid gap-4 sm:grid-cols-4">
                     <div className="rounded-lg border bg-muted/30 p-4">
-                      <p className="text-xs text-muted-foreground">Total At-Risk</p>
+                      <p className="text-xs text-muted-foreground">{t('admin:reports.sections.totalAtRisk')}</p>
                       <p className="text-2xl font-bold">{analytics?.atRiskStudentCount || 0}</p>
                     </div>
                     <div className="rounded-lg border bg-red-500/10 p-4">
-                      <p className="text-xs text-muted-foreground">Critical Risk</p>
+                      <p className="text-xs text-muted-foreground">{t('admin:reports.sections.criticalRisk')}</p>
                       <p className="text-2xl font-bold text-red-500">{analytics?.criticalRiskCount || 0}</p>
                     </div>
                     <div className="rounded-lg border bg-orange-500/10 p-4">
-                      <p className="text-xs text-muted-foreground">High Risk</p>
+                      <p className="text-xs text-muted-foreground">{t('admin:reports.sections.highRisk')}</p>
                       <p className="text-2xl font-bold text-orange-500">{analytics?.highRiskCount || 0}</p>
                     </div>
                     <div className="rounded-lg border bg-yellow-500/10 p-4">
-                      <p className="text-xs text-muted-foreground">Medium Risk</p>
+                      <p className="text-xs text-muted-foreground">{t('admin:reports.sections.mediumRisk')}</p>
                       <p className="text-2xl font-bold text-yellow-500">{analytics?.mediumRiskCount || 0}</p>
                     </div>
                   </div>
 
                   {/* At-Risk Students Table */}
                   <div>
-                    <h4 className="text-sm font-medium mb-3">Students Needing Attention</h4>
+                    <h4 className="text-sm font-medium mb-3">{t('admin:reports.sections.studentsNeedingAttention')}</h4>
                     {atRiskStudents.length > 0 ? (
                       <div className="rounded-lg border overflow-hidden">
                         <table className="w-full text-sm">
                           <thead>
                             <tr className="border-b bg-muted/50">
-                              <th className="px-4 py-2 text-start font-medium text-muted-foreground">Student</th>
-                              <th className="px-4 py-2 text-start font-medium text-muted-foreground">Risk Level</th>
-                              <th className="px-4 py-2 text-start font-medium text-muted-foreground">Risk Score</th>
-                              <th className="px-4 py-2 text-start font-medium text-muted-foreground">Engagement</th>
-                              <th className="px-4 py-2 text-start font-medium text-muted-foreground">Completion</th>
-                              <th className="px-4 py-2 text-start font-medium text-muted-foreground">Risk Factors</th>
+                              <th className="px-4 py-2 text-start font-medium text-muted-foreground">{t('admin:reports.table.student')}</th>
+                              <th className="px-4 py-2 text-start font-medium text-muted-foreground">{t('admin:reports.table.riskLevel')}</th>
+                              <th className="px-4 py-2 text-start font-medium text-muted-foreground">{t('admin:reports.table.riskScore')}</th>
+                              <th className="px-4 py-2 text-start font-medium text-muted-foreground">{t('admin:reports.table.engagement')}</th>
+                              <th className="px-4 py-2 text-start font-medium text-muted-foreground">{t('admin:reports.table.completion')}</th>
+                              <th className="px-4 py-2 text-start font-medium text-muted-foreground">{t('admin:reports.table.riskFactors')}</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -531,7 +533,7 @@ export function AdminReportsPage() {
                                     ))}
                                     {student.riskFactors.length > 2 && (
                                       <span className="text-xs text-muted-foreground">
-                                        +{student.riskFactors.length - 2} more
+                                        {t('admin:reports.table.moreFactors', { count: student.riskFactors.length - 2 })}
                                       </span>
                                     )}
                                   </div>
@@ -543,7 +545,7 @@ export function AdminReportsPage() {
                       </div>
                     ) : (
                       <div className="rounded-lg border p-8 text-center text-muted-foreground">
-                        No at-risk students found
+                        {t('admin:reports.charts.noAtRiskStudents')}
                       </div>
                     )}
                   </div>

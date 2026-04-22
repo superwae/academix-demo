@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { format, formatDistanceToNow } from 'date-fns'
 import { conversationService, type ConversationDto, type ConversationMessageDto, type ConversationRequestDto } from '../../services/conversationService'
 import { connectMessagingHub, joinConversation, leaveConversation, onMessageReceived, onConversationUpdated, isConnected } from '../../services/messagingHubService'
@@ -43,6 +44,7 @@ const POLLING_INTERVAL = 5000
 const POLLING_INTERVAL_WITH_SIGNALR = 10000
 
 export function MessagesPage() {
+  const { t } = useTranslation(['student', 'common', 'errors'])
   const { user } = useAuthStore()
   const [searchParams, setSearchParams] = useSearchParams()
   const targetUserIdParam = searchParams.get('user') || searchParams.get('student')
@@ -236,13 +238,13 @@ export function MessagesPage() {
         setSelectedConversation(newConversation)
         setSearchParams({})
 
-        toast.success('Conversation started', {
-          description: 'You can now send messages',
+        toast.success(t('student:messages.conversationStarted'), {
+          description: t('student:messages.canSendMessages'),
         })
       } catch (error) {
         console.error('Failed to start conversation:', error)
-        toast.error('Failed to start conversation', {
-          description: error instanceof Error ? error.message : 'An error occurred',
+        toast.error(t('student:messages.errors.startConversationFailed'), {
+          description: error instanceof Error ? error.message : t('student:messages.errors.unknownError'),
         })
         setSearchParams({})
       }
@@ -255,8 +257,8 @@ export function MessagesPage() {
     try {
       const data = await conversationService.getPendingRequests()
       setRequests(data)
-    } catch (error) {
-      toast.error('Failed to load requests')
+    } catch {
+      toast.error(t('student:messages.errors.loadRequestsFailed'))
     }
   }
 
@@ -283,8 +285,8 @@ export function MessagesPage() {
       scrollToBottom()
       // Refresh conversation list in background (don't block UI)
       void loadConversations(false)
-    } catch (error) {
-      toast.error('Failed to send message')
+    } catch {
+      toast.error(t('student:messages.errors.sendFailed'))
     } finally {
       setSending(false)
     }
@@ -293,23 +295,23 @@ export function MessagesPage() {
   const handleAcceptRequest = async (requestId: string) => {
     try {
       const conversation = await conversationService.acceptRequest(requestId)
-      toast.success('Request accepted')
+      toast.success(t('student:messages.requestAccepted'))
       setViewMode('conversations')
       setSelectedConversation(conversation)
       loadRequests()
       loadConversations(false)
-    } catch (error) {
-      toast.error('Failed to accept request')
+    } catch {
+      toast.error(t('student:messages.errors.acceptFailed'))
     }
   }
 
   const handleRejectRequest = async (requestId: string) => {
     try {
       await conversationService.rejectRequest(requestId)
-      toast.success('Request rejected')
+      toast.success(t('student:messages.requestRejected'))
       loadRequests()
-    } catch (error) {
-      toast.error('Failed to reject request')
+    } catch {
+      toast.error(t('student:messages.errors.rejectFailed'))
     }
   }
 
@@ -317,12 +319,12 @@ export function MessagesPage() {
     if (!targetUserId) return
     try {
       await conversationService.blockUser({ userId: targetUserId })
-      toast.success('User blocked')
+      toast.success(t('student:messages.userBlocked'))
       setShowBlockDialog(false)
       setTargetUserId(null)
       loadConversations(false)
-    } catch (error) {
-      toast.error('Failed to block user')
+    } catch {
+      toast.error(t('student:messages.errors.blockFailed'))
     }
   }
 
@@ -334,13 +336,13 @@ export function MessagesPage() {
         reason: reportReason.trim(),
         details: reportDetails.trim() || undefined,
       })
-      toast.success('User reported')
+      toast.success(t('student:messages.userReported'))
       setShowReportDialog(false)
       setTargetUserId(null)
       setReportReason('')
       setReportDetails('')
-    } catch (error) {
-      toast.error('Failed to report user')
+    } catch {
+      toast.error(t('student:messages.errors.reportFailed'))
     }
   }
 
@@ -355,8 +357,8 @@ export function MessagesPage() {
       {/* Header */}
       <div className="flex flex-shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
-          <h1 className="text-xl font-semibold sm:text-2xl">Messages</h1>
-          <p className="text-sm text-muted-foreground">Chat with students and instructors</p>
+          <h1 className="text-xl font-semibold sm:text-2xl">{t('student:messages.title')}</h1>
+          <p className="text-sm text-muted-foreground">{t('student:messages.subtitle')}</p>
         </div>
         <div className="flex w-full gap-2 sm:w-auto">
           <Button
@@ -366,8 +368,8 @@ export function MessagesPage() {
             className="flex-1 sm:flex-initial"
           >
             <MessageSquare className="h-4 w-4 me-2" />
-            <span className="hidden sm:inline">Conversations</span>
-            <span className="sm:hidden">Chats</span>
+            <span className="hidden sm:inline">{t('student:messages.conversations')}</span>
+            <span className="sm:hidden">{t('student:messages.conversationsShort')}</span>
             {totalUnread > 0 && (
               <Badge variant="destructive" className="ms-2 h-5 min-w-5 px-1.5 text-xs">
                 {totalUnread}
@@ -381,8 +383,8 @@ export function MessagesPage() {
             className="flex-1 sm:flex-initial"
           >
             <UserPlus className="h-4 w-4 me-2" />
-            <span className="hidden sm:inline">Requests</span>
-            <span className="sm:hidden">Req</span>
+            <span className="hidden sm:inline">{t('student:messages.requests')}</span>
+            <span className="sm:hidden">{t('student:messages.requestsShort')}</span>
             {pendingRequestsCount > 0 && (
               <Badge variant="destructive" className="ms-2 h-5 min-w-5 px-1.5 text-xs">
                 {pendingRequestsCount}
@@ -401,9 +403,11 @@ export function MessagesPage() {
             }`}
           >
             <CardHeader className="flex-shrink-0 py-3">
-              <CardTitle className="text-base">Inbox</CardTitle>
+              <CardTitle className="text-base">{t('student:messages.inbox')}</CardTitle>
               <CardDescription className="text-xs">
-                {conversations.length} conversation{conversations.length !== 1 ? 's' : ''}
+                {conversations.length === 1
+                  ? t('student:messages.conversationCountOne', { count: conversations.length })
+                  : t('student:messages.conversationCountOther', { count: conversations.length })}
               </CardDescription>
             </CardHeader>
             <CardContent className="min-h-0 flex-1 overflow-hidden p-0">
@@ -415,7 +419,7 @@ export function MessagesPage() {
                     </div>
                   ) : conversations.length === 0 ? (
                     <div className="text-center py-8 text-sm text-muted-foreground">
-                      No conversations yet
+                      {t('student:messages.noConversationsYet')}
                     </div>
                   ) : (
                     conversations.map((conv) => {
@@ -425,8 +429,8 @@ export function MessagesPage() {
                       const displayName = convIsDirectConversation && conv.otherParticipant
                         ? conv.otherParticipant.userName
                         : convIsCourseConversation
-                        ? conv.courseTitle || conv.title || 'Course Chat'
-                        : conv.title || 'Conversation'
+                        ? conv.courseTitle || conv.title || t('student:messages.courseChat')
+                        : conv.title || t('student:messages.conversation')
 
                       return (
                         <button
@@ -457,9 +461,9 @@ export function MessagesPage() {
                                   conv.otherParticipant.userId === conv.lastMessage?.senderId && (
                                     <span
                                       className="inline-flex shrink-0 rounded-full border border-amber-500/35 bg-amber-500/10 px-1.5 py-px text-[9px] font-semibold text-amber-800 dark:text-amber-300"
-                                      title="Official / staff account"
+                                      title={t('student:messages.officialTitle')}
                                     >
-                                      Official
+                                      {t('student:messages.official')}
                                     </span>
                                   )}
                               </div>
@@ -506,7 +510,7 @@ export function MessagesPage() {
                         variant="ghost"
                         size="icon"
                         className="mt-0.5 shrink-0 lg:hidden"
-                        aria-label="Back to inbox"
+                        aria-label={t('student:messages.backToInbox')}
                         onClick={() => setSelectedConversation(null)}
                       >
                         <ChevronLeft className="h-5 w-5" />
@@ -520,20 +524,20 @@ export function MessagesPage() {
                         )}
                         <span className="truncate">
                           {isCourseConversation
-                            ? selectedConversation.courseTitle || selectedConversation.title || 'Course Chat'
-                            : otherParticipant?.userName || 'Conversation'}
+                            ? selectedConversation.courseTitle || selectedConversation.title || t('student:messages.courseChat')
+                            : otherParticipant?.userName || t('student:messages.conversation')}
                         </span>
                         {isDirectConversation && otherParticipant?.isInstructor && (
                           <span className="inline-flex items-center gap-0.5 rounded-full border border-amber-500/35 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-800 dark:text-amber-300">
                             <Shield className="h-3 w-3" aria-hidden />
-                            Official account
+                            {t('student:messages.officialAccount')}
                           </span>
                         )}
                       </CardTitle>
                       <CardDescription className="text-xs truncate">
                         {isDirectConversation && otherParticipant
-                          ? 'Direct conversation'
-                          : `${selectedConversation.participants.length} participants`}
+                          ? t('student:messages.directConversation')
+                          : t('student:messages.participantsCount', { count: selectedConversation.participants.length })}
                       </CardDescription>
                     </div>
                     </div>
@@ -573,7 +577,7 @@ export function MessagesPage() {
                     <div className="space-y-3 p-4">
                       {messages.length === 0 ? (
                         <div className="text-center text-sm text-muted-foreground py-8">
-                          No messages yet. Start the conversation!
+                          {t('student:messages.noMessagesYet')}
                         </div>
                       ) : (
                         messages.map((message) => {
@@ -589,9 +593,9 @@ export function MessagesPage() {
                           const isStaffMessage =
                             !isOwnMessage && (staffFromApi || staffFromParticipant)
                           const staffLabel = staffFromApi
-                            ? 'System admin'
+                            ? t('student:messages.systemAdmin')
                             : staffFromParticipant
-                              ? 'Teaching staff'
+                              ? t('student:messages.teachingStaff')
                               : null
                           return (
                             <div
@@ -631,7 +635,7 @@ export function MessagesPage() {
                                     {isStaffMessage && staffLabel && (
                                       <span
                                         className="inline-flex items-center gap-0.5 rounded-full border border-amber-500/40 bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-amber-800 dark:text-amber-300"
-                                        title={staffFromApi ? 'System administrator' : 'Course staff or instructor'}
+                                        title={staffFromApi ? t('student:messages.systemAdminTitle') : t('student:messages.staffTitle')}
                                       >
                                         <Shield className="h-3 w-3 shrink-0" aria-hidden />
                                         {staffLabel}
@@ -671,7 +675,7 @@ export function MessagesPage() {
                 <div className="border-t p-3 flex-shrink-0">
                   <div className="flex gap-2 items-end">
                     <Textarea
-                      placeholder="Type a message..."
+                      placeholder={t('student:messages.typeMessage')}
                       value={messageContent}
                       onChange={(e) => setMessageContent(e.target.value)}
                       onKeyDown={(e) => {
@@ -702,9 +706,9 @@ export function MessagesPage() {
               <CardContent className="flex-1 flex items-center justify-center">
                 <div className="text-center">
                   <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-sm font-medium">No conversation selected</p>
+                  <p className="text-sm font-medium">{t('student:messages.noConversationSelected')}</p>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Select a conversation from the inbox
+                    {t('student:messages.selectFromInbox')}
                   </p>
                 </div>
               </CardContent>
@@ -715,9 +719,11 @@ export function MessagesPage() {
         /* Requests View */
         <Card className="flex-1 min-h-0 flex flex-col">
           <CardHeader className="py-3 flex-shrink-0">
-            <CardTitle className="text-base">Pending Requests</CardTitle>
+            <CardTitle className="text-base">{t('student:messages.pendingRequests')}</CardTitle>
             <CardDescription className="text-xs">
-              {requests.length} request{requests.length !== 1 ? 's' : ''} waiting
+              {requests.length === 1
+                ? t('student:messages.requestCountOne', { count: requests.length })
+                : t('student:messages.requestCountOther', { count: requests.length })}
             </CardDescription>
           </CardHeader>
           <CardContent className="min-h-0 flex-1 overflow-y-auto overscroll-contain scroll-fancy">
@@ -728,8 +734,8 @@ export function MessagesPage() {
               ) : requests.length === 0 ? (
                 <div className="text-center py-8">
                   <UserPlus className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-sm font-medium">No pending requests</p>
-                  <p className="text-sm text-muted-foreground mt-1">You're all caught up!</p>
+                  <p className="text-sm font-medium">{t('student:messages.noPendingRequests')}</p>
+                  <p className="text-sm text-muted-foreground mt-1">{t('student:messages.allCaughtUp')}</p>
                 </div>
               ) : (
                 <div className="space-y-3 pe-4">
@@ -789,17 +795,17 @@ export function MessagesPage() {
       <Dialog open={showBlockDialog} onOpenChange={setShowBlockDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Block User</DialogTitle>
+            <DialogTitle>{t('student:messages.blockUser')}</DialogTitle>
             <DialogDescription>
-              This user will no longer be able to send you messages.
+              {t('student:messages.blockDescription')}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowBlockDialog(false)}>
-              Cancel
+              {t('common:cancel')}
             </Button>
             <Button variant="destructive" onClick={handleBlockUser}>
-              Block User
+              {t('student:messages.blockUser')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -809,27 +815,27 @@ export function MessagesPage() {
       <Dialog open={showReportDialog} onOpenChange={setShowReportDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Report User</DialogTitle>
+            <DialogTitle>{t('student:messages.reportUser')}</DialogTitle>
             <DialogDescription>
-              Please provide details about why you're reporting this user.
+              {t('student:messages.reportDescription')}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <label className="text-sm font-medium">Reason</label>
+              <label className="text-sm font-medium">{t('student:messages.reason')}</label>
               <Input
                 value={reportReason}
                 onChange={(e) => setReportReason(e.target.value)}
-                placeholder="e.g., Harassment, Spam"
+                placeholder={t('student:messages.reasonPlaceholder')}
                 className="mt-1"
               />
             </div>
             <div>
-              <label className="text-sm font-medium">Additional Details (Optional)</label>
+              <label className="text-sm font-medium">{t('student:messages.additionalDetails')}</label>
               <Textarea
                 value={reportDetails}
                 onChange={(e) => setReportDetails(e.target.value)}
-                placeholder="Provide any additional information..."
+                placeholder={t('student:messages.additionalDetailsPlaceholder')}
                 className="mt-1"
                 rows={3}
               />
@@ -837,14 +843,14 @@ export function MessagesPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowReportDialog(false)}>
-              Cancel
+              {t('common:cancel')}
             </Button>
             <Button
               variant="destructive"
               onClick={handleReportUser}
               disabled={!reportReason.trim()}
             >
-              Submit Report
+              {t('student:messages.submitReport')}
             </Button>
           </DialogFooter>
         </DialogContent>

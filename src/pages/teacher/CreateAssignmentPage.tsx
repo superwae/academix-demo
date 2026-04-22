@@ -19,8 +19,10 @@ import { Save, ArrowLeft, Loader2 } from 'lucide-react'
 import { assignmentService, type CreateAssignmentRequest } from '../../services/assignmentService'
 import { teacherService } from '../../services/teacherService'
 import type { CourseDto } from '../../services/courseService'
+import { useTranslation } from 'react-i18next'
 
 export function CreateAssignmentPage() {
+  const { t } = useTranslation(['teacher', 'common', 'errors'])
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
   const [loadingCourses, setLoadingCourses] = useState(true)
@@ -47,8 +49,8 @@ export function CreateAssignmentPage() {
           setFormData(prev => ({ ...prev, courseId: result.items[0].id }))
         }
       } catch (error) {
-        toast.error('Failed to load courses', {
-          description: error instanceof Error ? error.message : 'Please try again later',
+        toast.error(t('teacher:createAssignment.errors.coursesFailed'), {
+          description: error instanceof Error ? error.message : t('teacher:shared.tryAgainLater'),
         })
       } finally {
         setLoadingCourses(false)
@@ -62,22 +64,22 @@ export function CreateAssignmentPage() {
     e.preventDefault()
     
     if (!formData.courseId) {
-      toast.error('Please select a course')
+      toast.error(t('teacher:createAssignment.errors.selectCourse'))
       return
     }
 
     if (!formData.title.trim()) {
-      toast.error('Assignment title is required')
+      toast.error(t('teacher:createAssignment.errors.titleRequired'))
       return
     }
 
     if (!formData.prompt.trim()) {
-      toast.error('Assignment prompt/description is required')
+      toast.error(t('teacher:createAssignment.errors.promptRequired'))
       return
     }
 
     if (!formData.dueAt) {
-      toast.error('Due date is required')
+      toast.error(t('teacher:createAssignment.errors.dueDateRequired'))
       return
     }
 
@@ -91,16 +93,16 @@ export function CreateAssignmentPage() {
 
       await assignmentService.createAssignment(request)
       
-      toast.success(saveAsDraft ? 'Assignment saved as draft' : 'Assignment published successfully', {
+      toast.success(saveAsDraft ? t('teacher:createAssignment.toasts.draftSaved') : t('teacher:createAssignment.toasts.published'), {
         description: saveAsDraft
-          ? 'Use Edit or Publish on the assignments list when you are ready.'
-          : 'Your assignment is now visible to students',
+          ? t('teacher:createAssignment.toasts.draftSavedDescription')
+          : t('teacher:createAssignment.toasts.publishedDescription'),
       })
-      
+
       navigate('/teacher/assignments')
     } catch (error) {
-      toast.error('Failed to save assignment', {
-        description: error instanceof Error ? error.message : 'Please try again later',
+      toast.error(t('teacher:createAssignment.errors.saveFailed'), {
+        description: error instanceof Error ? error.message : t('teacher:shared.tryAgainLater'),
       })
     } finally {
       setLoading(false)
@@ -120,8 +122,8 @@ export function CreateAssignmentPage() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight gradient-text">Create Assignment</h1>
-            <p className="mt-1 text-sm text-muted-foreground">Create a new assignment for your course</p>
+            <h1 className="text-3xl font-bold tracking-tight gradient-text">{t('teacher:createAssignment.pageTitle')}</h1>
+            <p className="mt-1 text-sm text-muted-foreground">{t('teacher:createAssignment.pageSubtitle')}</p>
           </div>
         </div>
       </div>
@@ -133,19 +135,19 @@ export function CreateAssignmentPage() {
             {/* Assignment Info */}
             <Card>
               <CardHeader className="pb-2 pt-4">
-                <CardTitle className="text-lg">Assignment Information</CardTitle>
-                <CardDescription className="text-xs mt-0.5">Basic details about your assignment</CardDescription>
+                <CardTitle className="text-lg">{t('teacher:createAssignment.assignmentInfo')}</CardTitle>
+                <CardDescription className="text-xs mt-0.5">{t('teacher:createAssignment.assignmentInfoDescription')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3 pt-2">
                 <div className="space-y-1.5">
-                  <Label htmlFor="course">Course *</Label>
+                  <Label htmlFor="course">{t('teacher:createAssignment.courseRequired')}</Label>
                   <SelectRoot
                     value={formData.courseId}
                     onValueChange={(value) => setFormData({ ...formData, courseId: value })}
                     disabled={loadingCourses}
                   >
                     <SelectTrigger id="course">
-                      <SelectValue placeholder={loadingCourses ? "Loading courses..." : "Select a course"} />
+                      <SelectValue placeholder={loadingCourses ? t('teacher:createAssignment.loadingCourses') : t('teacher:createAssignment.selectCourse')} />
                     </SelectTrigger>
                     <SelectContent>
                       {courses.map((course) => (
@@ -158,23 +160,23 @@ export function CreateAssignmentPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="title">Assignment Title *</Label>
+                  <Label htmlFor="title">{t('teacher:createAssignment.titleRequired')}</Label>
                   <Input
                     id="title"
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    placeholder="e.g., S3 Bucket Creation and Management"
+                    placeholder={t('teacher:createAssignment.titlePlaceholder')}
                     required
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="prompt">Assignment Prompt / Description *</Label>
+                  <Label htmlFor="prompt">{t('teacher:createAssignment.promptRequired')}</Label>
                   <Textarea
                     id="prompt"
                     value={formData.prompt}
                     onChange={(e) => setFormData({ ...formData, prompt: e.target.value })}
-                    placeholder="Describe what students need to do for this assignment..."
+                    placeholder={t('teacher:createAssignment.promptPlaceholder')}
                     rows={8}
                     required
                   />
@@ -182,7 +184,7 @@ export function CreateAssignmentPage() {
 
                 <div className="grid gap-3 md:grid-cols-2">
                   <div className="space-y-1.5">
-                    <Label htmlFor="dueAt">Due Date *</Label>
+                    <Label htmlFor="dueAt">{t('teacher:createAssignment.dueDateRequired')}</Label>
                     <Input
                       id="dueAt"
                       type="datetime-local"
@@ -196,7 +198,7 @@ export function CreateAssignmentPage() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="maxScore">Max Score</Label>
+                    <Label htmlFor="maxScore">{t('teacher:createAssignment.maxScore')}</Label>
                     <Input
                       id="maxScore"
                       type="number"
@@ -209,7 +211,7 @@ export function CreateAssignmentPage() {
 
                 <div className="grid gap-3 md:grid-cols-2">
                   <div className="space-y-1.5">
-                    <Label htmlFor="weight">Weight</Label>
+                    <Label htmlFor="weight">{t('teacher:createAssignment.weight')}</Label>
                     <Input
                       id="weight"
                       type="number"
@@ -228,15 +230,15 @@ export function CreateAssignmentPage() {
           <div className="space-y-3">
             <Card>
               <CardHeader className="pb-2 pt-4">
-                <CardTitle className="text-lg">Settings</CardTitle>
-                <CardDescription className="text-xs mt-0.5">Assignment configuration</CardDescription>
+                <CardTitle className="text-lg">{t('teacher:createAssignment.settings')}</CardTitle>
+                <CardDescription className="text-xs mt-0.5">{t('teacher:createAssignment.settingsDescription')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3 pt-2">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label htmlFor="allowLate">Allow Late Submission</Label>
+                    <Label htmlFor="allowLate">{t('teacher:createAssignment.allowLate')}</Label>
                     <p className="text-xs text-muted-foreground">
-                      Allow students to submit after due date
+                      {t('teacher:createAssignment.allowLateHint')}
                     </p>
                   </div>
                   <Switch
@@ -250,7 +252,7 @@ export function CreateAssignmentPage() {
 
                 {formData.allowLateSubmission && (
                   <div className="space-y-1.5">
-                    <Label htmlFor="latePenalty">Late Penalty (%)</Label>
+                    <Label htmlFor="latePenalty">{t('teacher:createAssignment.latePenalty')}</Label>
                     <Input
                       id="latePenalty"
                       type="number"
@@ -277,10 +279,10 @@ export function CreateAssignmentPage() {
                     {loading ? (
                       <>
                         <Loader2 className="h-4 w-4 me-2 animate-spin" />
-                        Publishing...
+                        {t('teacher:createAssignment.publishing')}
                       </>
                     ) : (
-                      'Publish Assignment'
+                      t('teacher:createAssignment.publishAssignment')
                     )}
                   </Button>
                   <Button
@@ -291,7 +293,7 @@ export function CreateAssignmentPage() {
                     disabled={loading || loadingCourses}
                   >
                     <Save className="h-4 w-4 me-2" />
-                    Save as Draft
+                    {t('teacher:createAssignment.saveAsDraft')}
                   </Button>
                   <Button
                     type="button"
@@ -300,7 +302,7 @@ export function CreateAssignmentPage() {
                     onClick={() => navigate('/teacher/assignments')}
                     disabled={loading}
                   >
-                    Cancel
+                    {t('common:cancel')}
                   </Button>
                 </div>
               </CardContent>

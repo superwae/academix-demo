@@ -41,6 +41,7 @@ import {
   startOfWeek,
   type WeeklySessionEvent,
 } from '../../lib/weeklySessions'
+import { useTranslation } from 'react-i18next'
 
 const BADGE_STYLES: Record<string, string> = {
   live: 'bg-red-500/10 text-red-700 dark:text-red-300 border-red-500/30 ring-2 ring-red-500/20',
@@ -49,6 +50,7 @@ const BADGE_STYLES: Record<string, string> = {
 }
 
 export function TeacherLiveSessionsPage() {
+  const { t } = useTranslation(['teacher', 'common', 'errors'])
   const [courses, setCourses] = useState<CourseDto[]>([])
   const [loading, setLoading] = useState(true)
   const [weekOffset, setWeekOffset] = useState(0)
@@ -70,7 +72,7 @@ export function TeacherLiveSessionsPage() {
         const result = await teacherService.getMyCourses({ pageSize: 500 })
         setCourses(result.items)
       } catch (error) {
-        toast.error('Failed to load your courses', {
+        toast.error(t('teacher:teacherLiveSessions.errors.coursesLoadFailed'), {
           description: error instanceof Error ? error.message : undefined,
         })
       } finally {
@@ -112,7 +114,7 @@ export function TeacherLiveSessionsPage() {
     if (!editSession) return
     const url = newJoinUrl.trim()
     if (url && !/^https?:\/\//i.test(url)) {
-      toast.error('Invalid URL', { description: 'Link must start with http:// or https://' })
+      toast.error(t('teacher:teacherLiveSessions.invalidUrlTitle'), { description: t('teacher:teacherLiveSessions.invalidUrlBody') })
       return
     }
     try {
@@ -120,7 +122,7 @@ export function TeacherLiveSessionsPage() {
       const course = courses.find((c) => c.id === editSession.courseId)
       const section = course?.sections.find((s) => s.id === editSession.sectionId)
       if (!course || !section) {
-        toast.error('Section no longer exists')
+        toast.error(t('teacher:teacherLiveSessions.sectionNotFound'))
         return
       }
       await courseService.updateSection(course.id, section.id, {
@@ -147,10 +149,10 @@ export function TeacherLiveSessionsPage() {
               },
         ),
       )
-      toast.success(url ? 'Join link updated' : 'Join link cleared')
+      toast.success(url ? t('teacher:teacherLiveSessions.linkUpdated') : t('teacher:teacherLiveSessions.linkCleared'))
       setEditSession(null)
     } catch (error) {
-      toast.error('Failed to update join link', {
+      toast.error(t('teacher:teacherLiveSessions.linkUpdateFailed'), {
         description: error instanceof Error ? error.message : undefined,
       })
     } finally {
@@ -172,20 +174,20 @@ export function TeacherLiveSessionsPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight md:text-3xl flex items-center gap-2">
             <Radio className="h-6 w-6 text-primary" />
-            Live Sessions
+            {t('teacher:teacherLiveSessions.pageTitle')}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Manage your weekly class schedule and join links
+            {t('teacher:teacherLiveSessions.pageSubtitle')}
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => setWeekOffset((w) => w - 1)} aria-label="Previous week">
+          <Button variant="outline" size="sm" onClick={() => setWeekOffset((w) => w - 1)} aria-label={t('teacher:teacherLiveSessions.previousWeek')}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
           <Button variant="outline" size="sm" onClick={() => setWeekOffset(0)} disabled={weekOffset === 0}>
-            This week
+            {t('teacher:teacherLiveSessions.thisWeek')}
           </Button>
-          <Button variant="outline" size="sm" onClick={() => setWeekOffset((w) => w + 1)} aria-label="Next week">
+          <Button variant="outline" size="sm" onClick={() => setWeekOffset((w) => w + 1)} aria-label={t('teacher:teacherLiveSessions.nextWeek')}>
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
@@ -199,7 +201,7 @@ export function TeacherLiveSessionsPage() {
               <Radio className="h-5 w-5 text-red-500" />
             </div>
             <div>
-              <div className="text-xs text-muted-foreground">Live right now</div>
+              <div className="text-xs text-muted-foreground">{t('teacher:teacherLiveSessions.liveRightNow')}</div>
               <div className="text-2xl font-bold">{liveNow.length}</div>
             </div>
           </CardContent>
@@ -210,7 +212,7 @@ export function TeacherLiveSessionsPage() {
               <Clock className="h-5 w-5 text-amber-500" />
             </div>
             <div>
-              <div className="text-xs text-muted-foreground">Starting soon</div>
+              <div className="text-xs text-muted-foreground">{t('teacher:teacherLiveSessions.startingSoon')}</div>
               <div className="text-2xl font-bold">{startingSoon.length}</div>
             </div>
           </CardContent>
@@ -221,7 +223,7 @@ export function TeacherLiveSessionsPage() {
               <Calendar className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <div className="text-xs text-muted-foreground">Total this week</div>
+              <div className="text-xs text-muted-foreground">{t('teacher:teacherLiveSessions.totalThisWeek')}</div>
               <div className="text-2xl font-bold">{totalThisWeek}</div>
             </div>
           </CardContent>
@@ -231,10 +233,10 @@ export function TeacherLiveSessionsPage() {
       {/* Week range */}
       <div className="flex items-center justify-between text-sm">
         <span className="font-medium">
-          Week of {format(weekStart, 'MMM d')} – {format(weekEnd, 'MMM d, yyyy')}
+          {t('teacher:teacherLiveSessions.weekOf', { start: format(weekStart, 'MMM d'), end: format(weekEnd, 'MMM d, yyyy') })}
         </span>
         {weekOffset === 0 && (
-          <span className="text-xs text-muted-foreground">Times are in your local timezone</span>
+          <span className="text-xs text-muted-foreground">{t('teacher:teacherLiveSessions.localTimezone')}</span>
         )}
       </div>
 
@@ -246,12 +248,12 @@ export function TeacherLiveSessionsPage() {
         <Card>
           <CardContent className="py-16 text-center">
             <Video className="mx-auto h-12 w-12 text-muted-foreground/50" />
-            <h2 className="mt-4 text-lg font-semibold">No sessions this week</h2>
+            <h2 className="mt-4 text-lg font-semibold">{t('teacher:teacherLiveSessions.noSessionsTitle')}</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Sessions appear here based on each course section's weekly schedule.
+              {t('teacher:teacherLiveSessions.noSessionsBody')}
             </p>
             <Button asChild className="mt-4">
-              <Link to="/teacher/courses">Manage courses</Link>
+              <Link to="/teacher/courses">{t('teacher:teacherLiveSessions.manageCourses')}</Link>
             </Button>
           </CardContent>
         </Card>
@@ -270,11 +272,11 @@ export function TeacherLiveSessionsPage() {
                         {format(day.date, 'MMM d')}
                       </span>
                       {isToday && (
-                        <Badge className="bg-primary/10 text-primary border-primary/30">Today</Badge>
+                        <Badge className="bg-primary/10 text-primary border-primary/30">{t('teacher:teacherLiveSessions.today')}</Badge>
                       )}
                     </CardTitle>
                     <span className="text-xs text-muted-foreground">
-                      {day.events.length} {day.events.length === 1 ? 'session' : 'sessions'}
+                      {t('teacher:teacherLiveSessions.sessionCount', { count: day.events.length })}
                     </span>
                   </div>
                 </CardHeader>
@@ -296,14 +298,13 @@ export function TeacherLiveSessionsPage() {
       <Dialog open={!!editSession} onOpenChange={(open) => { if (!open) setEditSession(null) }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Set join link</DialogTitle>
+            <DialogTitle>{t('teacher:teacherLiveSessions.setJoinLink')}</DialogTitle>
             <DialogDescription>
-              Paste the meeting URL (Zoom, Google Meet, Teams, etc.). This applies to the entire
-              section — every weekly occurrence will use the same link.
+              {t('teacher:teacherLiveSessions.setJoinLinkDescription')}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-2">
-            <Label htmlFor="join-url">Meeting URL</Label>
+            <Label htmlFor="join-url">{t('teacher:teacherLiveSessions.meetingUrl')}</Label>
             <Input
               id="join-url"
               value={newJoinUrl}
@@ -319,10 +320,10 @@ export function TeacherLiveSessionsPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditSession(null)} disabled={savingUrl}>
-              Cancel
+              {t('common:cancel')}
             </Button>
             <Button onClick={saveJoinUrl} disabled={savingUrl}>
-              {savingUrl ? 'Saving…' : 'Save link'}
+              {savingUrl ? t('common:saving') : t('teacher:teacherLiveSessions.saveLink')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -338,14 +339,15 @@ function TeacherSessionRow({
   event: WeeklySessionEvent
   onEditUrl: () => void
 }) {
+  const { t } = useTranslation(['teacher', 'common'])
   const badgeClass = event.badge ? BADGE_STYLES[event.badge] : ''
   const badgeLabel =
     event.badge === 'live'
-      ? 'Live now'
+      ? t('teacher:teacherLiveSessions.liveNowBadge')
       : event.badge === 'soon'
-      ? 'Starting soon'
+      ? t('teacher:teacherLiveSessions.startingSoon')
       : event.badge === 'today'
-      ? 'Later today'
+      ? t('teacher:teacherLiveSessions.laterToday')
       : null
 
   return (
@@ -380,7 +382,7 @@ function TeacherSessionRow({
       <div className="flex items-center gap-2 shrink-0">
         {event.joinUrl ? (
           <>
-            <Button size="sm" variant="outline" onClick={onEditUrl} title="Edit link">
+            <Button size="sm" variant="outline" onClick={onEditUrl} title={t('teacher:teacherLiveSessions.editLink')}>
               <Edit2 className="h-3.5 w-3.5" />
             </Button>
             <Button
@@ -391,11 +393,11 @@ function TeacherSessionRow({
               <a href={event.joinUrl} target="_blank" rel="noopener noreferrer">
                 {event.badge === 'live' ? (
                   <>
-                    <PlayCircle className="me-1.5 h-3.5 w-3.5" /> Start
+                    <PlayCircle className="me-1.5 h-3.5 w-3.5" /> {t('teacher:teacherLiveSessions.start')}
                   </>
                 ) : (
                   <>
-                    <ExternalLink className="me-1.5 h-3.5 w-3.5" /> Open
+                    <ExternalLink className="me-1.5 h-3.5 w-3.5" /> {t('teacher:teacherLiveSessions.open')}
                   </>
                 )}
               </a>
@@ -403,7 +405,7 @@ function TeacherSessionRow({
           </>
         ) : (
           <Button size="sm" variant="outline" onClick={onEditUrl}>
-            <LinkIcon className="me-1.5 h-3.5 w-3.5" /> Add link
+            <LinkIcon className="me-1.5 h-3.5 w-3.5" /> {t('teacher:teacherLiveSessions.addLink')}
           </Button>
         )}
       </div>

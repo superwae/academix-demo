@@ -16,8 +16,10 @@ import { toast } from "sonner";
 import { subscriptionService, type SubscriptionDto } from "../../services/subscriptionService";
 import { subscriptionPlanService, type SubscriptionPlanDto } from "../../services/subscriptionPlanService";
 import { paymentService } from "../../services/paymentService";
+import { useTranslation } from "react-i18next";
 
 export function TeacherSubscriptionPage() {
+  const { t } = useTranslation(['teacher', 'common', 'errors']);
   const [loading, setLoading] = useState(true);
   const [subscription, setSubscription] = useState<SubscriptionDto | null>(null);
   const [plans, setPlans] = useState<SubscriptionPlanDto[]>([]);
@@ -37,8 +39,8 @@ export function TeacherSubscriptionPage() {
         setPlans(allPlans.filter((p: SubscriptionPlanDto) => p.isActive));
       } catch (error) {
         console.error("Failed to load subscription data:", error);
-        toast.error("Failed to load subscription data", {
-          description: error instanceof Error ? error.message : "An error occurred",
+        toast.error(t('teacher:subscription.errors.loadFailed'), {
+          description: error instanceof Error ? error.message : t('teacher:shared.errorOccurred'),
         });
       } finally {
         setLoading(false);
@@ -59,13 +61,13 @@ export function TeacherSubscriptionPage() {
       if (result.authorizationUrl) {
         window.location.href = result.authorizationUrl;
       } else {
-        toast.error("Failed to start payment", {
-          description: "No checkout URL received from payment provider",
+        toast.error(t('teacher:subscription.errors.startPaymentFailed'), {
+          description: t('teacher:subscription.errors.noCheckoutUrl'),
         });
       }
     } catch (error) {
-      toast.error("Failed to start subscription payment", {
-        description: error instanceof Error ? error.message : "An error occurred",
+      toast.error(t('teacher:subscription.errors.paymentFailed'), {
+        description: error instanceof Error ? error.message : t('teacher:shared.errorOccurred'),
       });
     } finally {
       setSubscribing(null);
@@ -75,11 +77,11 @@ export function TeacherSubscriptionPage() {
   const handleCancel = async () => {
     try {
       await subscriptionService.cancelSubscription();
-      toast.success("Subscription cancelled");
+      toast.success(t('teacher:subscription.toasts.cancelled'));
       setSubscription(null);
     } catch (error) {
-      toast.error("Failed to cancel subscription", {
-        description: error instanceof Error ? error.message : "An error occurred",
+      toast.error(t('teacher:subscription.errors.cancelFailed'), {
+        description: error instanceof Error ? error.message : t('teacher:shared.errorOccurred'),
       });
     }
   };
@@ -96,9 +98,9 @@ export function TeacherSubscriptionPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight md:text-3xl">My Subscription</h1>
+        <h1 className="text-2xl font-bold tracking-tight md:text-3xl">{t('teacher:subscription.pageTitle')}</h1>
         <p className="mt-1 text-muted-foreground">
-          Manage your subscription plan and billing
+          {t('teacher:subscription.pageSubtitle')}
         </p>
       </div>
 
@@ -110,7 +112,7 @@ export function TeacherSubscriptionPage() {
               {subscription.planName}
             </CardTitle>
             <CardDescription>
-              {subscription.billingInterval === "Monthly" ? "Monthly" : "Yearly"} billing
+              {subscription.billingInterval === "Monthly" ? t('teacher:subscription.monthlyBilling') : t('teacher:subscription.yearlyBilling')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -120,7 +122,7 @@ export function TeacherSubscriptionPage() {
                   <CheckCircle className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Status</p>
+                  <p className="text-sm text-muted-foreground">{t('teacher:subscription.status')}</p>
                   <p className="font-semibold capitalize">{subscription.status}</p>
                 </div>
               </div>
@@ -130,7 +132,7 @@ export function TeacherSubscriptionPage() {
                   <Calendar className="h-5 w-5 text-blue-500" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Period</p>
+                  <p className="text-sm text-muted-foreground">{t('teacher:subscription.period')}</p>
                   <p className="text-sm font-medium">
                     {new Date(subscription.currentPeriodStart).toLocaleDateString()} -{" "}
                     {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
@@ -143,9 +145,9 @@ export function TeacherSubscriptionPage() {
                   <BookOpen className="h-5 w-5 text-emerald-500" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Max Courses</p>
+                  <p className="text-sm text-muted-foreground">{t('teacher:subscription.maxCourses')}</p>
                   <p className="font-semibold">
-                    {subscription.plan?.maxCourses ?? "Unlimited"}
+                    {subscription.plan?.maxCourses ?? t('teacher:subscription.unlimited')}
                   </p>
                 </div>
               </div>
@@ -155,9 +157,9 @@ export function TeacherSubscriptionPage() {
                   <Users className="h-5 w-5 text-amber-500" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Max Total Seats</p>
+                  <p className="text-sm text-muted-foreground">{t('teacher:subscription.maxTotalSeats')}</p>
                   <p className="font-semibold">
-                    {subscription.plan?.maxTotalSeats ?? "Unlimited"}
+                    {subscription.plan?.maxTotalSeats ?? t('teacher:subscription.unlimited')}
                   </p>
                 </div>
               </div>
@@ -166,16 +168,16 @@ export function TeacherSubscriptionPage() {
             {/* Plan Limits */}
             <div className="space-y-3">
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Max Courses</span>
-                <span className="font-medium">{subscription.plan?.maxCourses ?? "Unlimited"}</span>
+                <span className="text-muted-foreground">{t('teacher:subscription.maxCourses')}</span>
+                <span className="font-medium">{subscription.plan?.maxCourses ?? t('teacher:subscription.unlimited')}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Max Seats Per Course</span>
-                <span className="font-medium">{subscription.plan?.maxSeatsPerCourse ?? "Unlimited"}</span>
+                <span className="text-muted-foreground">{t('teacher:subscription.maxSeatsPerCourse')}</span>
+                <span className="font-medium">{subscription.plan?.maxSeatsPerCourse ?? t('teacher:subscription.unlimited')}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Max Total Seats</span>
-                <span className="font-medium">{subscription.plan?.maxTotalSeats ?? "Unlimited"}</span>
+                <span className="text-muted-foreground">{t('teacher:subscription.maxTotalSeats')}</span>
+                <span className="font-medium">{subscription.plan?.maxTotalSeats ?? t('teacher:subscription.unlimited')}</span>
               </div>
             </div>
 
@@ -186,7 +188,7 @@ export function TeacherSubscriptionPage() {
                 onClick={() => setCancelOpen(true)}
               >
                 <XCircle className="me-2 h-4 w-4" />
-                Cancel Subscription
+                {t('teacher:subscription.cancel')}
               </Button>
             </div>
           </CardContent>
@@ -204,7 +206,7 @@ export function TeacherSubscriptionPage() {
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
-              Monthly
+              {t('teacher:subscription.monthly')}
             </button>
             <button
               onClick={() => setBillingInterval("Yearly")}
@@ -215,9 +217,9 @@ export function TeacherSubscriptionPage() {
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
-              Yearly
+              {t('teacher:subscription.yearly')}
               <span className="ms-1.5 rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-600">
-                Save 20%
+                {t('teacher:subscription.save20')}
               </span>
             </button>
           </div>
@@ -239,22 +241,22 @@ export function TeacherSubscriptionPage() {
                       ${billingInterval === "Monthly" ? plan.monthlyPrice : plan.yearlyPrice}
                     </span>
                     <span className="text-muted-foreground">
-                      /{billingInterval === "Monthly" ? "mo" : "yr"}
+                      /{billingInterval === "Monthly" ? t('teacher:subscription.mo') : t('teacher:subscription.yr')}
                     </span>
                   </div>
 
                   <ul className="space-y-2 text-sm">
                     <li className="flex items-center gap-2">
                       <CheckCircle className="h-4 w-4 text-emerald-500" />
-                      {plan.maxCourses != null ? `Up to ${plan.maxCourses} courses` : "Unlimited courses"}
+                      {plan.maxCourses != null ? t('teacher:subscription.upToCoursesValue', { count: plan.maxCourses }) : t('teacher:subscription.unlimitedCourses')}
                     </li>
                     <li className="flex items-center gap-2">
                       <CheckCircle className="h-4 w-4 text-emerald-500" />
-                      {plan.maxSeatsPerCourse != null ? `${plan.maxSeatsPerCourse} seats per course` : "Unlimited seats per course"}
+                      {plan.maxSeatsPerCourse != null ? t('teacher:subscription.seatsPerCourseValue', { count: plan.maxSeatsPerCourse }) : t('teacher:subscription.unlimitedSeatsPerCourse')}
                     </li>
                     <li className="flex items-center gap-2">
                       <CheckCircle className="h-4 w-4 text-emerald-500" />
-                      {plan.maxTotalSeats != null ? `${plan.maxTotalSeats} total seats` : "Unlimited total seats"}
+                      {plan.maxTotalSeats != null ? t('teacher:subscription.totalSeatsValue', { count: plan.maxTotalSeats }) : t('teacher:subscription.unlimitedTotalSeats')}
                     </li>
                   </ul>
 
@@ -263,7 +265,7 @@ export function TeacherSubscriptionPage() {
                     onClick={() => handleSubscribe(plan.id)}
                     disabled={subscribing !== null}
                   >
-                    {subscribing === plan.id ? "Subscribing..." : "Subscribe"}
+                    {subscribing === plan.id ? t('teacher:subscription.subscribing') : t('teacher:subscription.subscribe')}
                   </Button>
                 </CardContent>
               </Card>
@@ -272,7 +274,7 @@ export function TeacherSubscriptionPage() {
 
           {plans.length === 0 && (
             <div className="text-center py-12 text-muted-foreground">
-              No subscription plans available at this time.
+              {t('teacher:subscription.noPlans')}
             </div>
           )}
         </>
@@ -281,9 +283,9 @@ export function TeacherSubscriptionPage() {
       <ConfirmDialog
         open={cancelOpen}
         onOpenChange={setCancelOpen}
-        title="Cancel Subscription"
-        description="Are you sure you want to cancel your subscription? You will lose access to premium features at the end of your current billing period."
-        confirmLabel="Cancel Subscription"
+        title={t('teacher:subscription.cancel')}
+        description={t('teacher:subscription.cancelConfirmDetailed')}
+        confirmLabel={t('teacher:subscription.cancel')}
         variant="destructive"
         onConfirm={handleCancel}
       />

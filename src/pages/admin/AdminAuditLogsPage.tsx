@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ScrollText,
   Search,
@@ -128,11 +129,11 @@ const MOCK_AUDIT_LOGS = [
 ];
 
 const ACTION_CATEGORIES = [
-  { value: "all", label: "All Actions" },
-  { value: "user", label: "User Actions" },
-  { value: "course", label: "Course Actions" },
-  { value: "payment", label: "Payment Actions" },
-  { value: "settings", label: "Settings" },
+  { value: "all", labelKey: "admin:auditLogs.categories.all" },
+  { value: "user", labelKey: "admin:auditLogs.categories.user" },
+  { value: "course", labelKey: "admin:auditLogs.categories.course" },
+  { value: "payment", labelKey: "admin:auditLogs.categories.payment" },
+  { value: "settings", labelKey: "admin:auditLogs.categories.settings" },
 ];
 
 function getActionIcon(action: string) {
@@ -153,19 +154,21 @@ function getActionColor(action: string, status: string) {
   return "bg-muted text-muted-foreground";
 }
 
-function formatTimestamp(timestamp: string) {
-  const date = new Date(timestamp);
-  const now = new Date();
-  const diff = now.getTime() - date.getTime();
-  const hours = Math.floor(diff / (1000 * 60 * 60));
-  
-  if (hours < 1) return "Just now";
-  if (hours < 24) return `${hours}h ago`;
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
-}
-
 export function AdminAuditLogsPage() {
+  const { t } = useTranslation(['admin', 'common', 'errors']);
   const [searchQuery, setSearchQuery] = useState("");
+
+  const formatTimestamp = (timestamp: string) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+
+    if (hours < 1) return t('admin:auditLogs.time.justNow');
+    if (hours < 24) return t('admin:auditLogs.time.hoursAgo', { hours });
+    return date.toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+  };
+
   const [categoryFilter, setCategoryFilter] = useState("all");
 
   const filteredLogs = MOCK_AUDIT_LOGS.filter((log) => {
@@ -190,19 +193,19 @@ export function AdminAuditLogsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Audit Logs</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{t('admin:auditLogs.title')}</h1>
           <p className="text-sm text-muted-foreground">
-            Track all system activities and changes
+            {t('admin:auditLogs.subtitle')}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" className="gap-2">
             <RefreshCw className="h-4 w-4" />
-            Refresh
+            {t('admin:auditLogs.refresh')}
           </Button>
           <Button variant="outline" size="sm" className="gap-2">
             <Download className="h-4 w-4" />
-            Export
+            {t('admin:auditLogs.export')}
           </Button>
         </div>
       </div>
@@ -215,7 +218,7 @@ export function AdminAuditLogsPage() {
               <ScrollText className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">Total Events</p>
+              <p className="text-xs text-muted-foreground">{t('admin:auditLogs.stats.totalEvents')}</p>
               <p className="text-xl font-bold">{totalLogs.toLocaleString()}</p>
             </div>
           </div>
@@ -226,7 +229,7 @@ export function AdminAuditLogsPage() {
               <Clock className="h-5 w-5 text-blue-500" />
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">Today's Events</p>
+              <p className="text-xs text-muted-foreground">{t('admin:auditLogs.stats.todayEvents')}</p>
               <p className="text-xl font-bold">{todayLogs}</p>
             </div>
           </div>
@@ -237,7 +240,7 @@ export function AdminAuditLogsPage() {
               <Shield className="h-5 w-5 text-red-500" />
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">Failed Actions</p>
+              <p className="text-xs text-muted-foreground">{t('admin:auditLogs.stats.failedActions')}</p>
               <p className="text-xl font-bold text-red-500">{errorLogs}</p>
             </div>
           </div>
@@ -249,7 +252,7 @@ export function AdminAuditLogsPage() {
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search logs..."
+            placeholder={t('admin:auditLogs.searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="ps-9"
@@ -259,14 +262,14 @@ export function AdminAuditLogsPage() {
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="gap-2">
               <Filter className="h-4 w-4" />
-              {ACTION_CATEGORIES.find((c) => c.value === categoryFilter)?.label}
+              {t(ACTION_CATEGORIES.find((c) => c.value === categoryFilter)?.labelKey ?? 'admin:auditLogs.categories.all')}
               <ChevronDown className="h-3 w-3 opacity-50" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             {ACTION_CATEGORIES.map((category) => (
               <DropdownMenuItem key={category.value} onClick={() => setCategoryFilter(category.value)}>
-                {category.label}
+                {t(category.labelKey)}
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
@@ -279,12 +282,12 @@ export function AdminAuditLogsPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/50">
-                <th className="px-4 py-3 text-start font-medium text-muted-foreground">Action</th>
-                <th className="px-4 py-3 text-start font-medium text-muted-foreground">Actor</th>
-                <th className="px-4 py-3 text-start font-medium text-muted-foreground">Target</th>
-                <th className="px-4 py-3 text-start font-medium text-muted-foreground">Description</th>
-                <th className="px-4 py-3 text-start font-medium text-muted-foreground">IP Address</th>
-                <th className="px-4 py-3 text-start font-medium text-muted-foreground">Time</th>
+                <th className="px-4 py-3 text-start font-medium text-muted-foreground">{t('admin:auditLogs.table.action')}</th>
+                <th className="px-4 py-3 text-start font-medium text-muted-foreground">{t('admin:auditLogs.table.actor')}</th>
+                <th className="px-4 py-3 text-start font-medium text-muted-foreground">{t('admin:auditLogs.table.target')}</th>
+                <th className="px-4 py-3 text-start font-medium text-muted-foreground">{t('admin:auditLogs.table.description')}</th>
+                <th className="px-4 py-3 text-start font-medium text-muted-foreground">{t('admin:auditLogs.table.ipAddress')}</th>
+                <th className="px-4 py-3 text-start font-medium text-muted-foreground">{t('admin:auditLogs.table.time')}</th>
               </tr>
             </thead>
             <tbody>
@@ -319,7 +322,7 @@ export function AdminAuditLogsPage() {
         {filteredLogs.length === 0 && (
           <div className="py-12 text-center">
             <ScrollText className="mx-auto h-12 w-12 text-muted-foreground/50" />
-            <p className="mt-2 text-sm text-muted-foreground">No logs found</p>
+            <p className="mt-2 text-sm text-muted-foreground">{t('admin:auditLogs.empty')}</p>
           </div>
         )}
       </div>

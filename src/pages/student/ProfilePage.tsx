@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Textarea } from '../../components/ui/textarea'
 import { Badge } from '../../components/ui/badge'
@@ -75,6 +76,7 @@ const MOCK_BADGES = [
 ]
 
 export function ProfilePage() {
+  const { t } = useTranslation(['student', 'common', 'errors'])
   const { user: authUser, updateUser: updateAuthUser } = useAuthStore()
   const [user, setUser] = useState<UserDto | null>(null)
   const [loading, setLoading] = useState(true)
@@ -105,7 +107,7 @@ export function ProfilePage() {
     const file = e.target.files?.[0]
     if (!file) return
     if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image must be under 5 MB')
+      toast.error(t('student:profile.errors.imageTooLarge'))
       return
     }
     try {
@@ -116,9 +118,9 @@ export function ProfilePage() {
       setAvatarImageError('none')
       // Update auth store so the header avatar + any other consumers reflect the change
       updateAuthUser({ profilePictureUrl: result.fileUrl })
-      toast.success('Profile photo updated')
+      toast.success(t('student:profile.photoUpdated'))
     } catch (error) {
-      toast.error('Failed to upload photo', {
+      toast.error(t('student:profile.errors.uploadPhotoFailed'), {
         description: error instanceof Error ? error.message : undefined,
       })
     } finally {
@@ -133,9 +135,9 @@ export function ProfilePage() {
       setBioSaving(true)
       await userService.updateCurrentUser({ bio })
       updateAuthUser({ bio })
-      toast.success('Bio updated')
+      toast.success(t('student:profile.bioUpdated'))
     } catch (error) {
-      toast.error('Failed to save bio', { description: error instanceof Error ? error.message : undefined })
+      toast.error(t('student:profile.errors.saveBioFailed'), { description: error instanceof Error ? error.message : undefined })
     } finally {
       setBioSaving(false)
     }
@@ -149,7 +151,7 @@ export function ProfilePage() {
     const file = e.target.files?.[0]
     if (!file) return
     if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image must be under 5 MB')
+      toast.error(t('student:profile.errors.imageTooLarge'))
       return
     }
     try {
@@ -158,9 +160,9 @@ export function ProfilePage() {
       await userService.updateCurrentUser({ coverImageUrl: result.fileUrl })
       setCoverImageUrl(result.fileUrl)
       updateAuthUser({ coverImageUrl: result.fileUrl })
-      toast.success('Cover image updated')
+      toast.success(t('student:profile.coverUpdated'))
     } catch (error) {
-      toast.error('Failed to upload cover image', { description: error instanceof Error ? error.message : undefined })
+      toast.error(t('student:profile.errors.uploadCoverFailed'), { description: error instanceof Error ? error.message : undefined })
     } finally {
       setUploadingCover(false)
       if (coverInputRef.current) coverInputRef.current.value = ''
@@ -189,8 +191,8 @@ export function ProfilePage() {
           coverImageUrl: userData.coverImageUrl,
         })
       } catch (error) {
-        toast.error('Failed to load profile', {
-          description: error instanceof Error ? error.message : 'Please try again later',
+        toast.error(t('student:profile.errors.loadProfileFailed'), {
+          description: error instanceof Error ? error.message : t('student:calendar.errors.tryLater'),
         })
       } finally {
         setLoading(false)
@@ -205,26 +207,26 @@ export function ProfilePage() {
 
   const handleChangePassword = async () => {
     if (!passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
-      toast.error('Please fill in all fields')
+      toast.error(t('student:profile.errors.fillAllFields'))
       return
     }
     if (passwordForm.newPassword.length < 8) {
-      toast.error('New password must be at least 8 characters')
+      toast.error(t('student:profile.errors.newPasswordMin'))
       return
     }
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      toast.error('New passwords do not match')
+      toast.error(t('student:profile.errors.newPasswordsMismatch'))
       return
     }
     try {
       setChangingPassword(true)
       await userService.changePassword(passwordForm.currentPassword, passwordForm.newPassword)
-      toast.success('Password changed successfully')
+      toast.success(t('student:profile.passwordChangedSuccess'))
       setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' })
       setPasswordFormOpen(false)
     } catch (error) {
-      toast.error('Failed to change password', {
-        description: error instanceof Error ? error.message : 'Please try again',
+      toast.error(t('student:profile.errors.changePasswordFailed'), {
+        description: error instanceof Error ? error.message : t('student:calendar.errors.tryLater'),
       })
     } finally {
       setChangingPassword(false)
@@ -239,7 +241,7 @@ export function ProfilePage() {
           <CardContent className="flex items-center justify-center py-16">
             <div className="flex flex-col items-center gap-3">
               <div className="h-10 w-10 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
-              <span className="text-sm text-muted-foreground">Loading profile…</span>
+              <span className="text-sm text-muted-foreground">{t('student:profile.loadingProfile')}</span>
             </div>
           </CardContent>
         </Card>
@@ -250,11 +252,11 @@ export function ProfilePage() {
   if (!user) {
     return (
       <div className="space-y-6">
-        <div className="text-2xl font-semibold">Profile</div>
+        <div className="text-2xl font-semibold">{t('student:profile.title')}</div>
         <Card className="max-w-2xl">
           <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="text-sm font-medium">Not authenticated</div>
-            <div className="mt-1 text-sm text-muted-foreground">Please sign in to view your profile.</div>
+            <div className="text-sm font-medium">{t('student:profile.notAuthenticated')}</div>
+            <div className="mt-1 text-sm text-muted-foreground">{t('student:profile.pleaseSignIn')}</div>
           </CardContent>
         </Card>
       </div>
@@ -273,8 +275,8 @@ export function ProfilePage() {
       <input ref={fileInputRef} type="file" accept="image/png,image/jpeg,image/gif" className="hidden" onChange={handleFileSelected} />
       <input ref={coverInputRef} type="file" accept="image/png,image/jpeg,image/gif" className="hidden" onChange={handleCoverSelected} />
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Profile</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">Your profile</p>
+        <h1 className="text-2xl font-semibold tracking-tight">{t('student:profile.title')}</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">{t('student:profile.subtitle')}</p>
       </div>
 
       {/* Cover image + personal image (avatar) */}
@@ -305,10 +307,10 @@ export function ProfilePage() {
             className="absolute top-3 end-3 flex items-center gap-2 rounded-lg border border-white/30 bg-black/40 px-3 py-2 text-sm font-medium text-white backdrop-blur-sm opacity-0 transition-opacity group-hover/cover:opacity-100 focus:opacity-100 hover:bg-black/50"
             onClick={handleCoverUpload}
             disabled={uploadingCover}
-            aria-label="Change cover image"
+            aria-label={t('student:profile.changeCoverAria')}
           >
             <ImagePlus className="h-4 w-4" />
-            Change cover
+            {t('student:profile.changeCover')}
           </button>
         </div>
 
@@ -340,14 +342,14 @@ export function ProfilePage() {
                 className="absolute -bottom-1 -right-1 flex h-9 w-9 items-center justify-center rounded-xl border-2 border-background bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-colors"
                 onClick={handlePhotoUpload}
                 disabled={uploadingPhoto}
-                aria-label="Change profile photo"
+                aria-label={t('student:profile.changeProfilePhotoAria')}
               >
                 <Camera className="h-4 w-4" />
               </button>
             </div>
             <div className="flex-1 min-w-0 pb-1">
               <h2 className="text-2xl sm:text-3xl font-bold tracking-tight truncate">
-                {user.fullName || `${user.firstName} ${user.lastName}`.trim() || 'Profile'}
+                {user.fullName || `${user.firstName} ${user.lastName}`.trim() || t('student:profile.title')}
               </h2>
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1.5">
@@ -356,17 +358,17 @@ export function ProfilePage() {
                 </span>
                 <span className="flex items-center gap-1.5">
                   <Calendar className="h-4 w-4 shrink-0" />
-                  Member since {memberYear}
+                  {t('student:profile.memberSince', { year: memberYear })}
                 </span>
               </div>
               <div className="flex flex-wrap gap-2 mt-3">
                 <Badge variant="secondary" className="font-medium">
                   <BookOpen className="h-3.5 w-3.5 me-1" />
-                  {MOCK_STATS.courses} courses
+                  {t('student:profile.coursesCount', { count: MOCK_STATS.courses })}
                 </Badge>
                 <Badge variant="secondary" className="font-medium">
                   <Award className="h-3.5 w-3.5 me-1" />
-                  {MOCK_STATS.certifications} certifications
+                  {t('student:profile.certificationsCount', { count: MOCK_STATS.certifications })}
                 </Badge>
               </div>
             </div>
@@ -382,21 +384,21 @@ export function ProfilePage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
                 <Sparkles className="h-5 w-5 text-primary" />
-                About
+                {t('student:profile.about')}
               </CardTitle>
-              <CardDescription>Your bio and learning interests</CardDescription>
+              <CardDescription>{t('student:profile.aboutSubtitle')}</CardDescription>
             </CardHeader>
             <CardContent>
               <Textarea
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
-                placeholder="Tell your story…"
+                placeholder={t('student:profile.bioPlaceholder')}
                 rows={5}
                 className="resize-y min-h-[120px] text-[15px] leading-relaxed"
               />
               <div className="flex justify-end pt-2">
                 <Button size="sm" onClick={handleSaveBio} disabled={bioSaving}>
-                  {bioSaving ? 'Saving…' : 'Save bio'}
+                  {bioSaving ? t('student:profile.saving') : t('student:profile.saveBio')}
                 </Button>
               </div>
             </CardContent>
@@ -407,9 +409,9 @@ export function ProfilePage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
                 <Award className="h-5 w-5 text-primary" />
-                Certifications
+                {t('student:profile.certifications')}
               </CardTitle>
-              <CardDescription>Verified credentials</CardDescription>
+              <CardDescription>{t('student:profile.certificationsSubtitle')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid gap-4 sm:grid-cols-2">
@@ -424,10 +426,10 @@ export function ProfilePage() {
                         <div className="text-xs text-muted-foreground mt-1">{cert.issuer}</div>
                         <div className="text-xs text-muted-foreground/80 mt-0.5">{cert.date}</div>
                         {cert.credentialId && (
-                          <div className="text-[11px] text-muted-foreground/70 font-mono mt-1">ID: {cert.credentialId}</div>
+                          <div className="text-[11px] text-muted-foreground/70 font-mono mt-1">{t('student:profile.credentialId', { id: cert.credentialId })}</div>
                         )}
                       </div>
-                      <div className="shrink-0 rounded-full bg-primary/10 p-1.5" title="Verified">
+                      <div className="shrink-0 rounded-full bg-primary/10 p-1.5" title={t('student:profile.verified')}>
                         <CheckCircle2 className="h-5 w-5 text-primary" />
                       </div>
                     </div>
@@ -442,56 +444,56 @@ export function ProfilePage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
                 <Lock className="h-5 w-5 text-primary" />
-                Security
+                {t('student:profile.security')}
               </CardTitle>
-              <CardDescription>Change your password</CardDescription>
+              <CardDescription>{t('student:profile.securitySubtitle')}</CardDescription>
             </CardHeader>
             <CardContent>
               {!passwordFormOpen ? (
                 <Button variant="outline" onClick={() => setPasswordFormOpen(true)}>
-                  Change password
+                  {t('student:profile.changePassword')}
                 </Button>
               ) : (
                 <div className="space-y-4 pt-2">
                   <div className="space-y-2">
-                    <Label htmlFor="current-password">Current password</Label>
+                    <Label htmlFor="current-password">{t('student:profile.currentPassword')}</Label>
                     <Input
                       id="current-password"
                       type="password"
                       value={passwordForm.currentPassword}
                       onChange={(e) => setPasswordForm((p) => ({ ...p, currentPassword: e.target.value }))}
-                      placeholder="Enter current password"
+                      placeholder={t('student:profile.enterCurrentPassword')}
                       autoComplete="current-password"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="new-password">New password</Label>
+                    <Label htmlFor="new-password">{t('student:profile.newPassword')}</Label>
                     <Input
                       id="new-password"
                       type="password"
                       value={passwordForm.newPassword}
                       onChange={(e) => setPasswordForm((p) => ({ ...p, newPassword: e.target.value }))}
-                      placeholder="At least 8 characters"
+                      placeholder={t('student:profile.atLeast8')}
                       autoComplete="new-password"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="confirm-password">Confirm new password</Label>
+                    <Label htmlFor="confirm-password">{t('student:profile.confirmPassword')}</Label>
                     <Input
                       id="confirm-password"
                       type="password"
                       value={passwordForm.confirmPassword}
                       onChange={(e) => setPasswordForm((p) => ({ ...p, confirmPassword: e.target.value }))}
-                      placeholder="Confirm new password"
+                      placeholder={t('student:profile.confirmPassword')}
                       autoComplete="new-password"
                     />
                   </div>
                   <div className="flex gap-2">
                     <Button onClick={handleChangePassword} disabled={changingPassword}>
-                      {changingPassword ? 'Changing…' : 'Update password'}
+                      {changingPassword ? t('student:profile.changing') : t('student:profile.updatePassword')}
                     </Button>
                     <Button type="button" variant="outline" onClick={() => setPasswordFormOpen(false)} disabled={changingPassword}>
-                      Cancel
+                      {t('common:cancel')}
                     </Button>
                   </div>
                 </div>
@@ -504,9 +506,9 @@ export function ProfilePage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
                 <GraduationCap className="h-5 w-5 text-primary" />
-                Focus areas
+                {t('student:profile.focusAreas')}
               </CardTitle>
-              <CardDescription>Areas of study</CardDescription>
+              <CardDescription>{t('student:profile.focusAreasSubtitle')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid gap-3 sm:grid-cols-2">
@@ -531,9 +533,9 @@ export function ProfilePage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
                 <Medal className="h-5 w-5 text-primary" />
-                Badges
+                {t('student:profile.badges')}
               </CardTitle>
-              <CardDescription>Achievements and milestones</CardDescription>
+              <CardDescription>{t('student:profile.badgesSubtitle')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">

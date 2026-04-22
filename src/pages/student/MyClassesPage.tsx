@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Badge } from '../../components/ui/badge'
 import { Button } from '../../components/ui/button'
@@ -19,6 +20,7 @@ function isEnrollmentCompleted(enrollment: EnrollmentWithCourse): boolean {
 }
 
 function EnrollmentCard({ enrollment }: { enrollment: EnrollmentWithCourse }) {
+  const { t } = useTranslation(['student', 'common'])
   const course = enrollment.course
   const section = course?.sections.find((s) => s.id === enrollment.sectionId)
   const completed = isEnrollmentCompleted(enrollment)
@@ -63,7 +65,7 @@ function EnrollmentCard({ enrollment }: { enrollment: EnrollmentWithCourse }) {
             )}
           </CardTitle>
           <CardDescription>
-            {course?.providerName || 'Course'} • {course?.instructorName || 'Instructor'}
+            {course?.providerName || t('student:shared.course')} • {course?.instructorName || t('student:shared.instructor')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -87,7 +89,9 @@ function EnrollmentCard({ enrollment }: { enrollment: EnrollmentWithCourse }) {
               {section.meetingTimes && section.meetingTimes.length > 0 && (
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4" />
-                  {section.meetingTimes.length} meeting{section.meetingTimes.length !== 1 ? 's' : ''} per week
+                  {section.meetingTimes.length === 1
+                    ? t('student:myClasses.meetingsPerWeekOne', { count: section.meetingTimes.length })
+                    : t('student:myClasses.meetingsPerWeekOther', { count: section.meetingTimes.length })}
                 </div>
               )}
             </div>
@@ -96,7 +100,7 @@ function EnrollmentCard({ enrollment }: { enrollment: EnrollmentWithCourse }) {
           <div className="flex items-center justify-between border-t pt-2">
             <div className="flex items-center gap-2 text-sm">
               <Calendar className="h-4 w-4 text-muted-foreground" />
-              <span className="text-muted-foreground">Enrolled {format(new Date(enrollment.enrolledAt), 'MMM d, yyyy')}</span>
+              <span className="text-muted-foreground">{t('student:myClasses.enrolled', { date: format(new Date(enrollment.enrolledAt), 'MMM d, yyyy') })}</span>
             </div>
             {enrollment.progressPercentage > 0 && (
               <div className="flex items-center gap-2 text-sm">
@@ -109,7 +113,7 @@ function EnrollmentCard({ enrollment }: { enrollment: EnrollmentWithCourse }) {
           <div className="flex flex-col gap-2 pt-2">
             {course && (
               <Button variant="outline" size="sm" asChild className="w-full">
-                <Link to={`/courses/${course.id}`}>View Course</Link>
+                <Link to={`/courses/${course.id}`}>{t('student:shared.viewCourse')}</Link>
               </Button>
             )}
             {course && completed && (
@@ -121,13 +125,13 @@ function EnrollmentCard({ enrollment }: { enrollment: EnrollmentWithCourse }) {
               >
                 <Link to={`/student/my-classes/${course.id}/certificate`}>
                   <Award className="me-2 h-4 w-4 text-[#b45309] dark:text-amber-300" />
-                  View Certificate
+                  {t('student:myClasses.viewCertificate')}
                 </Link>
               </Button>
             )}
             {course && enrollment.status === 'Active' && (
               <Button variant="default" size="sm" asChild className="w-full bg-primary hover:bg-primary/90">
-                <Link to={`/student/my-classes/${course.id}/lessons`}>Lessons</Link>
+                <Link to={`/student/my-classes/${course.id}/lessons`}>{t('student:myClasses.lessons')}</Link>
               </Button>
             )}
           </div>
@@ -138,6 +142,7 @@ function EnrollmentCard({ enrollment }: { enrollment: EnrollmentWithCourse }) {
 }
 
 export function MyClassesPage() {
+  const { t } = useTranslation(['student', 'common', 'errors'])
   const [enrollments, setEnrollments] = useState<EnrollmentWithCourse[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -171,8 +176,8 @@ export function MyClassesPage() {
 
         setEnrollments(enrollmentsWithCourses)
       } catch (error) {
-        toast.error('Failed to load enrollments', {
-          description: error instanceof Error ? error.message : 'Please try again later',
+        toast.error(t('student:myClasses.errors.loadFailed'), {
+          description: error instanceof Error ? error.message : t('student:calendar.errors.tryLater'),
         })
       } finally {
         setLoading(false)
@@ -180,14 +185,14 @@ export function MyClassesPage() {
     }
 
     loadEnrollments()
-  }, [])
+  }, [t])
 
   if (loading) {
     return (
       <div className="space-y-6">
         <div>
-          <div className="text-2xl font-semibold">My Classes</div>
-          <div className="text-sm text-muted-foreground">Your enrolled sections and upcoming meetings</div>
+          <div className="text-2xl font-semibold">{t('student:myClasses.title')}</div>
+          <div className="text-sm text-muted-foreground">{t('student:myClasses.subtitle')}</div>
         </div>
         <div className="grid gap-4 md:grid-cols-2">
           {[1, 2].map((i) => (
@@ -209,8 +214,8 @@ export function MyClassesPage() {
   return (
     <div className="space-y-10">
       <div>
-        <div className="text-2xl font-semibold">My Classes</div>
-        <div className="text-sm text-muted-foreground">Your enrolled sections and upcoming meetings</div>
+        <div className="text-2xl font-semibold">{t('student:myClasses.title')}</div>
+        <div className="text-sm text-muted-foreground">{t('student:myClasses.subtitle')}</div>
       </div>
 
       {enrollments.length === 0 ? (
@@ -223,14 +228,14 @@ export function MyClassesPage() {
             >
               <GraduationCap className="h-8 w-8 text-muted-foreground" />
             </motion.div>
-            <CardTitle className="mb-2 text-xl">No enrolled classes</CardTitle>
+            <CardTitle className="mb-2 text-xl">{t('student:myClasses.noEnrolled')}</CardTitle>
             <CardDescription className="mb-4 max-w-md">
-              Enroll from the Course Catalog to see your classes appear here.
+              {t('student:myClasses.noEnrolledBody')}
             </CardDescription>
             <Button variant="default" asChild>
               <Link to="/student/catalog">
                 <BookOpen className="me-2 h-4 w-4" />
-                Browse Catalog
+                {t('student:shared.browseCatalog')}
               </Link>
             </Button>
           </CardContent>
@@ -243,9 +248,9 @@ export function MyClassesPage() {
                 <BookMarked className="h-5 w-5 text-primary" aria-hidden />
                 <div>
                   <h2 id="in-progress-heading" className="text-lg font-semibold tracking-tight">
-                    In progress
+                    {t('student:myClasses.inProgress')}
                   </h2>
-                  <p className="text-sm text-muted-foreground">Courses you are currently taking</p>
+                  <p className="text-sm text-muted-foreground">{t('student:myClasses.inProgressSubtitle')}</p>
                 </div>
               </div>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -262,9 +267,9 @@ export function MyClassesPage() {
                 <Award className="h-5 w-5 text-[#b45309] dark:text-amber-400" aria-hidden />
                 <div>
                   <h2 id="completed-heading" className="text-lg font-semibold tracking-tight">
-                    Completed
+                    {t('student:myClasses.completed')}
                   </h2>
-                  <p className="text-sm text-muted-foreground">Courses you have finished — view your certificate below</p>
+                  <p className="text-sm text-muted-foreground">{t('student:myClasses.completedSubtitle')}</p>
                 </div>
               </div>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Plus,
   Pencil,
@@ -36,6 +37,7 @@ const emptyForm = {
 };
 
 export function SubscriptionPlansPage() {
+  const { t } = useTranslation(['admin', 'common', 'errors']);
   const [plans, setPlans] = useState<SubscriptionPlanDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -54,8 +56,8 @@ export function SubscriptionPlansPage() {
     } catch (error) {
       if (signal?.aborted) return;
       console.error("Failed to fetch plans:", error);
-      toast.error("Failed to load subscription plans", {
-        description: error instanceof Error ? error.message : "An error occurred",
+      toast.error(t('admin:subscriptionPlans.errors.loadFailed'), {
+        description: error instanceof Error ? error.message : t('admin:subscriptionPlans.errors.errorOccurred'),
       });
     } finally {
       if (!signal?.aborted) {
@@ -111,16 +113,16 @@ export function SubscriptionPlansPage() {
     try {
       if (editingPlan) {
         await subscriptionPlanService.updatePlan(editingPlan.id, payload);
-        toast.success("Plan updated successfully");
+        toast.success(t('admin:subscriptionPlans.toasts.updated'));
       } else {
         await subscriptionPlanService.createPlan(payload);
-        toast.success("Plan created successfully");
+        toast.success(t('admin:subscriptionPlans.toasts.created'));
       }
       setDialogOpen(false);
       fetchPlans();
     } catch (error) {
-      toast.error(editingPlan ? "Failed to update plan" : "Failed to create plan", {
-        description: error instanceof Error ? error.message : "An error occurred",
+      toast.error(editingPlan ? t('admin:subscriptionPlans.errors.updateFailed') : t('admin:subscriptionPlans.errors.createFailed'), {
+        description: error instanceof Error ? error.message : t('admin:subscriptionPlans.errors.errorOccurred'),
       });
     } finally {
       setSaving(false);
@@ -130,11 +132,11 @@ export function SubscriptionPlansPage() {
   const handleDelete = async (plan: SubscriptionPlanDto) => {
     try {
       await subscriptionPlanService.deletePlan(plan.id);
-      toast.success(`"${plan.name}" plan deleted`);
+      toast.success(t('admin:subscriptionPlans.toasts.deleted', { name: plan.name }));
       setPlans((prev) => prev.filter((p) => p.id !== plan.id));
     } catch (error) {
-      toast.error("Failed to delete plan", {
-        description: error instanceof Error ? error.message : "An error occurred",
+      toast.error(t('admin:subscriptionPlans.errors.deleteFailed'), {
+        description: error instanceof Error ? error.message : t('admin:subscriptionPlans.errors.errorOccurred'),
       });
     }
   };
@@ -144,14 +146,14 @@ export function SubscriptionPlansPage() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight md:text-3xl">Subscription Plans</h1>
+          <h1 className="text-2xl font-bold tracking-tight md:text-3xl">{t('admin:subscriptionPlans.title')}</h1>
           <p className="mt-1 text-muted-foreground">
-            Manage subscription tiers and pricing
+            {t('admin:subscriptionPlans.subtitle')}
           </p>
         </div>
         <Button size="sm" onClick={openCreateDialog}>
           <Plus className="me-2 h-4 w-4" />
-          Create Plan
+          {t('admin:subscriptionPlans.createPlan')}
         </Button>
       </div>
 
@@ -165,21 +167,21 @@ export function SubscriptionPlansPage() {
           <table className="w-full">
             <thead className="border-b border-border bg-muted/50">
               <tr>
-                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">Plan</th>
-                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">Monthly</th>
-                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">Yearly</th>
-                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">Courses</th>
-                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">Seats/Course</th>
-                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">Total Seats</th>
-                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">Status</th>
-                <th className="px-4 py-3 text-end text-sm font-medium text-muted-foreground">Actions</th>
+                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">{t('admin:subscriptionPlans.table.plan')}</th>
+                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">{t('admin:subscriptionPlans.table.monthly')}</th>
+                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">{t('admin:subscriptionPlans.table.yearly')}</th>
+                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">{t('admin:subscriptionPlans.table.courses')}</th>
+                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">{t('admin:subscriptionPlans.table.seatsPerCourse')}</th>
+                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">{t('admin:subscriptionPlans.table.totalSeats')}</th>
+                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">{t('admin:subscriptionPlans.table.status')}</th>
+                <th className="px-4 py-3 text-end text-sm font-medium text-muted-foreground">{t('admin:subscriptionPlans.table.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {plans.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="px-4 py-12 text-center text-muted-foreground">
-                    No subscription plans found. Create your first plan.
+                    {t('admin:subscriptionPlans.empty')}
                   </td>
                 </tr>
               ) : (
@@ -196,11 +198,11 @@ export function SubscriptionPlansPage() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-sm">${plan.monthlyPrice}/mo</td>
-                    <td className="px-4 py-3 text-sm">${plan.yearlyPrice}/yr</td>
-                    <td className="px-4 py-3 text-sm">{plan.maxCourses != null && plan.maxCourses > 0 ? plan.maxCourses : <span className="text-muted-foreground italic">Unlimited</span>}</td>
-                    <td className="px-4 py-3 text-sm">{plan.maxSeatsPerCourse != null && plan.maxSeatsPerCourse > 0 ? plan.maxSeatsPerCourse : <span className="text-muted-foreground italic">Unlimited</span>}</td>
-                    <td className="px-4 py-3 text-sm">{plan.maxTotalSeats != null && plan.maxTotalSeats > 0 ? plan.maxTotalSeats : <span className="text-muted-foreground italic">Unlimited</span>}</td>
+                    <td className="px-4 py-3 text-sm">${plan.monthlyPrice}{t('admin:subscriptionPlans.perMonth')}</td>
+                    <td className="px-4 py-3 text-sm">${plan.yearlyPrice}{t('admin:subscriptionPlans.perYear')}</td>
+                    <td className="px-4 py-3 text-sm">{plan.maxCourses != null && plan.maxCourses > 0 ? plan.maxCourses : <span className="text-muted-foreground italic">{t('admin:subscriptionPlans.unlimited')}</span>}</td>
+                    <td className="px-4 py-3 text-sm">{plan.maxSeatsPerCourse != null && plan.maxSeatsPerCourse > 0 ? plan.maxSeatsPerCourse : <span className="text-muted-foreground italic">{t('admin:subscriptionPlans.unlimited')}</span>}</td>
+                    <td className="px-4 py-3 text-sm">{plan.maxTotalSeats != null && plan.maxTotalSeats > 0 ? plan.maxTotalSeats : <span className="text-muted-foreground italic">{t('admin:subscriptionPlans.unlimited')}</span>}</td>
                     <td className="px-4 py-3">
                       <span
                         className={cn(
@@ -216,7 +218,7 @@ export function SubscriptionPlansPage() {
                             plan.isActive ? "bg-emerald-500" : "bg-red-500"
                           )}
                         />
-                        {plan.isActive ? "Active" : "Inactive"}
+                        {plan.isActive ? t('admin:users.statusActive') : t('admin:subscriptionPlans.inactive')}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-end">
@@ -228,7 +230,7 @@ export function SubscriptionPlansPage() {
                           onClick={() => openEditDialog(plan)}
                         >
                           <Pencil className="h-3.5 w-3.5" />
-                          Edit
+                          {t('common:edit')}
                         </Button>
                         <Button
                           variant="outline"
@@ -252,33 +254,33 @@ export function SubscriptionPlansPage() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>{editingPlan ? "Edit Plan" : "Create Plan"}</DialogTitle>
+            <DialogTitle>{editingPlan ? t('admin:subscriptionPlans.editPlan') : t('admin:subscriptionPlans.createPlan')}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="planName">Plan Name *</Label>
+              <Label htmlFor="planName">{t('admin:subscriptionPlans.nameLabel')}</Label>
               <Input
                 id="planName"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="e.g., Starter, Professional, Enterprise"
+                placeholder={t('admin:subscriptionPlans.namePlaceholder')}
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="planDescription">Description</Label>
+              <Label htmlFor="planDescription">{t('admin:subscriptionPlans.descriptionLabel')}</Label>
               <Input
                 id="planDescription"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Brief description of the plan"
+                placeholder={t('admin:subscriptionPlans.descriptionPlaceholder')}
               />
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="monthlyPrice">Monthly Price ($) *</Label>
+                <Label htmlFor="monthlyPrice">{t('admin:subscriptionPlans.monthlyPriceLabel')}</Label>
                 <Input
                   id="monthlyPrice"
                   type="number"
@@ -291,7 +293,7 @@ export function SubscriptionPlansPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="yearlyPrice">Yearly Price ($) *</Label>
+                <Label htmlFor="yearlyPrice">{t('admin:subscriptionPlans.yearlyPriceLabel')}</Label>
                 <Input
                   id="yearlyPrice"
                   type="number"
@@ -307,7 +309,7 @@ export function SubscriptionPlansPage() {
 
             <div className="grid gap-4 md:grid-cols-3">
               <div className="space-y-2">
-                <Label htmlFor="maxCourses">Max Courses *</Label>
+                <Label htmlFor="maxCourses">{t('admin:subscriptionPlans.maxCoursesLabel')}</Label>
                 <Input
                   id="maxCourses"
                   type="number"
@@ -319,7 +321,7 @@ export function SubscriptionPlansPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="maxSeatsPerCourse">Seats/Course *</Label>
+                <Label htmlFor="maxSeatsPerCourse">{t('admin:subscriptionPlans.maxSeatsPerCourseLabel')}</Label>
                 <Input
                   id="maxSeatsPerCourse"
                   type="number"
@@ -331,7 +333,7 @@ export function SubscriptionPlansPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="maxTotalSeats">Total Seats *</Label>
+                <Label htmlFor="maxTotalSeats">{t('admin:subscriptionPlans.maxTotalSeatsLabel')}</Label>
                 <Input
                   id="maxTotalSeats"
                   type="number"
@@ -346,7 +348,7 @@ export function SubscriptionPlansPage() {
 
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="sortOrder">Sort Order</Label>
+                <Label htmlFor="sortOrder">{t('admin:subscriptionPlans.sortOrderLabel')}</Label>
                 <Input
                   id="sortOrder"
                   type="number"
@@ -357,7 +359,7 @@ export function SubscriptionPlansPage() {
                 />
               </div>
               <div className="flex items-center justify-between pt-6">
-                <Label htmlFor="isActive">Active</Label>
+                <Label htmlFor="isActive">{t('admin:subscriptionPlans.activeLabel')}</Label>
                 <Switch
                   id="isActive"
                   checked={formData.isActive}
@@ -368,10 +370,10 @@ export function SubscriptionPlansPage() {
 
             <div className="flex justify-end gap-2 pt-4">
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
-                Cancel
+                {t('common:cancel')}
               </Button>
               <Button type="submit" disabled={saving}>
-                {saving ? "Saving..." : editingPlan ? "Update Plan" : "Create Plan"}
+                {saving ? t('admin:subscriptionPlans.saving') : editingPlan ? t('admin:subscriptionPlans.updatePlan') : t('admin:subscriptionPlans.createPlan')}
               </Button>
             </div>
           </form>
@@ -382,9 +384,9 @@ export function SubscriptionPlansPage() {
       <ConfirmDialog
         open={deletePlan !== null}
         onOpenChange={(open) => { if (!open) setDeletePlan(null); }}
-        title="Delete Plan"
-        description={`Are you sure you want to delete the "${deletePlan?.name}" plan? This action cannot be undone.`}
-        confirmLabel="Delete"
+        title={t('admin:subscriptionPlans.deleteTitle')}
+        description={t('admin:subscriptionPlans.deleteConfirm', { name: deletePlan?.name ?? '' })}
+        confirmLabel={t('common:delete')}
         variant="destructive"
         onConfirm={() => {
           if (deletePlan) return handleDelete(deletePlan);

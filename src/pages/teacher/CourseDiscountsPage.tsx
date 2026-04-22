@@ -28,6 +28,7 @@ import { Switch } from "../../components/ui/switch";
 import { ConfirmDialog } from "../../components/ui/confirm-dialog";
 import { cn } from "../../lib/cn";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import { discountService, type DiscountDto } from "../../services/discountService";
 
 const emptyForm = {
@@ -41,6 +42,7 @@ const emptyForm = {
 };
 
 export function CourseDiscountsPage() {
+  const { t } = useTranslation(['teacher', 'common', 'errors']);
   const { id: courseId } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [discounts, setDiscounts] = useState<DiscountDto[]>([]);
@@ -59,8 +61,8 @@ export function CourseDiscountsPage() {
       setDiscounts(result);
     } catch (error) {
       console.error("Failed to fetch discounts:", error);
-      toast.error("Failed to load discounts", {
-        description: error instanceof Error ? error.message : "An error occurred",
+      toast.error(t('teacher:discounts.errors.loadFailed'), {
+        description: error instanceof Error ? error.message : t('teacher:shared.errorOccurred'),
       });
     } finally {
       setLoading(false);
@@ -110,16 +112,16 @@ export function CourseDiscountsPage() {
     try {
       if (editingDiscount) {
         await discountService.updateDiscount(editingDiscount.id, payload);
-        toast.success("Discount updated successfully");
+        toast.success(t('teacher:discounts.toasts.updated'));
       } else {
         await discountService.createDiscount(payload);
-        toast.success("Discount created successfully");
+        toast.success(t('teacher:discounts.toasts.created'));
       }
       setDialogOpen(false);
       fetchDiscounts();
     } catch (error) {
-      toast.error(editingDiscount ? "Failed to update discount" : "Failed to create discount", {
-        description: error instanceof Error ? error.message : "An error occurred",
+      toast.error(editingDiscount ? t('teacher:discounts.errors.updateFailed') : t('teacher:discounts.errors.createFailed'), {
+        description: error instanceof Error ? error.message : t('teacher:shared.errorOccurred'),
       });
     } finally {
       setSaving(false);
@@ -129,11 +131,11 @@ export function CourseDiscountsPage() {
   const handleDelete = async (discount: DiscountDto) => {
     try {
       await discountService.deleteDiscount(discount.id);
-      toast.success(`Discount "${discount.code}" deleted`);
+      toast.success(t('teacher:discounts.toasts.deleted', { code: discount.code }));
       setDiscounts((prev) => prev.filter((d) => d.id !== discount.id));
     } catch (error) {
-      toast.error("Failed to delete discount", {
-        description: error instanceof Error ? error.message : "An error occurred",
+      toast.error(t('teacher:discounts.errors.deleteFailed'), {
+        description: error instanceof Error ? error.message : t('teacher:shared.errorOccurred'),
       });
     }
   };
@@ -147,15 +149,15 @@ export function CourseDiscountsPage() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight md:text-3xl">Course Discounts</h1>
+            <h1 className="text-2xl font-bold tracking-tight md:text-3xl">{t('teacher:discounts.pageTitle')}</h1>
             <p className="mt-1 text-muted-foreground">
-              Manage discount codes for this course
+              {t('teacher:discounts.pageSubtitle')}
             </p>
           </div>
         </div>
         <Button size="sm" onClick={openCreateDialog}>
           <Plus className="me-2 h-4 w-4" />
-          Create Discount
+          {t('teacher:discounts.createDiscount')}
         </Button>
       </div>
 
@@ -169,13 +171,13 @@ export function CourseDiscountsPage() {
           <table className="w-full">
             <thead className="border-b border-border bg-muted/50">
               <tr>
-                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">Code</th>
-                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">Type</th>
-                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">Value</th>
-                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">Dates</th>
-                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">Usage</th>
-                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">Status</th>
-                <th className="px-4 py-3 text-end text-sm font-medium text-muted-foreground">Actions</th>
+                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">{t('teacher:discounts.columns.code')}</th>
+                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">{t('teacher:discounts.columns.type')}</th>
+                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">{t('teacher:discounts.columns.value')}</th>
+                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">{t('teacher:discounts.columns.dates')}</th>
+                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">{t('teacher:discounts.columns.usage')}</th>
+                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">{t('teacher:discounts.columns.status')}</th>
+                <th className="px-4 py-3 text-end text-sm font-medium text-muted-foreground">{t('teacher:discounts.columns.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -184,7 +186,7 @@ export function CourseDiscountsPage() {
                   <td colSpan={7} className="px-4 py-12 text-center text-muted-foreground">
                     <div className="flex flex-col items-center gap-2">
                       <Tag className="h-8 w-8 text-muted-foreground/50" />
-                      <p>No discounts yet. Create your first discount code.</p>
+                      <p>{t('teacher:discounts.emptyState')}</p>
                     </div>
                   </td>
                 </tr>
@@ -203,11 +205,11 @@ export function CourseDiscountsPage() {
                     <td className="px-4 py-3 text-sm text-muted-foreground">
                       {discount.startsAt
                         ? new Date(discount.startsAt).toLocaleDateString()
-                        : "No start"}{" "}
+                        : t('teacher:discounts.noStart')}{" "}
                       -{" "}
                       {discount.expiresAt
                         ? new Date(discount.expiresAt).toLocaleDateString()
-                        : "No end"}
+                        : t('teacher:discounts.noEnd')}
                     </td>
                     <td className="px-4 py-3 text-sm">
                       {discount.usedCount}
@@ -228,7 +230,7 @@ export function CourseDiscountsPage() {
                             discount.isActive ? "bg-emerald-500" : "bg-red-500"
                           )}
                         />
-                        {discount.isActive ? "Active" : "Inactive"}
+                        {discount.isActive ? t('teacher:discounts.active') : t('teacher:discounts.inactive')}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-end">
@@ -240,7 +242,7 @@ export function CourseDiscountsPage() {
                           onClick={() => openEditDialog(discount)}
                         >
                           <Pencil className="h-3.5 w-3.5" />
-                          Edit
+                          {t('common:edit')}
                         </Button>
                         <Button
                           variant="outline"
@@ -264,25 +266,25 @@ export function CourseDiscountsPage() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>{editingDiscount ? "Edit Discount" : "Create Discount"}</DialogTitle>
+            <DialogTitle>{editingDiscount ? t('teacher:discounts.editDiscount') : t('teacher:discounts.createDiscount')}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="discountCode">Discount Code *</Label>
+              <Label htmlFor="discountCode">{t('teacher:discounts.form.codeRequired')}</Label>
               <Input
                 id="discountCode"
                 value={formData.code}
                 onChange={(e) =>
                   setFormData({ ...formData, code: e.target.value.toUpperCase() })
                 }
-                placeholder="e.g., SUMMER20"
+                placeholder={t('teacher:discounts.form.codePlaceholder')}
                 required
               />
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="discountType">Type *</Label>
+                <Label htmlFor="discountType">{t('teacher:discounts.form.typeRequired')}</Label>
                 <SelectRoot
                   value={formData.type}
                   onValueChange={(value) =>
@@ -293,14 +295,14 @@ export function CourseDiscountsPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Percentage">Percentage</SelectItem>
-                    <SelectItem value="FixedAmount">Fixed Amount</SelectItem>
+                    <SelectItem value="Percentage">{t('teacher:discounts.percentage')}</SelectItem>
+                    <SelectItem value="FixedAmount">{t('teacher:discounts.fixedAmount')}</SelectItem>
                   </SelectContent>
                 </SelectRoot>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="discountValue">
-                  Value {formData.type === "Percentage" ? "(%)" : "($)"} *
+                  {formData.type === "Percentage" ? t('teacher:discounts.form.valuePercent') : t('teacher:discounts.form.valueDollar')}
                 </Label>
                 <Input
                   id="discountValue"
@@ -318,7 +320,7 @@ export function CourseDiscountsPage() {
 
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="startDate">Start Date</Label>
+                <Label htmlFor="startDate">{t('teacher:discounts.form.startDate')}</Label>
                 <Input
                   id="startDate"
                   type="date"
@@ -327,7 +329,7 @@ export function CourseDiscountsPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="endDate">End Date</Label>
+                <Label htmlFor="endDate">{t('teacher:discounts.form.endDate')}</Label>
                 <Input
                   id="endDate"
                   type="date"
@@ -339,18 +341,18 @@ export function CourseDiscountsPage() {
 
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="maxUses">Max Uses (optional)</Label>
+                <Label htmlFor="maxUses">{t('teacher:discounts.form.maxUses')}</Label>
                 <Input
                   id="maxUses"
                   type="number"
                   min="0"
                   value={formData.maxUses}
                   onChange={(e) => setFormData({ ...formData, maxUses: e.target.value })}
-                  placeholder="Unlimited"
+                  placeholder={t('teacher:discounts.unlimited')}
                 />
               </div>
               <div className="flex items-center justify-between pt-6">
-                <Label htmlFor="discountActive">Active</Label>
+                <Label htmlFor="discountActive">{t('teacher:discounts.active')}</Label>
                 <Switch
                   id="discountActive"
                   checked={formData.isActive}
@@ -361,10 +363,10 @@ export function CourseDiscountsPage() {
 
             <div className="flex justify-end gap-2 pt-4">
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
-                Cancel
+                {t('common:cancel')}
               </Button>
               <Button type="submit" disabled={saving}>
-                {saving ? "Saving..." : editingDiscount ? "Update Discount" : "Create Discount"}
+                {saving ? t('common:saving') : editingDiscount ? t('teacher:discounts.updateDiscount') : t('teacher:discounts.createDiscount')}
               </Button>
             </div>
           </form>
@@ -375,9 +377,9 @@ export function CourseDiscountsPage() {
       <ConfirmDialog
         open={deleteDiscount !== null}
         onOpenChange={(open) => { if (!open) setDeleteDiscount(null); }}
-        title="Delete Discount"
-        description={`Are you sure you want to delete the discount code "${deleteDiscount?.code}"? This action cannot be undone.`}
-        confirmLabel="Delete"
+        title={t('teacher:discounts.deleteDiscount')}
+        description={t('teacher:discounts.deleteConfirmDetailed', { code: deleteDiscount?.code ?? '' })}
+        confirmLabel={t('common:delete')}
         variant="destructive"
         onConfirm={() => {
           if (deleteDiscount) return handleDelete(deleteDiscount);

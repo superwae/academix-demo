@@ -25,6 +25,7 @@ import {
 import { examService, type ExamDto } from '../../services/examService'
 import { teacherService } from '../../services/teacherService'
 import type { CourseDto } from '../../services/courseService'
+import { useTranslation } from 'react-i18next'
 
 function examStatus(startsAt: string, isActive: boolean): 'Scheduled' | 'Active' | 'Completed' {
   const now = Date.now()
@@ -34,6 +35,7 @@ function examStatus(startsAt: string, isActive: boolean): 'Scheduled' | 'Active'
 }
 
 export function TeacherExamsPage() {
+  const { t } = useTranslation(['teacher', 'common', 'errors'])
   const [courses, setCourses] = useState<CourseDto[]>([])
   const [examsByCourseId, setExamsByCourseId] = useState<Map<string, ExamDto[]>>(new Map())
   const [loading, setLoading] = useState(true)
@@ -57,8 +59,8 @@ export function TeacherExamsPage() {
         )
         setExamsByCourseId(map)
       } catch (error) {
-        toast.error('Failed to load exams', {
-          description: error instanceof Error ? error.message : 'Please try again.',
+        toast.error(t('teacher:exams.errors.loadFailed'), {
+          description: error instanceof Error ? error.message : t('teacher:shared.pleaseTryAgain'),
         })
       } finally {
         setLoading(false)
@@ -76,13 +78,13 @@ export function TeacherExamsPage() {
       {/* Header */}
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight gradient-text">Exams & Quizzes</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Exams grouped by course</p>
+          <h1 className="text-3xl font-bold tracking-tight gradient-text">{t('teacher:exams.pageTitle')}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{t('teacher:exams.pageSubtitle')}</p>
         </div>
         <Button variant="gradient" asChild>
           <Link to="/teacher/exams/create">
             <PlusCircle className="h-4 w-4 me-2" />
-            Create Exam
+            {t('teacher:exams.createExam')}
           </Link>
         </Button>
       </div>
@@ -93,13 +95,13 @@ export function TeacherExamsPage() {
           {loading ? (
             <div className="flex justify-center items-center py-12 text-muted-foreground">
               <Loader2 className="h-8 w-8 animate-spin me-2" />
-              <span className="text-sm">Loading courses...</span>
+              <span className="text-sm">{t('teacher:exams.loadingCourses')}</span>
             </div>
           ) : courses.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <FileText className="h-12 w-12 mx-auto mb-3 opacity-50" />
-              <p className="text-sm">No courses yet</p>
-              <p className="text-xs mt-1">Create a course first to add exams.</p>
+              <p className="text-sm">{t('teacher:exams.noCoursesYet')}</p>
+              <p className="text-xs mt-1">{t('teacher:exams.noCoursesHint')}</p>
             </div>
           ) : (
             <Accordion defaultOpen={[]}>
@@ -110,17 +112,17 @@ export function TeacherExamsPage() {
                     <AccordionTrigger className="flex items-center gap-2">
                       <span className="font-medium">{course.title}</span>
                       <Badge variant="secondary" className="ms-2 text-xs">
-                        {courseExams.length} exam{courseExams.length !== 1 ? 's' : ''}
+                        {t('teacher:exams.examCount', { count: courseExams.length })}
                       </Badge>
                     </AccordionTrigger>
                     <AccordionContent>
                       {courseExams.length === 0 ? (
                         <div className="py-4 text-center text-sm text-muted-foreground">
-                          <p>No exams in this course yet.</p>
+                          <p>{t('teacher:exams.noExamsInCourse')}</p>
                           <Button variant="outline" size="sm" className="mt-2" asChild>
                             <Link to={`/teacher/exams/create?courseId=${course.id}`}>
                               <PlusCircle className="h-3 w-3 me-1" />
-                              Create exam
+                              {t('teacher:exams.createExam')}
                             </Link>
                           </Button>
                         </div>
@@ -129,18 +131,18 @@ export function TeacherExamsPage() {
                           <Table>
                             <TableHeader>
                               <TableRow>
-                                <TableHead>Exam</TableHead>
-                                <TableHead>Start Date</TableHead>
-                                <TableHead>Duration</TableHead>
-                                <TableHead>Questions</TableHead>
-                                <TableHead>Status</TableHead>
+                                <TableHead>{t('teacher:exams.columns.exam')}</TableHead>
+                                <TableHead>{t('teacher:exams.columns.startDate')}</TableHead>
+                                <TableHead>{t('teacher:exams.columns.duration')}</TableHead>
+                                <TableHead>{t('teacher:exams.columns.questions')}</TableHead>
+                                <TableHead>{t('teacher:exams.columns.status')}</TableHead>
                                 <TableHead className="text-end">
                                   <div className="flex items-center justify-end gap-2">
-                                    <span>Actions</span>
+                                    <span>{t('teacher:exams.columns.actions')}</span>
                                     <Button variant="outline" size="sm" asChild>
                                       <Link to={`/teacher/exams/create?courseId=${course.id}`}>
                                         <PlusCircle className="h-3 w-3 me-1" />
-                                        Create Exam
+                                        {t('teacher:exams.createExam')}
                                       </Link>
                                     </Button>
                                   </div>
@@ -162,10 +164,10 @@ export function TeacherExamsPage() {
                                       </div>
                                     </TableCell>
                                     <TableCell>
-                                      <div className="text-sm">{exam.durationMinutes} min</div>
+                                      <div className="text-sm">{t('teacher:courseLessonsManagement.minutes', { count: exam.durationMinutes })}</div>
                                     </TableCell>
                                     <TableCell>
-                                      <div className="text-sm">{exam.questionCount} questions</div>
+                                      <div className="text-sm">{t('teacher:exams.questionsCount', { count: exam.questionCount })}</div>
                                     </TableCell>
                                     <TableCell>
                                       <Badge
@@ -178,7 +180,7 @@ export function TeacherExamsPage() {
                                         }
                                         className="text-xs"
                                       >
-                                        {status}
+                                        {t(`teacher:exams.statuses.${status.toLowerCase()}`)}
                                       </Badge>
                                     </TableCell>
                                     <TableCell className="text-end">
@@ -192,13 +194,13 @@ export function TeacherExamsPage() {
                                           <DropdownMenuItem asChild>
                                             <Link to={`/teacher/exams/${exam.id}`}>
                                               <Eye className="h-3 w-3 me-2" />
-                                              View
+                                              {t('teacher:assignments.viewAction')}
                                             </Link>
                                           </DropdownMenuItem>
                                           <DropdownMenuItem asChild>
                                             <Link to={`/teacher/exams/${exam.id}/edit`}>
                                               <Edit className="h-3 w-3 me-2" />
-                                              Edit
+                                              {t('common:edit')}
                                             </Link>
                                           </DropdownMenuItem>
                                         </DropdownMenuContent>

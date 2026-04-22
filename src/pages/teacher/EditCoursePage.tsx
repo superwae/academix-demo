@@ -28,8 +28,10 @@ import {
 } from '../../components/ui/dialog'
 import { countWords, MAX_CERTIFICATE_WORDS } from '../../lib/certificateText'
 import { ConfirmDialog } from '../../components/ui/confirm-dialog'
+import { useTranslation } from 'react-i18next'
 
 export function EditCoursePage() {
+  const { t } = useTranslation(['teacher', 'common', 'errors'])
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const location = useLocation()
@@ -87,7 +89,7 @@ export function EditCoursePage() {
   useEffect(() => {
     const loadCourse = async () => {
       if (!id) {
-        toast.error('Course ID is required')
+        toast.error(t('teacher:courseStudents.errors.idRequired'))
         navigate('/teacher/courses')
         return
       }
@@ -118,8 +120,8 @@ export function EditCoursePage() {
           courseEndDate: courseData.courseEndDate ? courseData.courseEndDate.slice(0, 10) : '',
         })
       } catch (error) {
-        toast.error('Failed to load course', {
-          description: error instanceof Error ? error.message : 'Please try again later',
+        toast.error(t('teacher:courseLessonsManagement.errors.loadFailed'), {
+          description: error instanceof Error ? error.message : t('teacher:shared.tryAgainLater'),
         })
         navigate('/teacher/courses')
       } finally {
@@ -140,13 +142,13 @@ export function EditCoursePage() {
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      toast.error('Please select an image file')
+      toast.error(t('teacher:createCoursePage.errors.selectImage'))
       return
     }
 
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image size must be less than 5MB')
+      toast.error(t('teacher:createCoursePage.errors.imageTooLarge'))
       return
     }
 
@@ -158,30 +160,30 @@ export function EditCoursePage() {
       reader.onloadend = () => {
         const base64String = reader.result as string
         setFormData({ ...formData, thumbnailUrl: base64String })
-        toast.success('Image uploaded successfully')
+        toast.success(t('teacher:createCoursePage.toasts.imageUploaded'))
         setUploadingImage(false)
       }
       reader.onerror = () => {
-        toast.error('Failed to read image file')
+        toast.error(t('teacher:createCoursePage.errors.readImage'))
         setUploadingImage(false)
       }
       reader.readAsDataURL(file)
     } catch (error) {
-      toast.error('Failed to process image', {
-        description: error instanceof Error ? error.message : 'Please try again',
+      toast.error(t('teacher:createCoursePage.errors.processImage'), {
+        description: error instanceof Error ? error.message : t('teacher:shared.pleaseTryAgain'),
       })
       setUploadingImage(false)
     }
   }
 
   const sectionPresets = [
-    { name: 'Online', locationLabel: 'Online' },
-    { name: 'In-site', locationLabel: 'On campus' },
-    { name: 'Hybrid', locationLabel: 'Hybrid (online + in-person)' },
-    { name: 'Section 1', locationLabel: 'Section 1' },
-    { name: 'Section 2', locationLabel: 'Section 2' },
-    { name: 'Section 3', locationLabel: 'Section 3' },
-    { name: 'Section 4', locationLabel: 'Section 4' },
+    { name: 'Online', locationLabel: t('teacher:createCoursePage.sectionPresets.online') },
+    { name: 'In-site', locationLabel: t('teacher:createCoursePage.sectionPresets.inSite') },
+    { name: 'Hybrid', locationLabel: t('teacher:createCoursePage.sectionPresets.hybrid') },
+    { name: 'Section 1', locationLabel: t('teacher:createCoursePage.sectionPresets.section1') },
+    { name: 'Section 2', locationLabel: t('teacher:createCoursePage.sectionPresets.section2') },
+    { name: 'Section 3', locationLabel: t('teacher:createCoursePage.sectionPresets.section3') },
+    { name: 'Section 4', locationLabel: t('teacher:createCoursePage.sectionPresets.section4') },
   ]
 
   const timeToMinutes = (timeStr: string): number => {
@@ -222,10 +224,10 @@ export function EditCoursePage() {
       })
       const updated = await courseService.getCourseById(id)
       setCourse(updated)
-      toast.success(`Section "${preset.name}" added`)
+      toast.success(t('teacher:editCoursePage.toasts.sectionAdded', { name: preset.name }))
     } catch (error) {
-      toast.error('Failed to add section', {
-        description: error instanceof Error ? error.message : 'Please try again',
+      toast.error(t('teacher:editCoursePage.errors.addSectionFailed'), {
+        description: error instanceof Error ? error.message : t('teacher:shared.pleaseTryAgain'),
       })
     } finally {
       setAddingSection(false)
@@ -282,11 +284,11 @@ export function EditCoursePage() {
   const handleSaveSection = async () => {
     if (!id || !course || !editingSection) return
     if (!editingSection.name.trim() || !editingSection.locationLabel.trim()) {
-      toast.error('Section name and location are required')
+      toast.error(t('teacher:editCoursePage.errors.sectionNameLocationRequired'))
       return
     }
     if (editingSection.maxSeats < 1) {
-      toast.error('Max seats must be at least 1')
+      toast.error(t('teacher:teacherMyCourses.errors.maxSeatsAtLeastOne'))
       return
     }
     setSectionsSaving(true)
@@ -309,17 +311,17 @@ export function EditCoursePage() {
 
       if (editingSection.id) {
         await courseService.updateSection(id, editingSection.id, request)
-        toast.success('Section updated')
+        toast.success(t('teacher:teacherMyCourses.toasts.sectionUpdated'))
       } else {
         await courseService.addSection(id, request)
-        toast.success('Section created')
+        toast.success(t('teacher:teacherMyCourses.toasts.sectionCreated'))
       }
       const updated = await courseService.getCourseById(id)
       setCourse(updated)
       setEditingSection(null)
     } catch (error) {
-      toast.error('Failed to save section', {
-        description: error instanceof Error ? error.message : 'Please try again',
+      toast.error(t('teacher:teacherMyCourses.errors.saveSectionFailed'), {
+        description: error instanceof Error ? error.message : t('teacher:shared.pleaseTryAgain'),
       })
     } finally {
       setSectionsSaving(false)
@@ -334,10 +336,10 @@ export function EditCoursePage() {
       const updated = await courseService.getCourseById(id)
       setCourse(updated)
       setEditingSection(null)
-      toast.success('Section deleted')
+      toast.success(t('teacher:teacherMyCourses.toasts.sectionDeleted'))
     } catch (error) {
-      toast.error('Failed to delete section', {
-        description: error instanceof Error ? error.message : 'Please try again',
+      toast.error(t('teacher:teacherMyCourses.errors.deleteSectionFailed'), {
+        description: error instanceof Error ? error.message : t('teacher:shared.pleaseTryAgain'),
       })
     } finally {
       setSectionsSaving(false)
@@ -354,13 +356,13 @@ export function EditCoursePage() {
       const start = formData.courseStartDate
       const end = formData.courseEndDate
       if (start && end && end < start) {
-        toast.error('Course end date must be on or after start date')
+        toast.error(t('teacher:createCoursePage.errors.endBeforeStart'))
         setLoading(false)
         return
       }
 
       if (formData.certificateEnabled && countWords(formData.certificateSummary) > MAX_CERTIFICATE_WORDS) {
-        toast.error(`Certificate summary must be at most ${MAX_CERTIFICATE_WORDS} words`)
+        toast.error(t('teacher:createCoursePage.errors.certificateWordLimit', { max: MAX_CERTIFICATE_WORDS }))
         setLoading(false)
         return
       }
@@ -373,7 +375,7 @@ export function EditCoursePage() {
         certDisplayHoursParsed !== null &&
         (Number.isNaN(certDisplayHoursParsed) || certDisplayHoursParsed < 0)
       ) {
-        toast.error('Certificate hours must be a valid non-negative number')
+        toast.error(t('teacher:createCoursePage.errors.certificateHoursInvalid'))
         setLoading(false)
         return
       }
@@ -409,16 +411,16 @@ export function EditCoursePage() {
         await courseService.publishCourse(id)
       }
       
-      toast.success(saveAsDraft ? 'Course updated' : 'Course published successfully', {
-        description: saveAsDraft 
-          ? 'Your changes have been saved'
-          : 'Your course is now live and available for enrollment',
+      toast.success(saveAsDraft ? t('teacher:editCoursePage.toasts.updated') : t('teacher:createCoursePage.toasts.published'), {
+        description: saveAsDraft
+          ? t('teacher:editCoursePage.toasts.updatedDescription')
+          : t('teacher:createCoursePage.toasts.publishedDescription'),
       })
-      
+
       navigate('/teacher/courses')
     } catch (error) {
-      toast.error('Failed to update course', {
-        description: error instanceof Error ? error.message : 'Please try again later',
+      toast.error(t('teacher:editCoursePage.errors.updateFailed'), {
+        description: error instanceof Error ? error.message : t('teacher:shared.tryAgainLater'),
       })
     } finally {
       setLoading(false)
@@ -432,17 +434,17 @@ export function EditCoursePage() {
 
     try {
       await courseService.deleteCourse(id)
-      toast.success('Course deleted successfully', {
-        description: 'The course has been permanently removed',
+      toast.success(t('teacher:editCoursePage.toasts.deleted'), {
+        description: t('teacher:editCoursePage.toasts.deletedDescription'),
       })
       navigate('/teacher/courses')
     } catch (error) {
       console.error('Delete course error:', error)
-      const errorMessage = error instanceof Error ? error.message : 'Please try again later'
+      const errorMessage = error instanceof Error ? error.message : t('teacher:shared.tryAgainLater')
       console.error('Error message:', errorMessage)
-      
+
       // Show error in toast and also alert for detailed debug info
-      toast.error('Failed to delete course', {
+      toast.error(t('teacher:editCoursePage.errors.deleteFailed'), {
         description: errorMessage,
         duration: 10000, // Show for 10 seconds to read debug info
       })
@@ -471,9 +473,9 @@ export function EditCoursePage() {
   if (!course) {
     return (
       <div className="text-center py-12">
-        <p className="text-muted-foreground">Course not found</p>
+        <p className="text-muted-foreground">{t('teacher:courseStudents.notFound')}</p>
         <Button onClick={() => navigate('/teacher/courses')} className="mt-4">
-          Back to Courses
+          {t('teacher:courseStudents.backToCourses')}
         </Button>
       </div>
     )
@@ -492,8 +494,8 @@ export function EditCoursePage() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight gradient-text">Edit Course</h1>
-            <p className="mt-1 text-sm text-muted-foreground">Update course information</p>
+            <h1 className="text-3xl font-bold tracking-tight gradient-text">{t('teacher:editCoursePage.pageTitle')}</h1>
+            <p className="mt-1 text-sm text-muted-foreground">{t('teacher:editCoursePage.pageSubtitle')}</p>
           </div>
         </div>
       </div>
@@ -505,75 +507,75 @@ export function EditCoursePage() {
             {/* Course Info */}
             <Card>
               <CardHeader className="pb-2 pt-4">
-                <CardTitle className="text-lg">Course Information</CardTitle>
-                <CardDescription className="text-xs mt-0.5">Basic details about your course</CardDescription>
+                <CardTitle className="text-lg">{t('teacher:createCoursePage.courseInfo')}</CardTitle>
+                <CardDescription className="text-xs mt-0.5">{t('teacher:createCoursePage.courseInfoDescription')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3 pt-2">
                 <div className="space-y-1.5">
-                  <Label htmlFor="title">Course Title *</Label>
+                  <Label htmlFor="title">{t('teacher:createCoursePage.courseTitleRequired')}</Label>
                   <Input
                     id="title"
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    placeholder="e.g., Introduction to React"
+                    placeholder={t('teacher:editCoursePage.courseTitlePlaceholder')}
                     required
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="description">Description</Label>
+                  <Label htmlFor="description">{t('teacher:courseLessonsManagement.description')}</Label>
                   <Textarea
                     id="description"
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Describe what students will learn..."
+                    placeholder={t('teacher:editCoursePage.descriptionPlaceholder')}
                     rows={6}
                   />
                 </div>
 
                 <div className="grid gap-3 md:grid-cols-2">
                   <div className="space-y-1.5">
-                    <Label htmlFor="category">Category *</Label>
+                    <Label htmlFor="category">{t('teacher:createCoursePage.categoryRequired')}</Label>
                     <Input
                       id="category"
                       value={formData.category}
                       onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                      placeholder="e.g., Web Development"
+                      placeholder={t('teacher:editCoursePage.categoryPlaceholder')}
                       required
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="level">Level *</Label>
+                    <Label htmlFor="level">{t('teacher:createCoursePage.levelRequired')}</Label>
                     <SelectRoot value={formData.level} onValueChange={(value) => setFormData({ ...formData, level: value })}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Beginner">Beginner</SelectItem>
-                        <SelectItem value="Intermediate">Intermediate</SelectItem>
-                        <SelectItem value="Advanced">Advanced</SelectItem>
+                        <SelectItem value="Beginner">{t('teacher:createCoursePage.levels.beginner')}</SelectItem>
+                        <SelectItem value="Intermediate">{t('teacher:createCoursePage.levels.intermediate')}</SelectItem>
+                        <SelectItem value="Advanced">{t('teacher:createCoursePage.levels.advanced')}</SelectItem>
                       </SelectContent>
                     </SelectRoot>
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="modality">Modality *</Label>
+                  <Label htmlFor="modality">{t('teacher:createCoursePage.modalityRequired')}</Label>
                   <SelectRoot value={formData.modality} onValueChange={(value) => setFormData({ ...formData, modality: value })}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Online">Online</SelectItem>
-                      <SelectItem value="In-Person">In-Person</SelectItem>
-                      <SelectItem value="Hybrid">Hybrid</SelectItem>
+                      <SelectItem value="Online">{t('teacher:createCoursePage.modalities.online')}</SelectItem>
+                      <SelectItem value="In-Person">{t('teacher:editCoursePage.inPerson')}</SelectItem>
+                      <SelectItem value="Hybrid">{t('teacher:createCoursePage.modalities.hybrid')}</SelectItem>
                     </SelectContent>
                   </SelectRoot>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label>Tags (max 5)</Label>
+                  <Label>{t('teacher:createCoursePage.tagsMax5')}</Label>
                   <div className="flex flex-wrap gap-2 items-center">
                     {formData.tags.map((tag) => (
                       <Badge key={tag} variant="secondary" className="gap-1">
@@ -592,14 +594,14 @@ export function EditCoursePage() {
                         <Input
                           value={formData.tagInput}
                           onChange={(e) => setFormData({ ...formData, tagInput: e.target.value })}
-                          placeholder="Add tag..."
+                          placeholder={t('teacher:createCoursePage.addTagPlaceholder')}
                           className="w-32"
                           onKeyDown={(e) => {
                             if (e.key === 'Enter') {
                               e.preventDefault()
-                              const t = formData.tagInput.trim()
-                              if (t && !formData.tags.includes(t) && formData.tags.length < 5) {
-                                setFormData({ ...formData, tags: [...formData.tags, t], tagInput: '' })
+                              const tag = formData.tagInput.trim()
+                              if (tag && !formData.tags.includes(tag) && formData.tags.length < 5) {
+                                setFormData({ ...formData, tags: [...formData.tags, tag], tagInput: '' })
                               }
                             }
                           }}
@@ -609,11 +611,11 @@ export function EditCoursePage() {
                           variant="outline"
                           size="sm"
                           onClick={() => {
-                            const t = formData.tagInput.trim()
-                            if (t && !formData.tags.includes(t) && formData.tags.length < 5) {
-                              setFormData({ ...formData, tags: [...formData.tags, t], tagInput: '' })
+                            const tag = formData.tagInput.trim()
+                            if (tag && !formData.tags.includes(tag) && formData.tags.length < 5) {
+                              setFormData({ ...formData, tags: [...formData.tags, tag], tagInput: '' })
                             } else if (formData.tags.length >= 5) {
-                              toast.error('Maximum 5 tags allowed')
+                              toast.error(t('teacher:createCoursePage.errors.maxTags'))
                             }
                           }}
                         >
@@ -622,7 +624,7 @@ export function EditCoursePage() {
                       </div>
                     )}
                   </div>
-                  <p className="text-xs text-muted-foreground">{formData.tags.length}/5 tags</p>
+                  <p className="text-xs text-muted-foreground">{t('teacher:createCoursePage.tagsCount', { count: formData.tags.length })}</p>
                 </div>
               </CardContent>
             </Card>
@@ -630,8 +632,8 @@ export function EditCoursePage() {
             {/* Media */}
             <Card>
               <CardHeader className="pb-2 pt-4">
-                <CardTitle className="text-lg">Course Media</CardTitle>
-                <CardDescription className="text-xs mt-0.5">Upload course cover image</CardDescription>
+                <CardTitle className="text-lg">{t('teacher:createCoursePage.courseMedia')}</CardTitle>
+                <CardDescription className="text-xs mt-0.5">{t('teacher:createCoursePage.uploadCover')}</CardDescription>
               </CardHeader>
               <CardContent className="pt-2">
                 <div className="space-y-2">
@@ -639,7 +641,7 @@ export function EditCoursePage() {
                     <div className="relative">
                       <img
                         src={formData.thumbnailUrl}
-                        alt="Course thumbnail"
+                        alt={t('teacher:createCoursePage.thumbnailAlt')}
                         className="w-full h-48 object-cover rounded-lg"
                       />
                       <Button
@@ -663,25 +665,25 @@ export function EditCoursePage() {
                       />
                       <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                       <p className="text-sm text-muted-foreground mb-2">
-                        Upload course cover image
+                        {t('teacher:createCoursePage.uploadCover')}
                       </p>
-                      <Button 
-                        type="button" 
-                        variant="outline" 
+                      <Button
+                        type="button"
+                        variant="outline"
                         size="sm"
                         onClick={handleFileSelect}
                         disabled={uploadingImage}
                       >
-                        {uploadingImage ? 'Uploading...' : 'Choose File'}
+                        {uploadingImage ? t('teacher:createCoursePage.uploading') : t('teacher:createCoursePage.chooseFile')}
                       </Button>
                       <p className="text-xs text-muted-foreground mt-2">
-                        PNG, JPG or GIF (max 5MB)
+                        {t('teacher:createCoursePage.imageFormatHint')}
                       </p>
                     </div>
                   )}
                   {formData.thumbnailUrl && (
                     <div className="space-y-1.5">
-                      <Label htmlFor="thumbnailUrl">Or enter URL</Label>
+                      <Label htmlFor="thumbnailUrl">{t('teacher:editCoursePage.orEnterUrl')}</Label>
                       <Input
                         id="thumbnailUrl"
                         value={formData.thumbnailUrl}
@@ -697,9 +699,9 @@ export function EditCoursePage() {
             {/* Sections - same system as Manage Course Sections */}
             <Card>
               <CardHeader className="pb-2 pt-4">
-                <CardTitle className="text-lg">Sections</CardTitle>
+                <CardTitle className="text-lg">{t('teacher:createCourse.sectionsTitle')}</CardTitle>
                 <CardDescription className="text-xs mt-0.5">
-                  Students choose a section when enrolling. Add Online, In-site, Hybrid, or Section 1–4.
+                  {t('teacher:editCoursePage.sectionsDescription')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3 pt-2">
@@ -723,11 +725,11 @@ export function EditCoursePage() {
                 </div>
                 <div className="flex items-center justify-between pt-2 border-t border-border/50">
                   <p className="text-xs font-medium text-muted-foreground">
-                    Current sections ({course.sections?.length ?? 0})
+                    {t('teacher:editCoursePage.currentSections', { count: course.sections?.length ?? 0 })}
                   </p>
                   <Button type="button" variant="outline" size="sm" onClick={openSectionsDialog}>
                     <Calendar className="h-3.5 w-3.5 me-1" />
-                    Manage Sections
+                    {t('teacher:teacherMyCourses.manageSections')}
                   </Button>
                 </div>
                 {course.sections && course.sections.length > 0 && (
@@ -742,7 +744,7 @@ export function EditCoursePage() {
                         <span className="text-muted-foreground">— {s.locationLabel}</span>
                         {s.seatsRemaining != null && (
                           <span className="text-xs text-muted-foreground ms-auto">
-                            {s.seatsRemaining} seats left
+                            {t('teacher:editCoursePage.seatsLeftShort', { count: s.seatsRemaining })}
                           </span>
                         )}
                       </li>
@@ -757,14 +759,14 @@ export function EditCoursePage() {
           <div className="space-y-3">
             <Card>
               <CardHeader className="pb-2 pt-4">
-                <CardTitle className="text-lg">Schedule & workload</CardTitle>
+                <CardTitle className="text-lg">{t('teacher:editCoursePage.scheduleAndWorkload')}</CardTitle>
                 <CardDescription className="text-xs mt-0.5">
-                  Expected hours and course dates (used for calendar bounds)
+                  {t('teacher:editCoursePage.scheduleAndWorkloadHint')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3 pt-2">
                 <div className="space-y-1.5">
-                  <Label htmlFor="expectedHours">Expected hours (total)</Label>
+                  <Label htmlFor="expectedHours">{t('teacher:createCoursePage.expectedHoursTotal')}</Label>
                   <Input
                     id="expectedHours"
                     type="number"
@@ -772,11 +774,11 @@ export function EditCoursePage() {
                     step="0.5"
                     value={formData.expectedDurationHours}
                     onChange={(e) => setFormData({ ...formData, expectedDurationHours: e.target.value })}
-                    placeholder="e.g., 40"
+                    placeholder={t('teacher:createCoursePage.expectedHoursPlaceholder')}
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="courseStartEdit">Course start</Label>
+                  <Label htmlFor="courseStartEdit">{t('teacher:createCoursePage.courseStart')}</Label>
                   <Input
                     id="courseStartEdit"
                     type="date"
@@ -785,7 +787,7 @@ export function EditCoursePage() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="courseEndEdit">Course end</Label>
+                  <Label htmlFor="courseEndEdit">{t('teacher:createCoursePage.courseEnd')}</Label>
                   <Input
                     id="courseEndEdit"
                     type="date"
@@ -799,11 +801,11 @@ export function EditCoursePage() {
             {/* Pricing */}
             <Card>
               <CardHeader className="pb-2 pt-4">
-                <CardTitle className="text-lg">Pricing</CardTitle>
+                <CardTitle className="text-lg">{t('teacher:editCoursePage.pricing')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 pt-2">
                 <div className="space-y-1.5">
-                  <Label htmlFor="price">Price</Label>
+                  <Label htmlFor="price">{t('teacher:createCourse.priceLabel')}</Label>
                   <Input
                     id="price"
                     type="number"
@@ -820,14 +822,14 @@ export function EditCoursePage() {
             {/* Settings */}
             <Card>
               <CardHeader className="pb-2 pt-4">
-                <CardTitle className="text-lg">Settings</CardTitle>
+                <CardTitle className="text-lg">{t('teacher:createAssignment.settings')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 pt-2">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label>Certificate Enabled</Label>
+                    <Label>{t('teacher:createCoursePage.certificateEnabled')}</Label>
                     <p className="text-xs text-muted-foreground">
-                      Issue certificates on completion; set text and hours for the certificate layout
+                      {t('teacher:editCoursePage.certificateEnabledHint')}
                     </p>
                   </div>
                   <Switch
@@ -839,10 +841,10 @@ export function EditCoursePage() {
                 {formData.certificateEnabled && (
                   <div className="space-y-3 rounded-lg border border-border/60 bg-muted/30 p-3">
                     <div className="space-y-1.5">
-                      <Label htmlFor="certSummaryEdit">Certificate summary</Label>
+                      <Label htmlFor="certSummaryEdit">{t('teacher:createCoursePage.certificateSummary')}</Label>
                       <div className="flex justify-between gap-2">
                         <p className="text-xs text-muted-foreground">
-                          Short text for the certificate (not the full course description)
+                          {t('teacher:createCoursePage.certificateSummaryHint')}
                         </p>
                         <span
                           className={
@@ -851,7 +853,7 @@ export function EditCoursePage() {
                               : 'text-xs text-muted-foreground'
                           }
                         >
-                          {countWords(formData.certificateSummary)} / {MAX_CERTIFICATE_WORDS} words
+                          {t('teacher:createCoursePage.wordsCount', { count: countWords(formData.certificateSummary), max: MAX_CERTIFICATE_WORDS })}
                         </span>
                       </div>
                       <Textarea
@@ -859,13 +861,13 @@ export function EditCoursePage() {
                         rows={4}
                         value={formData.certificateSummary}
                         onChange={(e) => setFormData({ ...formData, certificateSummary: e.target.value })}
-                        placeholder="e.g. Key learning outcomes in one short paragraph…"
+                        placeholder={t('teacher:createCoursePage.certificateSummaryPlaceholder')}
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <Label htmlFor="certHoursEdit">Hours on certificate (optional)</Label>
+                      <Label htmlFor="certHoursEdit">{t('teacher:createCoursePage.hoursOnCertificate')}</Label>
                       <p className="text-xs text-muted-foreground">
-                        Leave empty to use &quot;Expected hours (total)&quot; above
+                        {t('teacher:createCoursePage.hoursOnCertificateHint')}
                       </p>
                       <Input
                         id="certHoursEdit"
@@ -874,7 +876,7 @@ export function EditCoursePage() {
                         step="0.5"
                         value={formData.certificateDisplayHours}
                         onChange={(e) => setFormData({ ...formData, certificateDisplayHours: e.target.value })}
-                        placeholder="e.g. 40"
+                        placeholder={t('teacher:createCoursePage.hoursExample')}
                       />
                     </div>
                   </div>
@@ -882,8 +884,8 @@ export function EditCoursePage() {
 
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label>Publish Course</Label>
-                    <p className="text-xs text-muted-foreground">Make course available for enrollment</p>
+                    <Label>{t('teacher:createCourse.publish')}</Label>
+                    <p className="text-xs text-muted-foreground">{t('teacher:editCoursePage.publishHint')}</p>
                   </div>
                   <Switch
                     checked={formData.publish}
@@ -899,12 +901,12 @@ export function EditCoursePage() {
                 {loading ? (
                   <>
                     <Loader2 className="h-4 w-4 me-2 animate-spin" />
-                    Saving...
+                    {t('common:saving')}
                   </>
                 ) : (
                   <>
                     <Save className="h-4 w-4 me-2" />
-                    Save Changes
+                    {t('teacher:courseLessonsManagement.saveChanges')}
                   </>
                 )}
               </Button>
@@ -915,7 +917,7 @@ export function EditCoursePage() {
                 onClick={(e) => handleSubmit(e, true)}
                 disabled={loading}
               >
-                Save as Draft
+                {t('teacher:createCourse.saveDraft')}
               </Button>
               <Button
                 type="button"
@@ -927,12 +929,12 @@ export function EditCoursePage() {
                 {deleting ? (
                   <>
                     <Loader2 className="h-4 w-4 me-2 animate-spin" />
-                    Deleting...
+                    {t('common:deleting')}
                   </>
                 ) : (
                   <>
                     <Trash2 className="h-4 w-4 me-2" />
-                    Delete Course
+                    {t('teacher:editCoursePage.deleteCourse')}
                   </>
                 )}
               </Button>
@@ -945,9 +947,9 @@ export function EditCoursePage() {
       <Dialog open={showSectionsDialog} onOpenChange={(open) => { setShowSectionsDialog(open); if (!open) setEditingSection(null) }}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Manage Course Sections</DialogTitle>
+            <DialogTitle>{t('teacher:teacherMyCourses.manageSectionsTitle')}</DialogTitle>
             <DialogDescription>
-              {course?.title ? `Manage enrollment sections for "${course.title}"` : 'Add and manage course sections for student enrollment'}
+              {course?.title ? t('teacher:teacherMyCourses.manageSectionsDescription', { title: course.title }) : t('teacher:teacherMyCourses.manageSectionsGenericDescription')}
             </DialogDescription>
           </DialogHeader>
 
@@ -955,26 +957,26 @@ export function EditCoursePage() {
             <div className="space-y-4">
               <div className="space-y-3">
                 <div className="space-y-1.5">
-                  <Label>Section Name *</Label>
+                  <Label>{t('teacher:teacherMyCourses.sectionNameRequired')}</Label>
                   <Input
                     value={editingSection.name}
                     onChange={(e) => setEditingSection({ ...editingSection, name: e.target.value })}
-                    placeholder="e.g., Weekend Intensive, Part-Time Evening"
+                    placeholder={t('teacher:teacherMyCourses.sectionNamePlaceholder')}
                   />
                 </div>
 
                 <div className="grid gap-3 md:grid-cols-2">
                   <div className="space-y-1.5">
-                    <Label>Location/Modality *</Label>
+                    <Label>{t('teacher:teacherMyCourses.locationModality')}</Label>
                     <Input
                       value={editingSection.locationLabel}
                       onChange={(e) => setEditingSection({ ...editingSection, locationLabel: e.target.value })}
-                      placeholder="e.g., Online - Live Coding, Room 201"
+                      placeholder={t('teacher:teacherMyCourses.locationPlaceholder')}
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label>Max Seats</Label>
+                    <Label>{t('teacher:teacherMyCourses.maxSeats')}</Label>
                     <Input
                       type="number"
                       min="1"
@@ -990,7 +992,7 @@ export function EditCoursePage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label>Join URL (Optional)</Label>
+                  <Label>{t('teacher:teacherMyCourses.joinUrlOptional')}</Label>
                   <Input
                     value={editingSection.joinUrl}
                     onChange={(e) => setEditingSection({ ...editingSection, joinUrl: e.target.value })}
@@ -1000,16 +1002,16 @@ export function EditCoursePage() {
 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <Label>Meeting Times</Label>
+                    <Label>{t('teacher:teacherMyCourses.meetingTimes')}</Label>
                     <Button type="button" variant="outline" size="sm" onClick={addMeetingTime}>
                       <Plus className="h-4 w-4 me-1" />
-                      Add Time
+                      {t('teacher:teacherMyCourses.addTime')}
                     </Button>
                   </div>
 
                   {editingSection.meetingTimes.length === 0 ? (
                     <div className="text-sm text-muted-foreground text-center py-4 border border-dashed rounded">
-                      No meeting times added
+                      {t('teacher:teacherMyCourses.noMeetingTimesAdded')}
                     </div>
                   ) : (
                     <div className="space-y-2">
@@ -1027,13 +1029,13 @@ export function EditCoursePage() {
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="Monday">Monday</SelectItem>
-                                <SelectItem value="Tuesday">Tuesday</SelectItem>
-                                <SelectItem value="Wednesday">Wednesday</SelectItem>
-                                <SelectItem value="Thursday">Thursday</SelectItem>
-                                <SelectItem value="Friday">Friday</SelectItem>
-                                <SelectItem value="Saturday">Saturday</SelectItem>
-                                <SelectItem value="Sunday">Sunday</SelectItem>
+                                <SelectItem value="Monday">{t('teacher:teacherMyCourses.days.monday')}</SelectItem>
+                                <SelectItem value="Tuesday">{t('teacher:teacherMyCourses.days.tuesday')}</SelectItem>
+                                <SelectItem value="Wednesday">{t('teacher:teacherMyCourses.days.wednesday')}</SelectItem>
+                                <SelectItem value="Thursday">{t('teacher:teacherMyCourses.days.thursday')}</SelectItem>
+                                <SelectItem value="Friday">{t('teacher:teacherMyCourses.days.friday')}</SelectItem>
+                                <SelectItem value="Saturday">{t('teacher:teacherMyCourses.days.saturday')}</SelectItem>
+                                <SelectItem value="Sunday">{t('teacher:teacherMyCourses.days.sunday')}</SelectItem>
                               </SelectContent>
                             </SelectRoot>
                           </div>
@@ -1044,7 +1046,7 @@ export function EditCoursePage() {
                               onChange={(e) => updateMeetingTime(index, { startTime: e.target.value })}
                             />
                           </div>
-                          <span className="text-sm text-muted-foreground">to</span>
+                          <span className="text-sm text-muted-foreground">{t('teacher:teacherMyCourses.to')}</span>
                           <div className="flex-1">
                             <Input
                               type="time"
@@ -1073,16 +1075,16 @@ export function EditCoursePage() {
                   onClick={() => setEditingSection(null)}
                   disabled={sectionsSaving}
                 >
-                  Cancel
+                  {t('common:cancel')}
                 </Button>
                 <Button variant="gradient" onClick={handleSaveSection} disabled={sectionsSaving}>
                   {sectionsSaving ? (
                     <>
                       <Loader2 className="h-4 w-4 me-2 animate-spin" />
-                      Saving...
+                      {t('common:saving')}
                     </>
                   ) : (
-                    editingSection.id ? 'Update Section' : 'Create Section'
+                    editingSection.id ? t('teacher:teacherMyCourses.updateSection') : t('teacher:teacherMyCourses.createSection')
                   )}
                 </Button>
               </div>
@@ -1092,20 +1094,20 @@ export function EditCoursePage() {
               <div className="flex justify-end">
                 <Button onClick={handleAddSectionForm}>
                   <Plus className="h-4 w-4 me-2" />
-                  Add Section
+                  {t('teacher:teacherMyCourses.addSection')}
                 </Button>
               </div>
 
               {!course?.sections?.length ? (
                 <div className="border-2 border-dashed border-border/50 rounded-lg p-8 text-center">
                   <Calendar className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground mb-2">No sections added yet</p>
+                  <p className="text-sm text-muted-foreground mb-2">{t('teacher:teacherMyCourses.noSectionsYet')}</p>
                   <p className="text-xs text-muted-foreground mb-4">
-                    Add sections so students can choose their preferred schedule
+                    {t('teacher:teacherMyCourses.addSectionsHint')}
                   </p>
                   <Button onClick={handleAddSectionForm} variant="outline">
                     <Plus className="h-4 w-4 me-2" />
-                    Add First Section
+                    {t('teacher:teacherMyCourses.addFirstSection')}
                   </Button>
                 </div>
               ) : (
@@ -1126,11 +1128,11 @@ export function EditCoursePage() {
                             {section.joinUrl && (
                               <div className="flex items-center gap-1">
                                 <LinkIcon className="h-3 w-3" />
-                                Online meeting available
+                                {t('teacher:teacherMyCourses.onlineMeetingAvailable')}
                               </div>
                             )}
                             <div>
-                              {section.seatsRemaining} / {section.maxSeats} seats left
+                              {t('teacher:teacherMyCourses.seatsLeft', { remaining: section.seatsRemaining, max: section.maxSeats })}
                             </div>
                           </div>
                           {section.meetingTimes && section.meetingTimes.length > 0 && (
@@ -1152,7 +1154,7 @@ export function EditCoursePage() {
                             disabled={sectionsSaving}
                           >
                             <Edit className="h-3 w-3 me-1" />
-                            Edit
+                            {t('common:edit')}
                           </Button>
                           <Button
                             variant="destructive"
@@ -1177,9 +1179,9 @@ export function EditCoursePage() {
       <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Course</DialogTitle>
+            <DialogTitle>{t('teacher:editCoursePage.deleteCourse')}</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete "{course?.title}"? This action cannot be undone and will permanently remove the course and all its data.
+              {t('teacher:editCoursePage.deleteConfirm', { title: course?.title ?? '' })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -1188,7 +1190,7 @@ export function EditCoursePage() {
               onClick={() => setShowDeleteConfirm(false)}
               disabled={deleting}
             >
-              Cancel
+              {t('common:cancel')}
             </Button>
             <Button
               variant="destructive"
@@ -1198,12 +1200,12 @@ export function EditCoursePage() {
               {deleting ? (
                 <>
                   <Loader2 className="h-4 w-4 me-2 animate-spin" />
-                  Deleting...
+                  {t('common:deleting')}
                 </>
               ) : (
                 <>
                   <Trash2 className="h-4 w-4 me-2" />
-                  Delete Course
+                  {t('teacher:editCoursePage.deleteCourse')}
                 </>
               )}
             </Button>
@@ -1214,9 +1216,9 @@ export function EditCoursePage() {
       <ConfirmDialog
         open={deleteSectionId !== null}
         onOpenChange={(open) => { if (!open) setDeleteSectionId(null) }}
-        title="Delete Section"
-        description="Are you sure you want to delete this section?"
-        confirmLabel="Delete"
+        title={t('teacher:teacherMyCourses.deleteSection')}
+        description={t('teacher:teacherMyCourses.deleteSectionConfirm')}
+        confirmLabel={t('common:delete')}
         variant="destructive"
         onConfirm={() => {
           if (deleteSectionId) return handleDeleteSection(deleteSectionId)

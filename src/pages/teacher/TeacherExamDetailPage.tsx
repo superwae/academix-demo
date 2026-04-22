@@ -27,8 +27,10 @@ import {
 import { examService, type ExamDto, type ExamAttemptDto, type ExamResultDto } from '../../services/examService'
 import { enrollmentService, type EnrollmentDto } from '../../services/enrollmentService'
 import { notificationService } from '../../services/notificationService'
+import { useTranslation } from 'react-i18next'
 
 export function TeacherExamDetailPage() {
+  const { t } = useTranslation(['teacher', 'common', 'errors'])
   const { id: examId } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -82,8 +84,8 @@ export function TeacherExamDetailPage() {
           }
         }
       } catch (error) {
-        toast.error('Failed to load exam', {
-          description: error instanceof Error ? error.message : 'Please try again.',
+        toast.error(t('teacher:examDetail.errors.loadFailed'), {
+          description: error instanceof Error ? error.message : t('teacher:shared.pleaseTryAgain'),
         })
         navigate('/teacher/exams')
       } finally {
@@ -125,7 +127,7 @@ export function TeacherExamDetailPage() {
     const score = raw === '' ? NaN : parseInt(raw, 10)
     const attempt = attempts.find((a) => a.id === attemptId)
     if (!attempt || isNaN(score) || score < 0 || (attempt.total > 0 && score > attempt.total)) {
-      toast.error('Enter a valid score')
+      toast.error(t('teacher:examDetail.errors.enterValidScore'))
       return
     }
     setSavingScore(attemptId)
@@ -133,10 +135,10 @@ export function TeacherExamDetailPage() {
       const updated = await examService.updateAttemptScore(attemptId, score)
       setAttempts((prev) => prev.map((a) => (a.id === attemptId ? updated : a)))
       setEditScores((prev) => ({ ...prev, [attemptId]: String(updated.score) }))
-      toast.success('Grade updated')
+      toast.success(t('teacher:examDetail.toasts.gradeUpdated'))
     } catch (error) {
-      toast.error('Failed to update grade', {
-        description: error instanceof Error ? error.message : 'Please try again.',
+      toast.error(t('teacher:examDetail.errors.gradeFailed'), {
+        description: error instanceof Error ? error.message : t('teacher:shared.pleaseTryAgain'),
       })
     } finally {
       setSavingScore(null)
@@ -149,8 +151,8 @@ export function TeacherExamDetailPage() {
       const result = await examService.getAttemptSubmission(attemptId)
       setSubmissionDialog((prev) => ({ ...prev, result, loading: false }))
     } catch (error) {
-      toast.error('Failed to load submission', {
-        description: error instanceof Error ? error.message : 'Please try again.',
+      toast.error(t('teacher:examDetail.errors.submissionLoadFailed'), {
+        description: error instanceof Error ? error.message : t('teacher:shared.pleaseTryAgain'),
       })
       setSubmissionDialog((prev) => ({ ...prev, open: false, loading: false }))
     }
@@ -171,7 +173,7 @@ export function TeacherExamDetailPage() {
 
     openedAttemptFromQueryRef.current = true
     setExpandedUserId(att.userId)
-    void handleViewSubmission(att.id, att.userName || 'Student')
+    void handleViewSubmission(att.id, att.userName || t('teacher:examDetail.studentFallback'))
   }, [loading, attempts, searchParams, setSearchParams, handleViewSubmission])
 
   const handlePublishScore = async (attemptId: string) => {
@@ -185,17 +187,17 @@ export function TeacherExamDetailPage() {
         notificationService.sendNotificationToUser(
           updated.userEmail,
           'grade',
-          'Exam grade published',
-          `Your grade for "${exam.title}" is now available. Check your exams page.`,
+          t('teacher:examDetail.notifications.gradePublishedTitle'),
+          t('teacher:examDetail.notifications.gradePublishedBody', { title: exam.title }),
           '/student/exams'
         )
       }
-      toast.success('Score published', {
-        description: 'The student can now see their grade and has been notified.',
+      toast.success(t('teacher:examDetail.toasts.scorePublished'), {
+        description: t('teacher:examDetail.toasts.scorePublishedDescription'),
       })
     } catch (error) {
-      toast.error('Failed to publish score', {
-        description: error instanceof Error ? error.message : 'Please try again.',
+      toast.error(t('teacher:examDetail.errors.publishFailed'), {
+        description: error instanceof Error ? error.message : t('teacher:shared.pleaseTryAgain'),
       })
     } finally {
       setPublishingAttemptId(null)
@@ -226,12 +228,12 @@ export function TeacherExamDetailPage() {
           <div>
             <h1 className="text-3xl font-bold tracking-tight gradient-text">{exam.title}</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              {exam.courseTitle} · {exam.questionCount} questions · {exam.durationMinutes} min
+              {exam.courseTitle} · {t('teacher:exams.questionsCount', { count: exam.questionCount })} · {t('teacher:courseLessonsManagement.minutes', { count: exam.durationMinutes })}
             </p>
           </div>
         </div>
         <Button variant="outline" asChild>
-          <Link to={`/teacher/exams/${exam.id}/edit`}>Edit Exam</Link>
+          <Link to={`/teacher/exams/${exam.id}/edit`}>{t('teacher:examDetail.editExam')}</Link>
         </Button>
       </div>
 
@@ -240,12 +242,12 @@ export function TeacherExamDetailPage() {
           <CardHeader className="pb-2 pt-4">
             <CardTitle className="text-lg flex items-center gap-2">
               <Clock className="h-4 w-4" />
-              Schedule
+              {t('teacher:examDetail.schedule')}
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
             <p className="text-sm text-muted-foreground">
-              Starts {format(new Date(exam.startsAt), 'PPp')}
+              {t('teacher:examDetail.startsLabel', { when: format(new Date(exam.startsAt), 'PPp') })}
             </p>
           </CardContent>
         </Card>
@@ -253,40 +255,40 @@ export function TeacherExamDetailPage() {
           <CardHeader className="pb-2 pt-4">
             <CardTitle className="text-lg flex items-center gap-2">
               <Users className="h-4 w-4" />
-              Took the exam
+              {t('teacher:examDetail.tookExam')}
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
             <p className="text-2xl font-semibold">{attempts.length}</p>
-            <p className="text-xs text-muted-foreground">submitted attempts</p>
+            <p className="text-xs text-muted-foreground">{t('teacher:examDetail.submittedAttempts')}</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2 pt-4">
             <CardTitle className="text-lg flex items-center gap-2">
               <UserX className="h-4 w-4" />
-              Did not take
+              {t('teacher:examDetail.didNotTake')}
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
             <p className="text-2xl font-semibold">{notTaken.length}</p>
-            <p className="text-xs text-muted-foreground">enrolled students</p>
+            <p className="text-xs text-muted-foreground">{t('teacher:examDetail.enrolledStudents')}</p>
           </CardContent>
         </Card>
       </div>
 
       <Card>
         <CardHeader className="pb-2 pt-4">
-          <CardTitle className="text-lg">Students who took the exam</CardTitle>
+          <CardTitle className="text-lg">{t('teacher:examDetail.studentsWhoTook')}</CardTitle>
           <CardDescription className="text-xs mt-0.5">
-            View grades and update scores. Short answer questions are not auto-graded — set each student’s score manually below after reviewing their answers. Attempts are grouped by student so you don't miss grading any attempt.
+            {t('teacher:examDetail.studentsWhoTookDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-2">
           {attempts.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <FileText className="h-10 w-10 mx-auto mb-2 opacity-50" />
-              <p className="text-sm">No submissions yet</p>
+              <p className="text-sm">{t('teacher:assignmentSubmissions.noSubmissions')}</p>
             </div>
           ) : (
             <div className="overflow-x-auto max-h-[60vh] overflow-y-auto scroll-fancy">
@@ -294,10 +296,10 @@ export function TeacherExamDetailPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-10" />
-                    <TableHead>Student</TableHead>
-                    <TableHead className="w-[120px]">Attempts</TableHead>
-                    <TableHead className="w-[100px]">Latest score</TableHead>
-                    <TableHead className="w-[100px]">Pending</TableHead>
+                    <TableHead>{t('teacher:assignmentSubmissions.columns.student')}</TableHead>
+                    <TableHead className="w-[120px]">{t('teacher:examDetail.columns.attempts')}</TableHead>
+                    <TableHead className="w-[100px]">{t('teacher:examDetail.columns.latestScore')}</TableHead>
+                    <TableHead className="w-[100px]">{t('teacher:examDetail.columns.pending')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -323,7 +325,7 @@ export function TeacherExamDetailPage() {
                           </TableCell>
                           <TableCell>
                             <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
-                              {studentAttempts.length} attempt{studentAttempts.length !== 1 ? 's' : ''}
+                              {t('teacher:examDetail.attemptCount', { count: studentAttempts.length })}
                             </span>
                           </TableCell>
                           <TableCell>
@@ -337,10 +339,10 @@ export function TeacherExamDetailPage() {
                           <TableCell>
                             {pendingCount > 0 ? (
                               <span className="text-xs font-medium text-amber-600 dark:text-amber-400">
-                                {pendingCount} to grade
+                                {t('teacher:examDetail.toGrade', { count: pendingCount })}
                               </span>
                             ) : (
-                              <span className="text-xs text-muted-foreground">All published</span>
+                              <span className="text-xs text-muted-foreground">{t('teacher:examDetail.allPublished')}</span>
                             )}
                           </TableCell>
                         </TableRow>
@@ -356,7 +358,7 @@ export function TeacherExamDetailPage() {
                                     <div className="flex items-center justify-between flex-wrap gap-2">
                                       <div className="flex items-center gap-3">
                                         <span className="rounded-lg bg-muted px-2.5 py-1 text-xs font-semibold tabular-nums">
-                                          {idx === 0 && studentAttempts.length > 1 ? 'Latest' : `Attempt ${idx + 1}`}
+                                          {idx === 0 && studentAttempts.length > 1 ? t('teacher:examDetail.latest') : t('teacher:examDetail.attemptN', { n: idx + 1 })}
                                         </span>
                                         <span className="text-sm text-muted-foreground">
                                           {format(new Date(a.startedAt), 'MMM d, yyyy · h:mm a')}
@@ -380,10 +382,10 @@ export function TeacherExamDetailPage() {
                                         }}
                                       >
                                         <Eye className="h-3.5 w-3" />
-                                        View submission
+                                        {t('teacher:examDetail.viewSubmission')}
                                       </Button>
                                       <div className="flex items-center gap-2 rounded-lg border border-input bg-background px-3 py-1.5">
-                                        <span className="text-xs text-muted-foreground whitespace-nowrap">Grade:</span>
+                                        <span className="text-xs text-muted-foreground whitespace-nowrap">{t('teacher:examDetail.gradeLabel')}</span>
                                         <Input
                                           type="number"
                                           min={0}
@@ -414,7 +416,7 @@ export function TeacherExamDetailPage() {
                                         </Button>
                                       </div>
                                       {a.scorePublishedAt ? (
-                                        <span className="text-xs text-muted-foreground">Published</span>
+                                        <span className="text-xs text-muted-foreground">{t('teacher:assignments.statuses.published')}</span>
                                       ) : (
                                         <Button
                                           size="sm"
@@ -431,7 +433,7 @@ export function TeacherExamDetailPage() {
                                           ) : (
                                             <>
                                               <Send className="h-3.5 w-3" />
-                                              Publish score
+                                              {t('teacher:examDetail.publishScore')}
                                             </>
                                           )}
                                         </Button>
@@ -456,9 +458,9 @@ export function TeacherExamDetailPage() {
       <Dialog open={submissionDialog.open} onOpenChange={(open) => !submissionDialog.loading && setSubmissionDialog((p) => ({ ...p, open }))}>
         <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto scroll-fancy pe-2">
           <DialogHeader>
-            <DialogTitle>Submission — {submissionDialog.studentName}</DialogTitle>
+            <DialogTitle>{t('teacher:examDetail.submissionTitle', { name: submissionDialog.studentName })}</DialogTitle>
             <DialogDescription>
-              Review answers below to grade short-answer questions and set the score.
+              {t('teacher:examDetail.submissionDescription')}
             </DialogDescription>
           </DialogHeader>
           {submissionDialog.loading ? (
@@ -468,12 +470,12 @@ export function TeacherExamDetailPage() {
           ) : submissionDialog.result ? (
             <div className="space-y-4 pt-2">
               <div className="text-sm text-muted-foreground">
-                Score: {submissionDialog.result.score}/{submissionDialog.result.total} ({Number(submissionDialog.result.percentage).toFixed(1)}%)
+                {t('teacher:examDetail.scoreLabel')} {submissionDialog.result.score}/{submissionDialog.result.total} ({Number(submissionDialog.result.percentage).toFixed(1)}%)
               </div>
               {submissionDialog.result.questions.map((q, idx) => {
                 const studentAnswerDisplay =
                   q.type === 'ShortAnswer'
-                    ? (q.userAnswerText != null && q.userAnswerText !== '' ? q.userAnswerText : '(No answer)')
+                    ? (q.userAnswerText != null && q.userAnswerText !== '' ? q.userAnswerText : t('teacher:examDetail.noAnswer'))
                     : null
                 const choices = q.choices ?? []
                 const correctIdx = q.correctAnswerIndex
@@ -484,26 +486,26 @@ export function TeacherExamDetailPage() {
                       {idx + 1}. {q.prompt}
                     </div>
                     <div className="flex flex-wrap items-center gap-2 text-xs">
-                      <span className="text-muted-foreground">Type: {q.type}</span>
+                      <span className="text-muted-foreground">{t('teacher:examDetail.typeLabel')} {q.type}</span>
                       <span className="text-muted-foreground">•</span>
-                      <span className="text-muted-foreground">Points: {q.points}</span>
+                      <span className="text-muted-foreground">{t('teacher:examDetail.pointsLabel')} {q.points}</span>
                       <span className="text-muted-foreground">•</span>
                       <span className={q.isCorrect ? 'text-green-600 font-medium' : 'text-amber-600 font-medium'}>
                         {q.isCorrect ? (
-                          <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Correct</span>
+                          <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> {t('teacher:examDetail.correct')}</span>
                         ) : (
-                          <span className="inline-flex items-center gap-1"><XCircle className="h-3 w-3" /> Incorrect</span>
+                          <span className="inline-flex items-center gap-1"><XCircle className="h-3 w-3" /> {t('teacher:examDetail.incorrect')}</span>
                         )}
                       </span>
                     </div>
                     {q.type === 'ShortAnswer' ? (
                       <div className="text-sm">
-                        <span className="text-muted-foreground font-medium">Student answer: </span>
+                        <span className="text-muted-foreground font-medium">{t('teacher:examDetail.studentAnswer')} </span>
                         <span>{studentAnswerDisplay}</span>
                       </div>
                     ) : choices.length > 0 ? (
                       <div className="space-y-1.5">
-                        <div className="text-xs font-medium text-muted-foreground">Choices:</div>
+                        <div className="text-xs font-medium text-muted-foreground">{t('teacher:examDetail.choicesLabel')}</div>
                         <ul className="space-y-1.5">
                           {choices.map((choice, i) => {
                             const isCorrect = i === correctIdx
@@ -526,12 +528,12 @@ export function TeacherExamDetailPage() {
                                 <span className="flex gap-1.5 shrink-0">
                                   {isCorrect && (
                                     <span className="inline-flex items-center gap-0.5 text-green-600 text-xs font-medium">
-                                      <CheckCircle2 className="h-3 w-3" /> Correct
+                                      <CheckCircle2 className="h-3 w-3" /> {t('teacher:examDetail.correct')}
                                     </span>
                                   )}
                                   {isStudent && (
                                     <span className="inline-flex items-center gap-0.5 text-primary text-xs font-medium">
-                                      <User className="h-3 w-3" /> Student answer
+                                      <User className="h-3 w-3" /> {t('teacher:examDetail.studentAnswerShort')}
                                     </span>
                                   )}
                                 </span>
@@ -541,15 +543,15 @@ export function TeacherExamDetailPage() {
                         </ul>
                       </div>
                     ) : (
-                      <div className="text-sm text-muted-foreground">No choices available</div>
+                      <div className="text-sm text-muted-foreground">{t('teacher:examDetail.noChoicesAvailable')}</div>
                     )}
                     <div className="space-y-1.5 pt-2 border-t border-border">
                       <Label htmlFor={`note-${q.id}`} className="text-xs font-medium text-muted-foreground">
-                        Note for student (optional)
+                        {t('teacher:examDetail.noteForStudent')}
                       </Label>
                       <Textarea
                         id={`note-${q.id}`}
-                        placeholder="Explain why this answer was incorrect, or add feedback for the student..."
+                        placeholder={t('teacher:examDetail.notePlaceholder')}
                         value={submissionDialog.teacherNotes[q.id] ?? ''}
                         onChange={(e) =>
                           setSubmissionDialog((p) => ({
@@ -571,15 +573,15 @@ export function TeacherExamDetailPage() {
 
       <Card>
         <CardHeader className="pb-2 pt-4">
-          <CardTitle className="text-lg">Students who did not take the exam</CardTitle>
+          <CardTitle className="text-lg">{t('teacher:examDetail.studentsWhoDidNotTake')}</CardTitle>
           <CardDescription className="text-xs mt-0.5">
-            Enrolled in the course but have no submitted attempt
+            {t('teacher:examDetail.studentsWhoDidNotTakeDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-2">
           {notTaken.length === 0 ? (
             <p className="text-sm text-muted-foreground py-4">
-              All enrolled students have attempted the exam.
+              {t('teacher:examDetail.allStudentsAttempted')}
             </p>
           ) : (
             <ul className="space-y-1">

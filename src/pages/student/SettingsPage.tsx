@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAppStore } from '../../store/useAppStore'
 import { useAuthStore } from '../../store/useAuthStore'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
@@ -11,6 +12,7 @@ import { authService } from '../../services/authService'
 import { ConfirmDialog } from '../../components/ui/confirm-dialog'
 
 export function SettingsPage() {
+  const { t } = useTranslation(['student', 'common', 'errors'])
   const navigate = useNavigate()
   const { user: authUser, logout } = useAuthStore()
   const theme = useAppStore((s) => s.data.theme)
@@ -40,23 +42,23 @@ export function SettingsPage() {
         setUser(data)
         setName(data.fullName || `${data.firstName} ${data.lastName}`.trim())
       } catch {
-        toast.error('Failed to load account')
+        toast.error(t('student:settings.errors.loadAccountFailed'))
       } finally {
         setLoadingUser(false)
       }
     }
     load()
-  }, [authUser])
+  }, [authUser, t])
 
   const handleSave = async () => {
     if (!user) return
     if (password || confirmPassword) {
       if (password.length < 8) {
-        toast.error('Password must be at least 8 characters long')
+        toast.error(t('student:settings.errors.passwordTooShort'))
         return
       }
       if (password !== confirmPassword) {
-        toast.error('Passwords do not match')
+        toast.error(t('student:settings.errors.passwordsMismatch'))
         return
       }
     }
@@ -75,19 +77,19 @@ export function SettingsPage() {
       }
       if (password) {
         if (!currentPassword) {
-          toast.error('Please enter your current password')
+          toast.error(t('student:settings.errors.enterCurrentPassword'))
           return
         }
         await userService.changePassword(currentPassword, password)
-        toast.success('Password updated')
+        toast.success(t('student:settings.passwordUpdated'))
       } else {
-        toast.success('Profile updated')
+        toast.success(t('student:settings.profileUpdated'))
       }
       setCurrentPassword('')
       setPassword('')
       setConfirmPassword('')
     } catch (error) {
-      toast.error('Failed to update profile', { description: error instanceof Error ? error.message : undefined })
+      toast.error(t('student:settings.errors.updateProfileFailed'), { description: error instanceof Error ? error.message : undefined })
     } finally {
       setSaving(false)
     }
@@ -99,16 +101,16 @@ export function SettingsPage() {
       setDeleting(true)
       try {
         await userService.deleteCurrentUser()
-        toast.success('Account deleted')
+        toast.success(t('student:settings.accountDeleted'))
       } catch {
-        toast.info('Logged out')
+        toast.info(t('student:settings.loggedOut'))
       }
       authService.logout()
       logout()
       localStorage.clear()
       navigate('/register')
     } catch {
-      toast.error('Failed to delete account')
+      toast.error(t('student:settings.errors.deleteAccountFailed'))
     } finally {
       setDeleting(false)
     }
@@ -117,38 +119,38 @@ export function SettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <div className="text-2xl font-semibold">Settings</div>
-        <div className="text-sm text-muted-foreground">Theme, preferences, and account</div>
+        <div className="text-2xl font-semibold">{t('student:settings.title')}</div>
+        <div className="text-sm text-muted-foreground">{t('student:settings.subtitle')}</div>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
         {/* Account */}
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>Account</CardTitle>
-            <CardDescription>Name, email, and password</CardDescription>
+            <CardTitle>{t('student:settings.accountSection')}</CardTitle>
+            <CardDescription>{t('student:settings.accountSubtitle')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {loadingUser ? (
-              <div className="text-sm text-muted-foreground">Loading account…</div>
+              <div className="text-sm text-muted-foreground">{t('student:settings.loadingAccount')}</div>
             ) : user ? (
               <>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Name</label>
-                  <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Full name" className="h-9" />
+                  <label className="text-sm font-medium">{t('student:settings.nameLabel')}</label>
+                  <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('student:settings.namePlaceholder')} className="h-9" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Email</label>
+                  <label className="text-sm font-medium">{t('student:settings.emailLabel')}</label>
                   <Input value={user.email} disabled className="h-9 bg-muted" />
-                  <p className="text-[11px] text-muted-foreground">Email cannot be changed</p>
+                  <p className="text-[11px] text-muted-foreground">{t('student:settings.emailCannotChange')}</p>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Change password</label>
+                  <label className="text-sm font-medium">{t('student:settings.changePassword')}</label>
                   <Input
                     type="password"
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
-                    placeholder="Current password"
+                    placeholder={t('student:settings.currentPasswordPlaceholder')}
                     className="h-9"
                     autoComplete="current-password"
                   />
@@ -156,7 +158,7 @@ export function SettingsPage() {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="New password"
+                    placeholder={t('student:settings.newPasswordPlaceholder')}
                     className="h-9"
                   />
                   {password && (
@@ -164,76 +166,76 @@ export function SettingsPage() {
                       type="password"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="Confirm new password"
+                      placeholder={t('student:settings.confirmPasswordPlaceholder')}
                       className="h-9"
                     />
                   )}
-                  <p className="text-[11px] text-muted-foreground">Min. 8 characters</p>
+                  <p className="text-[11px] text-muted-foreground">{t('student:settings.minChars')}</p>
                 </div>
                 <div className="flex flex-wrap gap-2 pt-2">
                   <Button onClick={handleSave} disabled={saving}>
-                    {saving ? 'Saving…' : 'Save changes'}
+                    {saving ? t('student:settings.saving') : t('student:settings.saveChanges')}
                   </Button>
                   <Button variant="destructive" onClick={() => setDeleteDialogOpen(true)} disabled={deleting}>
-                    {deleting ? 'Deleting…' : 'Delete account'}
+                    {deleting ? t('student:settings.deleting') : t('student:settings.deleteAccount')}
                   </Button>
                 </div>
               </>
             ) : (
-              <div className="text-sm text-muted-foreground">Sign in to manage your account.</div>
+              <div className="text-sm text-muted-foreground">{t('student:settings.signInToManage')}</div>
             )}
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Theme</CardTitle>
-            <CardDescription>Current: {theme}</CardDescription>
+            <CardTitle>{t('student:settings.themeTitle')}</CardTitle>
+            <CardDescription>{t('student:settings.themeCurrent', { theme })}</CardDescription>
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground">
-            Use the theme dropdown in the top navbar.
+            {t('student:settings.themeHelp')}
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Notifications</CardTitle>
-            <CardDescription>Demo preference stored locally</CardDescription>
+            <CardTitle>{t('student:settings.notificationsSection')}</CardTitle>
+            <CardDescription>{t('student:settings.notificationsLocal')}</CardDescription>
           </CardHeader>
           <CardContent className="flex items-center justify-between gap-3">
             <div className="text-sm">
-              <div className="font-medium">Enable notifications</div>
-              <div className="text-muted-foreground">Toasts and reminders in the demo</div>
+              <div className="font-medium">{t('student:settings.enableNotifications')}</div>
+              <div className="text-muted-foreground">{t('student:settings.notificationsDesc')}</div>
             </div>
             <Button
               variant="outline"
               onClick={() => {
                 updateProfile({ notificationsEnabled: !profile.notificationsEnabled })
-                toast.success('Preference updated')
+                toast.success(t('student:settings.preferenceUpdated'))
               }}
             >
-              {profile.notificationsEnabled ? 'Enabled' : 'Disabled'}
+              {profile.notificationsEnabled ? t('student:settings.enabled') : t('student:settings.disabled')}
             </Button>
           </CardContent>
         </Card>
 
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>Reset Demo Data</CardTitle>
-            <CardDescription>Clears localStorage state and reseeds initial demo content</CardDescription>
+            <CardTitle>{t('student:settings.resetDemo')}</CardTitle>
+            <CardDescription>{t('student:settings.resetDemoSubtitle')}</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-wrap items-center justify-between gap-3">
             <div className="text-sm text-muted-foreground">
-              This will reset enrollments, submissions, exam attempts, message read status, and profile edits.
+              {t('student:settings.resetDemoBody')}
             </div>
             <Button
               variant="destructive"
               onClick={() => {
                 resetDemoData()
-                toast.success('Demo data reset', { description: 'You’re back to the initial seed.' })
+                toast.success(t('student:settings.demoReset'), { description: t('student:settings.demoResetDesc') })
               }}
             >
-              Reset Demo Data
+              {t('student:settings.resetDemo')}
             </Button>
           </CardContent>
         </Card>
@@ -242,9 +244,9 @@ export function SettingsPage() {
       <ConfirmDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        title="Delete account"
-        description="Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently removed."
-        confirmLabel="Delete my account"
+        title={t('student:settings.deleteDialogTitle')}
+        description={t('student:settings.deleteDialogDescription')}
+        confirmLabel={t('student:settings.deleteDialogConfirm')}
         variant="destructive"
         loading={deleting}
         onConfirm={handleDeleteAccount}
@@ -252,6 +254,3 @@ export function SettingsPage() {
     </div>
   )
 }
-
-
-

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Button } from '../../components/ui/button';
 import { courseExtrasService, type CertificateDto } from '../../services/courseExtrasService';
 import { ArrowLeft, Award, Clock, Loader2, Printer, ShieldCheck } from 'lucide-react';
@@ -13,15 +14,16 @@ const PLATFORM_EXECUTIVE = {
   organization: 'AcademiX',
 } as const;
 
-function formatProgramHours(hours: number | null | undefined): string | null {
+function formatProgramHours(hours: number | null | undefined, tHour: string, tHours: string): string | null {
   if (hours == null || hours <= 0 || Number.isNaN(hours)) return null;
   const n = Number(hours);
-  const label = n === 1 ? 'hour' : 'hours';
+  const label = n === 1 ? tHour : tHours;
   return `${Number.isInteger(n) ? n : n.toFixed(1)} ${label}`;
 }
 
 /** Circular official seal — print-safe */
 function CertificateOfficialSeal({ className }: { className?: string }) {
+  const { t } = useTranslation(['student']);
   return (
     <div
       className={cn('pointer-events-none select-none', className)}
@@ -38,7 +40,7 @@ function CertificateOfficialSeal({ className }: { className?: string }) {
             className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#92400e] sm:text-[10px]"
             style={{ fontFamily: "'Cinzel', serif" }}
           >
-            Official
+            {t('student:courseCertificate.official')}
           </span>
           <span
             className="mt-0.5 text-sm font-semibold leading-tight text-[#451a03] sm:text-base"
@@ -51,7 +53,7 @@ function CertificateOfficialSeal({ className }: { className?: string }) {
             className="text-[8px] font-semibold uppercase tracking-[0.25em] text-[#a16207] sm:text-[9px]"
             style={{ fontFamily: "'Cinzel', serif" }}
           >
-            Verified
+            {t('student:courseCertificate.verified')}
           </span>
         </div>
       </div>
@@ -61,6 +63,7 @@ function CertificateOfficialSeal({ className }: { className?: string }) {
 
 /** Formal certificate layout — screen + print (Save as PDF) */
 export function CourseCertificatePage() {
+  const { t } = useTranslation(['student', 'common', 'errors']);
   const { courseId } = useParams<{ courseId: string }>();
   const [data, setData] = useState<CertificateDto | null>(null);
   const [loading, setLoading] = useState(true);
@@ -73,13 +76,13 @@ export function CourseCertificatePage() {
         const cert = await courseExtrasService.getCertificate(courseId);
         setData(cert);
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : 'Could not load certificate');
+        toast.error(e instanceof Error ? e.message : t('student:courseCertificate.loadFailed'));
         setData(null);
       } finally {
         setLoading(false);
       }
     })();
-  }, [courseId]);
+  }, [courseId, t]);
 
   const handlePrint = () => window.print();
 
@@ -97,10 +100,10 @@ export function CourseCertificatePage() {
         <Button variant="ghost" size="sm" asChild>
           <Link to={courseId ? `/student/my-classes/${courseId}/lessons` : '/student/my-classes'}>
             <ArrowLeft className="me-2 h-4 w-4" />
-            Back to course
+            {t('student:courseCertificate.backToCourse')}
           </Link>
         </Button>
-        <p className="text-muted-foreground">Certificate unavailable.</p>
+        <p className="text-muted-foreground">{t('student:courseCertificate.unavailable')}</p>
       </div>
     );
   }
@@ -135,7 +138,7 @@ export function CourseCertificatePage() {
         >
           <Link to={`/student/my-classes/${courseId}/lessons`}>
             <ArrowLeft className="h-4 w-4" />
-            Back to course
+            {t('student:courseCertificate.backToCourse')}
           </Link>
         </Button>
         <Button
@@ -144,7 +147,7 @@ export function CourseCertificatePage() {
           className="gap-2 bg-slate-900 px-6 text-white shadow-md hover:bg-slate-800 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-800"
         >
           <Printer className="h-4 w-4" />
-          Print / Save as PDF
+          {t('student:courseCertificate.printSavePdf')}
         </Button>
       </div>
 
@@ -183,7 +186,7 @@ export function CourseCertificatePage() {
                 className="mb-3 text-[11px] font-semibold tracking-[0.35em] text-[#64748b] sm:text-xs sm:tracking-[0.4em]"
                 style={{ fontFamily: "'Cinzel', serif" }}
               >
-                CERTIFICATE OF COMPLETION
+                {t('student:courseCertificate.certificateOfCompletion')}
               </p>
 
               <h1
@@ -193,13 +196,13 @@ export function CourseCertificatePage() {
                 {data.courseTitle}
               </h1>
 
-              {formatProgramHours(data.expectedDurationHours) && (
+              {formatProgramHours(data.expectedDurationHours, t('student:courseCertificate.hour'), t('student:courseCertificate.hours')) && (
                 <div className="mx-auto mt-5 flex flex-wrap items-center justify-center gap-2">
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-[#c9a962]/60 bg-[#fffbeb]/80 px-4 py-1.5 text-sm font-medium text-[#78350f] shadow-sm">
                     <Clock className="h-4 w-4 shrink-0 text-[#b45309]" />
                     <span style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
-                      Program duration:{' '}
-                      <strong className="text-[#451a03]">{formatProgramHours(data.expectedDurationHours)}</strong>
+                      {t('student:courseCertificate.programDuration')}{' '}
+                      <strong className="text-[#451a03]">{formatProgramHours(data.expectedDurationHours, t('student:courseCertificate.hour'), t('student:courseCertificate.hours'))}</strong>
                     </span>
                   </span>
                 </div>
@@ -211,7 +214,7 @@ export function CourseCertificatePage() {
                     className="mb-2 text-center text-[10px] font-semibold uppercase tracking-[0.3em] text-[#94a3b8]"
                     style={{ fontFamily: "'Cinzel', serif" }}
                   >
-                    Course description
+                    {t('student:courseCertificate.courseDescription')}
                   </p>
                   <p
                     className="text-pretty text-center text-sm leading-relaxed text-[#475569] sm:text-base"
@@ -234,7 +237,7 @@ export function CourseCertificatePage() {
                 className="text-lg text-[#64748b] sm:text-xl"
                 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
               >
-                This certifies that
+                {t('student:courseCertificate.thisCertifies')}
               </p>
 
               <p
@@ -248,11 +251,10 @@ export function CourseCertificatePage() {
                 className="mx-auto mt-8 max-w-2xl text-pretty text-lg leading-relaxed text-[#475569] sm:text-xl"
                 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
               >
-                has successfully completed the course requirements
+                {t('student:courseCertificate.completedRequirements')}
                 {formattedDate ? (
                   <>
-                    {' '}
-                    on{' '}
+                    {t('student:courseCertificate.completedOn')}
                     <span className="font-semibold text-[#0f172a]">{formattedDate}</span>
                   </>
                 ) : null}
@@ -264,7 +266,7 @@ export function CourseCertificatePage() {
             <footer className="mt-auto pt-12 sm:pt-16">
               <div className="mx-auto grid max-w-5xl grid-cols-1 gap-10 border-t border-[#cbd5e1]/80 pt-10 sm:gap-8 md:grid-cols-3 md:pt-12">
                 <div className="text-center md:text-start">
-                  <p className="text-xs font-medium uppercase tracking-widest text-[#94a3b8]">Instructor</p>
+                  <p className="text-xs font-medium uppercase tracking-widest text-[#94a3b8]">{t('student:courseCertificate.instructor')}</p>
                   <p
                     className="mt-3 text-xl font-semibold text-[#0f172a] sm:text-2xl"
                     style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
@@ -272,7 +274,7 @@ export function CourseCertificatePage() {
                     {data.instructorName}
                   </p>
                   <div className="mx-auto mt-6 h-px w-48 max-w-full bg-gradient-to-r from-transparent via-[#94a3b8] to-transparent md:mx-0" />
-                  <p className="mt-2 text-xs text-[#94a3b8]">Course authority</p>
+                  <p className="mt-2 text-xs text-[#94a3b8]">{t('student:courseCertificate.courseAuthority')}</p>
                 </div>
 
                 <div className="text-center">
@@ -285,11 +287,11 @@ export function CourseCertificatePage() {
                     {PLATFORM_EXECUTIVE.name}
                   </p>
                   <div className="mx-auto mt-5 h-px w-52 max-w-full bg-gradient-to-r from-transparent via-[#64748b]/70 to-transparent" />
-                  <p className="mt-2 text-xs text-[#94a3b8]">Executive signature</p>
+                  <p className="mt-2 text-xs text-[#94a3b8]">{t('student:courseCertificate.executiveSignature')}</p>
                 </div>
 
                 <div className="text-center md:text-end">
-                  <p className="text-xs font-medium uppercase tracking-widest text-[#94a3b8]">Issued</p>
+                  <p className="text-xs font-medium uppercase tracking-widest text-[#94a3b8]">{t('student:courseCertificate.issued')}</p>
                   <p
                     className="mt-3 text-xl font-semibold text-[#0f172a] sm:text-2xl"
                     style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
@@ -301,19 +303,19 @@ export function CourseCertificatePage() {
                     })}
                   </p>
                   <div className="mx-auto mt-6 h-px w-48 max-w-full bg-gradient-to-r from-transparent via-[#94a3b8] to-transparent md:ms-auto md:me-0" />
-                  <p className="mt-2 text-xs text-[#94a3b8]">Date of issue</p>
+                  <p className="mt-2 text-xs text-[#94a3b8]">{t('student:courseCertificate.dateOfIssue')}</p>
                 </div>
               </div>
 
               {!data.eligible && (
                 <div className="mx-auto mt-10 max-w-2xl rounded-lg border border-amber-200/80 bg-amber-50 px-4 py-4 text-center text-sm text-amber-900 print:border-amber-300">
-                  Complete the course to unlock your official certificate. Your enrollment is still in progress.
+                  {t('student:courseCertificate.completeToUnlock')}
                 </div>
               )}
 
               {data.eligible && data.certificateId && (
                 <p className="mt-10 text-center font-mono text-[11px] tracking-wide text-[#94a3b8] sm:text-xs">
-                  Certificate ID · {data.certificateId}
+                  {t('student:courseCertificate.certificateId', { id: data.certificateId })}
                 </p>
               )}
             </footer>
@@ -321,7 +323,7 @@ export function CourseCertificatePage() {
         </article>
 
         <p className="mx-auto mt-6 max-w-2xl px-2 text-center text-xs text-muted-foreground print:hidden">
-          Use “Print / Save as PDF” and choose “Save as PDF” in the print dialog for a file copy.
+          {t('student:courseCertificate.pdfInstruction')}
         </p>
       </div>
 

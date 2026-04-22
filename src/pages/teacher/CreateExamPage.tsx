@@ -26,12 +26,9 @@ import {
 import { examService, type CreateExamRequest, type CreateExamQuestionRequest } from '../../services/examService'
 import { teacherService } from '../../services/teacherService'
 import type { CourseDto } from '../../services/courseService'
+import { useTranslation } from 'react-i18next'
 
-const QUESTION_TYPES = [
-  { value: 'MultipleChoice', label: 'Multiple Choice' },
-  { value: 'TrueFalse', label: 'True / False' },
-  { value: 'ShortAnswer', label: 'Short Answer (manual grading)' },
-] as const
+type QuestionTypeValue = 'MultipleChoice' | 'TrueFalse' | 'ShortAnswer'
 
 const defaultQuestion = (order: number): CreateExamQuestionRequest => ({
   prompt: '',
@@ -54,6 +51,12 @@ function toLocalDatetimeLocal(iso: string): string {
 }
 
 export function CreateExamPage() {
+  const { t } = useTranslation(['teacher', 'common', 'errors'])
+  const QUESTION_TYPES: { value: QuestionTypeValue; label: string }[] = [
+    { value: 'MultipleChoice', label: t('teacher:createExam.questionTypes.multipleChoice') },
+    { value: 'TrueFalse', label: t('teacher:createExam.questionTypes.trueFalse') },
+    { value: 'ShortAnswer', label: t('teacher:createExam.questionTypes.shortAnswer') },
+  ]
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const urlCourseId = searchParams.get('courseId') ?? ''
@@ -80,8 +83,8 @@ export function CreateExamPage() {
         const validUrlCourse = urlCourseId && result.items.some((c) => c.id === urlCourseId)
         setCourseId(validUrlCourse ? urlCourseId : result.items[0]?.id ?? '')
       } catch (error) {
-        toast.error('Failed to load courses', {
-          description: error instanceof Error ? error.message : 'Please try again later',
+        toast.error(t('teacher:createAssignment.errors.coursesFailed'), {
+          description: error instanceof Error ? error.message : t('teacher:shared.tryAgainLater'),
         })
       } finally {
         setLoadingCourses(false)
@@ -148,7 +151,7 @@ export function CreateExamPage() {
 
   const removeQuestion = (index: number) => {
     if (questions.length <= 1) {
-      toast.error('Exam must have at least one question')
+      toast.error(t('teacher:createExam.errors.atLeastOneQuestion'))
       return
     }
     setQuestions((prev) => prev.filter((_, i) => i !== index).map((x, i) => ({ ...x, order: i })))
@@ -158,40 +161,40 @@ export function CreateExamPage() {
     e.preventDefault()
 
     if (!courseId) {
-      toast.error('Please select a course')
+      toast.error(t('teacher:createAssignment.errors.selectCourse'))
       return
     }
     if (!title.trim()) {
-      toast.error('Exam title is required')
+      toast.error(t('teacher:createExam.errors.titleRequired'))
       return
     }
     if (!startsAt) {
-      toast.error('Start date and time is required')
+      toast.error(t('teacher:createExam.errors.startRequired'))
       return
     }
     if (durationMinutes < 1) {
-      toast.error('Duration must be at least 1 minute')
+      toast.error(t('teacher:createExam.errors.durationMinimum'))
       return
     }
 
     const validQuestions = questions.filter((q) => q.prompt.trim())
     if (validQuestions.length === 0) {
-      toast.error('Add at least one question with a prompt')
+      toast.error(t('teacher:createExam.errors.addOneWithPrompt'))
       return
     }
 
     for (let i = 0; i < validQuestions.length; i++) {
       const q = validQuestions[i]
       if (q.type === 'MultipleChoice' && q.choices.some((c) => !c.trim())) {
-        toast.error(`Question ${i + 1}: all choices must be filled`)
+        toast.error(t('teacher:createExam.errors.choicesFilled', { n: i + 1 }))
         return
       }
       if (q.type !== 'ShortAnswer' && q.type !== 'MultipleChoice' && q.type !== 'TrueFalse') {
-        toast.error(`Question ${i + 1}: unknown question type`)
+        toast.error(t('teacher:createExam.errors.unknownType', { n: i + 1 }))
         return
       }
       if (q.points < 0) {
-        toast.error(`Question ${i + 1}: points cannot be negative`)
+        toast.error(t('teacher:createExam.errors.pointsNegative', { n: i + 1 }))
         return
       }
     }
@@ -218,13 +221,13 @@ export function CreateExamPage() {
         })),
       }
       await examService.createExam(request)
-      toast.success('Exam created successfully', {
-        description: 'Students can take it once it starts.',
+      toast.success(t('teacher:createExam.toasts.created'), {
+        description: t('teacher:createExam.toasts.createdDescription'),
       })
       navigate('/teacher/exams')
     } catch (error) {
-      toast.error('Failed to create exam', {
-        description: error instanceof Error ? error.message : 'Please try again later',
+      toast.error(t('teacher:createExam.errors.createFailed'), {
+        description: error instanceof Error ? error.message : t('teacher:shared.tryAgainLater'),
       })
     } finally {
       setLoading(false)
@@ -243,8 +246,8 @@ export function CreateExamPage() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight gradient-text">Create Exam</h1>
-            <p className="mt-1 text-sm text-muted-foreground">Create a new exam or quiz for your course</p>
+            <h1 className="text-3xl font-bold tracking-tight gradient-text">{t('teacher:createExam.pageTitle')}</h1>
+            <p className="mt-1 text-sm text-muted-foreground">{t('teacher:createExam.pageSubtitle')}</p>
           </div>
         </div>
       </div>
@@ -254,19 +257,19 @@ export function CreateExamPage() {
           <div className="lg:col-span-2 space-y-3">
             <Card>
               <CardHeader className="pb-2 pt-4">
-                <CardTitle className="text-lg">Exam Information</CardTitle>
-                <CardDescription className="text-xs mt-0.5">Basic details and schedule</CardDescription>
+                <CardTitle className="text-lg">{t('teacher:createExam.examInfo')}</CardTitle>
+                <CardDescription className="text-xs mt-0.5">{t('teacher:createExam.examInfoDescription')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3 pt-2">
                 <div className="space-y-1.5">
-                  <Label htmlFor="course">Course *</Label>
+                  <Label htmlFor="course">{t('teacher:createAssignment.courseRequired')}</Label>
                   <SelectRoot
                     value={courseId}
                     onValueChange={setCourseId}
                     disabled={loadingCourses}
                   >
                     <SelectTrigger id="course">
-                      <SelectValue placeholder={loadingCourses ? 'Loading courses...' : 'Select a course'} />
+                      <SelectValue placeholder={loadingCourses ? t('teacher:createAssignment.loadingCourses') : t('teacher:createAssignment.selectCourse')} />
                     </SelectTrigger>
                     <SelectContent>
                       {courses.map((course) => (
@@ -279,30 +282,30 @@ export function CreateExamPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="title">Exam Title *</Label>
+                  <Label htmlFor="title">{t('teacher:createExam.examTitleRequired')}</Label>
                   <Input
                     id="title"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    placeholder="e.g., Module 2 Quiz"
+                    placeholder={t('teacher:createExam.examTitlePlaceholder')}
                     required
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="description">Description (optional)</Label>
+                  <Label htmlFor="description">{t('teacher:createExam.descriptionOptional')}</Label>
                   <Textarea
                     id="description"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Brief instructions or topic summary..."
+                    placeholder={t('teacher:createExam.descriptionPlaceholder')}
                     rows={3}
                   />
                 </div>
 
                 <div className="grid gap-3 md:grid-cols-2">
                   <div className="space-y-1.5">
-                    <Label htmlFor="startsAt">Start Date & Time *</Label>
+                    <Label htmlFor="startsAt">{t('teacher:createExam.startDateTimeRequired')}</Label>
                     <Input
                       id="startsAt"
                       type="datetime-local"
@@ -314,7 +317,7 @@ export function CreateExamPage() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="duration">Duration (minutes) *</Label>
+                    <Label htmlFor="duration">{t('teacher:createExam.durationRequired')}</Label>
                     <Input
                       id="duration"
                       type="number"
@@ -332,14 +335,14 @@ export function CreateExamPage() {
               <CardHeader className="pb-2 pt-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="text-lg">Questions</CardTitle>
+                    <CardTitle className="text-lg">{t('teacher:createExam.questions')}</CardTitle>
                     <CardDescription className="text-xs mt-0.5">
-                      {questions.length} question{questions.length !== 1 ? 's' : ''}
+                      {t('teacher:exams.questionsCount', { count: questions.length })}
                     </CardDescription>
                   </div>
                   <Button type="button" variant="outline" size="sm" onClick={addQuestion}>
                     <PlusCircle className="h-4 w-4 me-2" />
-                    Add Question
+                    {t('teacher:createExam.addQuestion')}
                   </Button>
                 </div>
               </CardHeader>
@@ -356,7 +359,7 @@ export function CreateExamPage() {
                       </span>
                       <div className="flex-1 space-y-3">
                         <div className="flex items-center justify-between gap-2">
-                          <span className="text-sm font-medium text-muted-foreground">Question {qIndex + 1}</span>
+                          <span className="text-sm font-medium text-muted-foreground">{t('teacher:createExam.questionN', { n: qIndex + 1 })}</span>
                           <Button
                             type="button"
                             variant="ghost"
@@ -366,16 +369,16 @@ export function CreateExamPage() {
                             className="text-destructive hover:text-destructive"
                           >
                             <Trash2 className="h-3 w-3 me-1" />
-                            Remove
+                            {t('teacher:createExam.remove')}
                           </Button>
                         </div>
 
                         <div className="space-y-1.5">
-                          <Label>Question text *</Label>
+                          <Label>{t('teacher:createExam.questionTextRequired')}</Label>
                           <Textarea
                             value={q.prompt}
                             onChange={(e) => updateQuestion(qIndex, { prompt: e.target.value })}
-                            placeholder="Enter the question..."
+                            placeholder={t('teacher:createExam.questionTextPlaceholder')}
                             rows={2}
                             className="resize-none"
                           />
@@ -383,7 +386,7 @@ export function CreateExamPage() {
 
                         <div className="grid gap-3 sm:grid-cols-2">
                           <div className="space-y-1.5">
-                            <Label>Type</Label>
+                            <Label>{t('teacher:createExam.type')}</Label>
                             <SelectRoot
                               value={q.type}
                               onValueChange={(value) =>
@@ -405,7 +408,7 @@ export function CreateExamPage() {
                             </SelectRoot>
                           </div>
                           <div className="space-y-1.5">
-                            <Label>Points</Label>
+                            <Label>{t('teacher:createExam.points')}</Label>
                             <Input
                               type="number"
                               min={0}
@@ -420,7 +423,7 @@ export function CreateExamPage() {
 
                         {q.type === 'MultipleChoice' && (
                           <div className="space-y-2">
-                            <Label>Choices (select correct answer)</Label>
+                            <Label>{t('teacher:createExam.choices')}</Label>
                             <div className="space-y-2">
                               {q.choices.map((choice, cIndex) => (
                                 <div key={cIndex} className="flex items-center gap-2">
@@ -434,7 +437,7 @@ export function CreateExamPage() {
                                   <Input
                                     value={choice}
                                     onChange={(e) => setQuestionChoice(qIndex, cIndex, e.target.value)}
-                                    placeholder={`Choice ${cIndex + 1}`}
+                                    placeholder={t('teacher:createExam.choicePlaceholder', { n: cIndex + 1 })}
                                     className="flex-1"
                                   />
                                   {q.choices.length > 2 && (
@@ -457,7 +460,7 @@ export function CreateExamPage() {
                                 onClick={() => addQuestionChoice(qIndex)}
                               >
                                 <PlusCircle className="h-3 w-3 me-1" />
-                                Add choice
+                                {t('teacher:createExam.addChoice')}
                               </Button>
                             </div>
                           </div>
@@ -465,7 +468,7 @@ export function CreateExamPage() {
 
                         {q.type === 'TrueFalse' && (
                           <div className="space-y-2">
-                            <Label>Correct answer</Label>
+                            <Label>{t('teacher:createExam.correctAnswer')}</Label>
                             <SelectRoot
                               value={String(q.answerIndex)}
                               onValueChange={(v) => updateQuestion(qIndex, { answerIndex: parseInt(v, 10) })}
@@ -474,8 +477,8 @@ export function CreateExamPage() {
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="0">True</SelectItem>
-                                <SelectItem value="1">False</SelectItem>
+                                <SelectItem value="0">{t('teacher:createExam.trueLabel')}</SelectItem>
+                                <SelectItem value="1">{t('teacher:createExam.falseLabel')}</SelectItem>
                               </SelectContent>
                             </SelectRoot>
                           </div>
@@ -483,7 +486,7 @@ export function CreateExamPage() {
 
                         {q.type === 'ShortAnswer' && (
                           <p className="text-xs text-muted-foreground rounded-md bg-muted/50 p-2">
-                            Short answer questions are not auto-graded. You can set the score manually from the exam results page after students submit.
+                            {t('teacher:createExam.shortAnswerHint')}
                           </p>
                         )}
                       </div>
@@ -497,14 +500,14 @@ export function CreateExamPage() {
           <div className="space-y-3">
             <Card>
               <CardHeader className="pb-2 pt-4">
-                <CardTitle className="text-lg">Settings</CardTitle>
-                <CardDescription className="text-xs mt-0.5">Attempts and retakes</CardDescription>
+                <CardTitle className="text-lg">{t('teacher:createAssignment.settings')}</CardTitle>
+                <CardDescription className="text-xs mt-0.5">{t('teacher:createExam.attemptsAndRetakes')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3 pt-2">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label htmlFor="allowRetake">Allow retake</Label>
-                    <p className="text-xs text-muted-foreground">Students can attempt the exam again</p>
+                    <Label htmlFor="allowRetake">{t('teacher:createExam.allowRetake')}</Label>
+                    <p className="text-xs text-muted-foreground">{t('teacher:createExam.allowRetakeHint')}</p>
                   </div>
                   <Switch
                     id="allowRetake"
@@ -514,12 +517,12 @@ export function CreateExamPage() {
                 </div>
                 {allowRetake && (
                   <div className="space-y-1.5">
-                    <Label htmlFor="maxAttempts">Max attempts (optional)</Label>
+                    <Label htmlFor="maxAttempts">{t('teacher:createExam.maxAttemptsOptional')}</Label>
                     <Input
                       id="maxAttempts"
                       type="number"
                       min={1}
-                      placeholder="Unlimited"
+                      placeholder={t('teacher:discounts.unlimited')}
                       value={maxAttempts ?? ''}
                       onChange={(e) => {
                         const v = e.target.value
@@ -543,12 +546,12 @@ export function CreateExamPage() {
                     {loading ? (
                       <>
                         <Loader2 className="h-4 w-4 me-2 animate-spin" />
-                        Creating...
+                        {t('common:creating')}
                       </>
                     ) : (
                       <>
                         <Save className="h-4 w-4 me-2" />
-                        Create Exam
+                        {t('teacher:exams.createExam')}
                       </>
                     )}
                   </Button>
@@ -559,7 +562,7 @@ export function CreateExamPage() {
                     onClick={() => navigate('/teacher/exams')}
                     disabled={loading}
                   >
-                    Cancel
+                    {t('common:cancel')}
                   </Button>
                 </div>
               </CardContent>

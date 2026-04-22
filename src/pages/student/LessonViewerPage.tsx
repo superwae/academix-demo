@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { lessonService, type LessonDto } from '../../services/lessonService';
@@ -20,6 +21,7 @@ import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 
 export function LessonViewerPage() {
+  const { t } = useTranslation(['student', 'common', 'errors']);
   const { courseId, lessonId } = useParams<{ courseId: string; lessonId: string }>();
   const navigate = useNavigate();
   const [course, setCourse] = useState<CourseDto | null>(null);
@@ -42,7 +44,7 @@ export function LessonViewerPage() {
 
   useEffect(() => {
     if (!courseId || !lessonId) {
-      toast.error('Course ID and Lesson ID are required');
+      toast.error(t('student:lessonViewer.errors.courseIdRequired'));
       navigate('/my-classes');
       return;
     }
@@ -50,11 +52,11 @@ export function LessonViewerPage() {
     const loadData = async () => {
       try {
         setLoading(true);
-        
+
         // Validate lessonId format (should be a GUID)
         const guidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
         if (!guidRegex.test(lessonId)) {
-          throw new Error(`Invalid lesson ID format: ${lessonId}. Please select a lesson from the course.`);
+          throw new Error(t('student:lessonViewer.errors.invalidLessonId', { id: lessonId }));
         }
 
         // Load course and lesson in parallel
@@ -81,8 +83,8 @@ export function LessonViewerPage() {
         }
       } catch (error) {
         console.error('Error loading lesson:', error);
-        const errorMessage = error instanceof Error ? error.message : 'Please try again later';
-        toast.error('Failed to load lesson', {
+        const errorMessage = error instanceof Error ? error.message : t('student:lessonViewer.errors.tryLater');
+        toast.error(t('student:lessonViewer.errors.loadFailed'), {
           description: errorMessage,
         });
         navigate(`/student/my-classes/${courseId}/lessons`);
@@ -92,7 +94,7 @@ export function LessonViewerPage() {
     };
 
     loadData();
-  }, [courseId, lessonId, navigate]);
+  }, [courseId, lessonId, navigate, t]);
 
   useEffect(() => {
     completionRatingGateRef.current = false;
@@ -100,12 +102,12 @@ export function LessonViewerPage() {
 
   const handleLessonComplete = useCallback(() => {
     setIsCompleted(true);
-    toast.success('Lesson completed! 🎉');
+    toast.success(t('student:lessonViewer.completedToast'));
     if (!completionRatingGateRef.current) {
       completionRatingGateRef.current = true;
       setRatingDialogOpen(true);
     }
-  }, []);
+  }, [t]);
 
   const formatDuration = (minutes?: number): string => {
     if (!minutes) return '';
@@ -145,7 +147,7 @@ export function LessonViewerPage() {
         </Button>
         <Card>
           <CardContent className="p-6 text-center">
-            <p className="text-muted-foreground">Lesson not found</p>
+            <p className="text-muted-foreground">{t('student:shared.lessonNotFound')}</p>
           </CardContent>
         </Card>
       </div>
@@ -191,7 +193,7 @@ export function LessonViewerPage() {
             <div className="aspect-video bg-muted flex items-center justify-center rounded-t-lg">
               <div className="text-center space-y-2">
                 <BookOpen className="h-12 w-12 text-muted-foreground mx-auto" />
-                <p className="text-muted-foreground">Content coming soon</p>
+                <p className="text-muted-foreground">{t('student:lessonViewer.contentComingSoon')}</p>
               </div>
             </div>
           )}
@@ -205,11 +207,11 @@ export function LessonViewerPage() {
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>Lesson Details</CardTitle>
+                <CardTitle>{t('student:lessonViewer.lessonDetails')}</CardTitle>
                 {isCompleted && (
                   <div className="flex items-center gap-2 text-primary">
                     <CheckCircle2 className="h-5 w-5" />
-                    <span className="text-sm font-medium">Completed</span>
+                    <span className="text-sm font-medium">{t('student:lessonViewer.completed')}</span>
                   </div>
                 )}
               </div>
@@ -224,7 +226,7 @@ export function LessonViewerPage() {
               {lesson.isPreview && (
                 <div className="inline-block">
                   <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
-                    Preview Lesson
+                    {t('student:lessonViewer.preview')}
                   </span>
                 </div>
               )}
@@ -236,7 +238,7 @@ export function LessonViewerPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <FileText className="h-5 w-5" />
-                  Materials
+                  {t('student:lessonViewer.materials')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -254,7 +256,7 @@ export function LessonViewerPage() {
                       <div className="min-w-0 flex-1">
                         <div className="font-medium text-sm truncate">{m.title}</div>
                         <div className="text-xs text-muted-foreground">
-                          {m.kind === 1 ? 'Book' : 'File'}
+                          {m.kind === 1 ? t('student:lessonViewer.book') : t('student:lessonViewer.file')}
                           {m.fileSizeBytes ? ` · ${formatBytes(m.fileSizeBytes)}` : ''}
                         </div>
                       </div>
@@ -269,7 +271,7 @@ export function LessonViewerPage() {
           <CourseDiscussion
             courseId={courseId}
             lessonId={lessonId}
-            title="Lesson Q&A"
+            title={t('student:lessonViewer.lessonQA')}
           />
         </div>
 
@@ -298,7 +300,7 @@ export function LessonViewerPage() {
           await courseExtrasService.upsertLessonRating(courseId, lessonId, { rating });
           const next = await courseExtrasService.getLessonRatingSummaries(courseId);
           setLessonRatingRow(next.find((s) => s.lessonId === lessonId) ?? null);
-          toast.success('Thanks for your feedback!');
+          toast.success(t('student:lessonViewer.thanksFeedback'));
         }}
       />
     </div>

@@ -28,6 +28,7 @@ import { format, formatDistanceToNow } from 'date-fns'
 import { teacherService, type TeacherDashboardStats, type TodayClass, type RecentActivity } from '../../services/teacherService'
 import { analyticsService, type StudentAnalytics } from '../../services/analyticsService'
 import { toast } from 'sonner'
+import { useTranslation } from 'react-i18next'
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -48,6 +49,7 @@ const itemVariants = {
 }
 
 export function TeacherDashboardPage() {
+  const { t } = useTranslation(['teacher', 'common', 'errors'])
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState<TeacherDashboardStats>({
     totalCourses: 0,
@@ -70,7 +72,7 @@ export function TeacherDashboardPage() {
         const [statsData, classesData, activityData] = await Promise.all([
           teacherService.getDashboardStats().catch((error) => {
             console.error('Failed to load dashboard stats:', error)
-            toast.error('Failed to load dashboard statistics')
+            toast.error(t('teacher:dashboard.errors.statsFailed'))
             return {
               totalCourses: 0,
               totalStudents: 0,
@@ -94,7 +96,7 @@ export function TeacherDashboardPage() {
         setRecentActivity(activityData)
       } catch (error) {
         console.error('Failed to load dashboard data:', error)
-        toast.error('Failed to load dashboard data')
+        toast.error(t('teacher:dashboard.errors.dataFailed'))
       } finally {
         setLoading(false)
       }
@@ -143,8 +145,8 @@ export function TeacherDashboardPage() {
       {/* Header */}
       <motion.div variants={itemVariants} className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight gradient-text">Teacher Dashboard</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Overview of your courses and students</p>
+          <h1 className="text-3xl font-bold tracking-tight gradient-text">{t('teacher:dashboard.pageTitle')}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{t('teacher:dashboard.pageSubtitle')}</p>
         </div>
         <div className="flex items-center gap-2 rounded-xl border border-border/50 bg-background/50 px-3 py-1.5 backdrop-blur-sm">
           <Calendar className="h-4 w-4 text-primary" />
@@ -155,7 +157,7 @@ export function TeacherDashboardPage() {
       {/* KPI Cards */}
       <motion.div variants={itemVariants} className="grid gap-2 md:grid-cols-2 lg:grid-cols-5">
         <StatCard
-          title="Total Courses"
+          title={t('teacher:dashboard.totalCourses')}
           value={stats.totalCourses}
           icon={BookOpen}
           color="primary"
@@ -163,7 +165,7 @@ export function TeacherDashboardPage() {
           delay={0}
         />
         <StatCard
-          title="Total Students"
+          title={t('teacher:dashboard.totalStudents')}
           value={stats.totalStudents}
           icon={Users}
           color="primary"
@@ -171,7 +173,7 @@ export function TeacherDashboardPage() {
           delay={0.1}
         />
         <StatCard
-          title="Active Classes"
+          title={t('teacher:dashboard.activeClasses')}
           value={stats.activeClasses}
           icon={GraduationCap}
           color="primary"
@@ -179,7 +181,7 @@ export function TeacherDashboardPage() {
           delay={0.2}
         />
         <StatCard
-          title="Pending Submissions"
+          title={t('teacher:dashboard.pendingSubmissions')}
           value={stats.pendingSubmissions}
           icon={FileText}
           color="primary"
@@ -187,7 +189,7 @@ export function TeacherDashboardPage() {
           delay={0.3}
         />
         <StatCard
-          title="Avg. Rating"
+          title={t('teacher:dashboard.avgRatingShort')}
           value={stats.averageRating}
           icon={Star}
           color="primary"
@@ -205,9 +207,9 @@ export function TeacherDashboardPage() {
             <CardHeader className="pb-2 pt-4">
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-primary" />
-                <CardTitle className="text-lg">Today's Classes</CardTitle>
+                <CardTitle className="text-lg">{t('teacher:dashboard.todaysClasses')}</CardTitle>
               </div>
-              <CardDescription className="text-xs mt-0.5">Your scheduled classes for today</CardDescription>
+              <CardDescription className="text-xs mt-0.5">{t('teacher:dashboard.todaysClassesDescription')}</CardDescription>
             </CardHeader>
             <CardContent className="pt-2">
               {loading ? (
@@ -218,8 +220,8 @@ export function TeacherDashboardPage() {
               ) : todaysClasses.length === 0 ? (
                 <EmptyState
                   icon={Calendar}
-                  title="No classes today"
-                  body="You have no scheduled classes for today."
+                  title={t('teacher:dashboard.noClassesTitle')}
+                  body={t('teacher:dashboard.noClassesBody')}
                 />
               ) : (
                 <div className="max-h-[320px] overflow-y-auto scroll-fancy space-y-1.5 pe-1">
@@ -242,17 +244,17 @@ export function TeacherDashboardPage() {
                           size="sm" 
                           variant="gradient" 
                           asChild={!!classItem.joinUrl}
-                          onClick={!classItem.joinUrl ? () => toast.info('Join URL not available') : undefined}
+                          onClick={!classItem.joinUrl ? () => toast.info(t('teacher:dashboard.joinUrlUnavailable')) : undefined}
                         >
                           {classItem.joinUrl ? (
                             <a href={classItem.joinUrl} target="_blank" rel="noopener noreferrer">
                               <PlayCircle className="h-3 w-3 me-1" />
-                              Start Session
+                              {t('teacher:dashboard.startSession')}
                             </a>
                           ) : (
                             <span>
                               <PlayCircle className="h-3 w-3 me-1" />
-                              Start Session
+                              {t('teacher:dashboard.startSession')}
                             </span>
                           )}
                         </Button>
@@ -271,33 +273,33 @@ export function TeacherDashboardPage() {
             <CardHeader className="pb-2 pt-4">
               <div className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-primary" />
-                <CardTitle className="text-lg">Quick Actions</CardTitle>
+                <CardTitle className="text-lg">{t('teacher:dashboard.quickActions')}</CardTitle>
               </div>
-              <CardDescription className="text-xs mt-0.5">Common tasks and shortcuts</CardDescription>
+              <CardDescription className="text-xs mt-0.5">{t('teacher:dashboard.quickActionsDescription')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2 pt-2">
               <Button variant="outline" className="w-full justify-start gap-2" asChild>
                 <Link to="/teacher/create-course">
                   <PlusCircle className="h-4 w-4" />
-                  Create New Course
+                  {t('teacher:dashboard.createNewCourse')}
                 </Link>
               </Button>
               <Button variant="outline" className="w-full justify-start gap-2" asChild>
                 <Link to="/teacher/lessons">
                   <Video className="h-4 w-4" />
-                  Add Lesson
+                  {t('teacher:dashboard.addLesson')}
                 </Link>
               </Button>
               <Button variant="outline" className="w-full justify-start gap-2" asChild>
                 <Link to="/teacher/assignments">
                   <FileText className="h-4 w-4" />
-                  Create Assignment
+                  {t('teacher:dashboard.createAssignment')}
                 </Link>
               </Button>
               <Button variant="outline" className="w-full justify-start gap-2" asChild>
                 <Link to="/teacher/exams">
                   <FileCheck className="h-4 w-4" />
-                  Schedule Exam
+                  {t('teacher:dashboard.scheduleExam')}
                 </Link>
               </Button>
             </CardContent>
@@ -311,9 +313,9 @@ export function TeacherDashboardPage() {
           <CardHeader className="pb-2 pt-4">
             <div className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-primary" />
-              <CardTitle className="text-lg">Recent Activity</CardTitle>
+              <CardTitle className="text-lg">{t('teacher:dashboard.recentActivity')}</CardTitle>
             </div>
-            <CardDescription className="text-xs mt-0.5">Latest updates and notifications</CardDescription>
+            <CardDescription className="text-xs mt-0.5">{t('teacher:dashboard.recentActivityDescription')}</CardDescription>
           </CardHeader>
           <CardContent className="pt-2">
             {loading ? (
@@ -325,8 +327,8 @@ export function TeacherDashboardPage() {
             ) : recentActivity.length === 0 ? (
               <EmptyState
                 icon={TrendingUp}
-                title="No recent activity"
-                body="Activity will appear here as it happens."
+                title={t('teacher:dashboard.noActivityTitle')}
+                body={t('teacher:dashboard.noActivityBody')}
               />
             ) : (
               <div className="max-h-[280px] overflow-y-auto scroll-fancy space-y-1.5 pe-1">
@@ -377,15 +379,15 @@ export function TeacherDashboardPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4 text-orange-500" />
-                <CardTitle className="text-lg">At-Risk Students</CardTitle>
+                <CardTitle className="text-lg">{t('teacher:dashboard.atRiskStudents')}</CardTitle>
               </div>
               <Button asChild variant="ghost" size="sm">
                 <Link to="/teacher/at-risk-students">
-                  View All <ArrowRight className="ms-1 h-3 w-3" />
+                  {t('common:viewAll')} <ArrowRight className="ms-1 h-3 w-3" />
                 </Link>
               </Button>
             </div>
-            <CardDescription className="text-xs mt-0.5">Students who may need additional support</CardDescription>
+            <CardDescription className="text-xs mt-0.5">{t('teacher:dashboard.atRiskStudentsDescription')}</CardDescription>
           </CardHeader>
           <CardContent className="pt-2">
             {loadingAtRisk ? (
@@ -396,8 +398,8 @@ export function TeacherDashboardPage() {
             ) : atRiskStudents.length === 0 ? (
               <EmptyState
                 icon={CheckCircle2}
-                title="No at-risk students"
-                body="All your students are on track!"
+                title={t('teacher:dashboard.noAtRiskTitle')}
+                body={t('teacher:dashboard.noAtRiskBody')}
               />
             ) : (
               <div className="max-h-[320px] overflow-y-auto scroll-fancy space-y-2 pe-1">
@@ -414,6 +416,7 @@ export function TeacherDashboardPage() {
 }
 
 function AtRiskStudentCard({ student }: { student: StudentAnalytics }) {
+  const { t } = useTranslation(['teacher', 'common'])
   const getRiskBadgeVariant = (level: string) => {
     switch (level) {
       case 'Critical':
@@ -452,7 +455,7 @@ function AtRiskStudentCard({ student }: { student: StudentAnalytics }) {
           <div className="flex items-center gap-2">
             <div className="font-medium text-sm">{student.studentName}</div>
             <Badge variant={getRiskBadgeVariant(student.riskLevel)} className="text-xs">
-              {student.riskLevel} Risk
+              {t('teacher:dashboard.riskLevel', { level: student.riskLevel })}
             </Badge>
           </div>
           <div className="text-xs text-muted-foreground mt-0.5">{student.email}</div>
@@ -472,17 +475,17 @@ function AtRiskStudentCard({ student }: { student: StudentAnalytics }) {
           <div className="mt-2 grid grid-cols-2 gap-3">
             <div>
               <div className="flex items-center justify-between text-xs mb-1">
-                <span className="text-muted-foreground">Completion</span>
+                <span className="text-muted-foreground">{t('teacher:dashboard.completion')}</span>
                 <span className="font-medium">{Math.round(student.completionRate)}%</span>
               </div>
               <Progress value={student.completionRate} className="h-1.5" />
             </div>
             <div className="text-xs">
-              <span className="text-muted-foreground">Last active: </span>
+              <span className="text-muted-foreground">{t('teacher:dashboard.lastActive')} </span>
               <span className="font-medium">
                 {student.lastActivityAt
                   ? formatDistanceToNow(new Date(student.lastActivityAt), { addSuffix: true })
-                  : 'Never'}
+                  : t('teacher:dashboard.never')}
               </span>
             </div>
           </div>
@@ -492,13 +495,13 @@ function AtRiskStudentCard({ student }: { student: StudentAnalytics }) {
           <Button variant="outline" size="sm" asChild>
             <Link to={`/teacher/students/${student.userId}`}>
               <Users className="h-3 w-3 me-1" />
-              View
+              {t('teacher:dashboard.view')}
             </Link>
           </Button>
           <Button variant="ghost" size="sm" asChild>
             <Link to={`/teacher/messages?student=${student.userId}`}>
               <MessageSquare className="h-3 w-3 me-1" />
-              Message
+              {t('teacher:dashboard.message')}
             </Link>
           </Button>
         </div>

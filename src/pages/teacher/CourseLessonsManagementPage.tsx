@@ -40,8 +40,10 @@ import { courseExtrasService, type CourseMaterialDto, type LessonRatingSummaryDt
 import { fileService } from '../../services/fileService'
 import { formatMeetingSlot } from '../../lib/meetingTimeFormat'
 import { ConfirmDialog } from '../../components/ui/confirm-dialog'
+import { useTranslation } from 'react-i18next'
 
 export function CourseLessonsManagementPage() {
+  const { t } = useTranslation(['teacher', 'common', 'errors'])
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [course, setCourse] = useState<CourseDto | null>(null)
@@ -66,7 +68,7 @@ export function CourseLessonsManagementPage() {
   useEffect(() => {
     const loadCourse = async () => {
       if (!id) {
-        toast.error('Course ID is required')
+        toast.error(t('teacher:courseStudents.errors.idRequired'))
         navigate('/teacher/courses')
         return
       }
@@ -105,8 +107,8 @@ export function CourseLessonsManagementPage() {
           }
         }
       } catch (error) {
-        toast.error('Failed to load course', {
-          description: error instanceof Error ? error.message : 'Please try again later',
+        toast.error(t('teacher:courseLessonsManagement.errors.loadFailed'), {
+          description: error instanceof Error ? error.message : t('teacher:shared.tryAgainLater'),
         })
         navigate('/teacher/courses')
       } finally {
@@ -135,7 +137,7 @@ export function CourseLessonsManagementPage() {
 
   const handleAddMaterial = async () => {
     if (!id || !materialTitle.trim() || !materialFile) {
-      toast.error('Add a title and choose a file')
+      toast.error(t('teacher:courseLessonsManagement.errors.materialTitleAndFile'))
       return
     }
     try {
@@ -150,13 +152,13 @@ export function CourseLessonsManagementPage() {
         kind: materialKind,
         lessonId: materialLessonId || null,
       })
-      toast.success('Material added')
+      toast.success(t('teacher:courseLessonsManagement.toasts.materialAdded'))
       setMaterialTitle('')
       setMaterialFile(null)
       setMaterialLessonId('')
       await refreshMaterialsAndRatings()
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'Failed to add material')
+      toast.error(e instanceof Error ? e.message : t('teacher:courseLessonsManagement.errors.materialAddFailed'))
     } finally {
       setMaterialsBusy(false)
     }
@@ -167,10 +169,10 @@ export function CourseLessonsManagementPage() {
     try {
       setMaterialsBusy(true)
       await courseExtrasService.deleteMaterial(id, materialId)
-      toast.success('Material removed')
+      toast.success(t('teacher:courseLessonsManagement.toasts.materialRemoved'))
       await refreshMaterialsAndRatings()
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'Failed to delete')
+      toast.error(e instanceof Error ? e.message : t('teacher:courseLessonsManagement.errors.deleteFailed'))
     } finally {
       setMaterialsBusy(false)
     }
@@ -182,8 +184,8 @@ export function CourseLessonsManagementPage() {
       const sectionLessons = await lessonService.getSectionLessons(sectionId)
       setLessons(sectionLessons)
     } catch (error) {
-      toast.error('Failed to load lessons', {
-        description: error instanceof Error ? error.message : 'Please try again later',
+      toast.error(t('teacher:courseLessonsManagement.errors.lessonsLoadFailed'), {
+        description: error instanceof Error ? error.message : t('teacher:shared.tryAgainLater'),
       })
     } finally {
       setLoading(false)
@@ -198,7 +200,7 @@ export function CourseLessonsManagementPage() {
 
   const handleAddLesson = async () => {
     if (!selectedSection || !id) {
-      toast.error('Please select a section first')
+      toast.error(t('teacher:courseLessonsManagement.errors.selectSectionFirst'))
       return
     }
 
@@ -207,20 +209,20 @@ export function CourseLessonsManagementPage() {
       const newLesson = await lessonService.createLesson({
         courseId: id,
         sectionId: selectedSection,
-        title: 'New Lesson',
+        title: t('teacher:courseLessonsManagement.newLessonDefaultTitle'),
         description: '',
         videoUrl: '',
         durationMinutes: 0,
         order: lessons.length + 1,
         isPreview: false,
       })
-      toast.success('Lesson created')
+      toast.success(t('teacher:courseLessonsManagement.toasts.lessonCreated'))
       await loadLessons(selectedSection)
       setEditingLesson(newLesson)
       setShowAddForm(false)
     } catch (error) {
-      toast.error('Failed to create lesson', {
-        description: error instanceof Error ? error.message : 'Please try again later',
+      toast.error(t('teacher:courseLessonsManagement.errors.createFailed'), {
+        description: error instanceof Error ? error.message : t('teacher:shared.tryAgainLater'),
       })
     } finally {
       setLoading(false)
@@ -240,12 +242,12 @@ export function CourseLessonsManagementPage() {
         order: editingLesson.order,
         isPreview: editingLesson.isPreview,
       })
-      toast.success('Lesson updated')
+      toast.success(t('teacher:courseLessonsManagement.toasts.lessonUpdated'))
       setEditingLesson(null)
       await loadLessons(selectedSection)
     } catch (error) {
-      toast.error('Failed to update lesson', {
-        description: error instanceof Error ? error.message : 'Please try again later',
+      toast.error(t('teacher:courseLessonsManagement.errors.updateFailed'), {
+        description: error instanceof Error ? error.message : t('teacher:shared.tryAgainLater'),
       })
     } finally {
       setLoading(false)
@@ -256,11 +258,11 @@ export function CourseLessonsManagementPage() {
     try {
       setLoading(true)
       await lessonService.deleteLesson(lessonId)
-      toast.success('Lesson deleted')
+      toast.success(t('teacher:courseLessonsManagement.toasts.lessonDeleted'))
       await loadLessons(selectedSection)
     } catch (error) {
-      toast.error('Failed to delete lesson', {
-        description: error instanceof Error ? error.message : 'Please try again later',
+      toast.error(t('teacher:courseLessonsManagement.errors.deleteLessonFailed'), {
+        description: error instanceof Error ? error.message : t('teacher:shared.tryAgainLater'),
       })
     } finally {
       setLoading(false)
@@ -279,11 +281,11 @@ export function CourseLessonsManagementPage() {
         isPreview: !lesson.isPreview,
         sectionId: lesson.sectionId ?? undefined,
       })
-      toast.success(`Lesson ${lesson.isPreview ? 'hidden' : 'made preview'}`)
+      toast.success(lesson.isPreview ? t('teacher:courseLessonsManagement.toasts.lessonHidden') : t('teacher:courseLessonsManagement.toasts.lessonMadePreview'))
       await loadLessons(selectedSection)
     } catch (error) {
-      toast.error('Failed to update lesson', {
-        description: error instanceof Error ? error.message : 'Please try again later',
+      toast.error(t('teacher:courseLessonsManagement.errors.updateFailed'), {
+        description: error instanceof Error ? error.message : t('teacher:shared.tryAgainLater'),
       })
     } finally {
       setLoading(false)
@@ -301,9 +303,9 @@ export function CourseLessonsManagementPage() {
   if (!course) {
     return (
       <div className="text-center py-12">
-        <p className="text-muted-foreground">Course not found</p>
+        <p className="text-muted-foreground">{t('teacher:courseStudents.notFound')}</p>
         <Button onClick={() => navigate('/teacher/courses')} className="mt-4">
-          Back to Courses
+          {t('teacher:courseStudents.backToCourses')}
         </Button>
       </div>
     )
@@ -324,13 +326,13 @@ export function CourseLessonsManagementPage() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight gradient-text">Manage Lessons</h1>
+            <h1 className="text-3xl font-bold tracking-tight gradient-text">{t('teacher:courseLessonsManagement.pageTitle')}</h1>
             <p className="mt-1 text-sm text-muted-foreground">{course.title}</p>
           </div>
         </div>
         <Button onClick={handleAddLesson} disabled={!selectedSection || loading}>
           <PlusCircle className="h-4 w-4 me-2" />
-          Add Lesson
+          {t('teacher:courseLessonsManagement.addLesson')}
         </Button>
       </div>
 
@@ -338,30 +340,30 @@ export function CourseLessonsManagementPage() {
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             <FileText className="h-5 w-5" />
-            Course materials
+            {t('teacher:courseLessonsManagement.courseMaterials')}
           </CardTitle>
           <CardDescription className="text-xs">
-            Upload files or add book links for the whole course or a specific lesson.
+            {t('teacher:courseLessonsManagement.courseMaterialsDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-1.5 sm:col-span-2">
-              <label className="text-sm font-medium">Title</label>
+              <label className="text-sm font-medium">{t('teacher:courseLessonsManagement.titleField')}</label>
               <Input
                 value={materialTitle}
                 onChange={(e) => setMaterialTitle(e.target.value)}
-                placeholder="e.g. Week 3 slides"
+                placeholder={t('teacher:courseLessonsManagement.materialTitlePlaceholder')}
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">Attach to lesson (optional)</label>
+              <label className="text-sm font-medium">{t('teacher:courseLessonsManagement.attachToLesson')}</label>
               <SelectRoot value={materialLessonId || '__course__'} onValueChange={(v) => setMaterialLessonId(v === '__course__' ? '' : v)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Whole course" />
+                  <SelectValue placeholder={t('teacher:courseLessonsManagement.wholeCourse')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="__course__">Whole course</SelectItem>
+                  <SelectItem value="__course__">{t('teacher:courseLessonsManagement.wholeCourse')}</SelectItem>
                   {allCourseLessons.map((l) => (
                     <SelectItem key={l.id} value={l.id}>
                       {l.title}
@@ -371,19 +373,19 @@ export function CourseLessonsManagementPage() {
               </SelectRoot>
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">Kind</label>
+              <label className="text-sm font-medium">{t('teacher:courseLessonsManagement.kind')}</label>
               <SelectRoot value={String(materialKind)} onValueChange={(v) => setMaterialKind(Number(v) as 0 | 1)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="0">File</SelectItem>
-                  <SelectItem value="1">Book / link</SelectItem>
+                  <SelectItem value="0">{t('teacher:courseLessonsManagement.kindFile')}</SelectItem>
+                  <SelectItem value="1">{t('teacher:courseLessonsManagement.kindBookLink')}</SelectItem>
                 </SelectContent>
               </SelectRoot>
             </div>
             <div className="space-y-1.5 sm:col-span-2">
-              <label className="text-sm font-medium">File</label>
+              <label className="text-sm font-medium">{t('teacher:courseLessonsManagement.file')}</label>
               <Input
                 type="file"
                 onChange={(e) => setMaterialFile(e.target.files?.[0] ?? null)}
@@ -392,7 +394,7 @@ export function CourseLessonsManagementPage() {
           </div>
           <Button type="button" onClick={handleAddMaterial} disabled={materialsBusy}>
             {materialsBusy ? <Loader2 className="h-4 w-4 animate-spin me-2" /> : <Upload className="h-4 w-4 me-2" />}
-            Add material
+            {t('teacher:courseLessonsManagement.addMaterial')}
           </Button>
           {materials.length > 0 && (
             <div className="space-y-2 pt-2 border-t">
@@ -404,8 +406,8 @@ export function CourseLessonsManagementPage() {
                   <div className="min-w-0">
                     <div className="font-medium truncate">{m.title}</div>
                     <div className="text-xs text-muted-foreground">
-                      {m.kind === 1 ? 'Book' : 'File'}
-                      {m.lessonTitle ? ` · ${m.lessonTitle}` : ' · Whole course'}
+                      {m.kind === 1 ? t('teacher:courseLessonsManagement.book') : t('teacher:courseLessonsManagement.fileLabel')}
+                      {m.lessonTitle ? ` · ${m.lessonTitle}` : ` · ${t('teacher:courseLessonsManagement.wholeCourse')}`}
                     </div>
                   </div>
                   <Button
@@ -428,18 +430,18 @@ export function CourseLessonsManagementPage() {
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             <Star className="h-5 w-5" />
-            Ratings overview
+            {t('teacher:courseLessonsManagement.ratingsOverview')}
           </CardTitle>
-          <CardDescription className="text-xs">Averages from student feedback (read-only).</CardDescription>
+          <CardDescription className="text-xs">{t('teacher:courseLessonsManagement.ratingsDescription')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 text-sm">
           {lessonRatingSummaries.length === 0 && meetingRatingSummaries.length === 0 ? (
-            <p className="text-muted-foreground">No ratings yet.</p>
+            <p className="text-muted-foreground">{t('teacher:courseLessonsManagement.noRatings')}</p>
           ) : (
             <>
               {lessonRatingSummaries.length > 0 && (
                 <div className="space-y-2">
-                  <p className="text-xs font-medium text-muted-foreground uppercase">Lessons</p>
+                  <p className="text-xs font-medium text-muted-foreground uppercase">{t('teacher:courseLessonsManagement.lessonsLabel')}</p>
                   <ul className="space-y-1">
                     {lessonRatingSummaries.map((r) => (
                       <li key={r.lessonId} className="flex justify-between gap-2">
@@ -454,7 +456,7 @@ export function CourseLessonsManagementPage() {
               )}
               {meetingRatingSummaries.length > 0 && (
                 <div className="space-y-2">
-                  <p className="text-xs font-medium text-muted-foreground uppercase">Sessions</p>
+                  <p className="text-xs font-medium text-muted-foreground uppercase">{t('teacher:courseLessonsManagement.sessionsLabel')}</p>
                   <ul className="space-y-1">
                     {meetingRatingSummaries.map((r) => (
                       <li key={r.sectionMeetingTimeId} className="flex justify-between gap-2">
@@ -479,7 +481,7 @@ export function CourseLessonsManagementPage() {
         <Card>
           <CardContent className="pt-4">
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">Section</label>
+              <label className="text-sm font-medium">{t('teacher:courseLessonsManagement.section')}</label>
               <SelectRoot value={selectedSection} onValueChange={setSelectedSection}>
                 <SelectTrigger>
                   <SelectValue />
@@ -500,17 +502,17 @@ export function CourseLessonsManagementPage() {
       {/* Lessons List */}
       <Card>
         <CardHeader className="pb-2 pt-4">
-          <CardTitle className="text-lg">Lessons</CardTitle>
+          <CardTitle className="text-lg">{t('teacher:courseLessonsManagement.lessons')}</CardTitle>
           <CardDescription className="text-xs mt-0.5">
-            {filteredLessons.length} lesson{filteredLessons.length !== 1 ? 's' : ''} in this section
+            {t('teacher:courseLessonsManagement.lessonCountInSection', { count: filteredLessons.length })}
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-2">
           {loading ? (
-            <div className="text-center py-8 text-muted-foreground">Loading lessons...</div>
+            <div className="text-center py-8 text-muted-foreground">{t('teacher:courseLessonsManagement.loadingLessons')}</div>
           ) : filteredLessons.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              No lessons in this section. Click "Add Lesson" to create one.
+              {t('teacher:courseLessonsManagement.noLessonsInSection')}
             </div>
           ) : (
             <div className="space-y-2">
@@ -525,9 +527,9 @@ export function CourseLessonsManagementPage() {
                       <div className="font-medium">{lesson.title}</div>
                       <div className="text-sm text-muted-foreground flex items-center gap-2">
                         <Clock className="h-3 w-3" />
-                        {lesson.durationMinutes || 0} min
+                        {t('teacher:courseLessonsManagement.minutes', { count: lesson.durationMinutes || 0 })}
                         {lesson.isPreview && (
-                          <Badge variant="secondary" className="text-xs">Preview</Badge>
+                          <Badge variant="secondary" className="text-xs">{t('teacher:courseLessonsManagement.preview')}</Badge>
                         )}
                       </div>
                     </div>
@@ -537,7 +539,7 @@ export function CourseLessonsManagementPage() {
                       variant="ghost"
                       size="icon"
                       onClick={() => handleToggleVisibility(lesson)}
-                      title={lesson.isPreview ? 'Hide from preview' : 'Make preview'}
+                      title={lesson.isPreview ? t('teacher:courseLessonsManagement.hideFromPreview') : t('teacher:courseLessonsManagement.makePreview')}
                     >
                       {lesson.isPreview ? (
                         <EyeOff className="h-4 w-4" />
@@ -571,13 +573,13 @@ export function CourseLessonsManagementPage() {
       <Dialog open={!!editingLesson} onOpenChange={(open) => !open && setEditingLesson(null)}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Edit Lesson</DialogTitle>
-            <DialogDescription>Update lesson details</DialogDescription>
+            <DialogTitle>{t('teacher:courseLessonsManagement.editLesson')}</DialogTitle>
+            <DialogDescription>{t('teacher:courseLessonsManagement.updateLessonDetails')}</DialogDescription>
           </DialogHeader>
           {editingLesson && (
             <div className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-sm font-medium">Title *</label>
+                <label className="text-sm font-medium">{t('teacher:courseLessonsManagement.titleRequired')}</label>
                 <Input
                   value={editingLesson.title}
                   onChange={(e) =>
@@ -586,7 +588,7 @@ export function CourseLessonsManagementPage() {
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-sm font-medium">Description</label>
+                <label className="text-sm font-medium">{t('teacher:courseLessonsManagement.description')}</label>
                 <textarea
                   className="w-full min-h-[100px] rounded-md border border-input bg-background px-3 py-2 text-sm"
                   value={editingLesson.description || ''}
@@ -596,21 +598,21 @@ export function CourseLessonsManagementPage() {
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-sm font-medium">Video URL *</label>
+                <label className="text-sm font-medium">{t('teacher:courseLessonsManagement.videoUrlRequired')}</label>
                 <Input
                   value={editingLesson.videoUrl || ''}
                   onChange={(e) =>
                     setEditingLesson({ ...editingLesson, videoUrl: e.target.value })
                   }
-                  placeholder="YouTube, Vimeo, Zoom, or direct video URL"
+                  placeholder={t('teacher:courseLessonsManagement.videoUrlPlaceholder')}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Supports: YouTube, Vimeo, Zoom recordings, Google Drive, Loom, Wistia, or direct MP4/WebM links
+                  {t('teacher:courseLessonsManagement.videoUrlHint')}
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium">Duration (minutes) *</label>
+                  <label className="text-sm font-medium">{t('teacher:courseLessonsManagement.durationRequired')}</label>
                   <Input
                     type="number"
                     min="0"
@@ -624,7 +626,7 @@ export function CourseLessonsManagementPage() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium">Order</label>
+                  <label className="text-sm font-medium">{t('teacher:courseLessonsManagement.order')}</label>
                   <Input
                     type="number"
                     min="0"
@@ -640,9 +642,9 @@ export function CourseLessonsManagementPage() {
               </div>
               <div className="flex items-center justify-between pt-2">
                 <div>
-                  <label className="text-sm font-medium">Preview Lesson</label>
+                  <label className="text-sm font-medium">{t('teacher:courseLessonsManagement.previewLesson')}</label>
                   <p className="text-xs text-muted-foreground">
-                    Make this lesson available for free preview
+                    {t('teacher:courseLessonsManagement.previewLessonHint')}
                   </p>
                 </div>
                 <input
@@ -655,16 +657,16 @@ export function CourseLessonsManagementPage() {
               </div>
               <div className="flex justify-end gap-2 pt-2">
                 <Button variant="outline" onClick={() => setEditingLesson(null)}>
-                  Cancel
+                  {t('common:cancel')}
                 </Button>
                 <Button onClick={handleSaveLesson} disabled={loading}>
                   {loading ? (
                     <>
                       <Loader2 className="h-4 w-4 me-2 animate-spin" />
-                      Saving...
+                      {t('common:saving')}
                     </>
                   ) : (
-                    'Save Changes'
+                    t('teacher:courseLessonsManagement.saveChanges')
                   )}
                 </Button>
               </div>
@@ -676,9 +678,9 @@ export function CourseLessonsManagementPage() {
       <ConfirmDialog
         open={deleteLessonId !== null}
         onOpenChange={(open) => { if (!open) setDeleteLessonId(null) }}
-        title="Delete Lesson"
-        description="Are you sure you want to delete this lesson?"
-        confirmLabel="Delete"
+        title={t('teacher:courseLessonsManagement.deleteLesson')}
+        description={t('teacher:courseLessonsManagement.deleteLessonConfirm')}
+        confirmLabel={t('common:delete')}
         variant="destructive"
         onConfirm={() => {
           if (deleteLessonId) return handleDeleteLesson(deleteLessonId)

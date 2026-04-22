@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import FullCalendar from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import dayGridPlugin from '@fullcalendar/daygrid'
@@ -170,6 +171,7 @@ function buildStudentCalendarEvents(
 }
 
 export function CalendarPage() {
+  const { t } = useTranslation(['student', 'common', 'errors'])
   const calendarRef = useRef<FullCalendar | null>(null)
   const [enrollments, setEnrollments] = useState<EnrollmentDto[]>([])
   const [courses, setCourses] = useState<Map<string, CourseDto>>(new Map())
@@ -216,8 +218,8 @@ export function CalendarPage() {
       )
       setCourses(courseMap)
     } catch (error) {
-      toast.error('Failed to load calendar data', {
-        description: error instanceof Error ? error.message : 'Please try again later',
+      toast.error(t('student:calendar.errors.loadFailed'), {
+        description: error instanceof Error ? error.message : t('student:calendar.errors.tryLater'),
       })
     } finally {
       setLoading(false)
@@ -289,13 +291,13 @@ export function CalendarPage() {
       <div className="space-y-6">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <div className="text-2xl font-semibold">Class schedule</div>
-            <div className="text-sm text-muted-foreground">Loading your enrolled courses…</div>
+            <div className="text-2xl font-semibold">{t('student:calendar.pageTitle')}</div>
+            <div className="text-sm text-muted-foreground">{t('student:calendar.loadingCourses')}</div>
           </div>
         </div>
         <Card>
           <CardContent className="flex items-center justify-center py-12">
-            <div className="text-sm text-muted-foreground">Loading calendar...</div>
+            <div className="text-sm text-muted-foreground">{t('student:calendar.loadingCalendar')}</div>
           </CardContent>
         </Card>
       </div>
@@ -306,10 +308,9 @@ export function CalendarPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <div className="text-2xl font-semibold">Class schedule</div>
+          <div className="text-2xl font-semibold">{t('student:calendar.pageTitle')}</div>
           <div className="text-sm text-muted-foreground">
-            Weekly class times from your enrollments; switch to month or move by week. Course start/end dates limit
-            occurrences when set by your instructor.
+            {t('student:calendar.subtitle')}
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -321,7 +322,7 @@ export function CalendarPage() {
               className="h-8"
               onClick={() => setCalendarView('week')}
             >
-              Week
+              {t('student:calendar.week')}
             </Button>
             <Button
               type="button"
@@ -330,25 +331,25 @@ export function CalendarPage() {
               className="h-8"
               onClick={() => setCalendarView('month')}
             >
-              Month
+              {t('student:calendar.month')}
             </Button>
           </div>
           <Button
             variant="outline"
             size="sm"
             onClick={() => calendarRef.current?.getApi().prev()}
-            aria-label="Previous period"
+            aria-label={t('student:calendar.previousPeriodAria')}
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="sm" onClick={() => calendarRef.current?.getApi().today()} aria-label="Go to today">
-            Today
+          <Button variant="outline" size="sm" onClick={() => calendarRef.current?.getApi().today()} aria-label={t('student:calendar.goToTodayAria')}>
+            {t('student:calendar.today')}
           </Button>
           <Button
             variant="outline"
             size="sm"
             onClick={() => calendarRef.current?.getApi().next()}
-            aria-label="Next period"
+            aria-label={t('student:calendar.nextPeriodAria')}
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
@@ -357,9 +358,9 @@ export function CalendarPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{calendarView === 'week' ? 'Week view' : 'Month view'}</CardTitle>
+          <CardTitle>{calendarView === 'week' ? t('student:calendar.weekView') : t('student:calendar.monthView')}</CardTitle>
           <CardDescription>
-            Sessions repeat on the same weekday each week. Tap or click an event for details and links.
+            {t('student:calendar.viewDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -373,12 +374,12 @@ export function CalendarPage() {
                 >
                   <Calendar className="h-8 w-8 text-muted-foreground" />
                 </motion.div>
-                <CardTitle className="text-xl mb-2">No enrolled classes</CardTitle>
+                <CardTitle className="text-xl mb-2">{t('student:calendar.noEnrolled')}</CardTitle>
                 <CardDescription className="max-w-md mb-4">
-                  Enroll from the Course Catalog to see your schedule appear here.
+                  {t('student:calendar.noEnrolledBody')}
                 </CardDescription>
                 <Button variant="default" asChild>
-                  <Link to="/student/catalog">Browse Catalog</Link>
+                  <Link to="/student/catalog">{t('student:shared.browseCatalog')}</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -392,13 +393,12 @@ export function CalendarPage() {
                 >
                   <Calendar className="h-8 w-8 text-muted-foreground" />
                 </motion.div>
-                <CardTitle className="text-xl mb-2">No meeting times yet</CardTitle>
+                <CardTitle className="text-xl mb-2">{t('student:calendar.noMeetingTimes')}</CardTitle>
                 <CardDescription className="max-w-md mb-4">
-                  Your enrolled courses don&apos;t have section times scheduled yet. Check back later or contact your
-                  instructor.
+                  {t('student:calendar.noMeetingTimesBody')}
                 </CardDescription>
                 <Button variant="outline" size="sm" asChild>
-                  <Link to="/student/catalog">Catalog</Link>
+                  <Link to="/student/catalog">{t('student:calendar.catalog')}</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -463,7 +463,7 @@ export function CalendarPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{eventInfo?.title}</DialogTitle>
-            <DialogDescription>Class details</DialogDescription>
+            <DialogDescription>{t('student:calendar.classDetails')}</DialogDescription>
           </DialogHeader>
           {eventInfo && (
             <div className="mt-4 space-y-4">
@@ -473,7 +473,7 @@ export function CalendarPage() {
                     <User className="h-4 w-4 text-muted-foreground" />
                   </div>
                   <div>
-                    <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Instructor</div>
+                    <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{t('student:calendar.instructor')}</div>
                     <div className="text-sm font-medium mt-1">{eventInfo.instructor}</div>
                   </div>
                 </div>
@@ -482,7 +482,7 @@ export function CalendarPage() {
                     <Clock className="h-4 w-4 text-muted-foreground" />
                   </div>
                   <div>
-                    <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Section</div>
+                    <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{t('student:calendar.section')}</div>
                     <div className="text-sm font-medium mt-1">{eventInfo.sectionName}</div>
                   </div>
                 </div>
@@ -491,7 +491,7 @@ export function CalendarPage() {
                     <MapPin className="h-4 w-4 text-muted-foreground" />
                   </div>
                   <div>
-                    <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Location</div>
+                    <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{t('student:calendar.location')}</div>
                     <div className="text-sm font-medium mt-1">{eventInfo.location}</div>
                   </div>
                 </div>
@@ -501,12 +501,12 @@ export function CalendarPage() {
                   <Button size="sm" className="gap-2" asChild>
                     <a href={eventInfo.joinUrl} target="_blank" rel="noopener noreferrer">
                       <Video className="h-4 w-4" />
-                      Enter Live Lesson
+                      {t('student:calendar.enterLiveLesson')}
                     </a>
                   </Button>
                 ) : null}
                 <Button variant="outline" size="sm" asChild>
-                  <Link to={`/courses/${eventInfo.courseId}`}>View Course</Link>
+                  <Link to={`/courses/${eventInfo.courseId}`}>{t('student:calendar.viewCourse')}</Link>
                 </Button>
               </div>
             </div>

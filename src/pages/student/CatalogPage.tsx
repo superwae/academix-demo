@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import { useAppStore } from '../../store/useAppStore'
 import { useAuthStore } from '../../store/useAuthStore'
@@ -23,6 +24,7 @@ type Filters = {
 }
 
 export function CatalogPage() {
+  const { t } = useTranslation(['student', 'common', 'errors'])
   const { enrolled } = useAppStore((s) => s.data)
   const { isAuthenticated } = useAuthStore()
   const [myEnrollments, setMyEnrollments] = useState<{ courseId: string; sectionId: string }[]>([])
@@ -52,8 +54,8 @@ export function CatalogPage() {
         const result = await courseService.getCourses({ pageSize: 100 })
         setCourses(result.items)
       } catch (error) {
-        toast.error('Failed to load courses', {
-          description: error instanceof Error ? error.message : 'Please try again later',
+        toast.error(t('student:catalog.errors.loadCoursesFailed'), {
+          description: error instanceof Error ? error.message : t('student:catalog.errors.tryLater'),
         })
       } finally {
         setLoading(false)
@@ -61,7 +63,7 @@ export function CatalogPage() {
     }
 
     loadCourses()
-  }, [])
+  }, [t])
 
   // Load current user's enrollments from API (not local store)
   const loadMyEnrollments = async () => {
@@ -200,8 +202,8 @@ export function CatalogPage() {
           setSelectedSectionId(null)
         }
       } catch (error) {
-        toast.error('Failed to load course details', {
-          description: error instanceof Error ? error.message : 'Please try again later',
+        toast.error(t('student:catalog.errors.loadDetailsFailed'), {
+          description: error instanceof Error ? error.message : t('student:catalog.errors.tryLater'),
         })
         setOpenCourseId(null)
       } finally {
@@ -210,7 +212,7 @@ export function CatalogPage() {
     }
 
     loadCourseDetails()
-  }, [openCourseId, courses])
+  }, [openCourseId, courses, t])
 
   const openCourse = openCourseDetails
   
@@ -224,18 +226,18 @@ export function CatalogPage() {
   
   const handleEnroll = async () => {
     if (!openCourse || !selectedSectionId) {
-      setEnrollmentError('Please select a section to enroll.')
+      setEnrollmentError(t('student:catalog.selectSection'))
       return
     }
 
     if (!isAuthenticated) {
-      setEnrollmentError('Please sign in to enroll in courses.')
+      setEnrollmentError(t('student:catalog.pleaseSignIn'))
       return
     }
 
     const selectedSection = openCourse.sections.find((s) => s.id === selectedSectionId)
     if (!selectedSection) {
-      setEnrollmentError('Selected section not found.')
+      setEnrollmentError(t('student:catalog.sectionNotFound'))
       return
     }
 
@@ -245,7 +247,7 @@ export function CatalogPage() {
     // Use myEnrollments which is already filtered to only Active/Completed enrollments
     const res = checkConflict({ course: openCourse, section: selectedSection }, courses, myEnrollments)
     if (res.conflict) {
-      setConflict({ withCourseTitle: res.withCourseTitle ?? 'another class' })
+      setConflict({ withCourseTitle: res.withCourseTitle ?? t('student:catalog.anotherClass') })
       return
     }
 
@@ -254,8 +256,8 @@ export function CatalogPage() {
         courseId: openCourse.id,
         sectionId: selectedSectionId,
       })
-      
-      toast.success('Successfully enrolled!', {
+
+      toast.success(t('student:catalog.enrolledSuccess'), {
         description: `${openCourse.title} • ${selectedSection.name}`,
       })
       
@@ -287,11 +289,11 @@ export function CatalogPage() {
       const result = await courseService.getCourses({ pageSize: 100 })
       setCourses(result.items)
     } catch (error) {
-      const raw = error instanceof Error ? error.message : 'Please try again later.'
-      if (raw.includes('Section is full')) setEnrollmentError('This section is full. Please choose another section.')
-      else if (raw.includes('already enrolled')) setEnrollmentError('You are already enrolled in this course.')
-      else if (raw.includes('overlap') || raw.includes('conflict')) setEnrollmentError('This section conflicts with another class.')
-      else setEnrollmentError(raw.replace(/^Cannot enroll:\s*/i, '').trim() || 'Unable to complete enrollment. Please try again.')
+      const raw = error instanceof Error ? error.message : t('student:catalog.errors.tryLater')
+      if (raw.includes('Section is full')) setEnrollmentError(t('student:catalog.sectionFull'))
+      else if (raw.includes('already enrolled')) setEnrollmentError(t('student:catalog.alreadyEnrolledErr'))
+      else if (raw.includes('overlap') || raw.includes('conflict')) setEnrollmentError(t('student:catalog.sectionConflict'))
+      else setEnrollmentError(raw.replace(/^Cannot enroll:\s*/i, '').trim() || t('student:catalog.unableEnroll'))
     }
   }
   const selectedSection = useMemo(() => {
@@ -309,18 +311,18 @@ export function CatalogPage() {
     // Check for conflicts with actual enrollments from API (only Active/Completed)
     const res = checkConflict({ course: openCourse, section: selectedSection }, courses, myEnrollments)
     if (res.conflict) {
-      setConflict({ withCourseTitle: res.withCourseTitle ?? 'another class' })
+      setConflict({ withCourseTitle: res.withCourseTitle ?? t('student:catalog.anotherClass') })
     } else {
       setConflict(null)
     }
-  }, [openCourse, selectedSectionId, selectedSection, courses, myEnrollments])
+  }, [openCourse, selectedSectionId, selectedSection, courses, myEnrollments, t])
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <div className="text-2xl font-semibold">Course Catalog</div>
-          <div className="text-sm text-muted-foreground">Browse, filter, and enroll in sections</div>
+          <div className="text-2xl font-semibold">{t('student:catalog.title')}</div>
+          <div className="text-sm text-muted-foreground">{t('student:catalog.subtitle')}</div>
         </div>
       </div>
 
@@ -333,14 +335,14 @@ export function CatalogPage() {
               ref={searchInputRef}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search courses, instructors, providers… (Press / to focus)"
+              placeholder={t('student:catalog.searchPlaceholder')}
               className="ps-11"
             />
             {query && (
               <button
                 onClick={() => setQuery('')}
                 className="absolute end-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                aria-label="Clear search"
+                aria-label={t('student:catalog.clearSearch')}
               >
                 <X className="h-4 w-4" />
               </button>
@@ -349,21 +351,21 @@ export function CatalogPage() {
           <Select
             value={filters.category}
             onValueChange={(value) => setFilters((f) => ({ ...f, category: value as Filters['category'] }))}
-            placeholder="All categories"
+            placeholder={t('student:catalog.allCategories')}
             options={[
-              { value: 'All', label: 'All categories' },
+              { value: 'All', label: t('student:catalog.allCategories') },
               ...categories.map((c) => ({ value: c, label: c })),
             ]}
           />
           <Select
             value={filters.modality}
             onValueChange={(value) => setFilters((f) => ({ ...f, modality: value as Filters['modality'] }))}
-            placeholder="All modalities"
+            placeholder={t('student:catalog.allModalities')}
             options={[
-              { value: 'All', label: 'All modalities' },
-              { value: 'Online', label: 'Online' },
-              { value: 'In-person', label: 'In-person' },
-              { value: 'Hybrid', label: 'Hybrid' },
+              { value: 'All', label: t('student:catalog.allModalities') },
+              { value: 'Online', label: t('student:catalog.onlineModality') },
+              { value: 'In-person', label: t('student:catalog.inPersonModality') },
+              { value: 'Hybrid', label: t('student:catalog.hybridModality') },
             ]}
           />
         </div>
@@ -372,14 +374,14 @@ export function CatalogPage() {
         {activeFiltersCount > 0 && (
           <div className="flex flex-wrap items-center gap-2">
             <Filter className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">Active filters:</span>
+            <span className="text-sm text-muted-foreground">{t('student:catalog.activeFilters')}</span>
             {filters.category !== 'All' && (
               <Badge variant="subtle" className="gap-1.5 pe-1.5">
-                Category: {filters.category}
+                {t('student:catalog.categoryFilter', { value: filters.category })}
                 <button
                   onClick={() => setFilters((f) => ({ ...f, category: 'All' }))}
                   className="ms-1 rounded-full hover:bg-background/50 p-0.5 transition-colors"
-                  aria-label={`Remove category filter: ${filters.category}`}
+                  aria-label={t('student:catalog.removeCategoryFilter', { value: filters.category })}
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -387,11 +389,11 @@ export function CatalogPage() {
             )}
             {filters.modality !== 'All' && (
               <Badge variant="subtle" className="gap-1.5 pe-1.5">
-                Modality: {filters.modality}
+                {t('student:catalog.modalityFilter', { value: filters.modality })}
                 <button
                   onClick={() => setFilters((f) => ({ ...f, modality: 'All' }))}
                   className="ms-1 rounded-full hover:bg-background/50 p-0.5 transition-colors"
-                  aria-label={`Remove modality filter: ${filters.modality}`}
+                  aria-label={t('student:catalog.removeModalityFilter', { value: filters.modality })}
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -399,11 +401,11 @@ export function CatalogPage() {
             )}
             {filters.providerType !== 'All' && (
               <Badge variant="subtle" className="gap-1.5 pe-1.5">
-                Provider: {filters.providerType}
+                {t('student:catalog.providerFilter', { value: filters.providerType })}
                 <button
                   onClick={() => setFilters((f) => ({ ...f, providerType: 'All' }))}
                   className="ms-1 rounded-full hover:bg-background/50 p-0.5 transition-colors"
-                  aria-label={`Remove provider filter: ${filters.providerType}`}
+                  aria-label={t('student:catalog.removeProviderFilter', { value: filters.providerType })}
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -411,18 +413,18 @@ export function CatalogPage() {
             )}
             {filters.day !== 'All' && (
               <Badge variant="subtle" className="gap-1.5 pe-1.5">
-                Day: {filters.day}
+                {t('student:catalog.dayFilter', { value: filters.day })}
                 <button
                   onClick={() => setFilters((f) => ({ ...f, day: 'All' }))}
                   className="ms-1 rounded-full hover:bg-background/50 p-0.5 transition-colors"
-                  aria-label={`Remove day filter: ${filters.day}`}
+                  aria-label={t('student:catalog.removeDayFilter', { value: filters.day })}
                 >
                   <X className="h-3 w-3" />
                 </button>
               </Badge>
             )}
             <Button variant="ghost" size="sm" onClick={clearFilters} className="h-7 text-xs">
-              Clear all
+              {t('student:catalog.clearAll')}
             </Button>
           </div>
         )}
@@ -448,15 +450,15 @@ export function CatalogPage() {
             <div className="rounded-full bg-muted p-4 mb-4">
               <Search className="h-8 w-8 text-muted-foreground" />
             </div>
-            <CardTitle className="text-xl mb-2">No courses found</CardTitle>
+            <CardTitle className="text-xl mb-2">{t('student:catalog.noCoursesFound')}</CardTitle>
             <CardDescription className="max-w-md">
               {query || activeFiltersCount > 0
-                ? "Try adjusting your search or filters to find more courses."
-                : "No courses available at the moment."}
+                ? t('student:catalog.adjustFilters')
+                : t('student:catalog.noCoursesAvailable')}
             </CardDescription>
             {(query || activeFiltersCount > 0) && (
               <Button variant="outline" size="sm" onClick={() => { setQuery(''); clearFilters(); }} className="mt-4">
-                Clear search and filters
+                {t('student:catalog.clearSearchFilters')}
               </Button>
             )}
           </CardContent>
@@ -524,7 +526,7 @@ export function CatalogPage() {
                   <div className="flex items-center justify-between w-full">
                     <div className="text-xs text-muted-foreground">⭐ {c.rating.toFixed(1)}</div>
                     <div className="text-sm font-semibold">
-                      {c.price ? `$${c.price.toFixed(2)}` : <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-500/30">Free</Badge>}
+                      {c.price ? `$${c.price.toFixed(2)}` : <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-500/30">{t('student:catalog.free')}</Badge>}
                     </div>
                   </div>
                   <div className="flex gap-2 w-full">
@@ -534,7 +536,7 @@ export function CatalogPage() {
                       asChild
                       className="flex-1"
                     >
-                      <Link to={`/courses/${c.id}`}>View Details</Link>
+                      <Link to={`/courses/${c.id}`}>{t('student:catalog.viewDetails')}</Link>
                     </Button>
                     <Button
                       variant={isEnrolled ? 'secondary' : 'default'}
@@ -545,7 +547,7 @@ export function CatalogPage() {
                       }}
                       className="flex-1"
                     >
-                      {isEnrolled ? 'View Sections' : 'Enroll'}
+                      {isEnrolled ? t('student:catalog.viewSections') : t('student:catalog.enroll')}
                     </Button>
                   </div>
                 </CardFooter>
@@ -573,7 +575,7 @@ export function CatalogPage() {
             <div className="flex items-center justify-center py-12">
               <div className="text-center space-y-4">
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto" />
-                <p className="text-sm text-muted-foreground">Loading course details...</p>
+                <p className="text-sm text-muted-foreground">{t('student:shared.loadingCourseDetails')}</p>
               </div>
             </div>
           ) : openCourse ? (
@@ -587,7 +589,7 @@ export function CatalogPage() {
 
               <div className="mt-4 grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <div className="text-sm font-medium">About</div>
+                  <div className="text-sm font-medium">{t('student:catalog.about')}</div>
                   <div className="text-sm text-muted-foreground">{openCourse.description}</div>
                   <div className="mt-3 flex flex-wrap gap-1">
                     <Badge variant="subtle">{openCourse.category}</Badge>
@@ -597,15 +599,15 @@ export function CatalogPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <div className="text-sm font-medium">Choose a section</div>
+                  <div className="text-sm font-medium">{t('student:catalog.chooseSection')}</div>
                   <p className="text-xs text-muted-foreground">
-                    Times sync with your Calendar after you enroll.
+                    {t('student:catalog.timesSync')}
                   </p>
                   {isAlreadyEnrolled && (
                     <div className="rounded-xl border border-primary/40 bg-primary/10 p-3 text-sm">
-                      <div className="font-medium text-primary">Already Enrolled</div>
+                      <div className="font-medium text-primary">{t('student:catalog.alreadyEnrolled')}</div>
                       <div className="mt-1 text-muted-foreground">
-                        You are already enrolled in this course. You can only enroll in one section per course.
+                        {t('student:catalog.alreadyEnrolledNote')}
                       </div>
                     </div>
                   )}
@@ -636,7 +638,7 @@ export function CatalogPage() {
                                 {sec.name}
                               </div>
                               <Badge variant={sec.seatsRemaining > 0 ? "secondary" : "destructive"} className="text-xs shrink-0">
-                                {sec.seatsRemaining > 0 ? `${sec.seatsRemaining} seats left` : "Full"}
+                                {sec.seatsRemaining > 0 ? t('student:catalog.seatsLeft', { count: sec.seatsRemaining }) : t('student:catalog.full')}
                               </Badge>
                             </div>
                             {sec.meetingTimes && sec.meetingTimes.length > 0 ? (
@@ -647,7 +649,7 @@ export function CatalogPage() {
                             ) : (
                               <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1.5">
                                 <Calendar className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70" />
-                                <span>Schedule TBD</span>
+                                <span>{t('student:catalog.scheduleTBD')}</span>
                               </div>
                             )}
                             <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
@@ -657,7 +659,7 @@ export function CatalogPage() {
                             {sec.joinUrl && (
                               <div className="flex items-center gap-2 text-xs text-primary mt-1">
                                 <Globe className="h-3.5 w-3.5 shrink-0" />
-                                <span>Online meeting available</span>
+                                <span>{t('student:catalog.onlineAvailable')}</span>
                               </div>
                             )}
                           </div>
@@ -666,7 +668,7 @@ export function CatalogPage() {
                     </div>
                   ) : (
                     <div className="rounded-md border border-dashed border-border/50 bg-muted/30 p-4 text-center text-sm text-muted-foreground">
-                      No sections available for this course.
+                      {t('student:catalog.noSections')}
                     </div>
                   )}
                 </div>
@@ -677,11 +679,11 @@ export function CatalogPage() {
                   <AlertCircle className="h-5 w-5 shrink-0 text-destructive mt-0.5" />
                   <div>
                     <p className="font-medium text-destructive">
-                      {conflict ? 'Schedule conflict' : 'Enrollment issue'}
+                      {conflict ? t('student:catalog.scheduleConflict') : t('student:catalog.enrollmentIssue')}
                     </p>
                     <p className="mt-1 text-muted-foreground">
                       {conflict
-                        ? `This section overlaps with ${conflict.withCourseTitle}. Choose another section.`
+                        ? t('student:catalog.conflictDescription', { title: conflict.withCourseTitle })
                         : enrollmentError}
                     </p>
                     <button
@@ -689,7 +691,7 @@ export function CatalogPage() {
                       onClick={() => { setConflict(null); setEnrollmentError(null) }}
                       className="mt-2 text-primary hover:underline text-xs font-medium"
                     >
-                      Dismiss
+                      {t('student:catalog.dismiss')}
                     </button>
                   </div>
                 </div>
@@ -697,26 +699,26 @@ export function CatalogPage() {
 
               <div className="mt-5 flex items-center justify-end gap-2">
                 <Button variant="outline" onClick={() => setOpenCourseId(null)}>
-                  Close
+                  {t('student:catalog.close')}
                 </Button>
                 <Button
                   onClick={handleEnroll}
                   disabled={!selectedSectionId || isAlreadyEnrolled}
                 >
-                  {isAlreadyEnrolled ? 'Already Enrolled' : 'Confirm enroll'}
+                  {isAlreadyEnrolled ? t('student:catalog.alreadyEnrolled') : t('student:catalog.confirmEnroll')}
                 </Button>
               </div>
             </>
           ) : (
             <div className="py-12 text-center">
-              <p className="text-sm text-muted-foreground">Failed to load course details</p>
+              <p className="text-sm text-muted-foreground">{t('student:catalog.failedLoadDetails')}</p>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setOpenCourseId(null)}
                 className="mt-4"
               >
-                Close
+                {t('student:catalog.close')}
               </Button>
             </div>
           )}

@@ -15,6 +15,7 @@ import {
   type AssignmentDto,
   type AssignmentSubmissionDto,
 } from '../../services/assignmentService'
+import { useTranslation } from 'react-i18next'
 
 /** Stable string for number inputs; avoids floating-point noise after save/reload. */
 function formatScoreInput(n: number): string {
@@ -23,6 +24,7 @@ function formatScoreInput(n: number): string {
 }
 
 export function TeacherAssignmentGradePage() {
+  const { t } = useTranslation(['teacher', 'common', 'errors'])
   const { assignmentId } = useParams<{ assignmentId: string }>()
   const [assignment, setAssignment] = useState<AssignmentDto | null>(null)
   const [submissions, setSubmissions] = useState<AssignmentSubmissionDto[]>([])
@@ -72,7 +74,7 @@ export function TeacherAssignmentGradePage() {
         setFeedback(fb)
         setRowStatus({})
       } catch (err) {
-        setLoadError(err instanceof Error ? err.message : 'Could not load assignment.')
+        setLoadError(err instanceof Error ? err.message : t('teacher:assignmentGrade.errors.loadFailed'))
       } finally {
         setLoading(false)
       }
@@ -89,7 +91,7 @@ export function TeacherAssignmentGradePage() {
     if (raw === '' || raw === undefined) {
       setRowStatus((p) => ({
         ...p,
-        [submissionId]: { variant: 'error', message: 'Enter a score before saving.' },
+        [submissionId]: { variant: 'error', message: t('teacher:assignmentGrade.errors.enterScore') },
       }))
       return
     }
@@ -97,7 +99,7 @@ export function TeacherAssignmentGradePage() {
     if (Number.isNaN(num) || num < 0 || num > maxScore) {
       setRowStatus((p) => ({
         ...p,
-        [submissionId]: { variant: 'error', message: `Score must be between 0 and ${maxScore}.` },
+        [submissionId]: { variant: 'error', message: t('teacher:assignmentGrade.errors.scoreRange', { max: maxScore }) },
       }))
       return
     }
@@ -133,8 +135,8 @@ export function TeacherAssignmentGradePage() {
       const pen = assignment?.latePenaltyPercent
       const successMsg =
         isLateRow && pen != null && pen > 0
-          ? `Saved. Student record: ${final} / ${maxScore} (after ${pen}% late penalty).`
-          : `Saved. Student record: ${final} / ${maxScore}.`
+          ? t('teacher:assignmentGrade.savedLate', { final, max: maxScore, pen })
+          : t('teacher:assignmentGrade.saved', { final, max: maxScore })
       setRowStatus((p) => ({
         ...p,
         [submissionId]: { variant: 'success', message: successMsg },
@@ -144,7 +146,7 @@ export function TeacherAssignmentGradePage() {
         ...p,
         [submissionId]: {
           variant: 'error',
-          message: err instanceof Error ? err.message : 'Could not save grade.',
+          message: err instanceof Error ? err.message : t('teacher:assignmentGrade.errors.saveFailed'),
         },
       }))
     } finally {
@@ -169,14 +171,14 @@ export function TeacherAssignmentGradePage() {
               <ArrowLeft className="h-4 w-4" />
             </Link>
           </Button>
-          <h1 className="text-xl font-semibold">Grade submissions</h1>
+          <h1 className="text-xl font-semibold">{t('teacher:assignmentGrade.pageTitle')}</h1>
         </div>
         <div
           className="rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive flex gap-3"
           role="alert"
         >
           <AlertCircle className="h-5 w-5 shrink-0" />
-          <p>{loadError ?? 'Assignment could not be loaded.'}</p>
+          <p>{loadError ?? t('teacher:assignmentGrade.errors.loadFailed')}</p>
         </div>
       </div>
     )
@@ -199,14 +201,14 @@ export function TeacherAssignmentGradePage() {
             </Link>
           </Button>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Grade submissions</h1>
+            <h1 className="text-2xl font-bold tracking-tight">{t('teacher:assignmentGrade.pageTitle')}</h1>
             <p className="text-sm text-muted-foreground">
               {assignment.courseTitle} · {assignment.title}
             </p>
           </div>
         </div>
         <Button variant="outline" asChild>
-          <Link to={`/teacher/assignments/${assignmentId}/submissions`}>View summary</Link>
+          <Link to={`/teacher/assignments/${assignmentId}/submissions`}>{t('teacher:assignmentGrade.viewSummary')}</Link>
         </Button>
       </div>
 
@@ -215,14 +217,14 @@ export function TeacherAssignmentGradePage() {
           <div className="flex items-center gap-2">
             <CalendarClock className="h-4 w-4" />
             <span>
-              <span className="font-medium text-foreground">Due:</span> {dueLabel}
+              <span className="font-medium text-foreground">{t('teacher:assignmentGrade.dueLabel')}</span> {dueLabel}
             </span>
           </div>
           <span>
-            <span className="font-medium text-foreground">Max score:</span> {maxScore}
+            <span className="font-medium text-foreground">{t('teacher:assignmentGrade.maxScoreLabel')}</span> {maxScore}
           </span>
           {assignment.latePenaltyPercent != null && assignment.latePenaltyPercent > 0 ? (
-            <Badge variant="secondary">Late penalty: {assignment.latePenaltyPercent}%</Badge>
+            <Badge variant="secondary">{t('teacher:assignmentGrade.latePenaltyBadge', { pen: assignment.latePenaltyPercent })}</Badge>
           ) : null}
         </CardContent>
       </Card>
@@ -230,7 +232,7 @@ export function TeacherAssignmentGradePage() {
       {submissions.length === 0 ? (
         <Card>
           <CardContent className="py-10 text-center text-muted-foreground text-sm">
-            No submissions to grade yet.
+            {t('teacher:assignmentGrade.noSubmissions')}
           </CardContent>
         </Card>
       ) : (
@@ -242,7 +244,7 @@ export function TeacherAssignmentGradePage() {
                   <div>
                     <CardTitle className="text-base">{s.userName}</CardTitle>
                     <CardDescription>
-                      Submitted{' '}
+                      {t('teacher:assignmentGrade.submittedLabel')}{' '}
                       {(() => {
                         try {
                           return format(new Date(s.submittedAt), 'PP p')
@@ -252,14 +254,14 @@ export function TeacherAssignmentGradePage() {
                       })()}
                       {s.isLate ? (
                         <Badge variant="destructive" className="ms-2 text-[10px]">
-                          Late
+                          {t('teacher:assignmentGrade.late')}
                         </Badge>
                       ) : null}
                     </CardDescription>
                   </div>
                   {s.gradedAt ? (
                     <Badge variant="outline" className="text-xs">
-                      Last graded{' '}
+                      {t('teacher:assignmentGrade.lastGraded')}{' '}
                       {(() => {
                         try {
                           return format(new Date(s.gradedAt), 'PP')
@@ -276,7 +278,7 @@ export function TeacherAssignmentGradePage() {
                   {s.text ? (
                     <p className="whitespace-pre-wrap break-words [overflow-wrap:anywhere] leading-relaxed">{s.text}</p>
                   ) : (
-                    <p className="text-muted-foreground italic">No written answer</p>
+                    <p className="text-muted-foreground italic">{t('teacher:assignmentGrade.noWrittenAnswer')}</p>
                   )}
                   {s.fileUrl ? (
                     <a
@@ -286,14 +288,14 @@ export function TeacherAssignmentGradePage() {
                       className="inline-flex items-center gap-1 text-primary text-sm font-medium hover:underline"
                     >
                       <ExternalLink className="h-3.5 w-3.5" />
-                      {s.fileName || 'Open attachment'}
+                      {s.fileName || t('teacher:assignmentGrade.openAttachment')}
                     </a>
                   ) : null}
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-[140px_1fr_auto] sm:items-end">
                   <div className="space-y-1.5">
-                    <Label htmlFor={`score-${s.id}`}>Score (0–{maxScore})</Label>
+                    <Label htmlFor={`score-${s.id}`}>{t('teacher:assignmentGrade.scoreRange', { max: maxScore })}</Label>
                     <Input
                       id={`score-${s.id}`}
                       type="number"
@@ -310,19 +312,19 @@ export function TeacherAssignmentGradePage() {
                     assignment.latePenaltyPercent != null &&
                     assignment.latePenaltyPercent > 0 ? (
                       <p className="text-xs text-muted-foreground mt-1">
-                        Student record:{' '}
+                        {t('teacher:assignmentGrade.studentRecord')}{' '}
                         {(() => {
                           const v = parseFloat(scores[s.id] ?? '')
                           if (Number.isNaN(v)) return '—'
                           const pen = v * (assignment.latePenaltyPercent / 100)
                           return formatScoreInput(Math.max(0, v - pen))
                         })()}{' '}
-                        / {maxScore} (after {assignment.latePenaltyPercent}% late penalty)
+                        {t('teacher:assignmentGrade.outOfAfterPenalty', { max: maxScore, pen: assignment.latePenaltyPercent })}
                       </p>
                     ) : null}
                   </div>
                   <div className="space-y-1.5 sm:col-span-1">
-                    <Label htmlFor={`fb-${s.id}`}>Feedback (optional)</Label>
+                    <Label htmlFor={`fb-${s.id}`}>{t('teacher:assignmentGrade.feedbackOptional')}</Label>
                     <Textarea
                       id={`fb-${s.id}`}
                       rows={3}
@@ -331,7 +333,7 @@ export function TeacherAssignmentGradePage() {
                         clearRowStatus(s.id)
                         setFeedback((p) => ({ ...p, [s.id]: e.target.value }))
                       }}
-                      placeholder="Comments for the student…"
+                      placeholder={t('teacher:assignmentGrade.feedbackPlaceholder')}
                     />
                   </div>
                   <div className="flex flex-col gap-2 sm:items-end sm:justify-end sm:min-w-[min(100%,260px)]">
@@ -347,7 +349,7 @@ export function TeacherAssignmentGradePage() {
                       ) : (
                         <>
                           <Save className="h-4 w-4 me-2" />
-                          Save grade
+                          {t('teacher:assignmentGrade.saveGrade')}
                         </>
                       )}
                     </Button>

@@ -19,8 +19,10 @@ import { Save, ArrowLeft, Loader2 } from 'lucide-react'
 import { assignmentService, type UpdateAssignmentRequest } from '../../services/assignmentService'
 import { teacherService } from '../../services/teacherService'
 import type { CourseDto } from '../../services/courseService'
+import { useTranslation } from 'react-i18next'
 
 export function EditAssignmentPage() {
+  const { t } = useTranslation(['teacher', 'common', 'errors'])
   const { assignmentId } = useParams<{ assignmentId: string }>()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
@@ -37,7 +39,7 @@ export function EditAssignmentPage() {
 
   useEffect(() => {
     if (!assignmentId) {
-      toast.error('Missing assignment id')
+      toast.error(t('teacher:editAssignment.errors.missingId'))
       navigate('/teacher/assignments')
       return
     }
@@ -59,7 +61,7 @@ export function EditAssignmentPage() {
         setAllowLateSubmission(assignment.allowLateSubmission)
         setLatePenaltyPercent(assignment.latePenaltyPercent ?? 0)
       } catch (error) {
-        toast.error('Failed to load assignment', {
+        toast.error(t('teacher:editAssignment.errors.loadFailed'), {
           description: error instanceof Error ? error.message : undefined,
         })
         navigate('/teacher/assignments')
@@ -87,15 +89,15 @@ export function EditAssignmentPage() {
     if (!assignmentId) return
 
     if (!title.trim()) {
-      toast.error('Assignment title is required')
+      toast.error(t('teacher:createAssignment.errors.titleRequired'))
       return
     }
     if (!prompt.trim()) {
-      toast.error('Assignment prompt is required')
+      toast.error(t('teacher:createAssignment.errors.promptRequired'))
       return
     }
     if (!dueAt) {
-      toast.error('Due date is required')
+      toast.error(t('teacher:createAssignment.errors.dueDateRequired'))
       return
     }
 
@@ -105,15 +107,15 @@ export function EditAssignmentPage() {
         assignmentId,
         buildUpdatePayload(saveAsDraft ? 'Draft' : 'Published'),
       )
-      toast.success(saveAsDraft ? 'Draft saved' : 'Assignment published', {
+      toast.success(saveAsDraft ? t('teacher:editAssignment.toasts.draftSaved') : t('teacher:editAssignment.toasts.published'), {
         description: saveAsDraft
-          ? 'Changes saved. Publish when ready for students.'
-          : 'Students enrolled in this course can see this assignment.',
+          ? t('teacher:editAssignment.toasts.draftSavedDescription')
+          : t('teacher:editAssignment.toasts.publishedDescription'),
       })
       navigate('/teacher/assignments')
     } catch (error) {
-      toast.error('Failed to save assignment', {
-        description: error instanceof Error ? error.message : 'Please try again later',
+      toast.error(t('teacher:createAssignment.errors.saveFailed'), {
+        description: error instanceof Error ? error.message : t('teacher:shared.tryAgainLater'),
       })
     } finally {
       setLoading(false)
@@ -140,8 +142,8 @@ export function EditAssignmentPage() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight gradient-text">Edit Assignment</h1>
-            <p className="mt-1 text-sm text-muted-foreground">Update details or publish for students</p>
+            <h1 className="text-3xl font-bold tracking-tight gradient-text">{t('teacher:editAssignment.pageTitle')}</h1>
+            <p className="mt-1 text-sm text-muted-foreground">{t('teacher:editAssignment.pageSubtitle')}</p>
           </div>
         </div>
       </div>
@@ -151,15 +153,15 @@ export function EditAssignmentPage() {
           <div className="lg:col-span-2 space-y-3">
             <Card>
               <CardHeader className="pb-2 pt-4">
-                <CardTitle className="text-lg">Assignment Information</CardTitle>
-                <CardDescription className="text-xs mt-0.5">Basic details</CardDescription>
+                <CardTitle className="text-lg">{t('teacher:createAssignment.assignmentInfo')}</CardTitle>
+                <CardDescription className="text-xs mt-0.5">{t('teacher:editAssignment.basicDetails')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3 pt-2">
                 <div className="space-y-1.5">
-                  <Label htmlFor="course">Course</Label>
+                  <Label htmlFor="course">{t('teacher:editAssignment.course')}</Label>
                   <SelectRoot value={courseId} onValueChange={setCourseId} disabled>
                     <SelectTrigger id="course">
-                      <SelectValue placeholder="Course" />
+                      <SelectValue placeholder={t('teacher:editAssignment.course')} />
                     </SelectTrigger>
                     <SelectContent>
                       {courses.map((course) => (
@@ -169,11 +171,11 @@ export function EditAssignmentPage() {
                       ))}
                     </SelectContent>
                   </SelectRoot>
-                  <p className="text-xs text-muted-foreground">Course cannot be changed after creation.</p>
+                  <p className="text-xs text-muted-foreground">{t('teacher:editAssignment.courseLockHint')}</p>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="title">Assignment Title *</Label>
+                  <Label htmlFor="title">{t('teacher:createAssignment.titleRequired')}</Label>
                   <Input
                     id="title"
                     value={title}
@@ -183,7 +185,7 @@ export function EditAssignmentPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="prompt">Assignment Prompt / Description *</Label>
+                  <Label htmlFor="prompt">{t('teacher:createAssignment.promptRequired')}</Label>
                   <Textarea
                     id="prompt"
                     value={prompt}
@@ -195,7 +197,7 @@ export function EditAssignmentPage() {
 
                 <div className="grid gap-3 md:grid-cols-2">
                   <div className="space-y-1.5">
-                    <Label htmlFor="dueAt">Due Date *</Label>
+                    <Label htmlFor="dueAt">{t('teacher:createAssignment.dueDateRequired')}</Label>
                     <Input
                       id="dueAt"
                       type="datetime-local"
@@ -208,7 +210,7 @@ export function EditAssignmentPage() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="maxScore">Max Score</Label>
+                    <Label htmlFor="maxScore">{t('teacher:createAssignment.maxScore')}</Label>
                     <Input
                       id="maxScore"
                       type="number"
@@ -221,7 +223,7 @@ export function EditAssignmentPage() {
 
                 <div className="grid gap-3 md:grid-cols-2">
                   <div className="space-y-1.5">
-                    <Label htmlFor="weight">Weight</Label>
+                    <Label htmlFor="weight">{t('teacher:createAssignment.weight')}</Label>
                     <Input
                       id="weight"
                       type="number"
@@ -239,11 +241,11 @@ export function EditAssignmentPage() {
           <div className="space-y-3">
             <Card>
               <CardHeader className="pb-2 pt-4">
-                <CardTitle className="text-lg">Settings</CardTitle>
+                <CardTitle className="text-lg">{t('teacher:createAssignment.settings')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 pt-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="allowLate">Allow Late Submission</Label>
+                  <Label htmlFor="allowLate">{t('teacher:createAssignment.allowLate')}</Label>
                   <Switch
                     id="allowLate"
                     checked={allowLateSubmission}
@@ -252,7 +254,7 @@ export function EditAssignmentPage() {
                 </div>
                 {allowLateSubmission && (
                   <div className="space-y-1.5">
-                    <Label htmlFor="latePenalty">Late Penalty (%)</Label>
+                    <Label htmlFor="latePenalty">{t('teacher:createAssignment.latePenalty')}</Label>
                     <Input
                       id="latePenalty"
                       type="number"
@@ -273,10 +275,10 @@ export function EditAssignmentPage() {
                     {loading ? (
                       <>
                         <Loader2 className="h-4 w-4 me-2 animate-spin" />
-                        Saving...
+                        {t('common:saving')}
                       </>
                     ) : (
-                      'Publish (visible to students)'
+                      t('teacher:editAssignment.publishVisibleToStudents')
                     )}
                   </Button>
                   <Button
@@ -287,7 +289,7 @@ export function EditAssignmentPage() {
                     disabled={loading}
                   >
                     <Save className="h-4 w-4 me-2" />
-                    Save as Draft
+                    {t('teacher:createAssignment.saveAsDraft')}
                   </Button>
                   <Button
                     type="button"
@@ -296,7 +298,7 @@ export function EditAssignmentPage() {
                     onClick={() => navigate('/teacher/assignments')}
                     disabled={loading}
                   >
-                    Cancel
+                    {t('common:cancel')}
                   </Button>
                 </div>
               </CardContent>

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { format, formatDistanceToNow, isValid } from 'date-fns'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Button } from '../../components/ui/button'
@@ -51,6 +52,7 @@ const itemVariants = {
 }
 
 export function DashboardPage() {
+  const { t } = useTranslation(['student', 'common', 'errors'])
   const [loading, setLoading] = useState(true)
   const [enrollments, setEnrollments] = useState<any[]>([])
   const [assignments, setAssignments] = useState<any[]>([])
@@ -306,8 +308,8 @@ export function DashboardPage() {
       {/* Header */}
       <motion.div variants={itemVariants} transition={{ duration: 0.4, ease: 'easeOut' }} className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight gradient-text md:text-4xl">Dashboard</h1>
-          <p className="mt-1.5 text-muted-foreground">Your week at a glance</p>
+          <h1 className="text-3xl font-bold tracking-tight gradient-text md:text-4xl">{t('student:dashboard.pageTitle')}</h1>
+          <p className="mt-1.5 text-muted-foreground">{t('student:dashboard.pageSubtitle')}</p>
         </div>
         <div className="flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 shadow-sm">
           <Calendar className="h-4 w-4 text-primary" />
@@ -318,7 +320,7 @@ export function DashboardPage() {
       {/* Stats Grid */}
       <motion.div variants={itemVariants} transition={{ duration: 0.4, ease: 'easeOut' }} className="grid gap-2 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          title="Enrolled Classes"
+          title={t('student:dashboard.stats.enrolledClasses')}
           value={enrollments.length}
           icon={GraduationCap}
           color="primary"
@@ -326,7 +328,7 @@ export function DashboardPage() {
           delay={0}
         />
         <StatCard
-          title="Lessons Completed"
+          title={t('student:dashboard.stats.lessonsCompleted')}
           value={learningStats.totalLessonsCompleted}
           icon={Award}
           color="primary"
@@ -334,16 +336,16 @@ export function DashboardPage() {
           delay={0.1}
         />
         <StatCard
-          title="Study Time"
+          title={t('student:dashboard.stats.studyTime')}
           value={learningStats.totalStudyTime}
           icon={Clock}
           color="primary"
           loading={loading}
           delay={0.2}
-          suffix=" min"
+          suffix={t('student:dashboard.stats.minSuffix')}
         />
         <StatCard
-          title="Courses In Progress"
+          title={t('student:dashboard.stats.coursesInProgress')}
           value={learningStats.coursesInProgress}
           icon={TrendingUp}
           color="primary"
@@ -361,16 +363,19 @@ export function DashboardPage() {
                 <div className="rounded-lg bg-primary/15 p-1.5">
                   <PlayCircle className="h-4 w-4 text-primary" />
                 </div>
-                <CardTitle className="text-lg">Continue Watching</CardTitle>
+                <CardTitle className="text-lg">{t('student:dashboard.continueWatching')}</CardTitle>
               </div>
-              <CardDescription className="text-xs mt-0.5">Pick up where you left off</CardDescription>
+              <CardDescription className="text-xs mt-0.5">{t('student:dashboard.continueWatchingSubtitle')}</CardDescription>
             </CardHeader>
             <CardContent className="pt-2">
               <div className="space-y-3">
                 {/* Progress Info */}
                 {learningStats.continueWatching.totalLessons > 0 && (
                   <div className="text-sm text-muted-foreground">
-                    {learningStats.continueWatching.completedLessons || 0} of {learningStats.continueWatching.totalLessons} lessons completed
+                    {t('student:dashboard.lessonsOf', {
+                      completed: learningStats.continueWatching.completedLessons || 0,
+                      total: learningStats.continueWatching.totalLessons,
+                    })}
                   </div>
                 )}
                 
@@ -382,16 +387,16 @@ export function DashboardPage() {
                       {(() => {
                         const lastWatchedDate = safeDate(learningStats.continueWatching.lastWatchedAt)
                         if (lastWatchedDate) {
-                          return `Last watched ${formatDistanceToNow(lastWatchedDate, { addSuffix: true })}`
+                          return t('student:dashboard.lastWatched', { ago: formatDistanceToNow(lastWatchedDate, { addSuffix: true }) })
                         }
-                        return 'Continue watching'
+                        return t('student:dashboard.continueWatching')
                       })()}
                     </div>
                   </div>
                   <Button asChild className="shrink-0">
                     <Link to={`/student/my-classes/${learningStats.continueWatching.courseId}/lessons/${learningStats.continueWatching.lessonId}`}>
                       <PlayCircle className="h-4 w-4 me-2" />
-                      Continue Watching
+                      {t('student:dashboard.continueWatching')}
                     </Link>
                   </Button>
                 </div>
@@ -414,10 +419,10 @@ export function DashboardPage() {
                 <div className="rounded-lg bg-primary/10 p-1.5">
                   <Calendar className="h-4 w-4 text-primary" />
                 </div>
-                <CardTitle className="text-lg">Today's Schedule</CardTitle>
+                <CardTitle className="text-lg">{t('student:dashboard.todaysSchedule')}</CardTitle>
               </div>
               <CardDescription className="text-xs mt-0.5">
-                Today&apos;s live sessions only — full week in Calendar
+                {t('student:dashboard.todaysScheduleSubtitle')}
               </CardDescription>
             </CardHeader>
             <CardContent className="min-h-0 flex-1 overflow-y-auto px-4 pt-1.5 pb-4 scroll-fancy">
@@ -430,20 +435,20 @@ export function DashboardPage() {
               ) : enrollments.length === 0 ? (
                 <EmptyState
                   icon={Calendar}
-                  title="No enrolled classes yet"
-                  body="Browse the catalog and enroll to see your schedule here."
+                  title={t('student:dashboard.noEnrolledClasses')}
+                  body={t('student:dashboard.noEnrolledBody')}
                 />
               ) : todayLiveSlots.length === 0 ? (
                 <div className="space-y-3 pe-0.5">
                   <p className="text-sm text-muted-foreground">
-                    No live sessions scheduled for today. Open{' '}
+                    {t('student:dashboard.noLiveToday')}
                     <Link to="/student/calendar" className="text-primary font-medium underline-offset-2 hover:underline">
-                      Calendar
-                    </Link>{' '}
-                    for your full week.
+                      {t('student:calendar.pageTitle')}
+                    </Link>
+                    {t('student:dashboard.forYourWeek')}
                   </p>
                   <Button variant="outline" size="sm" className="w-full sm:w-auto" asChild>
-                    <Link to="/student/calendar">View weekly calendar</Link>
+                    <Link to="/student/calendar">{t('student:dashboard.viewWeeklyCalendar')}</Link>
                   </Button>
                 </div>
               ) : (
@@ -464,16 +469,16 @@ export function DashboardPage() {
                             <div className="flex flex-wrap items-center gap-2">
                               <span className="font-medium text-sm">{slot.courseTitle}</span>
                               {badge === 'live' && (
-                                <Badge className="text-[10px] h-5 bg-red-600 hover:bg-red-600">Live now</Badge>
+                                <Badge className="text-[10px] h-5 bg-red-600 hover:bg-red-600">{t('student:shared.liveNow')}</Badge>
                               )}
                               {badge === 'soon' && (
                                 <Badge variant="secondary" className="text-[10px] h-5">
-                                  Starting soon
+                                  {t('student:shared.startingSoon')}
                                 </Badge>
                               )}
                               {badge === 'today' && (
                                 <Badge variant="outline" className="text-[10px] h-5 border-primary/40 text-primary">
-                                  Today
+                                  {t('student:shared.today')}
                                 </Badge>
                               )}
                             </div>
@@ -486,7 +491,7 @@ export function DashboardPage() {
                             <Button size="sm" className="shrink-0 gap-1.5 w-full sm:w-auto" asChild>
                               <a href={slot.joinUrl} target="_blank" rel="noopener noreferrer">
                                 <Video className="h-3.5 w-3.5" />
-                                Join
+                                {t('student:shared.join')}
                               </a>
                             </Button>
                           ) : null}
@@ -508,9 +513,9 @@ export function DashboardPage() {
                 <div className="rounded-lg bg-primary/10 p-1.5">
                   <Sparkles className="h-4 w-4 text-primary" />
                 </div>
-                <CardTitle className="text-lg">Quick Enroll</CardTitle>
+                <CardTitle className="text-lg">{t('student:dashboard.quickEnroll')}</CardTitle>
               </div>
-              <CardDescription className="text-xs mt-0.5">Featured courses to get you started</CardDescription>
+              <CardDescription className="text-xs mt-0.5">{t('student:dashboard.quickEnrollSubtitle')}</CardDescription>
             </CardHeader>
             <CardContent className="min-h-0 flex-1 overflow-y-auto px-4 pt-1.5 pb-4 space-y-2 scroll-fancy">
               {loading ? (
@@ -521,8 +526,8 @@ export function DashboardPage() {
               ) : featuredCourses.length === 0 ? (
                 <EmptyState
                   icon={Sparkles}
-                  title="No featured courses"
-                  body="Check back later for featured courses."
+                  title={t('student:dashboard.noFeaturedCourses')}
+                  body={t('student:dashboard.noFeaturedBody')}
                 />
               ) : (
                 <div className="space-y-2 pe-0.5">
@@ -545,7 +550,7 @@ export function DashboardPage() {
                           </div>
                         </div>
                         <Button size="sm" variant="default" className="shrink-0" asChild>
-                          <Link to={`/courses/${c.id}`}>View</Link>
+                          <Link to={`/courses/${c.id}`}>{t('student:dashboard.view')}</Link>
                         </Button>
                       </div>
                     </motion.div>
@@ -566,9 +571,9 @@ export function DashboardPage() {
                 <div className="rounded-lg bg-primary/10 p-1.5">
                   <FileText className="h-4 w-4 text-primary" />
                 </div>
-                <CardTitle className="text-lg">Next Due Assignment</CardTitle>
+                <CardTitle className="text-lg">{t('student:dashboard.nextDue')}</CardTitle>
               </div>
-              <CardDescription className="text-xs mt-0.5">Stay on track this week</CardDescription>
+              <CardDescription className="text-xs mt-0.5">{t('student:dashboard.nextDueSubtitle')}</CardDescription>
             </CardHeader>
             <CardContent className="min-h-0 flex-1 overflow-y-auto pt-1.5 scroll-fancy">
               {loading ? (
@@ -576,8 +581,8 @@ export function DashboardPage() {
               ) : sortedPendingAssignments.length === 0 ? (
                 <EmptyState
                   icon={FileText}
-                  title="No assignments yet"
-                  body="Once you enroll, assignments will appear here."
+                  title={t('student:dashboard.noAssignmentsYet')}
+                  body={t('student:dashboard.noAssignmentsBody')}
                 />
               ) : (
                 <div className="space-y-2 pe-0.5">
@@ -592,7 +597,7 @@ export function DashboardPage() {
                         <Clock className="h-3.5 w-3.5 shrink-0" />
                         {(() => {
                         const d = safeDate(a.dueAt)
-                        return d ? `Due ${format(d, 'MMM d, p')}` : 'Due date not set'
+                        return d ? t('student:dashboard.dueAt', { when: format(d, 'MMM d, p') }) : t('student:dashboard.dueNotSet')
                       })()}
                       </div>
                     </div>
@@ -611,19 +616,19 @@ export function DashboardPage() {
                   <div className="rounded-lg bg-primary/10 p-1.5">
                     <BookOpen className="h-4 w-4 text-primary" />
                   </div>
-                  <CardTitle className="text-lg">Exams & Quizzes</CardTitle>
+                  <CardTitle className="text-lg">{t('student:dashboard.examsTitle')}</CardTitle>
                 </div>
                 {dashboardExams.length > 0 && (
                   <Button variant="ghost" size="sm" className="text-xs shrink-0 text-primary hover:text-primary" asChild>
                     <Link to="/student/exams" className="flex items-center gap-1">
-                      View all
+                      {t('student:dashboard.viewAll')}
                       <ArrowRight className="h-3 w-3" />
                     </Link>
                   </Button>
                 )}
               </div>
               <CardDescription className="text-xs mt-0.5">
-                {dashboardExams.length > 0 ? 'Available and upcoming exams from your courses' : 'Practice mode available in the demo'}
+                {dashboardExams.length > 0 ? t('student:dashboard.examsSubtitleWithExams') : t('student:dashboard.examsSubtitleEmpty')}
               </CardDescription>
             </CardHeader>
             <CardContent className="min-h-0 flex-1 overflow-y-auto pt-1.5 scroll-fancy">
@@ -632,8 +637,8 @@ export function DashboardPage() {
               ) : dashboardExams.length === 0 ? (
                 <EmptyState
                   icon={BookOpen}
-                  title="No exams yet"
-                  body="You're all caught up. Enroll in courses to see exams and quizzes here."
+                  title={t('student:dashboard.noExamsYet')}
+                  body={t('student:dashboard.noExamsBody')}
                 />
               ) : (
                 <ul className="space-y-2 pe-0.5">
@@ -654,26 +659,28 @@ export function DashboardPage() {
                           </div>
                           <div className="min-w-0 flex-1">
                             <div className="font-semibold text-sm truncate">{exam.title}</div>
-                            <div className="text-xs text-muted-foreground mt-0.5">{exam.courseTitle || 'Course'}</div>
+                            <div className="text-xs text-muted-foreground mt-0.5">{exam.courseTitle || t('student:shared.course')}</div>
                             <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
                               <span className="flex items-center gap-1">
                                 <Clock className="h-3 w-3 shrink-0" />
                                 {startDate
                                   ? isUpcoming
-                                    ? `Starts ${format(startDate, 'MMM d, p')}`
-                                    : `Started ${format(startDate, 'MMM d')}`
+                                    ? t('student:dashboard.examStarts', { when: format(startDate, 'MMM d, p') })
+                                    : t('student:dashboard.examStarted', { when: format(startDate, 'MMM d') })
                                   : '—'}
                               </span>
                               {exam.durationMinutes != null && (
-                                <span>{exam.durationMinutes} min</span>
+                                <span>{t('student:dashboard.examMinutes', { count: exam.durationMinutes })}</span>
                               )}
                               {exam.questionCount != null && (
-                                <span>{exam.questionCount} question{exam.questionCount !== 1 ? 's' : ''}</span>
+                                <span>{exam.questionCount === 1
+                                  ? t('student:dashboard.examQuestionsOne', { count: exam.questionCount })
+                                  : t('student:dashboard.examQuestionsOther', { count: exam.questionCount })}</span>
                               )}
                             </div>
                           </div>
                           <Badge variant={isUpcoming ? 'secondary' : 'default'} className="shrink-0 text-xs font-medium">
-                            {isUpcoming ? 'Upcoming' : 'Available'}
+                            {isUpcoming ? t('student:dashboard.upcoming') : t('student:dashboard.available')}
                           </Badge>
                         </Link>
                       </li>
@@ -702,15 +709,15 @@ export function DashboardPage() {
                     <div className="rounded-lg bg-primary/10 p-1.5">
                       <Sparkles className="h-4 w-4 text-primary" />
                     </div>
-                    <CardTitle className="text-lg">Recommended For You</CardTitle>
+                    <CardTitle className="text-lg">{t('student:dashboard.recommended')}</CardTitle>
                   </div>
                   <Button asChild variant="ghost" size="sm" className="text-primary">
                     <Link to="/student/catalog" className="flex items-center gap-1">
-                      View All <ArrowRight className="h-3 w-3" />
+                      {t('student:dashboard.viewAll')} <ArrowRight className="h-3 w-3" />
                     </Link>
                   </Button>
                 </div>
-                <CardDescription className="text-xs mt-0.5">Personalized course suggestions based on your interests</CardDescription>
+                <CardDescription className="text-xs mt-0.5">{t('student:dashboard.recommendedSubtitle')}</CardDescription>
               </CardHeader>
               <CardContent className="pt-2">
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -729,15 +736,15 @@ export function DashboardPage() {
                     <div className="rounded-lg bg-primary/10 p-1.5">
                       <TrendingUp className="h-4 w-4 text-primary" />
                     </div>
-                    <CardTitle className="text-lg">Trending Now</CardTitle>
+                    <CardTitle className="text-lg">{t('student:dashboard.trending')}</CardTitle>
                   </div>
                   <Button asChild variant="ghost" size="sm" className="text-primary">
                     <Link to="/student/catalog" className="flex items-center gap-1">
-                      View All <ArrowRight className="h-3 w-3" />
+                      {t('student:dashboard.viewAll')} <ArrowRight className="h-3 w-3" />
                     </Link>
                   </Button>
                 </div>
-                <CardDescription className="text-xs mt-0.5">Popular courses based on recent enrollments</CardDescription>
+                <CardDescription className="text-xs mt-0.5">{t('student:dashboard.trendingSubtitle')}</CardDescription>
               </CardHeader>
               <CardContent className="pt-2">
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

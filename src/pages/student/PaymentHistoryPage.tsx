@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Loader2,
   CreditCard,
@@ -10,6 +11,7 @@ import { toast } from "sonner";
 import { paymentService, type PaymentDto } from "../../services/paymentService";
 
 export function PaymentHistoryPage() {
+  const { t } = useTranslation(['student', 'common', 'errors']);
   const [payments, setPayments] = useState<PaymentDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -27,8 +29,8 @@ export function PaymentHistoryPage() {
         setTotalCount(result.totalCount);
       } catch (error) {
         console.error("Failed to fetch payments:", error);
-        toast.error("Failed to load payment history", {
-          description: error instanceof Error ? error.message : "An error occurred",
+        toast.error(t('student:payments.errors.loadFailed'), {
+          description: error instanceof Error ? error.message : t('student:payments.errors.unknownError'),
         });
       } finally {
         setLoading(false);
@@ -36,7 +38,7 @@ export function PaymentHistoryPage() {
     };
 
     fetchPayments();
-  }, [currentPage]);
+  }, [currentPage, t]);
 
   const getStatusBadge = (status: string) => {
     switch (status.toLowerCase()) {
@@ -56,9 +58,9 @@ export function PaymentHistoryPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight md:text-3xl">Payment History</h1>
+        <h1 className="text-2xl font-bold tracking-tight md:text-3xl">{t('student:payments.title')}</h1>
         <p className="mt-1 text-muted-foreground">
-          View your past payments and transactions ({totalCount} total)
+          {t('student:payments.subtitle', { count: totalCount })}
         </p>
       </div>
 
@@ -72,11 +74,11 @@ export function PaymentHistoryPage() {
           <table className="w-full">
             <thead className="border-b border-border bg-muted/50">
               <tr>
-                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">Date</th>
-                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">Course</th>
-                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">Amount</th>
-                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">Status</th>
-                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">Reference</th>
+                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">{t('student:payments.columnDate')}</th>
+                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">{t('student:payments.columnCourse')}</th>
+                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">{t('student:payments.columnAmount')}</th>
+                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">{t('student:payments.columnStatus')}</th>
+                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">{t('student:payments.columnReference')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -85,7 +87,7 @@ export function PaymentHistoryPage() {
                   <td colSpan={5} className="px-4 py-12 text-center text-muted-foreground">
                     <div className="flex flex-col items-center gap-2">
                       <CreditCard className="h-8 w-8 text-muted-foreground/50" />
-                      <p>No payments found</p>
+                      <p>{t('student:payments.noPayments')}</p>
                     </div>
                   </td>
                 </tr>
@@ -126,24 +128,29 @@ export function PaymentHistoryPage() {
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            Showing {(currentPage - 1) * pageSize + 1} to{" "}
-            {Math.min(currentPage * pageSize, totalCount)} of {totalCount} payments
+            {t('student:payments.showing', {
+              start: (currentPage - 1) * pageSize + 1,
+              end: Math.min(currentPage * pageSize, totalCount),
+              total: totalCount,
+            })}
           </p>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage === 1 || loading}
               className="rounded-lg p-2 hover:bg-accent disabled:opacity-50"
+              aria-label={t('student:payments.previous')}
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
             <span className="text-sm">
-              Page {currentPage} of {totalPages}
+              {t('student:payments.page', { current: currentPage, total: totalPages })}
             </span>
             <button
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages || loading}
               className="rounded-lg p-2 hover:bg-accent disabled:opacity-50"
+              aria-label={t('student:payments.next')}
             >
               <ChevronRight className="h-4 w-4" />
             </button>

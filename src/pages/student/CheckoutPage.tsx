@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   Loader2,
   Tag,
@@ -9,15 +10,14 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
-import { Label } from "../../components/ui/label";
 import { toast } from "sonner";
 import { courseService, type CourseDto } from "../../services/courseService";
 import { paymentService } from "../../services/paymentService";
-import { discountService, type ValidateDiscountResponse } from "../../services/discountService";
+import { discountService } from "../../services/discountService";
 
 export function CheckoutPage() {
+  const { t } = useTranslation(['student', 'common', 'errors']);
   const { courseId } = useParams<{ courseId: string }>();
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [course, setCourse] = useState<CourseDto | null>(null);
   const [discountCode, setDiscountCode] = useState("");
@@ -38,8 +38,8 @@ export function CheckoutPage() {
         setCourse(data);
       } catch (error) {
         console.error("Failed to fetch course:", error);
-        toast.error("Failed to load course", {
-          description: error instanceof Error ? error.message : "An error occurred",
+        toast.error(t('student:checkout.errors.failedLoadCourse'), {
+          description: error instanceof Error ? error.message : t('student:checkout.errors.unknownError'),
         });
       } finally {
         setLoading(false);
@@ -47,7 +47,7 @@ export function CheckoutPage() {
     };
 
     fetchCourse();
-  }, [courseId]);
+  }, [courseId, t]);
 
   const handleApplyDiscount = async () => {
     if (!discountCode.trim() || !courseId) return;
@@ -56,8 +56,8 @@ export function CheckoutPage() {
       setValidating(true);
       const result = await discountService.validateDiscount(courseId, discountCode.trim());
       if (!result.isValid) {
-        toast.error("Invalid discount code", {
-          description: result.message || "The code is not valid or has expired",
+        toast.error(t('student:checkout.errors.invalidCode'), {
+          description: result.message || t('student:checkout.errors.codeNotValid'),
         });
         setDiscountApplied(null);
         return;
@@ -69,12 +69,12 @@ export function CheckoutPage() {
         discountedPrice,
         discountAmount: discountAmt,
       });
-      toast.success("Discount applied", {
-        description: `You saved $${discountAmt.toFixed(2)}`,
+      toast.success(t('student:checkout.discountAppliedTitle'), {
+        description: t('student:checkout.discountSaved', { amount: discountAmt.toFixed(2) }),
       });
     } catch (error) {
-      toast.error("Failed to validate discount", {
-        description: error instanceof Error ? error.message : "An error occurred",
+      toast.error(t('student:checkout.errors.failedValidate'), {
+        description: error instanceof Error ? error.message : t('student:checkout.errors.unknownError'),
       });
       setDiscountApplied(null);
     } finally {
@@ -100,13 +100,13 @@ export function CheckoutPage() {
       if (result.authorizationUrl) {
         window.location.href = result.authorizationUrl;
       } else {
-        toast.error("Payment initialization failed", {
-          description: "No redirect URL received from payment provider",
+        toast.error(t('student:checkout.errors.paymentInitFailed'), {
+          description: t('student:checkout.errors.noRedirectUrl'),
         });
       }
     } catch (error) {
-      toast.error("Failed to initialize payment", {
-        description: error instanceof Error ? error.message : "An error occurred",
+      toast.error(t('student:checkout.errors.failedInitPayment'), {
+        description: error instanceof Error ? error.message : t('student:checkout.errors.unknownError'),
       });
     } finally {
       setPaying(false);
@@ -124,7 +124,7 @@ export function CheckoutPage() {
   if (!course) {
     return (
       <div className="text-center py-12 text-muted-foreground">
-        Course not found.
+        {t('student:checkout.courseNotFound')}
       </div>
     );
   }
@@ -133,9 +133,9 @@ export function CheckoutPage() {
     <div className="space-y-6 max-w-2xl mx-auto">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight md:text-3xl">Checkout</h1>
+        <h1 className="text-2xl font-bold tracking-tight md:text-3xl">{t('student:checkout.title')}</h1>
         <p className="mt-1 text-muted-foreground">
-          Complete your purchase to enroll in this course
+          {t('student:checkout.subtitle')}
         </p>
       </div>
 
@@ -144,7 +144,7 @@ export function CheckoutPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <ShoppingCart className="h-5 w-5 text-primary" />
-            Course Details
+            {t('student:checkout.courseDetails')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -170,7 +170,7 @@ export function CheckoutPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Tag className="h-5 w-5 text-primary" />
-            Discount Code
+            {t('student:checkout.discountCode')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -179,7 +179,7 @@ export function CheckoutPage() {
               <Input
                 value={discountCode}
                 onChange={(e) => setDiscountCode(e.target.value)}
-                placeholder="Enter discount code"
+                placeholder={t('student:checkout.enterDiscountCode')}
                 disabled={discountApplied !== null}
               />
             </div>
@@ -191,7 +191,7 @@ export function CheckoutPage() {
                   setDiscountCode("");
                 }}
               >
-                Remove
+                {t('student:checkout.remove')}
               </Button>
             ) : (
               <Button
@@ -199,14 +199,17 @@ export function CheckoutPage() {
                 onClick={handleApplyDiscount}
                 disabled={validating || !discountCode.trim()}
               >
-                {validating ? "Validating..." : "Apply"}
+                {validating ? t('student:checkout.validating') : t('student:checkout.apply')}
               </Button>
             )}
           </div>
           {discountApplied && (
             <div className="mt-3 flex items-center gap-2 text-sm text-emerald-600">
               <CheckCircle className="h-4 w-4" />
-              Discount "{discountApplied.code}" applied - saving ${discountApplied.discountAmount.toFixed(2)}
+              {t('student:checkout.discountApplied', {
+                code: discountApplied.code,
+                amount: discountApplied.discountAmount.toFixed(2),
+              })}
             </div>
           )}
         </CardContent>
@@ -215,22 +218,22 @@ export function CheckoutPage() {
       {/* Price Summary */}
       <Card>
         <CardHeader>
-          <CardTitle>Order Summary</CardTitle>
+          <CardTitle>{t('student:checkout.orderSummary')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Original price</span>
+            <span className="text-muted-foreground">{t('student:checkout.originalPrice')}</span>
             <span>${originalPrice.toFixed(2)}</span>
           </div>
           {discountApplied && (
             <div className="flex justify-between text-sm text-emerald-600">
-              <span>Discount ({discountApplied.code})</span>
+              <span>{t('student:checkout.discount', { code: discountApplied.code })}</span>
               <span>-${discountAmount.toFixed(2)}</span>
             </div>
           )}
           <div className="border-t pt-3">
             <div className="flex justify-between">
-              <span className="font-semibold">Total</span>
+              <span className="font-semibold">{t('student:checkout.total')}</span>
               <span className="text-xl font-bold">${finalPrice.toFixed(2)}</span>
             </div>
           </div>
@@ -244,10 +247,10 @@ export function CheckoutPage() {
             {paying ? (
               <>
                 <Loader2 className="me-2 h-4 w-4 animate-spin" />
-                Processing...
+                {t('student:checkout.processing')}
               </>
             ) : (
-              `Pay $${finalPrice.toFixed(2)}`
+              t('student:checkout.pay', { amount: finalPrice.toFixed(2) })
             )}
           </Button>
         </CardContent>

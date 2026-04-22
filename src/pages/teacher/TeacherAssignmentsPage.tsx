@@ -29,6 +29,7 @@ import {
 } from '../../components/ui/table'
 import { assignmentService, type AssignmentDto } from '../../services/assignmentService'
 import { teacherService } from '../../services/teacherService'
+import { useTranslation } from 'react-i18next'
 
 interface AssignmentWithStats extends AssignmentDto {
   submissionCount: number
@@ -36,6 +37,7 @@ interface AssignmentWithStats extends AssignmentDto {
 }
 
 export function TeacherAssignmentsPage() {
+  const { t } = useTranslation(['teacher', 'common', 'errors'])
   const [searchQuery, setSearchQuery] = useState('')
   const [assignments, setAssignments] = useState<AssignmentWithStats[]>([])
   const [loading, setLoading] = useState(true)
@@ -88,8 +90,8 @@ export function TeacherAssignmentsPage() {
         setAssignments(allAssignments)
       } catch (error) {
         console.error('Failed to load assignments:', error)
-        toast.error('Failed to load assignments', {
-          description: error instanceof Error ? error.message : 'Please try again later',
+        toast.error(t('teacher:assignments.errors.loadFailed'), {
+          description: error instanceof Error ? error.message : t('teacher:shared.tryAgainLater'),
         })
       } finally {
         setLoading(false)
@@ -102,15 +104,15 @@ export function TeacherAssignmentsPage() {
   const handlePublish = async (id: string) => {
     try {
       await assignmentService.updateAssignment(id, { status: 'Published' })
-      toast.success('Assignment published', {
-        description: 'Students enrolled in the course can now see it.',
+      toast.success(t('teacher:assignments.toasts.published'), {
+        description: t('teacher:assignments.toasts.publishedDescription'),
       })
       setAssignments((prev) =>
         prev.map((a) => (a.id === id ? { ...a, status: 'Published' } : a)),
       )
     } catch (error) {
-      toast.error('Could not publish', {
-        description: error instanceof Error ? error.message : 'Please try again.',
+      toast.error(t('teacher:assignments.errors.publishFailed'), {
+        description: error instanceof Error ? error.message : t('teacher:shared.pleaseTryAgain'),
       })
     }
   }
@@ -129,13 +131,13 @@ export function TeacherAssignmentsPage() {
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
         <div className="min-w-0">
-          <h1 className="text-2xl font-bold tracking-tight gradient-text sm:text-3xl">Assignments</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Manage assignments and grade submissions</p>
+          <h1 className="text-2xl font-bold tracking-tight gradient-text sm:text-3xl">{t('teacher:assignments.pageTitle')}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{t('teacher:assignments.pageSubtitle')}</p>
         </div>
         <Button variant="gradient" asChild className="w-full shrink-0 sm:w-auto">
           <Link to="/teacher/assignments/create">
             <PlusCircle className="h-4 w-4 me-2" />
-            Create Assignment
+            {t('teacher:createAssignment.pageTitle')}
           </Link>
         </Button>
       </div>
@@ -146,7 +148,7 @@ export function TeacherAssignmentsPage() {
           <div className="relative">
             <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Search assignments..."
+              placeholder={t('teacher:assignments.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="ps-10"
@@ -158,9 +160,9 @@ export function TeacherAssignmentsPage() {
       {/* Assignments Table */}
       <Card>
         <CardHeader className="pb-2 pt-4">
-          <CardTitle className="text-lg">All Assignments</CardTitle>
+          <CardTitle className="text-lg">{t('teacher:assignments.allAssignments')}</CardTitle>
           <CardDescription className="text-xs mt-0.5">
-            {filteredAssignments.length} assignment{filteredAssignments.length !== 1 ? 's' : ''}
+            {t('teacher:assignments.count', { count: filteredAssignments.length })}
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-2">
@@ -171,8 +173,8 @@ export function TeacherAssignmentsPage() {
           ) : filteredAssignments.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <FileText className="h-12 w-12 mx-auto mb-3 opacity-50" />
-              <p className="text-sm">No assignments found</p>
-              <p className="text-xs mt-1">Create your first assignment to get started</p>
+              <p className="text-sm">{t('teacher:assignments.noneFound')}</p>
+              <p className="text-xs mt-1">{t('teacher:assignments.createFirst')}</p>
             </div>
           ) : (
             <>
@@ -184,40 +186,40 @@ export function TeacherAssignmentsPage() {
                         try {
                           return format(new Date(assignment.dueAt), 'MMM d, yyyy')
                         } catch {
-                          return 'Invalid date'
+                          return t('teacher:shared.invalidDate')
                         }
                       })()
-                    : 'No due date'
+                    : t('teacher:assignments.noDueDate')
                   return (
                     <div
                       key={assignment.id}
                       className="rounded-xl border border-border/70 bg-card/80 p-4 shadow-sm"
                     >
                       <div className="font-semibold leading-snug">{assignment.title}</div>
-                      <p className="mt-1 text-sm text-muted-foreground">{assignment.courseTitle || 'Unknown course'}</p>
+                      <p className="mt-1 text-sm text-muted-foreground">{assignment.courseTitle || t('teacher:assignments.unknownCourse')}</p>
                       <dl className="mt-3 grid grid-cols-2 gap-2 text-sm">
                         <div>
-                          <dt className="text-xs text-muted-foreground">Due</dt>
+                          <dt className="text-xs text-muted-foreground">{t('teacher:assignments.due')}</dt>
                           <dd className="mt-0.5 flex items-center gap-1.5 font-medium">
                             <Clock className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                             {dueLabel}
                           </dd>
                         </div>
                         <div>
-                          <dt className="text-xs text-muted-foreground">Submissions</dt>
+                          <dt className="text-xs text-muted-foreground">{t('teacher:assignments.submissions')}</dt>
                           <dd className="mt-0.5 flex items-center gap-1.5 font-medium">
                             <Users className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                             {assignment.submissionCount} / {assignment.totalStudents || '?'}
                           </dd>
                         </div>
                         <div className="col-span-2">
-                          <dt className="text-xs text-muted-foreground">Status</dt>
+                          <dt className="text-xs text-muted-foreground">{t('teacher:assignments.status')}</dt>
                           <dd className="mt-1">
                             <Badge
                               variant={assignment.status === 'Published' ? 'default' : 'secondary'}
                               className="text-xs"
                             >
-                              {assignment.status || 'Draft'}
+                              {t(`teacher:assignments.statuses.${(assignment.status || 'Draft').toLowerCase()}`)}
                             </Badge>
                           </dd>
                         </div>
@@ -226,7 +228,7 @@ export function TeacherAssignmentsPage() {
                         <Button variant="outline" size="sm" className="flex-1 min-w-[calc(50%-0.25rem)]" asChild>
                           <Link to={`/teacher/assignments/${assignment.id}/edit`}>
                             <Pencil className="h-3.5 w-3.5 me-1" />
-                            Edit
+                            {t('common:edit')}
                           </Link>
                         </Button>
                         {assignment.status !== 'Published' && (
@@ -238,19 +240,19 @@ export function TeacherAssignmentsPage() {
                             onClick={() => handlePublish(assignment.id)}
                           >
                             <Send className="h-3.5 w-3.5 me-1" />
-                            Publish
+                            {t('teacher:assignments.publish')}
                           </Button>
                         )}
                         <Button variant="outline" size="sm" className="flex-1 min-w-[calc(50%-0.25rem)]" asChild>
                           <Link to={`/teacher/assignments/${assignment.id}/submissions`}>
                             <Eye className="h-3.5 w-3.5 me-1" />
-                            Submissions
+                            {t('teacher:assignments.submissions')}
                           </Link>
                         </Button>
                         <Button variant="outline" size="sm" className="flex-1 min-w-[calc(50%-0.25rem)]" asChild>
                           <Link to={`/teacher/assignments/${assignment.id}/grade`}>
                             <CheckCircle2 className="h-3.5 w-3.5 me-1" />
-                            Grade
+                            {t('teacher:assignments.grade')}
                           </Link>
                         </Button>
                       </div>
@@ -265,12 +267,12 @@ export function TeacherAssignmentsPage() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Assignment</TableHead>
-                        <TableHead>Course</TableHead>
-                        <TableHead>Due Date</TableHead>
-                        <TableHead>Submissions</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead className="text-end">Actions</TableHead>
+                        <TableHead>{t('teacher:assignments.columns.assignment')}</TableHead>
+                        <TableHead>{t('teacher:assignments.columns.course')}</TableHead>
+                        <TableHead>{t('teacher:assignments.columns.dueDate')}</TableHead>
+                        <TableHead>{t('teacher:assignments.columns.submissions')}</TableHead>
+                        <TableHead>{t('teacher:assignments.columns.status')}</TableHead>
+                        <TableHead className="text-end">{t('teacher:assignments.columns.actions')}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -280,7 +282,7 @@ export function TeacherAssignmentsPage() {
                             <div className="font-medium text-sm">{assignment.title}</div>
                           </TableCell>
                           <TableCell>
-                            <div className="text-sm text-muted-foreground">{assignment.courseTitle || 'Unknown Course'}</div>
+                            <div className="text-sm text-muted-foreground">{assignment.courseTitle || t('teacher:assignments.unknownCourse')}</div>
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-1.5 text-sm">
@@ -289,9 +291,9 @@ export function TeacherAssignmentsPage() {
                                 try {
                                   return format(new Date(assignment.dueAt), 'MMM d, yyyy')
                                 } catch {
-                                  return 'Invalid date'
+                                  return t('teacher:shared.invalidDate')
                                 }
-                              })() : 'No due date'}
+                              })() : t('teacher:assignments.noDueDate')}
                             </div>
                           </TableCell>
                           <TableCell>
@@ -305,7 +307,7 @@ export function TeacherAssignmentsPage() {
                               variant={assignment.status === 'Published' ? 'default' : 'secondary'}
                               className="text-xs"
                             >
-                              {assignment.status || 'Draft'}
+                              {t(`teacher:assignments.statuses.${(assignment.status || 'Draft').toLowerCase()}`)}
                             </Badge>
                           </TableCell>
                           <TableCell className="text-end">
@@ -313,7 +315,7 @@ export function TeacherAssignmentsPage() {
                               <Button variant="ghost" size="sm" asChild>
                                 <Link to={`/teacher/assignments/${assignment.id}/edit`}>
                                   <Pencil className="h-3 w-3 me-1" />
-                                  Edit
+                                  {t('common:edit')}
                                 </Link>
                               </Button>
                               {assignment.status !== 'Published' && (
@@ -324,19 +326,19 @@ export function TeacherAssignmentsPage() {
                                   onClick={() => handlePublish(assignment.id)}
                                 >
                                   <Send className="h-3 w-3 me-1" />
-                                  Publish
+                                  {t('teacher:assignments.publish')}
                                 </Button>
                               )}
                               <Button variant="ghost" size="sm" asChild>
                                 <Link to={`/teacher/assignments/${assignment.id}/submissions`}>
                                   <Eye className="h-3 w-3 me-1" />
-                                  View
+                                  {t('teacher:assignments.viewAction')}
                                 </Link>
                               </Button>
                               <Button variant="ghost" size="sm" asChild>
                                 <Link to={`/teacher/assignments/${assignment.id}/grade`}>
                                   <CheckCircle2 className="h-3 w-3 me-1" />
-                                  Grade
+                                  {t('teacher:assignments.grade')}
                                 </Link>
                               </Button>
                             </div>

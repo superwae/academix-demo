@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
 import { Button } from '../../components/ui/button';
@@ -73,6 +74,7 @@ function buildLectureLessonsForScheduledSection(
   lessonSectionId: string,
   joinByLessonId: Record<string, string | undefined>,
   metaByLessonId: Record<string, MeetingMeta>,
+  openJoinLabel: string,
 ): LessonDto[] {
   const lessons: LessonDto[] = [];
   let order = 0;
@@ -89,7 +91,7 @@ function buildLectureLessonsForScheduledSection(
       id,
       sectionId: lessonSectionId,
       title: `${formatMeetingRow(mt)}`,
-      description: [cs.locationLabel, cs.joinUrl ? 'Open join link for the live session' : undefined]
+      description: [cs.locationLabel, cs.joinUrl ? openJoinLabel : undefined]
         .filter(Boolean)
         .join(' · '),
       order,
@@ -102,7 +104,10 @@ function buildLectureLessonsForScheduledSection(
 }
 
 /** Flat list when there are no lesson-module sections — one card for all meetings. */
-function buildLiveScheduleFromCourse(course: CourseDto): {
+function buildLiveScheduleFromCourse(
+  course: CourseDto,
+  labels: { openJoin: string; sectionTitle: string; sectionDescription: string },
+): {
   section: CourseSectionDto;
   lessons: LessonDto[];
   joinByLessonId: Record<string, string | undefined>;
@@ -128,7 +133,7 @@ function buildLiveScheduleFromCourse(course: CourseDto): {
         id,
         sectionId,
         title: `${cs.name} — ${formatMeetingRow(mt)}`,
-        description: [cs.locationLabel, cs.joinUrl ? 'Open join link for the live session' : undefined]
+        description: [cs.locationLabel, cs.joinUrl ? labels.openJoin : undefined]
           .filter(Boolean)
           .join(' · '),
         order,
@@ -145,9 +150,9 @@ function buildLiveScheduleFromCourse(course: CourseDto): {
     section: {
       id: sectionId,
       courseId: course.id,
-      title: 'Live lectures & schedule',
+      title: labels.sectionTitle,
       order: 999,
-      description: 'Your class meetings (same schedule the instructor set for this section)',
+      description: labels.sectionDescription,
     },
     lessons,
     joinByLessonId,
@@ -156,6 +161,7 @@ function buildLiveScheduleFromCourse(course: CourseDto): {
 }
 
 export function CourseLessonsPage() {
+  const { t } = useTranslation(['student', 'common', 'errors']);
   const { courseId } = useParams<{ courseId: string }>();
   const navigate = useNavigate();
   const [course, setCourse] = useState<CourseDto | null>(null);
@@ -188,7 +194,7 @@ export function CourseLessonsPage() {
 
   useEffect(() => {
     if (!courseId) {
-      toast.error('Course ID is required');
+      toast.error(t('student:courseLessons.errors.courseIdRequired'));
       navigate('/my-classes');
       return;
     }
@@ -243,9 +249,9 @@ export function CourseLessonsPage() {
               {
                 id: recordedSectionId,
                 courseId,
-                title: 'Recorded lectures',
+                title: t('student:courseLessons.recordedLectures'),
                 order: -1,
-                description: 'On-demand video lessons',
+                description: t('student:courseLessons.recordedLecturesSubtitle'),
               },
               ...sortedSections,
             ].sort((a, b) => a.order - b.order);
@@ -263,14 +269,18 @@ export function CourseLessonsPage() {
           if (existing.length > 0) continue;
           const cs = courseData.sections.find((s) => s.id === section.id);
           if (cs?.meetingTimes?.length) {
-            lessonsMap[section.id] = buildLectureLessonsForScheduledSection(cs, section.id, joinMap, metaMap);
+            lessonsMap[section.id] = buildLectureLessonsForScheduledSection(cs, section.id, joinMap, metaMap, t('student:courseLessons.openJoinLink'));
           }
         }
 
         let finalSections = sortedSections;
         const lessonCount = () => Object.values(lessonsMap).reduce((sum, lessons) => sum + lessons.length, 0);
 
-        const live = buildLiveScheduleFromCourse(courseData);
+        const live = buildLiveScheduleFromCourse(courseData, {
+          openJoin: t('student:courseLessons.openJoinLink'),
+          sectionTitle: t('student:courseLessons.liveLecturesSchedule'),
+          sectionDescription: t('student:courseLessons.liveLecturesSubtitle'),
+        });
 
         if (finalSections.length === 0) {
           if (live) {
@@ -341,8 +351,8 @@ export function CourseLessonsPage() {
         setMeetingRatings(mr);
         setCertificateInfo(cert);
       } catch (error) {
-        toast.error('Failed to load course lessons', {
-          description: error instanceof Error ? error.message : 'Please try again later',
+        toast.error(t('student:courseLessons.errors.loadFailed'), {
+          description: error instanceof Error ? error.message : t('student:courseLessons.errors.tryLater'),
         });
         navigate('/my-classes');
       } finally {
@@ -351,7 +361,7 @@ export function CourseLessonsPage() {
     };
 
     loadData();
-  }, [courseId, navigate]);
+  }, [courseId, navigate, t]);
 
   useEffect(() => {
     if (!course || !courseId || loading) return;
@@ -396,8 +406,8 @@ export function CourseLessonsPage() {
       if (url) {
         window.open(url, '_blank', 'noopener,noreferrer');
       } else {
-        toast.message('Live session', {
-          description: 'Your instructor has not added a join link yet. Check the calendar or messages.',
+        toast.message(t('student:courseLessons.liveSession'), {
+          description: t('student:courseLessons.instructorNoLink'),
         });
       }
       return;
@@ -449,7 +459,7 @@ export function CourseLessonsPage() {
         </Button>
         <Card>
           <CardContent className="p-6 text-center">
-            <p className="text-muted-foreground">Course not found</p>
+            <p className="text-muted-foreground">{t('student:shared.courseNotFound')}</p>
           </CardContent>
         </Card>
       </div>
@@ -467,7 +477,7 @@ export function CourseLessonsPage() {
         </Button>
         <div>
           <h1 className="text-2xl font-semibold">{course.title}</h1>
-          <p className="text-sm text-muted-foreground">Lessons & live sessions · local time</p>
+          <p className="text-sm text-muted-foreground">{t('student:courseLessons.subtitle')}</p>
         </div>
       </div>
 
@@ -478,7 +488,7 @@ export function CourseLessonsPage() {
             <Card>
               <CardContent className="p-6 text-center">
                 <p className="text-muted-foreground">
-                  No lessons or scheduled meetings are available for this course yet.
+                  {t('student:courseLessons.noLessons')}
                 </p>
               </CardContent>
             </Card>
@@ -513,7 +523,7 @@ export function CourseLessonsPage() {
                       ) : lessons.length === 0 ? (
                         <div className="p-4 text-center">
                           <p className="text-sm text-muted-foreground">
-                            No lessons available in this section yet.
+                            {t('student:courseLessons.noLessonsInSection')}
                           </p>
                         </div>
                       ) : (
@@ -567,24 +577,24 @@ export function CourseLessonsPage() {
                                   {isLiveLectureLessonId(lesson.id) &&
                                     (sessionBadge === 'live' ? (
                                       <Badge className="text-[10px] font-semibold px-1.5 py-0 h-5 bg-red-600 hover:bg-red-600">
-                                        Live now
+                                        {t('student:shared.liveNow')}
                                       </Badge>
                                     ) : sessionBadge === 'soon' ? (
                                       <Badge variant="secondary" className="text-[10px] h-5 px-1.5">
-                                        Starting soon
+                                        {t('student:shared.startingSoon')}
                                       </Badge>
                                     ) : sessionBadge === 'today' ? (
                                       <Badge variant="outline" className="text-[10px] h-5 px-1.5 border-primary/40 text-primary">
-                                        Today
+                                        {t('student:shared.today')}
                                       </Badge>
                                     ) : (
                                       <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">
-                                        Live
+                                        {t('student:courseLessons.live')}
                                       </span>
                                     ))}
                                   {lesson.isPreview && !isLiveLectureLessonId(lesson.id) && (
                                     <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">
-                                      Preview
+                                      {t('student:courseLessons.preview')}
                                     </span>
                                   )}
                                   {(() => {
@@ -592,7 +602,7 @@ export function CourseLessonsPage() {
                                     if (progress?.isCompleted) {
                                       return (
                                         <span className="text-xs bg-green-500/10 text-green-600 px-2 py-0.5 rounded">
-                                          Completed
+                                          {t('student:courseLessons.completed')}
                                         </span>
                                       );
                                     }
@@ -644,19 +654,22 @@ export function CourseLessonsPage() {
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <CheckCircle2 className="h-5 w-5" />
-                  Course Progress
+                  {t('student:courseLessons.courseProgress')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div>
                   <div className="flex items-center justify-between text-sm mb-2">
-                    <span className="text-muted-foreground">Progress</span>
+                    <span className="text-muted-foreground">{t('student:courseLessons.progress')}</span>
                     <span className="font-semibold">{courseProgress.progressPercentage}%</span>
                   </div>
                   <Progress value={courseProgress.progressPercentage} />
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  {courseProgress.completedLessons} of {courseProgress.totalLessons} lessons completed
+                  {t('student:courseLessons.lessonsCompletedOfTotal', {
+                    completed: courseProgress.completedLessons,
+                    total: courseProgress.totalLessons,
+                  })}
                 </div>
                 {continueWatching && continueWatching.lessonId && (
                   <Button
@@ -666,14 +679,14 @@ export function CourseLessonsPage() {
                     onClick={async () => {
                       try {
                         if (!continueWatching.lessonId) {
-                          toast.error('Lesson ID not found');
+                          toast.error(t('student:courseLessons.errors.lessonIdNotFound'));
                           return;
                         }
 
                         // Validate GUID format
                         const guidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
                         if (!guidRegex.test(continueWatching.lessonId)) {
-                          toast.error('Invalid lesson ID format');
+                          toast.error(t('student:courseLessons.errors.invalidLessonId'));
                           return;
                         }
 
@@ -688,20 +701,20 @@ export function CourseLessonsPage() {
                           if (courseId) {
                             navigate(`/student/my-classes/${courseId}/lessons/${continueWatching.lessonId}`);
                           } else {
-                            toast.error('Course ID not found');
+                            toast.error(t('student:courseLessons.errors.courseIdNotFound'));
                           }
                         }
                       } catch (error) {
                         console.error('Error navigating to continue watching:', error);
-                        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-                        toast.error('Failed to navigate to lesson', {
-                          description: errorMessage || 'Please try selecting the lesson manually',
+                        const errorMessage = error instanceof Error ? error.message : t('student:checkout.errors.unknownError');
+                        toast.error(t('student:courseLessons.errors.failedNavigateLesson'), {
+                          description: errorMessage || t('student:courseLessons.errors.selectManually'),
                         });
                       }
                     }}
                   >
                     <PlayCircle className="h-4 w-4 me-2" />
-                    Continue Watching
+                    {t('student:courseLessons.continueWatching')}
                   </Button>
                 )}
               </CardContent>
@@ -712,19 +725,19 @@ export function CourseLessonsPage() {
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <Award className="h-5 w-5" />
-                Certificate
+                {t('student:courseLessons.certificate')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               {certificateInfo?.eligible ? (
                 <Button className="w-full" variant="default" asChild>
-                  <Link to={`/student/my-classes/${courseId}/certificate`}>View & print certificate</Link>
+                  <Link to={`/student/my-classes/${courseId}/certificate`}>{t('student:courseLessons.viewPrintCertificate')}</Link>
                 </Button>
               ) : (
                 <p className="text-sm text-muted-foreground">
                   {certificateInfo
-                    ? 'Complete the course to unlock your certificate.'
-                    : 'Sign in as an enrolled student to see certificate status.'}
+                    ? t('student:courseLessons.completeToUnlock')
+                    : t('student:courseLessons.signInToSeeCert')}
                 </p>
               )}
             </CardContent>
@@ -734,12 +747,12 @@ export function CourseLessonsPage() {
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <BookOpen className="h-5 w-5" />
-                Course materials
+                {t('student:courseLessons.courseMaterials')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               {materials.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No files or books uploaded for this course yet.</p>
+                <p className="text-sm text-muted-foreground">{t('student:courseLessons.noMaterials')}</p>
               ) : (
                 <div className="space-y-2">
                   {materials.map((m) => (
@@ -753,8 +766,8 @@ export function CourseLessonsPage() {
                       <div className="flex-1 min-w-0">
                         <div className="font-medium text-sm truncate">{m.title}</div>
                         <div className="text-xs text-muted-foreground">
-                          {m.kind === 1 ? 'Book' : 'File'}
-                          {m.lessonTitle ? ` · ${m.lessonTitle}` : ' · Whole course'}
+                          {m.kind === 1 ? t('student:courseLessons.book') : t('student:courseLessons.file')}
+                          {m.lessonTitle ? ` · ${m.lessonTitle}` : ` · ${t('student:courseLessons.wholeCourse')}`}
                           {m.fileSizeBytes ? ` · ${formatBytes(m.fileSizeBytes)}` : ''}
                         </div>
                       </div>
@@ -764,7 +777,7 @@ export function CourseLessonsPage() {
                 </div>
               )}
               <p className="text-xs text-muted-foreground pt-2 border-t">
-                Materials may be linked to a specific lesson or the whole course.
+                {t('student:courseLessons.materialsInfo')}
               </p>
             </CardContent>
           </Card>
@@ -772,25 +785,25 @@ export function CourseLessonsPage() {
           {/* Course Info Card */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Course Info</CardTitle>
+              <CardTitle className="text-lg">{t('student:courseLessons.courseInfo')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
               <div>
-                <div className="text-muted-foreground">Instructor</div>
+                <div className="text-muted-foreground">{t('student:courseLessons.instructor')}</div>
                 <div className="font-medium">{course.instructorName}</div>
               </div>
               <div>
-                <div className="text-muted-foreground">Category</div>
+                <div className="text-muted-foreground">{t('student:courseLessons.category')}</div>
                 <div className="font-medium">{course.category}</div>
               </div>
               <div>
-                <div className="text-muted-foreground">Level</div>
+                <div className="text-muted-foreground">{t('student:courseLessons.level')}</div>
                 <div className="font-medium">{course.level}</div>
               </div>
               {course.rating > 0 && (
                 <div>
-                  <div className="text-muted-foreground">Rating</div>
-                  <div className="font-medium">⭐ {course.rating.toFixed(1)} ({course.ratingCount} reviews)</div>
+                  <div className="text-muted-foreground">{t('student:courseLessons.rating')}</div>
+                  <div className="font-medium">{t('student:courseLessons.ratingValue', { rating: course.rating.toFixed(1), count: course.ratingCount })}</div>
                 </div>
               )}
             </CardContent>
@@ -819,7 +832,7 @@ export function CourseLessonsPage() {
           await courseExtrasService.upsertMeetingTimeRating(courseId, m.meetingTimeId, { rating });
           await refreshMeetingRatings();
           setPendingLiveRating(null);
-          toast.success('Thanks for your feedback!');
+          toast.success(t('student:courseLessons.thanksFeedback'));
         }}
       />
     </div>

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
 import { Button } from '../../components/ui/button'
 import { Badge } from '../../components/ui/badge'
@@ -39,6 +40,7 @@ const BADGE_STYLES: Record<string, string> = {
 type EnrolledPair = { courseId: string; sectionId: string }
 
 export function LiveSessionsPage() {
+  const { t } = useTranslation(['student', 'common', 'errors'])
   const [courses, setCourses] = useState<CourseDto[]>([])
   const [enrollmentPairs, setEnrollmentPairs] = useState<EnrolledPair[]>([])
   const [loading, setLoading] = useState(true)
@@ -70,7 +72,7 @@ export function LiveSessionsPage() {
           .map((r) => r.value)
         setCourses(loaded)
       } catch (error) {
-        toast.error('Failed to load your schedule', {
+        toast.error(t('student:liveClasses.errors.loadFailed'), {
           description: error instanceof Error ? error.message : undefined,
         })
       } finally {
@@ -78,7 +80,7 @@ export function LiveSessionsPage() {
       }
     }
     load()
-  }, [])
+  }, [t])
 
   const weekStart = useMemo(() => {
     const d = startOfWeek(new Date())
@@ -114,20 +116,20 @@ export function LiveSessionsPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight md:text-3xl flex items-center gap-2">
             <Radio className="h-6 w-6 text-primary" />
-            My Live Classes
+            {t('student:liveClasses.title')}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Your weekly class schedule — join live when class starts
+            {t('student:liveClasses.subtitle')}
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => setWeekOffset((w) => w - 1)} aria-label="Previous week">
+          <Button variant="outline" size="sm" onClick={() => setWeekOffset((w) => w - 1)} aria-label={t('student:liveClasses.previousWeek')}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
           <Button variant="outline" size="sm" onClick={() => setWeekOffset(0)} disabled={weekOffset === 0}>
-            This week
+            {t('student:liveClasses.thisWeek')}
           </Button>
-          <Button variant="outline" size="sm" onClick={() => setWeekOffset((w) => w + 1)} aria-label="Next week">
+          <Button variant="outline" size="sm" onClick={() => setWeekOffset((w) => w + 1)} aria-label={t('student:liveClasses.nextWeek')}>
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
@@ -143,7 +145,9 @@ export function LiveSessionsPage() {
               </div>
               <div>
                 <div className="font-semibold">
-                  {liveNow.length === 1 ? 'You have a class live now' : `${liveNow.length} classes are live now`}
+                  {liveNow.length === 1
+                    ? t('student:liveClasses.bannerLiveOne')
+                    : t('student:liveClasses.bannerLiveOther', { count: liveNow.length })}
                 </div>
                 <div className="text-sm text-muted-foreground">
                   {liveNow.map((e) => e.courseTitle).join(', ')}
@@ -154,7 +158,7 @@ export function LiveSessionsPage() {
               <Button asChild variant="default">
                 <a href={liveNow[0].joinUrl} target="_blank" rel="noopener noreferrer">
                   <PlayCircle className="me-1.5 h-4 w-4" />
-                  Join {liveNow[0].courseTitle}
+                  {t('student:liveClasses.joinClass', { name: liveNow[0].courseTitle })}
                 </a>
               </Button>
             )}
@@ -170,7 +174,7 @@ export function LiveSessionsPage() {
               <Radio className="h-5 w-5 text-red-500" />
             </div>
             <div>
-              <div className="text-xs text-muted-foreground">Live now</div>
+              <div className="text-xs text-muted-foreground">{t('student:liveClasses.summaryLiveNow')}</div>
               <div className="text-2xl font-bold">{liveNow.length}</div>
             </div>
           </CardContent>
@@ -181,7 +185,7 @@ export function LiveSessionsPage() {
               <Clock className="h-5 w-5 text-amber-500" />
             </div>
             <div>
-              <div className="text-xs text-muted-foreground">Starting soon</div>
+              <div className="text-xs text-muted-foreground">{t('student:liveClasses.summaryStartingSoon')}</div>
               <div className="text-2xl font-bold">{startingSoon.length}</div>
             </div>
           </CardContent>
@@ -192,7 +196,7 @@ export function LiveSessionsPage() {
               <Calendar className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <div className="text-xs text-muted-foreground">This week</div>
+              <div className="text-xs text-muted-foreground">{t('student:liveClasses.summaryThisWeek')}</div>
               <div className="text-2xl font-bold">{totalThisWeek}</div>
             </div>
           </CardContent>
@@ -202,9 +206,12 @@ export function LiveSessionsPage() {
       {/* Week range */}
       <div className="flex items-center justify-between text-sm">
         <span className="font-medium">
-          Week of {format(weekStart, 'MMM d')} – {format(weekEnd, 'MMM d, yyyy')}
+          {t('student:liveClasses.weekRange', {
+            start: format(weekStart, 'MMM d'),
+            end: format(weekEnd, 'MMM d, yyyy'),
+          })}
         </span>
-        <span className="text-xs text-muted-foreground">Times shown in your local timezone</span>
+        <span className="text-xs text-muted-foreground">{t('student:liveClasses.localTimezone')}</span>
       </div>
 
       {loading ? (
@@ -215,16 +222,16 @@ export function LiveSessionsPage() {
         <Card>
           <CardContent className="py-16 text-center">
             <Video className="mx-auto h-12 w-12 text-muted-foreground/50" />
-            <h2 className="mt-4 text-lg font-semibold">No classes this week</h2>
+            <h2 className="mt-4 text-lg font-semibold">{t('student:liveClasses.noClassesThisWeek')}</h2>
             <p className="mt-1 text-sm text-muted-foreground">
               {enrollmentPairs.length === 0
-                ? "You're not enrolled in any courses yet."
-                : "None of your courses have sessions scheduled this week."}
+                ? t('student:liveClasses.notEnrolled')
+                : t('student:liveClasses.noSessionsThisWeek')}
             </p>
             <Button asChild className="mt-4">
               <Link to="/student/catalog">
                 <BookOpen className="me-1.5 h-4 w-4" />
-                Browse courses
+                {t('student:liveClasses.browseCourses')}
               </Link>
             </Button>
           </CardContent>
@@ -244,11 +251,13 @@ export function LiveSessionsPage() {
                         {format(day.date, 'MMM d')}
                       </span>
                       {isToday && (
-                        <Badge className="bg-primary/10 text-primary border-primary/30">Today</Badge>
+                        <Badge className="bg-primary/10 text-primary border-primary/30">{t('student:shared.today')}</Badge>
                       )}
                     </CardTitle>
                     <span className="text-xs text-muted-foreground">
-                      {day.events.length} {day.events.length === 1 ? 'class' : 'classes'}
+                      {day.events.length === 1
+                        ? t('student:liveClasses.classCountOne', { count: day.events.length })
+                        : t('student:liveClasses.classCountOther', { count: day.events.length })}
                     </span>
                   </div>
                 </CardHeader>
@@ -267,14 +276,15 @@ export function LiveSessionsPage() {
 }
 
 function StudentSessionRow({ event }: { event: WeeklySessionEvent }) {
+  const { t } = useTranslation(['student'])
   const badgeClass = event.badge ? BADGE_STYLES[event.badge] : ''
   const badgeLabel =
     event.badge === 'live'
-      ? 'Live now'
+      ? t('student:liveClasses.liveNow')
       : event.badge === 'soon'
-      ? 'Starting soon'
+      ? t('student:liveClasses.startingSoon')
       : event.badge === 'today'
-      ? 'Later today'
+      ? t('student:liveClasses.laterToday')
       : null
 
   const canJoin = event.badge === 'live' || event.badge === 'soon'
@@ -318,20 +328,20 @@ function StudentSessionRow({ event }: { event: WeeklySessionEvent }) {
           canJoin ? (
             <Button size="sm" variant="default" asChild>
               <a href={event.joinUrl} target="_blank" rel="noopener noreferrer">
-                <PlayCircle className="me-1.5 h-3.5 w-3.5" /> Join
+                <PlayCircle className="me-1.5 h-3.5 w-3.5" /> {t('student:shared.join')}
               </a>
             </Button>
           ) : (
             <Button size="sm" variant="outline" asChild>
               <a href={event.joinUrl} target="_blank" rel="noopener noreferrer">
-                <ExternalLink className="me-1.5 h-3.5 w-3.5" /> View link
+                <ExternalLink className="me-1.5 h-3.5 w-3.5" /> {t('student:shared.viewLink')}
               </a>
             </Button>
           )
         ) : (
-          <Button size="sm" variant="outline" disabled title="Your instructor has not set a join link yet">
+          <Button size="sm" variant="outline" disabled title={t('student:liveClasses.noJoinLinkTitle')}>
             <Video className="me-1.5 h-3.5 w-3.5" />
-            No link yet
+            {t('student:shared.noLinkYet')}
           </Button>
         )}
       </div>

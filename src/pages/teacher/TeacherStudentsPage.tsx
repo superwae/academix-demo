@@ -27,6 +27,7 @@ import { teacherService, type EnrolledStudent } from '../../services/teacherServ
 import { analyticsService, type StudentAnalytics, type RiskLevel } from '../../services/analyticsService'
 import type { CourseDto } from '../../services/courseService'
 import { toast } from 'sonner'
+import { useTranslation } from 'react-i18next'
 
 // Extended student type with risk data
 interface StudentWithRisk extends EnrolledStudent {
@@ -37,6 +38,7 @@ interface StudentWithRisk extends EnrolledStudent {
 }
 
 export function TeacherStudentsPage() {
+  const { t } = useTranslation(['teacher', 'common', 'errors'])
   const [searchQuery, setSearchQuery] = useState('')
   const [courses, setCourses] = useState<CourseDto[]>([])
   const [students, setStudents] = useState<StudentWithRisk[]>([])
@@ -118,8 +120,8 @@ export function TeacherStudentsPage() {
         setStudents(studentsWithRisk)
       } catch (error) {
         console.error('Failed to load students:', error)
-        toast.error('Failed to load students', {
-          description: error instanceof Error ? error.message : 'An error occurred',
+        toast.error(t('teacher:teacherStudents.errors.loadFailed'), {
+          description: error instanceof Error ? error.message : t('teacher:shared.errorOccurred'),
         })
       } finally {
         setLoading(false)
@@ -163,8 +165,8 @@ export function TeacherStudentsPage() {
       {/* Header */}
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="min-w-0">
-          <h1 className="text-2xl font-bold tracking-tight gradient-text sm:text-3xl">Students</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Students grouped by course</p>
+          <h1 className="text-2xl font-bold tracking-tight gradient-text sm:text-3xl">{t('teacher:students.title')}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{t('teacher:teacherStudents.pageSubtitle')}</p>
         </div>
       </div>
 
@@ -172,7 +174,7 @@ export function TeacherStudentsPage() {
       <div className="grid gap-2 grid-cols-2 md:grid-cols-4">
           <Card>
             <CardContent className="pt-4">
-              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total</div>
+              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('teacher:teacherStudents.total')}</div>
               <div className="mt-1 text-xl font-bold">
                 {loading ? '—' : (cardStats?.total ?? students.length)}
               </div>
@@ -180,7 +182,7 @@ export function TeacherStudentsPage() {
           </Card>
           <Card>
             <CardContent className="pt-4">
-              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Active</div>
+              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('teacher:courseStudents.active')}</div>
               <div className="mt-1 text-xl font-bold">
                 {loading ? '—' : (cardStats?.active ?? students.filter(s => s.status === 'Active').length)}
               </div>
@@ -188,7 +190,7 @@ export function TeacherStudentsPage() {
           </Card>
           <Card>
             <CardContent className="pt-4">
-              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Avg. Progress</div>
+              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('teacher:courseStudents.avgProgress')}</div>
               <div className="mt-1 text-xl font-bold">
                 {loading ? '—' : `${cardStats?.avgProgress ?? (students.length > 0 ? Math.round(students.reduce((sum, s) => sum + s.progress, 0) / students.length) : 0)}%`}
               </div>
@@ -198,7 +200,7 @@ export function TeacherStudentsPage() {
             <Link to="/teacher/at-risk-students">
               <Card className="cursor-pointer hover:border-orange-500/50 transition-colors h-full">
                 <CardContent className="pt-4">
-                  <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">At-Risk</div>
+                  <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('teacher:teacherStudents.atRiskShort')}</div>
                   <div className="mt-1 text-xl font-bold text-orange-500 flex items-center gap-1">
                     {atRiskCount}
                     <ArrowRight className="h-4 w-4" />
@@ -220,7 +222,7 @@ export function TeacherStudentsPage() {
       <div className="relative max-w-md">
         <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
-          placeholder="Search students..."
+          placeholder={t('teacher:courseStudents.searchPlaceholder')}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="ps-10"
@@ -230,9 +232,9 @@ export function TeacherStudentsPage() {
       {/* Students Table - Grouped by Course */}
       <Card>
         <CardHeader className="pb-2 pt-4">
-          <CardTitle className="text-lg">All Students</CardTitle>
+          <CardTitle className="text-lg">{t('teacher:teacherStudents.allStudents')}</CardTitle>
           <CardDescription className="text-xs mt-0.5">
-            {filteredStudents.length} student{filteredStudents.length !== 1 ? 's' : ''} across {courses.length} course{courses.length !== 1 ? 's' : ''}
+            {t('teacher:teacherStudents.summary', { students: filteredStudents.length, courses: courses.length })}
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-2">
@@ -243,14 +245,14 @@ export function TeacherStudentsPage() {
           ) : courses.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <Users className="h-12 w-12 mx-auto mb-3 opacity-50" />
-              <p className="text-sm">No courses yet</p>
-              <p className="text-xs mt-1">Create a course first to see students</p>
+              <p className="text-sm">{t('teacher:exams.noCoursesYet')}</p>
+              <p className="text-xs mt-1">{t('teacher:teacherStudents.noCoursesHint')}</p>
             </div>
           ) : filteredStudents.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <Users className="h-12 w-12 mx-auto mb-3 opacity-50" />
-              <p className="text-sm">No students found</p>
-              <p className="text-xs mt-1">Try adjusting your search or filters</p>
+              <p className="text-sm">{t('teacher:teacherStudents.noStudentsFound')}</p>
+              <p className="text-xs mt-1">{t('teacher:teacherStudents.adjustSearch')}</p>
             </div>
           ) : (
             <Accordion className="w-full">
@@ -263,13 +265,13 @@ export function TeacherStudentsPage() {
                     <AccordionTrigger className="flex items-center gap-2">
                       <span className="font-medium">{course.title}</span>
                       <Badge variant="secondary" className="ms-2 text-xs">
-                        {courseStudents.length} student{courseStudents.length !== 1 ? 's' : ''}
+                        {t('teacher:courseStudents.studentCount', { count: courseStudents.length })}
                       </Badge>
                     </AccordionTrigger>
                     <AccordionContent>
                       {courseStudents.length === 0 ? (
                         <div className="py-4 text-center text-sm text-muted-foreground">
-                          No students matching your search in this course.
+                          {t('teacher:teacherStudents.noMatchInCourse')}
                         </div>
                       ) : (
                         <>
@@ -284,13 +286,13 @@ export function TeacherStudentsPage() {
                                 <p className="mt-0.5 break-all text-sm text-muted-foreground">{student.email}</p>
                                 <div className="mt-3 space-y-2">
                                   <div className="flex items-center justify-between gap-2 text-sm">
-                                    <span className="text-muted-foreground">Progress</span>
+                                    <span className="text-muted-foreground">{t('teacher:courseStudents.columns.progress')}</span>
                                     <span className="tabular-nums font-semibold">{Math.round(student.progress)}%</span>
                                   </div>
                                   <Progress value={student.progress} className="h-2.5" />
                                 </div>
                                 <div className="mt-3 flex flex-wrap items-center gap-2">
-                                  <span className="text-xs text-muted-foreground">Risk:</span>
+                                  <span className="text-xs text-muted-foreground">{t('teacher:teacherStudents.riskLabel')}</span>
                                   {student.riskLevel ? (
                                     <Badge
                                       variant={student.riskLevel === 'Medium' ? 'secondary' : 'outline'}
@@ -302,29 +304,29 @@ export function TeacherStudentsPage() {
                                             : ''
                                       }`}
                                     >
-                                      {student.riskLevel}
+                                      {t(`teacher:teacherStudents.riskLevels.${student.riskLevel.toLowerCase()}`)}
                                     </Badge>
                                   ) : (
                                     <span className="text-xs text-muted-foreground">—</span>
                                   )}
                                   <Badge variant={student.status === 'Active' ? 'default' : 'secondary'} className="text-xs">
-                                    {student.status}
+                                    {t(`teacher:courseStudents.status.${(student.status || 'Active').toLowerCase()}`)}
                                   </Badge>
                                 </div>
                                 <p className="mt-2 text-xs text-muted-foreground">
-                                  Enrolled {formatDistanceToNow(new Date(student.enrolledAt), { addSuffix: true })}
+                                  {t('teacher:teacherStudents.enrolledRelative', { time: formatDistanceToNow(new Date(student.enrolledAt), { addSuffix: true }) })}
                                 </p>
                                 <div className="mt-4 flex flex-col gap-2 border-t border-border/50 pt-3 sm:flex-row">
                                   <Button variant="outline" size="sm" className="w-full" asChild>
                                     <Link to={`/teacher/students/${student.userId}`}>
                                       <Users className="h-4 w-4 me-2" />
-                                      Profile
+                                      {t('teacher:teacherStudents.profile')}
                                     </Link>
                                   </Button>
                                   <Button variant="outline" size="sm" className="w-full" asChild>
                                     <Link to={`/teacher/messages?student=${student.userId}`}>
                                       <MessageSquare className="h-4 w-4 me-2" />
-                                      Message
+                                      {t('teacher:dashboard.message')}
                                     </Link>
                                   </Button>
                                 </div>
@@ -337,12 +339,12 @@ export function TeacherStudentsPage() {
                             <Table>
                               <TableHeader>
                                 <TableRow>
-                                  <TableHead>Student Name</TableHead>
-                                  <TableHead>Progress</TableHead>
-                                  <TableHead>Risk</TableHead>
-                                  <TableHead>Enrolled</TableHead>
-                                  <TableHead>Status</TableHead>
-                                  <TableHead className="text-end">Actions</TableHead>
+                                  <TableHead>{t('teacher:teacherStudents.columns.studentName')}</TableHead>
+                                  <TableHead>{t('teacher:courseStudents.columns.progress')}</TableHead>
+                                  <TableHead>{t('teacher:teacherStudents.columns.risk')}</TableHead>
+                                  <TableHead>{t('teacher:courseStudents.columns.enrolled')}</TableHead>
+                                  <TableHead>{t('teacher:courseStudents.columns.status')}</TableHead>
+                                  <TableHead className="text-end">{t('teacher:courseStudents.columns.actions')}</TableHead>
                                 </TableRow>
                               </TableHeader>
                               <TableBody>
@@ -357,7 +359,7 @@ export function TeacherStudentsPage() {
                                     <TableCell>
                                       <div className="min-w-[8rem] space-y-2">
                                         <div className="flex items-center justify-between text-xs">
-                                          <span className="text-muted-foreground">Progress</span>
+                                          <span className="text-muted-foreground">{t('teacher:courseStudents.columns.progress')}</span>
                                           <span className="font-medium tabular-nums">{Math.round(student.progress)}%</span>
                                         </div>
                                         <Progress value={student.progress} className="h-2" />
@@ -375,7 +377,7 @@ export function TeacherStudentsPage() {
                                                 : ''
                                           }`}
                                         >
-                                          {student.riskLevel}
+                                          {t(`teacher:teacherStudents.riskLevels.${student.riskLevel.toLowerCase()}`)}
                                         </Badge>
                                       ) : (
                                         <span className="text-xs text-muted-foreground">-</span>
@@ -388,7 +390,7 @@ export function TeacherStudentsPage() {
                                     </TableCell>
                                     <TableCell>
                                       <Badge variant={student.status === 'Active' ? 'default' : 'secondary'} className="text-xs">
-                                        {student.status}
+                                        {t(`teacher:courseStudents.status.${(student.status || 'Active').toLowerCase()}`)}
                                       </Badge>
                                     </TableCell>
                                     <TableCell className="text-end">
@@ -396,13 +398,13 @@ export function TeacherStudentsPage() {
                                         <Button variant="ghost" size="sm" asChild>
                                           <Link to={`/teacher/students/${student.userId}`}>
                                             <Users className="h-3 w-3 me-1" />
-                                            Profile
+                                            {t('teacher:teacherStudents.profile')}
                                           </Link>
                                         </Button>
                                         <Button variant="ghost" size="sm" asChild>
                                           <Link to={`/teacher/messages?student=${student.userId}`}>
                                             <MessageSquare className="h-3 w-3 me-1" />
-                                            Message
+                                            {t('teacher:dashboard.message')}
                                           </Link>
                                         </Button>
                                       </div>

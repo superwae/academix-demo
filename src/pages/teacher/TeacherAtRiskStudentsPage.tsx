@@ -9,8 +9,10 @@ import { motion } from 'framer-motion'
 import { formatDistanceToNow } from 'date-fns'
 import { analyticsService, type StudentAnalytics } from '../../services/analyticsService'
 import { toast } from 'sonner'
+import { useTranslation } from 'react-i18next'
 
 export function TeacherAtRiskStudentsPage() {
+  const { t } = useTranslation(['teacher', 'common'])
   const [atRiskStudents, setAtRiskStudents] = useState<StudentAnalytics[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -31,7 +33,7 @@ export function TeacherAtRiskStudentsPage() {
         setAtRiskStudents(allAtRisk)
       } catch (error) {
         console.error('Failed to load at-risk students:', error)
-        toast.error('Failed to load at-risk students')
+        toast.error(t('teacher:atRiskStudents.errors.loadFailed'))
       } finally {
         setLoading(false)
       }
@@ -48,13 +50,13 @@ export function TeacherAtRiskStudentsPage() {
       {/* Header */}
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight gradient-text">At-Risk Students</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Students who may need additional support</p>
+          <h1 className="text-3xl font-bold tracking-tight gradient-text">{t('teacher:atRiskStudents.pageTitle')}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{t('teacher:dashboard.atRiskStudentsDescription')}</p>
         </div>
         <Button variant="outline" size="sm" asChild>
           <Link to="/teacher/students">
             <ArrowLeft className="me-1 h-3 w-3" />
-            Back to Students
+            {t('teacher:atRiskStudents.backToStudents')}
           </Link>
         </Button>
       </div>
@@ -64,10 +66,10 @@ export function TeacherAtRiskStudentsPage() {
         <CardHeader className="pb-2 pt-4">
           <div className="flex items-center gap-2">
             <AlertTriangle className="h-4 w-4 text-orange-500" />
-            <CardTitle className="text-lg">At-Risk Students</CardTitle>
+            <CardTitle className="text-lg">{t('teacher:atRiskStudents.pageTitle')}</CardTitle>
           </div>
           <CardDescription className="text-xs mt-0.5">
-            Students who may need additional support
+            {t('teacher:dashboard.atRiskStudentsDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-2">
@@ -77,10 +79,10 @@ export function TeacherAtRiskStudentsPage() {
             </div>
           ) : atRiskStudents.length === 0 ? (
             <div className="py-12 text-center text-muted-foreground">
-              <p className="text-sm">No at-risk students identified</p>
-              <p className="text-xs mt-1">All your students are on track</p>
+              <p className="text-sm">{t('teacher:atRiskStudents.noneTitle')}</p>
+              <p className="text-xs mt-1">{t('teacher:atRiskStudents.noneBody')}</p>
               <Button variant="outline" size="sm" className="mt-4" asChild>
-                <Link to="/teacher/students">Back to Students</Link>
+                <Link to="/teacher/students">{t('teacher:atRiskStudents.backToStudents')}</Link>
               </Button>
             </div>
           ) : (
@@ -97,6 +99,7 @@ export function TeacherAtRiskStudentsPage() {
 }
 
 function AtRiskStudentCard({ student }: { student: StudentAnalytics }) {
+  const { t } = useTranslation(['teacher', 'common'])
   const riskCount = student.riskFactors?.length ?? 0
   return (
     <div className="rounded-lg border border-border/50 bg-background/50 p-3">
@@ -105,7 +108,7 @@ function AtRiskStudentCard({ student }: { student: StudentAnalytics }) {
           <div className="flex items-center gap-2">
             <div className="font-medium text-sm">{student.studentName}</div>
             <Badge variant="secondary" className="text-xs">
-              {riskCount} Risk
+              {t('teacher:atRiskStudents.riskCount', { count: riskCount })}
             </Badge>
           </div>
           <div className="text-xs text-muted-foreground mt-0.5">{student.email}</div>
@@ -117,17 +120,17 @@ function AtRiskStudentCard({ student }: { student: StudentAnalytics }) {
           <div className="mt-2 grid grid-cols-2 gap-3">
             <div>
               <div className="flex items-center justify-between text-xs mb-1">
-                <span className="text-muted-foreground">Completion</span>
+                <span className="text-muted-foreground">{t('teacher:dashboard.completion')}</span>
                 <span className="font-medium">{Math.round(student.completionRate ?? 0)}%</span>
               </div>
               <Progress value={student.completionRate ?? 0} className="h-1.5" />
             </div>
             <div className="text-xs">
-              <span className="text-muted-foreground">Last active: </span>
+              <span className="text-muted-foreground">{t('teacher:dashboard.lastActive')} </span>
               <span className="font-medium">
                 {student.lastActivityAt
                   ? formatDistanceToNow(new Date(student.lastActivityAt), { addSuffix: true })
-                  : 'Never'}
+                  : t('teacher:dashboard.never')}
               </span>
             </div>
           </div>
@@ -136,13 +139,13 @@ function AtRiskStudentCard({ student }: { student: StudentAnalytics }) {
           <Button variant="outline" size="sm" asChild>
             <Link to={`/teacher/students/${student.userId}`}>
               <Users className="h-3 w-3 me-1" />
-              View
+              {t('teacher:dashboard.view')}
             </Link>
           </Button>
           <Button variant="ghost" size="sm" asChild>
             <Link to={`/teacher/messages?student=${student.userId}`}>
               <MessageSquare className="h-3 w-3 me-1" />
-              Message
+              {t('teacher:dashboard.message')}
             </Link>
           </Button>
         </div>
