@@ -1,3 +1,4 @@
+using System.Globalization;
 using AcademixLMS.Application.Common;
 using AcademixLMS.Application.DTOs.Auth;
 using AcademixLMS.Application.DTOs.User;
@@ -6,6 +7,7 @@ using AcademixLMS.Application.Mapping;
 using AcademixLMS.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 
 namespace AcademixLMS.Application.Services;
@@ -17,19 +19,22 @@ public class AuthService : IAuthService
     private readonly IConfiguration _configuration;
     private readonly IEmailService _emailService;
     private readonly ILogger<AuthService> _logger;
+    private readonly IStringLocalizer<AuthService> _localizer;
 
     public AuthService(
         IApplicationDbContext context,
         IJwtService jwtService,
         IConfiguration configuration,
         IEmailService emailService,
-        ILogger<AuthService> logger)
+        ILogger<AuthService> logger,
+        IStringLocalizer<AuthService> localizer)
     {
         _context = context;
         _jwtService = jwtService;
         _configuration = configuration;
         _emailService = emailService;
         _logger = logger;
+        _localizer = localizer;
     }
 
     public async Task<Result<LoginResponse>> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default)
@@ -46,22 +51,24 @@ public class AuthService : IAuthService
         if (user == null)
         {
             _logger.LogWarning("[AUTH] Login failed - user not found for email {Email}", normalizedEmail);
-            return Result<LoginResponse>.Failure("Invalid email or password.");
+            return Result<LoginResponse>.Failure(_localizer["InvalidEmailOrPassword"]);
         }
 
         // Check if user is active
         if (!user.IsActive)
         {
-            return Result<LoginResponse>.Failure(
-                "This account is inactive, so you can’t sign in. If you think this is a mistake, contact support.");
+            return Result<LoginResponse>.Failure(_localizer["AccountInactive"]);
         }
 
         // Verify password (BCrypt can throw on malformed hashes — treat as invalid)
         if (!VerifyPassword(request.Password, user.PasswordHash, "Login"))
         {
             _logger.LogWarning("[AUTH] Login failed - invalid password for user {UserId}", user.Id);
-            return Result<LoginResponse>.Failure("Invalid email or password.");
+            return Result<LoginResponse>.Failure(_localizer["InvalidEmailOrPassword"]);
         }
+
+        // Honor stored user language preference for the rest of this request
+        TryApplyUserCulture(user.PreferredLanguage);
 
         // Get user roles (guard null Role navigation — avoids 500 if data is inconsistent)
         var roles = user.UserRoles.Where(ur => ur.Role != null).Select(ur => ur.Role!.Name).ToList();
@@ -118,11 +125,15 @@ public class AuthService : IAuthService
         if (existingUser != null)
         {
             _logger.LogWarning("[AUTH] Registration failed - email already exists {Email}", request.Email);
-            return Result<LoginResponse>.Failure("Email is already registered.");
+            return Result<LoginResponse>.Failure(_localizer["EmailAlreadyRegistered"]);
         }
 
         // Hash password
         var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
+
+        // Seed PreferredLanguage from the culture that RequestLocalization resolved
+        // (Accept-Language header) so new users get localized responses immediately.
+        var initialLanguage = ResolveInitialLanguage();
 
         // Create user
         var user = new User
@@ -133,7 +144,8 @@ public class AuthService : IAuthService
             LastName = request.LastName,
             PhoneNumber = request.PhoneNumber,
             IsActive = true,
-            IsEmailVerified = false
+            IsEmailVerified = false,
+            PreferredLanguage = initialLanguage
         };
 
         _context.Users.Add(user);
@@ -230,25 +242,25 @@ public class AuthService : IAuthService
 
         if (refreshTokenEntity == null)
         {
-            return Result<RefreshTokenResponse>.Failure("Invalid refresh token.");
+            return Result<RefreshTokenResponse>.Failure(_localizer["InvalidRefreshToken"]);
         }
 
         // Check if token is revoked
         if (refreshTokenEntity.IsRevoked)
         {
-            return Result<RefreshTokenResponse>.Failure("Refresh token has been revoked.");
+            return Result<RefreshTokenResponse>.Failure(_localizer["RefreshTokenRevoked"]);
         }
 
         // Check if token is expired
         if (refreshTokenEntity.ExpiresAt < DateTime.UtcNow)
         {
-            return Result<RefreshTokenResponse>.Failure("Refresh token has expired.");
+            return Result<RefreshTokenResponse>.Failure(_localizer["RefreshTokenExpired"]);
         }
 
         // Check if user is active
         if (!refreshTokenEntity.User.IsActive || refreshTokenEntity.User.IsDeleted)
         {
-            return Result<RefreshTokenResponse>.Failure("User account is not active.");
+            return Result<RefreshTokenResponse>.Failure(_localizer["UserAccountNotActive"]);
         }
 
         // Revoke old token
@@ -329,9 +341,9 @@ public class AuthService : IAuthService
     public async Task<Result> ResetPasswordWithTokenAsync(string token, string newPassword, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(token) || string.IsNullOrWhiteSpace(newPassword))
-            return Result.Failure("Invalid request.");
+            return Result.Failure(_localizer["InvalidRequest"]);
         if (newPassword.Length < 8)
-            return Result.Failure("Password must be at least 8 characters.");
+            return Result.Failure(_localizer["PasswordTooShort"]);
 
         // Normalize token so link casing (e.g. from email client) does not invalidate it
         var normalizedToken = token.Trim().ToLowerInvariant();
@@ -339,7 +351,7 @@ public class AuthService : IAuthService
             .FirstOrDefaultAsync(u => u.PasswordResetToken != null && u.PasswordResetToken.ToLower() == normalizedToken && !u.IsDeleted, cancellationToken);
 
         if (user == null || user.PasswordResetTokenExpiresAt == null || user.PasswordResetTokenExpiresAt < DateTime.UtcNow)
-            return Result.Failure("Invalid or expired reset link. Please request a new one.");
+            return Result.Failure(_localizer["InvalidOrExpiredResetLink"]);
 
         user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
         user.PasswordResetToken = null;
@@ -351,14 +363,14 @@ public class AuthService : IAuthService
     public async Task<Result> VerifyEmailAsync(string token, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(token))
-            return Result.Failure("Invalid verification link.");
+            return Result.Failure(_localizer["InvalidVerificationLink"]);
 
         var normalizedToken = token.Trim().ToLowerInvariant();
         var user = await _context.Users
             .FirstOrDefaultAsync(u => u.EmailVerificationToken != null && u.EmailVerificationToken.ToLower() == normalizedToken && !u.IsDeleted, cancellationToken);
 
         if (user == null || user.EmailVerificationTokenExpiresAt == null || user.EmailVerificationTokenExpiresAt < DateTime.UtcNow)
-            return Result.Failure("Invalid or expired verification link.");
+            return Result.Failure(_localizer["InvalidOrExpiredVerificationLink"]);
 
         user.IsEmailVerified = true;
         user.EmailVerifiedAt = DateTime.UtcNow;
@@ -371,7 +383,7 @@ public class AuthService : IAuthService
     public async Task<Result> ResendVerificationEmailAsync(string email, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(email))
-            return Result.Failure("Email is required.");
+            return Result.Failure(_localizer["EmailRequired"]);
 
         var user = await _context.Users
             .FirstOrDefaultAsync(u => u.Email == email.Trim() && !u.IsDeleted, cancellationToken);
@@ -397,21 +409,50 @@ public class AuthService : IAuthService
     public async Task<Result> ChangePasswordAsync(Guid userId, string currentPassword, string newPassword, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(currentPassword))
-            return Result.Failure("Current password is required.");
+            return Result.Failure(_localizer["CurrentPasswordRequired"]);
         if (string.IsNullOrWhiteSpace(newPassword) || newPassword.Length < 8)
-            return Result.Failure("New password must be at least 8 characters.");
+            return Result.Failure(_localizer["NewPasswordTooShort"]);
 
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted, cancellationToken);
         if (user == null)
-            return Result.Failure("User not found.");
+            return Result.Failure(_localizer["UserNotFound"]);
 
         if (!VerifyPassword(currentPassword, user.PasswordHash, "ChangePassword"))
-            return Result.Failure("Current password is incorrect.");
+            return Result.Failure(_localizer["CurrentPasswordIncorrect"]);
 
         user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
         await _context.SaveChangesAsync(cancellationToken);
         _logger.LogInformation("[AUTH] Password changed for user {UserId}", userId);
         return Result.Success();
+    }
+
+    // Supported locales. Kept in sync with RequestLocalization configuration.
+    private static readonly HashSet<string> SupportedLanguages = new(StringComparer.OrdinalIgnoreCase) { "en", "ar" };
+
+    /// <summary>Return a supported language code based on the request culture, or null if none matches.</summary>
+    private static string? ResolveInitialLanguage()
+    {
+        var culture = CultureInfo.CurrentUICulture;
+        if (culture is null || string.IsNullOrWhiteSpace(culture.Name)) return null;
+        var primary = culture.TwoLetterISOLanguageName;
+        return SupportedLanguages.Contains(primary) ? primary.ToLowerInvariant() : null;
+    }
+
+    /// <summary>Set CurrentUICulture so subsequent localizer lookups match the user's saved preference.</summary>
+    private static void TryApplyUserCulture(string? preferred)
+    {
+        if (string.IsNullOrWhiteSpace(preferred)) return;
+        if (!SupportedLanguages.Contains(preferred)) return;
+        try
+        {
+            var culture = new CultureInfo(preferred);
+            CultureInfo.CurrentCulture = culture;
+            CultureInfo.CurrentUICulture = culture;
+        }
+        catch (CultureNotFoundException)
+        {
+            // ignore — fall back to whatever the request localization middleware resolved
+        }
     }
 
     private bool VerifyPassword(string plainPassword, string? passwordHash, string context)

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms</value>
+  </resheader>
+  <data name="EnrollmentNotFound" xml:space="preserve">
+    <value>التسجيل غير موجود.</value>
+  </data>
+  <data name="UserNotFound" xml:space="preserve">
+    <value>المستخدم غير موجود.</value>
+  </data>
+  <data name="UserSuspended" xml:space="preserve">
+    <value>تعذّر التسجيل: حساب المستخدم موقوف.</value>
+  </data>
+  <data name="CourseNotFound" xml:space="preserve">
+    <value>الدورة غير موجودة.</value>
+  </data>
+  <data name="CourseNotPublished" xml:space="preserve">
+    <value>تعذّر التسجيل: الدورة غير منشورة.</value>
+  </data>
+  <data name="CourseArchived" xml:space="preserve">
+    <value>تعذّر التسجيل: الدورة مؤرشفة.</value>
+  </data>
+  <data name="SectionNotFound" xml:space="preserve">
+    <value>الشعبة غير موجودة أو لا تنتمي إلى هذه الدورة.</value>
+  </data>
+  <data name="SectionInactive" xml:space="preserve">
+    <value>تعذّر التسجيل: الشعبة غير نشطة.</value>
+  </data>
+  <data name="AlreadyEnrolledSection" xml:space="preserve">
+    <value>أنت مسجّل بالفعل في هذه الشعبة.</value>
+  </data>
+  <data name="AlreadyEnrolledCourse" xml:space="preserve">
+    <value>أنت مسجّل بالفعل في هذه الدورة (الشعبة: {0}). يمكنك التسجيل في شعبة واحدة فقط لكل دورة. يرجى إلغاء تسجيلك من الشعبة الحالية أولًا إذا أردت التبديل.</value>
+  </data>
+  <data name="SectionFull" xml:space="preserve">
+    <value>تعذّر التسجيل: المقاعد في الشعبة ممتلئة.</value>
+  </data>
+  <data name="AlreadyEnrolledGeneric" xml:space="preserve">
+    <value>أنت مسجّل بالفعل في هذه الدورة. يرجى مراجعة تسجيلاتك.</value>
+  </data>
+  <data name="UnenrollOnlyOwn" xml:space="preserve">
+    <value>يمكنك إلغاء تسجيلاتك الخاصة فقط.</value>
+  </data>
+  <data name="UnenrollInvalidStatus" xml:space="preserve">
+    <value>تعذّر إلغاء التسجيل: حالة التسجيل هي {0}. يمكن إلغاء التسجيلات النشطة أو المكتملة فقط.</value>
+  </data>
+  <data name="InvalidEnrollmentStatus" xml:space="preserve">
+    <value>حالة تسجيل غير صالحة.</value>
+  </data>
+  <data name="InvalidProgressPercentage" xml:space="preserve">
+    <value>يجب أن تكون نسبة التقدّم بين 0 و100.</value>
+  </data>
+  <data name="CompleteInvalidStatus" xml:space="preserve">
+    <value>تعذّر إكمال التسجيل: الحالة الحالية هي {0}.</value>
+  </data>
+  <data name="NoSectionsForEnrollment" xml:space="preserve">
+    <value>لا تحتوي الدورة على شُعب متاحة للتسجيل.</value>
+  </data>
+</root>

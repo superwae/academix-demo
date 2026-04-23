@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms</value>
+  </resheader>
+  <data name="AlreadyPaid" xml:space="preserve">
+    <value>لقد دفعت ثمن هذه الدورة مسبقًا.</value>
+  </data>
+  <data name="CourseNotFound" xml:space="preserve">
+    <value>الدورة غير موجودة.</value>
+  </data>
+  <data name="CourseIsFree" xml:space="preserve">
+    <value>هذه الدورة مجانية ولا تتطلّب الدفع.</value>
+  </data>
+  <data name="UserNotFound" xml:space="preserve">
+    <value>المستخدم غير موجود.</value>
+  </data>
+  <data name="AlreadyHasActiveSubscription" xml:space="preserve">
+    <value>لديك اشتراك نشط بالفعل. يرجى إلغاؤه قبل الاشتراك في خطة جديدة.</value>
+  </data>
+  <data name="SubscriptionPlanNotFound" xml:space="preserve">
+    <value>خطة الاشتراك غير موجودة أو غير نشطة.</value>
+  </data>
+  <data name="InvalidBillingInterval" xml:space="preserve">
+    <value>فترة فوترة غير صالحة. يجب أن تكون "شهريًا" أو "سنويًا".</value>
+  </data>
+  <data name="PlanHasNoPrice" xml:space="preserve">
+    <value>لم يتم تحديد سعر لهذه الخطة.</value>
+  </data>
+  <data name="PaymentInitFailed" xml:space="preserve">
+    <value>فشل بدء عملية الدفع: {0}</value>
+  </data>
+  <data name="PaymentNotFound" xml:space="preserve">
+    <value>لم يتم العثور على دفعة بهذا المرجع.</value>
+  </data>
+  <data name="PaymentVerificationFailed" xml:space="preserve">
+    <value>فشل التحقّق من الدفع: {0}</value>
+  </data>
+</root>

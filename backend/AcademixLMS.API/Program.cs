@@ -1,5 +1,8 @@
+using System.Globalization;
 using AcademixLMS.API.Extensions;
+using AcademixLMS.API.Localization;
 using AcademixLMS.API.Middleware;
+using Microsoft.AspNetCore.Localization;
 using Serilog;
 using AspNetCoreRateLimit;
 
@@ -22,6 +25,24 @@ builder.Services.AddHttpClient();
 
 // Add API services (Application, Infrastructure, Controllers, Versioning)
 builder.Services.AddApiServices(builder.Configuration);
+
+// Request localization: supported cultures + culture providers.
+// Custom provider (user column) runs first, then Accept-Language, then default.
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    var supportedCultures = new[]
+    {
+        new CultureInfo("en"),
+        new CultureInfo("ar"),
+    };
+
+    options.DefaultRequestCulture = new RequestCulture("en");
+    options.SupportedCultures = supportedCultures;
+    options.SupportedUICultures = supportedCultures;
+
+    options.RequestCultureProviders.Insert(0, new CustomRequestCultureProvider(
+        UserPreferredLanguageCultureProvider.ResolveAsync));
+});
 
 // Add JWT Authentication
 builder.Services.AddJwtAuthentication(builder.Configuration);
@@ -75,6 +96,10 @@ app.UseIpRateLimiting();
 // Authentication & Authorization (in correct order)
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Request localization must run AFTER authentication so the custom culture
+// provider can read the authenticated user's PreferredLanguage from the DB.
+app.UseRequestLocalization();
 
 // Swagger (Development only)
 if (app.Environment.IsDevelopment())

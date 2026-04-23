@@ -37,6 +37,9 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.UiPreferencesJson)
             .HasMaxLength(8000);
 
+        builder.Property(u => u.PreferredLanguage)
+            .HasMaxLength(10);
+
         // Relationships
         builder.HasMany(u => u.UserRoles)
             .WithOne(ur => ur.User)

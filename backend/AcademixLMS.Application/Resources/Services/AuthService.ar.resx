@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms</value>
+  </resheader>
+  <data name="InvalidEmailOrPassword" xml:space="preserve">
+    <value>البريد الإلكتروني أو كلمة المرور غير صحيحة.</value>
+  </data>
+  <data name="AccountInactive" xml:space="preserve">
+    <value>هذا الحساب غير نشط، لذا لا يمكنك تسجيل الدخول. إذا كنت تعتقد أن هذا خطأ، يرجى التواصل مع الدعم.</value>
+  </data>
+  <data name="EmailAlreadyRegistered" xml:space="preserve">
+    <value>البريد الإلكتروني مسجّل مسبقًا.</value>
+  </data>
+  <data name="InvalidRefreshToken" xml:space="preserve">
+    <value>رمز التحديث غير صالح.</value>
+  </data>
+  <data name="RefreshTokenRevoked" xml:space="preserve">
+    <value>تم إبطال رمز التحديث.</value>
+  </data>
+  <data name="RefreshTokenExpired" xml:space="preserve">
+    <value>انتهت صلاحية رمز التحديث.</value>
+  </data>
+  <data name="UserAccountNotActive" xml:space="preserve">
+    <value>حساب المستخدم غير نشط.</value>
+  </data>
+  <data name="InvalidRequest" xml:space="preserve">
+    <value>طلب غير صالح.</value>
+  </data>
+  <data name="PasswordTooShort" xml:space="preserve">
+    <value>يجب أن تتكوّن كلمة المرور من 8 أحرف على الأقل.</value>
+  </data>
+  <data name="NewPasswordTooShort" xml:space="preserve">
+    <value>يجب أن تتكوّن كلمة المرور الجديدة من 8 أحرف على الأقل.</value>
+  </data>
+  <data name="InvalidOrExpiredResetLink" xml:space="preserve">
+    <value>رابط إعادة التعيين غير صالح أو انتهت صلاحيته. يرجى طلب رابط جديد.</value>
+  </data>
+  <data name="InvalidVerificationLink" xml:space="preserve">
+    <value>رابط التحقق غير صالح.</value>
+  </data>
+  <data name="InvalidOrExpiredVerificationLink" xml:space="preserve">
+    <value>رابط التحقق غير صالح أو انتهت صلاحيته.</value>
+  </data>
+  <data name="EmailRequired" xml:space="preserve">
+    <value>البريد الإلكتروني مطلوب.</value>
+  </data>
+  <data name="CurrentPasswordRequired" xml:space="preserve">
+    <value>كلمة المرور الحالية مطلوبة.</value>
+  </data>
+  <data name="UserNotFound" xml:space="preserve">
+    <value>المستخدم غير موجود.</value>
+  </data>
+  <data name="CurrentPasswordIncorrect" xml:space="preserve">
+    <value>كلمة المرور الحالية غير صحيحة.</value>
+  </data>
+</root>

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms</value>
+  </resheader>
+  <data name="NotAuthorizedOrg" xml:space="preserve">
+    <value>Not authorized for this organization.</value>
+  </data>
+  <data name="NotAuthorized" xml:space="preserve">
+    <value>Not authorized.</value>
+  </data>
+  <data name="LicenseNotFound" xml:space="preserve">
+    <value>License not found.</value>
+  </data>
+  <data name="SeatsMustBePositive" xml:space="preserve">
+    <value>Seats must be positive.</value>
+  </data>
+  <data name="OnlyAdminsCanPurchase" xml:space="preserve">
+    <value>Only org admins can purchase licenses.</value>
+  </data>
+  <data name="CourseNotFound" xml:space="preserve">
+    <value>Course not found.</value>
+  </data>
+  <data name="CourseNotPublished" xml:space="preserve">
+    <value>Course is not published.</value>
+  </data>
+  <data name="CourseExclusiveToOtherOrg" xml:space="preserve">
+    <value>This course is exclusive to another organization.</value>
+  </data>
+  <data name="CourseIsFree" xml:space="preserve">
+    <value>This course is free — no license needed.</value>
+  </data>
+  <data name="LicenseNotActive" xml:space="preserve">
+    <value>License is not active.</value>
+  </data>
+  <data name="NoActiveSection" xml:space="preserve">
+    <value>Course has no active section to enroll into.</value>
+  </data>
+  <data name="SeatsAvailableShort" xml:space="preserve">
+    <value>Only {0} seat(s) available; {1} requested.</value>
+  </data>
+  <data name="UsersNotActiveMembers" xml:space="preserve">
+    <value>{0} user(s) are not active members of this organization.</value>
+  </data>
+  <data name="AssignmentNotFound" xml:space="preserve">
+    <value>Assignment not found.</value>
+  </data>
+</root>

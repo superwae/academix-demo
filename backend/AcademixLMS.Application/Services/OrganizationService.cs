@@ -4,6 +4,7 @@ using AcademixLMS.Application.Interfaces;
 using AcademixLMS.Domain.Common;
 using AcademixLMS.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using System.Text;
 
@@ -13,11 +14,16 @@ public class OrganizationService : IOrganizationService
 {
     private readonly IApplicationDbContext _context;
     private readonly ILogger<OrganizationService> _logger;
+    private readonly IStringLocalizer<OrganizationService> _localizer;
 
-    public OrganizationService(IApplicationDbContext context, ILogger<OrganizationService> logger)
+    public OrganizationService(
+        IApplicationDbContext context,
+        ILogger<OrganizationService> logger,
+        IStringLocalizer<OrganizationService> localizer)
     {
         _context = context;
         _logger = logger;
+        _localizer = localizer;
     }
 
     public async Task<Result<IReadOnlyList<OrganizationSummaryDto>>> GetMyOrganizationsAsync(Guid userId, CancellationToken cancellationToken = default)
@@ -41,10 +47,10 @@ public class OrganizationService : IOrganizationService
     public async Task<Result<OrganizationDto>> GetByIdAsync(Guid orgId, Guid requestingUserId, CancellationToken cancellationToken = default)
     {
         var org = await LoadOrgAsync(orgId, cancellationToken);
-        if (org is null) return Result<OrganizationDto>.Failure("Organization not found.");
+        if (org is null) return Result<OrganizationDto>.Failure(_localizer["OrganizationNotFound"]);
 
         if (!await IsMemberAsync(orgId, requestingUserId, cancellationToken))
-            return Result<OrganizationDto>.Failure("You do not have access to this organization.");
+            return Result<OrganizationDto>.Failure(_localizer["NoAccess"]);
 
         return Result<OrganizationDto>.Success(await MapAsync(org, cancellationToken));
     }
@@ -54,10 +60,10 @@ public class OrganizationService : IOrganizationService
         var org = await _context.Organizations
             .Include(o => o.Owner)
             .FirstOrDefaultAsync(o => o.Slug == slug && !o.IsDeleted, cancellationToken);
-        if (org is null) return Result<OrganizationDto>.Failure("Organization not found.");
+        if (org is null) return Result<OrganizationDto>.Failure(_localizer["OrganizationNotFound"]);
 
         if (!await IsMemberAsync(org.Id, requestingUserId, cancellationToken))
-            return Result<OrganizationDto>.Failure("You do not have access to this organization.");
+            return Result<OrganizationDto>.Failure(_localizer["NoAccess"]);
 
         return Result<OrganizationDto>.Success(await MapAsync(org, cancellationToken));
     }
@@ -78,10 +84,10 @@ public class OrganizationService : IOrganizationService
     public async Task<Result<OrganizationDto>> CreateAsync(Guid ownerUserId, CreateOrganizationRequest request, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(request.Name))
-            return Result<OrganizationDto>.Failure("Organization name is required.");
+            return Result<OrganizationDto>.Failure(_localizer["NameRequired"]);
 
         var owner = await _context.Users.FirstOrDefaultAsync(u => u.Id == ownerUserId && !u.IsDeleted, cancellationToken);
-        if (owner is null) return Result<OrganizationDto>.Failure("Owner user not found.");
+        if (owner is null) return Result<OrganizationDto>.Failure(_localizer["OwnerNotFound"]);
 
         var slug = await MakeUniqueSlugAsync(Slugify(request.Name), cancellationToken);
         var org = new Organization
@@ -123,10 +129,10 @@ public class OrganizationService : IOrganizationService
     public async Task<Result<OrganizationDto>> UpdateAsync(Guid orgId, Guid requestingUserId, UpdateOrganizationRequest request, CancellationToken cancellationToken = default)
     {
         var org = await LoadOrgAsync(orgId, cancellationToken);
-        if (org is null) return Result<OrganizationDto>.Failure("Organization not found.");
+        if (org is null) return Result<OrganizationDto>.Failure(_localizer["OrganizationNotFound"]);
 
         if (!await HasRoleAsync(orgId, requestingUserId, OrgMemberRole.OrgAdmin, cancellationToken))
-            return Result<OrganizationDto>.Failure("Only the organization admin can update settings.");
+            return Result<OrganizationDto>.Failure(_localizer["OnlyAdminCanUpdate"]);
 
         org.Name = request.Name.Trim();
         org.Description = request.Description;
@@ -145,7 +151,7 @@ public class OrganizationService : IOrganizationService
     public async Task<Result<IReadOnlyList<OrganizationMemberDto>>> GetMembersAsync(Guid orgId, Guid requestingUserId, CancellationToken cancellationToken = default)
     {
         if (!await IsMemberAsync(orgId, requestingUserId, cancellationToken))
-            return Result<IReadOnlyList<OrganizationMemberDto>>.Failure("You do not have access to this organization.");
+            return Result<IReadOnlyList<OrganizationMemberDto>>.Failure(_localizer["NoAccess"]);
 
         var members = await _context.OrganizationMembers
             .Include(m => m.User)
@@ -163,20 +169,20 @@ public class OrganizationService : IOrganizationService
     public async Task<Result<OrganizationMemberDto>> InviteMemberAsync(Guid orgId, Guid requestingUserId, InviteMemberRequest request, CancellationToken cancellationToken = default)
     {
         if (!await HasRoleAsync(orgId, requestingUserId, OrgMemberRole.OrgAdmin, cancellationToken))
-            return Result<OrganizationMemberDto>.Failure("Only the org admin can invite members.");
+            return Result<OrganizationMemberDto>.Failure(_localizer["OnlyAdminCanInvite"]);
 
         if (string.IsNullOrWhiteSpace(request.Email))
-            return Result<OrganizationMemberDto>.Failure("Email is required.");
+            return Result<OrganizationMemberDto>.Failure(_localizer["EmailRequired"]);
 
         var email = request.Email.Trim().ToLowerInvariant();
 
         var org = await _context.Organizations.FirstOrDefaultAsync(o => o.Id == orgId && !o.IsDeleted, cancellationToken);
-        if (org is null) return Result<OrganizationMemberDto>.Failure("Organization not found.");
+        if (org is null) return Result<OrganizationMemberDto>.Failure(_localizer["OrganizationNotFound"]);
 
         if (org.Type == OrganizationType.TeachingInstitution && request.Role == OrgMemberRole.OrgEmployee)
-            return Result<OrganizationMemberDto>.Failure("Teaching institutions don't have employees. Invite as OrgTeacher instead.");
+            return Result<OrganizationMemberDto>.Failure(_localizer["TeachingInstitutionsNoEmployees"]);
         if (org.Type == OrganizationType.Employer && request.Role == OrgMemberRole.OrgTeacher)
-            return Result<OrganizationMemberDto>.Failure("Employers don't have teachers. Invite as OrgEmployee instead.");
+            return Result<OrganizationMemberDto>.Failure(_localizer["EmployersNoTeachers"]);
 
         var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == email && !u.IsDeleted, cancellationToken);
         Guid userId;
@@ -205,7 +211,7 @@ public class OrganizationService : IOrganizationService
             var alreadyMember = await _context.OrganizationMembers
                 .AnyAsync(m => m.OrganizationId == orgId && m.UserId == existingUser.Id && m.IsActive && !m.IsDeleted, cancellationToken);
             if (alreadyMember)
-                return Result<OrganizationMemberDto>.Failure("User is already a member of this organization.");
+                return Result<OrganizationMemberDto>.Failure(_localizer["AlreadyMember"]);
             userId = existingUser.Id;
             userWasNew = false;
         }
@@ -254,12 +260,12 @@ public class OrganizationService : IOrganizationService
     public async Task<Result<OrganizationMemberDto>> UpdateMemberRoleAsync(Guid orgId, Guid memberId, Guid requestingUserId, UpdateMemberRoleRequest request, CancellationToken cancellationToken = default)
     {
         if (!await HasRoleAsync(orgId, requestingUserId, OrgMemberRole.OrgAdmin, cancellationToken))
-            return Result<OrganizationMemberDto>.Failure("Only the org admin can change member roles.");
+            return Result<OrganizationMemberDto>.Failure(_localizer["OnlyAdminCanChangeRoles"]);
 
         var member = await _context.OrganizationMembers
             .Include(m => m.User)
             .FirstOrDefaultAsync(m => m.Id == memberId && m.OrganizationId == orgId && !m.IsDeleted, cancellationToken);
-        if (member is null) return Result<OrganizationMemberDto>.Failure("Member not found.");
+        if (member is null) return Result<OrganizationMemberDto>.Failure(_localizer["MemberNotFound"]);
 
         // Prevent demoting the last admin
         if (member.Role == OrgMemberRole.OrgAdmin && request.Role != OrgMemberRole.OrgAdmin)
@@ -267,7 +273,7 @@ public class OrganizationService : IOrganizationService
             var adminCount = await _context.OrganizationMembers
                 .CountAsync(m => m.OrganizationId == orgId && m.Role == OrgMemberRole.OrgAdmin && m.IsActive && !m.IsDeleted, cancellationToken);
             if (adminCount <= 1)
-                return Result<OrganizationMemberDto>.Failure("Cannot remove the last OrgAdmin. Promote another member first.");
+                return Result<OrganizationMemberDto>.Failure(_localizer["CannotRemoveLastAdminPromote"]);
         }
 
         member.Role = request.Role;
@@ -285,18 +291,18 @@ public class OrganizationService : IOrganizationService
     public async Task<Result<bool>> RemoveMemberAsync(Guid orgId, Guid memberId, Guid requestingUserId, CancellationToken cancellationToken = default)
     {
         if (!await HasRoleAsync(orgId, requestingUserId, OrgMemberRole.OrgAdmin, cancellationToken))
-            return Result<bool>.Failure("Only the org admin can remove members.");
+            return Result<bool>.Failure(_localizer["OnlyAdminCanRemove"]);
 
         var member = await _context.OrganizationMembers
             .FirstOrDefaultAsync(m => m.Id == memberId && m.OrganizationId == orgId && !m.IsDeleted, cancellationToken);
-        if (member is null) return Result<bool>.Failure("Member not found.");
+        if (member is null) return Result<bool>.Failure(_localizer["MemberNotFound"]);
 
         if (member.Role == OrgMemberRole.OrgAdmin)
         {
             var adminCount = await _context.OrganizationMembers
                 .CountAsync(m => m.OrganizationId == orgId && m.Role == OrgMemberRole.OrgAdmin && m.IsActive && !m.IsDeleted, cancellationToken);
             if (adminCount <= 1)
-                return Result<bool>.Failure("Cannot remove the last OrgAdmin.");
+                return Result<bool>.Failure(_localizer["CannotRemoveLastAdmin"]);
         }
 
         member.IsActive = false;

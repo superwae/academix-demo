@@ -4,6 +4,7 @@ using AcademixLMS.Application.Interfaces;
 using AcademixLMS.Domain.Common;
 using AcademixLMS.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 
 namespace AcademixLMS.Application.Services;
@@ -12,13 +13,16 @@ public class SubscriptionService : ISubscriptionService
 {
     private readonly IApplicationDbContext _context;
     private readonly ILogger<SubscriptionService> _logger;
+    private readonly IStringLocalizer<SubscriptionService> _localizer;
 
     public SubscriptionService(
         IApplicationDbContext context,
-        ILogger<SubscriptionService> logger)
+        ILogger<SubscriptionService> logger,
+        IStringLocalizer<SubscriptionService> localizer)
     {
         _context = context;
         _logger = logger;
+        _localizer = localizer;
     }
 
     public async Task<Result<SubscriptionDto>> GetSubscriptionByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
@@ -32,7 +36,7 @@ public class SubscriptionService : ISubscriptionService
 
         if (subscription == null)
         {
-            return Result<SubscriptionDto>.Failure("No active subscription found.");
+            return Result<SubscriptionDto>.Failure(_localizer["NoActiveSubscription"]);
         }
 
         return Result<SubscriptionDto>.Success(MapToSubscriptionDto(subscription));
@@ -66,7 +70,7 @@ public class SubscriptionService : ISubscriptionService
 
         if (existingSubscription)
         {
-            return Result<SubscriptionDto>.Failure("User already has an active subscription. Cancel it first before subscribing to a new plan.");
+            return Result<SubscriptionDto>.Failure(_localizer["AlreadyHasActiveSubscription"]);
         }
 
         var plan = await _context.SubscriptionPlans
@@ -74,7 +78,7 @@ public class SubscriptionService : ISubscriptionService
 
         if (plan == null)
         {
-            return Result<SubscriptionDto>.Failure("Subscription plan not found or is not active.");
+            return Result<SubscriptionDto>.Failure(_localizer["PlanNotFound"]);
         }
 
         var user = await _context.Users
@@ -82,7 +86,7 @@ public class SubscriptionService : ISubscriptionService
 
         if (user == null)
         {
-            return Result<SubscriptionDto>.Failure("User not found.");
+            return Result<SubscriptionDto>.Failure(_localizer["UserNotFound"]);
         }
 
         var now = DateTime.UtcNow;
@@ -119,12 +123,12 @@ public class SubscriptionService : ISubscriptionService
 
         if (subscription == null)
         {
-            return Result.Failure("Subscription not found.");
+            return Result.Failure(_localizer["SubscriptionNotFound"]);
         }
 
         if (subscription.Status == SubscriptionStatus.Cancelled)
         {
-            return Result.Failure("Subscription is already cancelled.");
+            return Result.Failure(_localizer["AlreadyCancelled"]);
         }
 
         subscription.Status = SubscriptionStatus.Cancelled;
@@ -146,7 +150,7 @@ public class SubscriptionService : ISubscriptionService
 
         if (payment == null)
         {
-            return Result.Failure("Payment not found for the given reference.");
+            return Result.Failure(_localizer["PaymentNotFound"]);
         }
 
         if (payment.Status == PaymentStatus.Completed)

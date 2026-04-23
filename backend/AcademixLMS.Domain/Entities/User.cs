@@ -33,6 +33,9 @@ public class User : BaseEntity
 
     /// <summary>JSON blob for UI preferences (theme, colors). Synced across devices.</summary>
     public string? UiPreferencesJson { get; set; }
+
+    /// <summary>Preferred UI language code (e.g. "en", "ar"). Drives server-side i18n.</summary>
+    public string? PreferredLanguage { get; set; }
     
     // Navigation Properties
     public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();

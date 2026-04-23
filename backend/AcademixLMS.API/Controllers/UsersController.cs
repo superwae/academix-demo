@@ -1,9 +1,11 @@
+using System.Globalization;
 using AcademixLMS.API.Extensions;
 using AcademixLMS.Application.Common;
 using AcademixLMS.Application.DTOs.User;
 using AcademixLMS.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace AcademixLMS.API.Controllers;
 
@@ -16,12 +18,23 @@ public class UsersController : ControllerBase
 {
     private readonly IUserService _userService;
     private readonly IAuthService _authService;
+    private readonly IApplicationDbContext _dbContext;
     private readonly ILogger<UsersController> _logger;
 
-    public UsersController(IUserService userService, IAuthService authService, ILogger<UsersController> logger)
+    // Supported locale codes for the PUT /users/me/language endpoint.
+    // Must stay in sync with Program.cs RequestLocalization configuration.
+    private static readonly HashSet<string> SupportedLanguages =
+        new(StringComparer.OrdinalIgnoreCase) { "en", "ar" };
+
+    public UsersController(
+        IUserService userService,
+        IAuthService authService,
+        IApplicationDbContext dbContext,
+        ILogger<UsersController> logger)
     {
         _userService = userService;
         _authService = authService;
+        _dbContext = dbContext;
         _logger = logger;
     }
 
@@ -51,6 +64,49 @@ public class UsersController : ControllerBase
             return NotFound(result.Error);
 
         return Ok(result.Value);
+    }
+
+    /// <summary>
+    /// Update the current user's preferred UI language. Affects server-side i18n
+    /// (error messages) immediately and persists across sessions.
+    /// </summary>
+    [HttpPut("me/language")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> UpdateMyLanguage([FromBody] UpdateLanguageRequest request, CancellationToken cancellationToken)
+    {
+        if (request is null || string.IsNullOrWhiteSpace(request.Language) ||
+            !SupportedLanguages.Contains(request.Language))
+        {
+            return BadRequest(new { error = "Unsupported language." });
+        }
+
+        var userId = User.GetRequiredUserId();
+        var user = await _dbContext.Users
+            .FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted, cancellationToken);
+        if (user is null) return NotFound();
+
+        var normalized = request.Language.ToLowerInvariant();
+        user.PreferredLanguage = normalized;
+        user.UpdatedAt = DateTime.UtcNow;
+        user.UpdatedBy = userId;
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        // Apply the new culture to the current thread so any localized messages
+        // produced by the rest of this request honor the user's new preference.
+        // Subsequent requests will pick it up via the custom culture provider.
+        try
+        {
+            var culture = new CultureInfo(normalized);
+            CultureInfo.CurrentCulture = culture;
+            CultureInfo.CurrentUICulture = culture;
+        }
+        catch (CultureNotFoundException)
+        {
+            // Should not happen for supported languages — guard anyway.
+        }
+
+        return NoContent();
     }
 
     /// <summary>Save theme / UI preferences for the current user (syncs across devices).</summary>
@@ -195,5 +251,8 @@ public class UsersController : ControllerBase
         return Ok();
     }
 }
+
+/// <summary>Payload for PUT /users/me/language.</summary>
+public record UpdateLanguageRequest(string Language);
 
 

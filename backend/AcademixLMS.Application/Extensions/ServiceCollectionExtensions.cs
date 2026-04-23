@@ -10,6 +10,10 @@ public static class ServiceCollectionExtensions
     /// </summary>
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
+        // Localization: resources live under Application/Resources so IStringLocalizer<T>
+        // resolves "Resources/{ServiceName}.{culture}.resx" for each service.
+        services.AddLocalization(options => options.ResourcesPath = "Resources");
+
         // Register Application services
         services.AddScoped<IAuthService, Services.AuthService>();
         services.AddScoped<IUserService, Services.UserService>();

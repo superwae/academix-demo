@@ -3,22 +3,25 @@ using AcademixLMS.Application.DTOs.Organization;
 using AcademixLMS.Application.Interfaces;
 using AcademixLMS.Domain.Common;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 
 namespace AcademixLMS.Application.Services;
 
 public class OrgComplianceService : IOrgComplianceService
 {
     private readonly IApplicationDbContext _context;
+    private readonly IStringLocalizer<OrgComplianceService> _localizer;
 
-    public OrgComplianceService(IApplicationDbContext context)
+    public OrgComplianceService(IApplicationDbContext context, IStringLocalizer<OrgComplianceService> localizer)
     {
         _context = context;
+        _localizer = localizer;
     }
 
     public async Task<Result<OrgComplianceSummaryDto>> GetSummaryAsync(Guid orgId, Guid requestingUserId, CancellationToken cancellationToken = default)
     {
         if (!await IsOrgReaderAsync(orgId, requestingUserId, cancellationToken))
-            return Result<OrgComplianceSummaryDto>.Failure("Not authorized.");
+            return Result<OrgComplianceSummaryDto>.Failure(_localizer["NotAuthorized"]);
 
         var now = DateTime.UtcNow;
 
@@ -51,7 +54,7 @@ public class OrgComplianceService : IOrgComplianceService
     public async Task<Result<IReadOnlyList<OrgAssignmentRowDto>>> GetAssignmentsAsync(Guid orgId, Guid requestingUserId, string? statusFilter, CancellationToken cancellationToken = default)
     {
         if (!await IsOrgReaderAsync(orgId, requestingUserId, cancellationToken))
-            return Result<IReadOnlyList<OrgAssignmentRowDto>>.Failure("Not authorized.");
+            return Result<IReadOnlyList<OrgAssignmentRowDto>>.Failure(_localizer["NotAuthorized"]);
 
         var now = DateTime.UtcNow;
 

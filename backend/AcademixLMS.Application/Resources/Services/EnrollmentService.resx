@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms</value>
+  </resheader>
+  <data name="EnrollmentNotFound" xml:space="preserve">
+    <value>Enrollment not found.</value>
+  </data>
+  <data name="UserNotFound" xml:space="preserve">
+    <value>User not found.</value>
+  </data>
+  <data name="UserSuspended" xml:space="preserve">
+    <value>Cannot enroll: User account is suspended.</value>
+  </data>
+  <data name="CourseNotFound" xml:space="preserve">
+    <value>Course not found.</value>
+  </data>
+  <data name="CourseNotPublished" xml:space="preserve">
+    <value>Cannot enroll: Course is not published.</value>
+  </data>
+  <data name="CourseArchived" xml:space="preserve">
+    <value>Cannot enroll: Course is archived.</value>
+  </data>
+  <data name="SectionNotFound" xml:space="preserve">
+    <value>Section not found or does not belong to this course.</value>
+  </data>
+  <data name="SectionInactive" xml:space="preserve">
+    <value>Cannot enroll: Section is not active.</value>
+  </data>
+  <data name="AlreadyEnrolledSection" xml:space="preserve">
+    <value>You are already enrolled in this course section.</value>
+  </data>
+  <data name="AlreadyEnrolledCourse" xml:space="preserve">
+    <value>You are already enrolled in this course (Section: {0}). You can only enroll in one section per course. Please unenroll from your current section first if you want to switch.</value>
+  </data>
+  <data name="SectionFull" xml:space="preserve">
+    <value>Cannot enroll: Section is full.</value>
+  </data>
+  <data name="AlreadyEnrolledGeneric" xml:space="preserve">
+    <value>You are already enrolled in this course. Please check your enrollments.</value>
+  </data>
+  <data name="UnenrollOnlyOwn" xml:space="preserve">
+    <value>You can only unenroll from your own enrollments.</value>
+  </data>
+  <data name="UnenrollInvalidStatus" xml:space="preserve">
+    <value>Cannot unenroll: Enrollment status is {0}. Only Active or Completed enrollments can be unenrolled.</value>
+  </data>
+  <data name="InvalidEnrollmentStatus" xml:space="preserve">
+    <value>Invalid enrollment status.</value>
+  </data>
+  <data name="InvalidProgressPercentage" xml:space="preserve">
+    <value>Progress percentage must be between 0 and 100.</value>
+  </data>
+  <data name="CompleteInvalidStatus" xml:space="preserve">
+    <value>Cannot complete enrollment: Current status is {0}.</value>
+  </data>
+  <data name="NoSectionsForEnrollment" xml:space="preserve">
+    <value>Course has no sections available for enrollment.</value>
+  </data>
+</root>

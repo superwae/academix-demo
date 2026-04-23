@@ -4,6 +4,7 @@ using AcademixLMS.Application.Interfaces;
 using AcademixLMS.Domain.Common;
 using AcademixLMS.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 
 namespace AcademixLMS.Application.Services;
@@ -13,15 +14,18 @@ public class EnrollmentService : IEnrollmentService
     private readonly IApplicationDbContext _context;
     private readonly INotificationService _notificationService;
     private readonly ILogger<EnrollmentService> _logger;
+    private readonly IStringLocalizer<EnrollmentService> _localizer;
 
     public EnrollmentService(
         IApplicationDbContext context,
         INotificationService notificationService,
-        ILogger<EnrollmentService> logger)
+        ILogger<EnrollmentService> logger,
+        IStringLocalizer<EnrollmentService> localizer)
     {
         _context = context;
         _notificationService = notificationService;
         _logger = logger;
+        _localizer = localizer;
     }
 
     public async Task<Result<EnrollmentDto>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
@@ -34,7 +38,7 @@ public class EnrollmentService : IEnrollmentService
 
         if (enrollment == null)
         {
-            return Result<EnrollmentDto>.Failure("Enrollment not found.");
+            return Result<EnrollmentDto>.Failure(_localizer["EnrollmentNotFound"]);
         }
 
         var enrollmentDto = MapToEnrollmentDto(enrollment);
@@ -166,12 +170,12 @@ public class EnrollmentService : IEnrollmentService
 
             if (user == null)
             {
-                return Result<EnrollmentDto>.Failure("User not found.");
+                return Result<EnrollmentDto>.Failure(_localizer["UserNotFound"]);
             }
 
             if (!user.IsActive)
             {
-                return Result<EnrollmentDto>.Failure("Cannot enroll: User account is suspended.");
+                return Result<EnrollmentDto>.Failure(_localizer["UserSuspended"]);
             }
 
             // Business Rule 2: Validate course exists and is Published
@@ -181,18 +185,18 @@ public class EnrollmentService : IEnrollmentService
 
             if (course == null)
             {
-                return Result<EnrollmentDto>.Failure("Course not found.");
+                return Result<EnrollmentDto>.Failure(_localizer["CourseNotFound"]);
             }
 
             if (course.Status != CourseStatus.Published)
             {
-                return Result<EnrollmentDto>.Failure("Cannot enroll: Course is not published.");
+                return Result<EnrollmentDto>.Failure(_localizer["CourseNotPublished"]);
             }
 
             // Business Rule 3: Course must not be Archived
             if (course.Status == CourseStatus.Archived)
             {
-                return Result<EnrollmentDto>.Failure("Cannot enroll: Course is archived.");
+                return Result<EnrollmentDto>.Failure(_localizer["CourseArchived"]);
             }
 
             // Business Rule 4: Validate section exists and belongs to course
@@ -201,12 +205,12 @@ public class EnrollmentService : IEnrollmentService
 
             if (section == null)
             {
-                return Result<EnrollmentDto>.Failure("Section not found or does not belong to this course.");
+                return Result<EnrollmentDto>.Failure(_localizer["SectionNotFound"]);
             }
 
             if (!section.IsActive)
             {
-                return Result<EnrollmentDto>.Failure("Cannot enroll: Section is not active.");
+                return Result<EnrollmentDto>.Failure(_localizer["SectionInactive"]);
             }
 
             // Business Rule 5: Prevent duplicate enrollment in the same section
@@ -222,7 +226,7 @@ public class EnrollmentService : IEnrollmentService
 
             if (existingEnrollment != null)
             {
-                return Result<EnrollmentDto>.Failure("You are already enrolled in this course section.");
+                return Result<EnrollmentDto>.Failure(_localizer["AlreadyEnrolledSection"]);
             }
 
             // Business Rule 5b: Prevent enrolling in multiple sections of the same course
@@ -238,7 +242,7 @@ public class EnrollmentService : IEnrollmentService
 
             if (existingCourseEnrollment != null)
             {
-                return Result<EnrollmentDto>.Failure($"You are already enrolled in this course (Section: {existingCourseEnrollment.Section.Name}). You can only enroll in one section per course. Please unenroll from your current section first if you want to switch.");
+                return Result<EnrollmentDto>.Failure(_localizer["AlreadyEnrolledCourse", existingCourseEnrollment.Section.Name]);
             }
 
             // Business Rule 6: Check available seats in Section
@@ -253,7 +257,7 @@ public class EnrollmentService : IEnrollmentService
 
                 if (activeEnrollmentsCount >= section.MaxSeats)
                 {
-                    return Result<EnrollmentDto>.Failure("Cannot enroll: Section is full.");
+                    return Result<EnrollmentDto>.Failure(_localizer["SectionFull"]);
                 }
             }
 
@@ -313,7 +317,7 @@ public class EnrollmentService : IEnrollmentService
         {
             await transaction.RollbackAsync(cancellationToken);
             _logger.LogWarning(ex, "Duplicate enrollment attempt prevented by database constraint for user {UserId}, course {CourseId}", userId, request.CourseId);
-            return Result<EnrollmentDto>.Failure("You are already enrolled in this course. Please check your enrollments.");
+            return Result<EnrollmentDto>.Failure(_localizer["AlreadyEnrolledGeneric"]);
         }
         catch (Exception ex)
         {
@@ -336,20 +340,20 @@ public class EnrollmentService : IEnrollmentService
 
             if (enrollment == null)
             {
-                return Result.Failure("Enrollment not found.");
+                return Result.Failure(_localizer["EnrollmentNotFound"]);
             }
 
             // Ownership check: User can only unenroll themselves (unless Admin)
             if (!isAdmin && enrollment.UserId != userId)
             {
-                return Result.Failure("You can only unenroll from your own enrollments.");
+                return Result.Failure(_localizer["UnenrollOnlyOwn"]);
             }
 
             // Only allow unenrolling from Active or Completed enrollments
             // Cannot unenroll from already Cancelled, Dropped, or Suspended enrollments
             if (enrollment.Status != EnrollmentStatus.Active && enrollment.Status != EnrollmentStatus.Completed)
             {
-                return Result.Failure($"Cannot unenroll: Enrollment status is {enrollment.Status}. Only Active or Completed enrollments can be unenrolled.");
+                return Result.Failure(_localizer["UnenrollInvalidStatus", enrollment.Status]);
             }
 
             // Soft delete / Cancel enrollment - change status to Cancelled and mark as deleted
@@ -398,7 +402,7 @@ public class EnrollmentService : IEnrollmentService
 
         if (enrollment == null)
         {
-            return Result<EnrollmentDto>.Failure("Enrollment not found.");
+            return Result<EnrollmentDto>.Failure(_localizer["EnrollmentNotFound"]);
         }
 
         // Update status if provided
@@ -410,7 +414,7 @@ public class EnrollmentService : IEnrollmentService
             }
             else
             {
-                return Result<EnrollmentDto>.Failure("Invalid enrollment status.");
+                return Result<EnrollmentDto>.Failure(_localizer["InvalidEnrollmentStatus"]);
             }
         }
 
@@ -420,7 +424,7 @@ public class EnrollmentService : IEnrollmentService
             var progress = request.ProgressPercentage.Value;
             if (progress < 0 || progress > 100)
             {
-                return Result<EnrollmentDto>.Failure("Progress percentage must be between 0 and 100.");
+                return Result<EnrollmentDto>.Failure(_localizer["InvalidProgressPercentage"]);
             }
             enrollment.ProgressPercentage = progress;
         }
@@ -443,7 +447,7 @@ public class EnrollmentService : IEnrollmentService
     {
         if (progressPercentage < 0 || progressPercentage > 100)
         {
-            return Result.Failure("Progress percentage must be between 0 and 100.");
+            return Result.Failure(_localizer["InvalidProgressPercentage"]);
         }
 
         var enrollment = await _context.Enrollments
@@ -451,7 +455,7 @@ public class EnrollmentService : IEnrollmentService
 
         if (enrollment == null)
         {
-            return Result.Failure("Enrollment not found.");
+            return Result.Failure(_localizer["EnrollmentNotFound"]);
         }
 
         enrollment.ProgressPercentage = progressPercentage;
@@ -469,12 +473,12 @@ public class EnrollmentService : IEnrollmentService
 
         if (enrollment == null)
         {
-            return Result.Failure("Enrollment not found.");
+            return Result.Failure(_localizer["EnrollmentNotFound"]);
         }
 
         if (enrollment.Status != EnrollmentStatus.Active)
         {
-            return Result.Failure($"Cannot complete enrollment: Current status is {enrollment.Status}.");
+            return Result.Failure(_localizer["CompleteInvalidStatus", enrollment.Status]);
         }
 
         enrollment.Status = EnrollmentStatus.Completed;
@@ -510,7 +514,7 @@ public class EnrollmentService : IEnrollmentService
 
         if (course == null)
         {
-            return Result<bool>.Failure("Course not found.");
+            return Result<bool>.Failure(_localizer["CourseNotFound"]);
         }
 
         return Result<bool>.Success(course.InstructorId == userId);
@@ -605,11 +609,11 @@ public class EnrollmentService : IEnrollmentService
                 .FirstOrDefaultAsync(c => c.Id == courseId && !c.IsDeleted, cancellationToken);
 
             if (course == null)
-                return Result.Failure("Course not found.");
+                return Result.Failure(_localizer["CourseNotFound"]);
 
             var firstSection = course.Sections?.OrderBy(s => s.Name).FirstOrDefault();
             if (firstSection == null)
-                return Result.Failure("Course has no sections available for enrollment.");
+                return Result.Failure(_localizer["NoSectionsForEnrollment"]);
 
             var enrollment = new Enrollment
             {

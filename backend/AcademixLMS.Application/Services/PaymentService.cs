@@ -4,6 +4,7 @@ using AcademixLMS.Application.Interfaces;
 using AcademixLMS.Domain.Common;
 using AcademixLMS.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 
 namespace AcademixLMS.Application.Services;
@@ -13,15 +14,18 @@ public class PaymentService : IPaymentService
     private readonly IApplicationDbContext _context;
     private readonly ILahzaService _lahzaService;
     private readonly ILogger<PaymentService> _logger;
+    private readonly IStringLocalizer<PaymentService> _localizer;
 
     public PaymentService(
         IApplicationDbContext context,
         ILahzaService lahzaService,
-        ILogger<PaymentService> logger)
+        ILogger<PaymentService> logger,
+        IStringLocalizer<PaymentService> localizer)
     {
         _context = context;
         _lahzaService = lahzaService;
         _logger = logger;
+        _localizer = localizer;
     }
 
     public async Task<Result<InitializePaymentResponse>> InitializeCoursePaymentAsync(Guid userId, Guid courseId, string? discountCode = null, CancellationToken cancellationToken = default)
@@ -32,7 +36,7 @@ public class PaymentService : IPaymentService
 
         if (alreadyPaid)
         {
-            return Result<InitializePaymentResponse>.Failure("You have already paid for this course.");
+            return Result<InitializePaymentResponse>.Failure(_localizer["AlreadyPaid"]);
         }
 
         // Load course
@@ -41,12 +45,12 @@ public class PaymentService : IPaymentService
 
         if (course == null)
         {
-            return Result<InitializePaymentResponse>.Failure("Course not found.");
+            return Result<InitializePaymentResponse>.Failure(_localizer["CourseNotFound"]);
         }
 
         if (!course.Price.HasValue || course.Price.Value <= 0)
         {
-            return Result<InitializePaymentResponse>.Failure("This course is free and does not require payment.");
+            return Result<InitializePaymentResponse>.Failure(_localizer["CourseIsFree"]);
         }
 
         // Load user
@@ -55,7 +59,7 @@ public class PaymentService : IPaymentService
 
         if (user == null)
         {
-            return Result<InitializePaymentResponse>.Failure("User not found.");
+            return Result<InitializePaymentResponse>.Failure(_localizer["UserNotFound"]);
         }
 
         // Convert price to smallest currency unit (e.g. cents)
@@ -134,7 +138,7 @@ public class PaymentService : IPaymentService
             await _context.SaveChangesAsync(cancellationToken);
 
             _logger.LogWarning("Lahza initialization failed for payment {PaymentId}: {Error}", payment.Id, lahzaResult.Error);
-            return Result<InitializePaymentResponse>.Failure($"Payment initialization failed: {lahzaResult.Error}");
+            return Result<InitializePaymentResponse>.Failure(_localizer["PaymentInitFailed", lahzaResult.Error ?? string.Empty]);
         }
 
         // 5. Save LahzaReference on Payment
@@ -161,7 +165,7 @@ public class PaymentService : IPaymentService
 
         if (existing)
         {
-            return Result<InitializePaymentResponse>.Failure("You already have an active subscription. Cancel it before subscribing to a new plan.");
+            return Result<InitializePaymentResponse>.Failure(_localizer["AlreadyHasActiveSubscription"]);
         }
 
         // Load plan
@@ -170,20 +174,20 @@ public class PaymentService : IPaymentService
 
         if (plan == null)
         {
-            return Result<InitializePaymentResponse>.Failure("Subscription plan not found or inactive.");
+            return Result<InitializePaymentResponse>.Failure(_localizer["SubscriptionPlanNotFound"]);
         }
 
         // Parse billing interval (case-insensitive)
         if (!Enum.TryParse<BillingInterval>(billingInterval, true, out var interval))
         {
-            return Result<InitializePaymentResponse>.Failure("Invalid billing interval. Must be 'Monthly' or 'Yearly'.");
+            return Result<InitializePaymentResponse>.Failure(_localizer["InvalidBillingInterval"]);
         }
 
         // Determine price based on interval
         var price = interval == BillingInterval.Monthly ? plan.MonthlyPrice : plan.YearlyPrice;
         if (price <= 0)
         {
-            return Result<InitializePaymentResponse>.Failure("This plan has no price configured.");
+            return Result<InitializePaymentResponse>.Failure(_localizer["PlanHasNoPrice"]);
         }
 
         // Load user
@@ -192,7 +196,7 @@ public class PaymentService : IPaymentService
 
         if (user == null)
         {
-            return Result<InitializePaymentResponse>.Failure("User not found.");
+            return Result<InitializePaymentResponse>.Failure(_localizer["UserNotFound"]);
         }
 
         var amountInSmallestUnit = (long)(price * 100);
@@ -236,7 +240,7 @@ public class PaymentService : IPaymentService
             await _context.SaveChangesAsync(cancellationToken);
 
             _logger.LogWarning("Lahza initialization failed for subscription payment {PaymentId}: {Error}", payment.Id, lahzaResult.Error);
-            return Result<InitializePaymentResponse>.Failure($"Payment initialization failed: {lahzaResult.Error}");
+            return Result<InitializePaymentResponse>.Failure(_localizer["PaymentInitFailed", lahzaResult.Error ?? string.Empty]);
         }
 
         payment.LahzaReference = lahzaResult.Value!.Reference;
@@ -262,7 +266,7 @@ public class PaymentService : IPaymentService
 
         if (payment == null)
         {
-            return Result<PaymentDto>.Failure("Payment not found for the given reference.");
+            return Result<PaymentDto>.Failure(_localizer["PaymentNotFound"]);
         }
 
         if (payment.Status == PaymentStatus.Completed)
@@ -274,7 +278,7 @@ public class PaymentService : IPaymentService
         if (!verifyResult.IsSuccess)
         {
             _logger.LogWarning("Lahza verification failed for reference '{Reference}': {Error}", lahzaReference, verifyResult.Error);
-            return Result<PaymentDto>.Failure($"Payment verification failed: {verifyResult.Error}");
+            return Result<PaymentDto>.Failure(_localizer["PaymentVerificationFailed", verifyResult.Error ?? string.Empty]);
         }
 
         var verification = verifyResult.Value!;

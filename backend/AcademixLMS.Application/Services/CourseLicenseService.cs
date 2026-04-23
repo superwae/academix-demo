@@ -4,6 +4,7 @@ using AcademixLMS.Application.Interfaces;
 using AcademixLMS.Domain.Common;
 using AcademixLMS.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 
 namespace AcademixLMS.Application.Services;
@@ -12,17 +13,22 @@ public class CourseLicenseService : ICourseLicenseService
 {
     private readonly IApplicationDbContext _context;
     private readonly ILogger<CourseLicenseService> _logger;
+    private readonly IStringLocalizer<CourseLicenseService> _localizer;
 
-    public CourseLicenseService(IApplicationDbContext context, ILogger<CourseLicenseService> logger)
+    public CourseLicenseService(
+        IApplicationDbContext context,
+        ILogger<CourseLicenseService> logger,
+        IStringLocalizer<CourseLicenseService> localizer)
     {
         _context = context;
         _logger = logger;
+        _localizer = localizer;
     }
 
     public async Task<Result<IReadOnlyList<CourseLicenseDto>>> GetLicensesForOrgAsync(Guid orgId, Guid requestingUserId, CancellationToken cancellationToken = default)
     {
         if (!await IsOrgAdminOrManagerAsync(orgId, requestingUserId, cancellationToken))
-            return Result<IReadOnlyList<CourseLicenseDto>>.Failure("Not authorized for this organization.");
+            return Result<IReadOnlyList<CourseLicenseDto>>.Failure(_localizer["NotAuthorizedOrg"]);
 
         var licenses = await _context.CourseLicenses
             .Include(l => l.Course)
@@ -37,26 +43,26 @@ public class CourseLicenseService : ICourseLicenseService
     public async Task<Result<CourseLicenseDto>> GetByIdAsync(Guid licenseId, Guid requestingUserId, CancellationToken cancellationToken = default)
     {
         var license = await LoadAsync(licenseId, cancellationToken);
-        if (license is null) return Result<CourseLicenseDto>.Failure("License not found.");
+        if (license is null) return Result<CourseLicenseDto>.Failure(_localizer["LicenseNotFound"]);
         if (!await IsOrgAdminOrManagerAsync(license.OrganizationId, requestingUserId, cancellationToken))
-            return Result<CourseLicenseDto>.Failure("Not authorized for this organization.");
+            return Result<CourseLicenseDto>.Failure(_localizer["NotAuthorizedOrg"]);
         return Result<CourseLicenseDto>.Success(Map(license));
     }
 
     public async Task<Result<CourseLicenseDto>> PurchaseAsync(Guid orgId, Guid requestingUserId, PurchaseLicenseRequest request, CancellationToken cancellationToken = default)
     {
-        if (request.Seats <= 0) return Result<CourseLicenseDto>.Failure("Seats must be positive.");
+        if (request.Seats <= 0) return Result<CourseLicenseDto>.Failure(_localizer["SeatsMustBePositive"]);
         if (!await IsOrgAdminAsync(orgId, requestingUserId, cancellationToken))
-            return Result<CourseLicenseDto>.Failure("Only org admins can purchase licenses.");
+            return Result<CourseLicenseDto>.Failure(_localizer["OnlyAdminsCanPurchase"]);
 
         var course = await _context.Courses.FirstOrDefaultAsync(c => c.Id == request.CourseId && !c.IsDeleted, cancellationToken);
-        if (course is null) return Result<CourseLicenseDto>.Failure("Course not found.");
+        if (course is null) return Result<CourseLicenseDto>.Failure(_localizer["CourseNotFound"]);
         if (course.Status != CourseStatus.Published)
-            return Result<CourseLicenseDto>.Failure("Course is not published.");
+            return Result<CourseLicenseDto>.Failure(_localizer["CourseNotPublished"]);
         if (course.IsOrgExclusive && course.OrganizationId != orgId)
-            return Result<CourseLicenseDto>.Failure("This course is exclusive to another organization.");
+            return Result<CourseLicenseDto>.Failure(_localizer["CourseExclusiveToOtherOrg"]);
         if (course.Price is null || course.Price <= 0)
-            return Result<CourseLicenseDto>.Failure("This course is free — no license needed.");
+            return Result<CourseLicenseDto>.Failure(_localizer["CourseIsFree"]);
 
         var pricePerSeat = course.Price.Value;
         var total = pricePerSeat * request.Seats;
@@ -106,9 +112,9 @@ public class CourseLicenseService : ICourseLicenseService
     public async Task<Result<CourseLicenseDto>> ActivateAsync(Guid licenseId, Guid requestingUserId, CancellationToken cancellationToken = default)
     {
         var license = await LoadAsync(licenseId, cancellationToken);
-        if (license is null) return Result<CourseLicenseDto>.Failure("License not found.");
+        if (license is null) return Result<CourseLicenseDto>.Failure(_localizer["LicenseNotFound"]);
         if (!await IsOrgAdminAsync(license.OrganizationId, requestingUserId, cancellationToken))
-            return Result<CourseLicenseDto>.Failure("Not authorized.");
+            return Result<CourseLicenseDto>.Failure(_localizer["NotAuthorized"]);
 
         if (license.Status == CourseLicenseStatus.Active) return Result<CourseLicenseDto>.Success(Map(license));
 
@@ -123,9 +129,9 @@ public class CourseLicenseService : ICourseLicenseService
     public async Task<Result<IReadOnlyList<LicenseAssignmentDto>>> GetAssignmentsAsync(Guid licenseId, Guid requestingUserId, CancellationToken cancellationToken = default)
     {
         var license = await LoadAsync(licenseId, cancellationToken);
-        if (license is null) return Result<IReadOnlyList<LicenseAssignmentDto>>.Failure("License not found.");
+        if (license is null) return Result<IReadOnlyList<LicenseAssignmentDto>>.Failure(_localizer["LicenseNotFound"]);
         if (!await IsOrgAdminOrManagerAsync(license.OrganizationId, requestingUserId, cancellationToken))
-            return Result<IReadOnlyList<LicenseAssignmentDto>>.Failure("Not authorized.");
+            return Result<IReadOnlyList<LicenseAssignmentDto>>.Failure(_localizer["NotAuthorized"]);
 
         var assignments = await _context.Enrollments
             .Include(e => e.User)
@@ -143,21 +149,21 @@ public class CourseLicenseService : ICourseLicenseService
         var license = await _context.CourseLicenses
             .Include(l => l.Course).ThenInclude(c => c.Sections)
             .FirstOrDefaultAsync(l => l.Id == licenseId && !l.IsDeleted, cancellationToken);
-        if (license is null) return Result<IReadOnlyList<LicenseAssignmentDto>>.Failure("License not found.");
+        if (license is null) return Result<IReadOnlyList<LicenseAssignmentDto>>.Failure(_localizer["LicenseNotFound"]);
 
         if (!await IsOrgAdminOrManagerAsync(license.OrganizationId, requestingUserId, cancellationToken))
-            return Result<IReadOnlyList<LicenseAssignmentDto>>.Failure("Not authorized.");
+            return Result<IReadOnlyList<LicenseAssignmentDto>>.Failure(_localizer["NotAuthorized"]);
 
         if (license.Status != CourseLicenseStatus.Active)
-            return Result<IReadOnlyList<LicenseAssignmentDto>>.Failure("License is not active.");
+            return Result<IReadOnlyList<LicenseAssignmentDto>>.Failure(_localizer["LicenseNotActive"]);
 
         var targetSection = license.Course.Sections.FirstOrDefault(s => !s.IsDeleted && s.IsActive);
         if (targetSection is null)
-            return Result<IReadOnlyList<LicenseAssignmentDto>>.Failure("Course has no active section to enroll into.");
+            return Result<IReadOnlyList<LicenseAssignmentDto>>.Failure(_localizer["NoActiveSection"]);
 
         var available = license.SeatsTotal - license.SeatsUsed;
         if (request.MemberUserIds.Count > available)
-            return Result<IReadOnlyList<LicenseAssignmentDto>>.Failure($"Only {available} seat(s) available; {request.MemberUserIds.Count} requested.");
+            return Result<IReadOnlyList<LicenseAssignmentDto>>.Failure(_localizer["SeatsAvailableShort", available, request.MemberUserIds.Count]);
 
         var memberIdsInOrg = await _context.OrganizationMembers
             .Where(m => m.OrganizationId == license.OrganizationId && request.MemberUserIds.Contains(m.UserId) && m.IsActive && !m.IsDeleted)
@@ -166,7 +172,7 @@ public class CourseLicenseService : ICourseLicenseService
 
         var missing = request.MemberUserIds.Except(memberIdsInOrg).ToList();
         if (missing.Count > 0)
-            return Result<IReadOnlyList<LicenseAssignmentDto>>.Failure($"{missing.Count} user(s) are not active members of this organization.");
+            return Result<IReadOnlyList<LicenseAssignmentDto>>.Failure(_localizer["UsersNotActiveMembers", missing.Count]);
 
         // Skip users who are already enrolled in this course (org-assigned or self-assigned)
         var alreadyEnrolledUsers = await _context.Enrollments
@@ -219,13 +225,13 @@ public class CourseLicenseService : ICourseLicenseService
     public async Task<Result<bool>> RevokeAssignmentAsync(Guid licenseId, Guid enrollmentId, Guid requestingUserId, CancellationToken cancellationToken = default)
     {
         var license = await LoadAsync(licenseId, cancellationToken);
-        if (license is null) return Result<bool>.Failure("License not found.");
+        if (license is null) return Result<bool>.Failure(_localizer["LicenseNotFound"]);
         if (!await IsOrgAdminOrManagerAsync(license.OrganizationId, requestingUserId, cancellationToken))
-            return Result<bool>.Failure("Not authorized.");
+            return Result<bool>.Failure(_localizer["NotAuthorized"]);
 
         var enrollment = await _context.Enrollments
             .FirstOrDefaultAsync(e => e.Id == enrollmentId && e.CourseLicenseId == licenseId && !e.IsDeleted, cancellationToken);
-        if (enrollment is null) return Result<bool>.Failure("Assignment not found.");
+        if (enrollment is null) return Result<bool>.Failure(_localizer["AssignmentNotFound"]);
 
         enrollment.Status = EnrollmentStatus.Cancelled;
         enrollment.IsDeleted = true;

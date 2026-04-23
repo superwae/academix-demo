@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms</value>
+  </resheader>
+  <data name="OrganizationNotFound" xml:space="preserve">
+    <value>المنظمة غير موجودة.</value>
+  </data>
+  <data name="NoAccess" xml:space="preserve">
+    <value>لا تملك صلاحية الوصول إلى هذه المنظمة.</value>
+  </data>
+  <data name="NameRequired" xml:space="preserve">
+    <value>اسم المنظمة مطلوب.</value>
+  </data>
+  <data name="OwnerNotFound" xml:space="preserve">
+    <value>المستخدم المالك غير موجود.</value>
+  </data>
+  <data name="OnlyAdminCanUpdate" xml:space="preserve">
+    <value>يمكن لمسؤول المنظمة فقط تعديل الإعدادات.</value>
+  </data>
+  <data name="OnlyAdminCanInvite" xml:space="preserve">
+    <value>يمكن لمسؤول المنظمة فقط دعوة الأعضاء.</value>
+  </data>
+  <data name="EmailRequired" xml:space="preserve">
+    <value>البريد الإلكتروني مطلوب.</value>
+  </data>
+  <data name="TeachingInstitutionsNoEmployees" xml:space="preserve">
+    <value>المؤسسات التعليمية لا تضم موظفين. ادعُهم بصفة معلّم في المنظمة بدلًا من ذلك.</value>
+  </data>
+  <data name="EmployersNoTeachers" xml:space="preserve">
+    <value>جهات العمل لا تضم معلّمين. ادعُهم بصفة موظّف في المنظمة بدلًا من ذلك.</value>
+  </data>
+  <data name="AlreadyMember" xml:space="preserve">
+    <value>المستخدم عضو بالفعل في هذه المنظمة.</value>
+  </data>
+  <data name="OnlyAdminCanChangeRoles" xml:space="preserve">
+    <value>يمكن لمسؤول المنظمة فقط تغيير أدوار الأعضاء.</value>
+  </data>
+  <data name="MemberNotFound" xml:space="preserve">
+    <value>العضو غير موجود.</value>
+  </data>
+  <data name="CannotRemoveLastAdminPromote" xml:space="preserve">
+    <value>لا يمكن إزالة آخر مسؤول للمنظمة. قم بترقية عضو آخر أولًا.</value>
+  </data>
+  <data name="OnlyAdminCanRemove" xml:space="preserve">
+    <value>يمكن لمسؤول المنظمة فقط إزالة الأعضاء.</value>
+  </data>
+  <data name="CannotRemoveLastAdmin" xml:space="preserve">
+    <value>لا يمكن إزالة آخر مسؤول للمنظمة.</value>
+  </data>
+</root>
