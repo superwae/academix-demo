@@ -144,7 +144,8 @@ public enum PaymentType
 {
     CoursePurchase = 1,
     Subscription = 2,
-    Refund = 3
+    Refund = 3,
+    OrganizationBulkLicense = 4
 }
 
 /// <summary>
@@ -154,4 +155,44 @@ public enum DiscountType
 {
     Percentage = 1,
     FixedAmount = 2
+}
+
+/// <summary>
+/// Organization archetype.
+/// TeachingInstitution — owns instructors selling public courses. Revenue split applies.
+/// Employer — owns employees; buys seats (CourseLicense) or creates exclusive internal courses.
+/// </summary>
+public enum OrganizationType
+{
+    TeachingInstitution = 1,
+    Employer = 2
+}
+
+/// <summary>
+/// Role a user holds inside a specific organization. Distinct from global platform roles.
+/// </summary>
+public enum OrgMemberRole
+{
+    /// <summary>Full control of the org (billing, members, courses). Usually the founder / HR head.</summary>
+    OrgAdmin = 1,
+
+    /// <summary>HR/training manager (Type B). Can assign licenses and see compliance; cannot change billing.</summary>
+    OrgManager = 2,
+
+    /// <summary>Teacher employed by a TeachingInstitution. Creates courses under the org.</summary>
+    OrgTeacher = 3,
+
+    /// <summary>Employee of an Employer org. Learner owned by the org.</summary>
+    OrgEmployee = 4
+}
+
+/// <summary>
+/// Lifecycle state of a bulk course license.
+/// </summary>
+public enum CourseLicenseStatus
+{
+    Pending = 1,   // checkout not completed
+    Active = 2,    // paid; seats can be assigned
+    Expired = 3,   // past ValidUntil
+    Revoked = 4    // manually revoked (refund, dispute)
 }

@@ -54,5 +54,17 @@ public class PaymentConfiguration : IEntityTypeConfiguration<Payment>
             .WithMany(d => d.Payments)
             .HasForeignKey(p => p.DiscountId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        // Payment -> CourseLicense: CourseLicense also has optional Payment nav.
+        // Pick Payment.CourseLicenseId as the one-true FK; CourseLicense.PaymentId is the inverse.
+        builder.HasOne(p => p.CourseLicense)
+            .WithMany()
+            .HasForeignKey(p => p.CourseLicenseId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        builder.HasOne(p => p.Organization)
+            .WithMany()
+            .HasForeignKey(p => p.OrganizationId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }

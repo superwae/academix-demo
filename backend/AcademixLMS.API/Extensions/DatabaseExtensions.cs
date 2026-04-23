@@ -140,6 +140,7 @@ public static class DatabaseExtensions
                 await DemoFacultyBulkSeeder.EnsureAsync(context, logger, cancellationToken: default);
                 await DemoFacultyBulkSeeder.BackfillDemoCourseThumbnailsAsync(context, logger, cancellationToken: default);
                 await SubscriptionPlanSeeder.EnsureAsync(context, logger, cancellationToken: default);
+                await DemoOrganizationSeeder.EnsureAsync(context, logger, cancellationToken: default);
             }
 
             logger.LogInformation("Database migration completed.");

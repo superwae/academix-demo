@@ -17,7 +17,13 @@ public class Course : BaseEntity
     public string ProviderName { get; set; } = string.Empty;
     
     public Guid InstructorId { get; set; }
-    
+
+    /// <summary>Organization that owns this course. Null for independent instructors.</summary>
+    public Guid? OrganizationId { get; set; }
+
+    /// <summary>When true, only members of <see cref="OrganizationId"/> can see/enroll. Never appears in the public catalog.</summary>
+    public bool IsOrgExclusive { get; set; } = false;
+
     public decimal Rating { get; set; } = 0;
     public int RatingCount { get; set; } = 0;
     
@@ -47,6 +53,7 @@ public class Course : BaseEntity
 
     // Navigation Properties
     public User Instructor { get; set; } = null!;
+    public Organization? Organization { get; set; }
     public ICollection<CourseSection> Sections { get; set; } = new List<CourseSection>();
     public ICollection<Enrollment> Enrollments { get; set; } = new List<Enrollment>();
     public ICollection<Assignment> Assignments { get; set; } = new List<Assignment>();

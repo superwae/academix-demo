@@ -58,6 +58,10 @@ public class User : BaseEntity
     public ICollection<UserInterest> Interests { get; set; } = new List<UserInterest>();
     public ICollection<UserLearningGoal> LearningGoals { get; set; } = new List<UserLearningGoal>();
 
+    // Organizations
+    public ICollection<OrganizationMember> OrganizationMemberships { get; set; } = new List<OrganizationMember>();
+    public ICollection<Organization> OwnedOrganizations { get; set; } = new List<Organization>();
+
     // Helper properties
     public string FullName => $"{FirstName} {LastName}";
 }

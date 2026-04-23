@@ -29,9 +29,11 @@ public class Payment : BaseEntity
 
     public DateTime? PaidAt { get; set; }
 
-    // Polymorphic: either a course purchase or a subscription payment
+    // Polymorphic: course purchase, subscription, or organization bulk license
     public Guid? CourseId { get; set; }
     public Guid? SubscriptionId { get; set; }
+    public Guid? CourseLicenseId { get; set; }
+    public Guid? OrganizationId { get; set; }
 
     /// <summary>Discount applied to this payment, if any.</summary>
     public Guid? DiscountId { get; set; }
@@ -44,4 +46,6 @@ public class Payment : BaseEntity
     public Course? Course { get; set; }
     public Subscription? Subscription { get; set; }
     public Discount? Discount { get; set; }
+    public CourseLicense? CourseLicense { get; set; }
+    public Organization? Organization { get; set; }
 }
