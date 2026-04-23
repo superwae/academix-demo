@@ -39,6 +39,7 @@ import {
 } from "../../components/ui/dialog";
 import { adminService } from "../../services/adminService";
 import type { AdminCourseDto, PagedResult } from "../../services/adminService";
+import { ResponsiveTable, type ResponsiveTableColumn } from "../../components/ui/responsive-table";
 import { toast } from "sonner";
 import {
   courseExtrasService,
@@ -299,180 +300,204 @@ export function AdminCoursesPage() {
       </div>
 
       {/* Courses Table */}
-      <div className="rounded-xl border border-border bg-card overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b bg-muted/50">
-                <th className="px-4 py-3 text-start font-medium text-muted-foreground">{t('admin:courses.table.course')}</th>
-                <th className="px-4 py-3 text-start font-medium text-muted-foreground">{t('admin:courses.table.instructor')}</th>
-                <th className="px-4 py-3 text-start font-medium text-muted-foreground">{t('admin:courses.table.category')}</th>
-                <th className="px-4 py-3 text-start font-medium text-muted-foreground">{t('admin:courses.table.price')}</th>
-                <th className="px-4 py-3 text-start font-medium text-muted-foreground">{t('admin:courses.table.rating')}</th>
-                <th className="px-4 py-3 text-start font-medium text-muted-foreground">{t('admin:courses.table.status')}</th>
-                <th className="px-4 py-3 text-end font-medium text-muted-foreground">{t('admin:courses.table.actions')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                Array.from({ length: 5 }).map((_, i) => (
-                  <tr key={i} className="border-b">
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-16 animate-pulse rounded bg-muted" />
-                        <div className="h-4 w-32 animate-pulse rounded bg-muted" />
-                      </div>
-                    </td>
-                    <td className="px-4 py-3"><div className="h-4 w-24 animate-pulse rounded bg-muted" /></td>
-                    <td className="px-4 py-3"><div className="h-4 w-20 animate-pulse rounded bg-muted" /></td>
-                    <td className="px-4 py-3"><div className="h-4 w-12 animate-pulse rounded bg-muted" /></td>
-                    <td className="px-4 py-3"><div className="h-4 w-12 animate-pulse rounded bg-muted" /></td>
-                    <td className="px-4 py-3"><div className="h-6 w-20 animate-pulse rounded-full bg-muted" /></td>
-                    <td className="px-4 py-3"><div className="h-8 w-8 animate-pulse rounded bg-muted ms-auto" /></td>
-                  </tr>
-                ))
-              ) : (
-                filteredCourses.map((course) => (
-                  <tr key={course.id} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        {course.thumbnailUrl ? (
-                          <img
-                            src={course.thumbnailUrl}
-                            alt={course.title}
-                            className="h-10 w-16 rounded-md object-cover"
-                          />
-                        ) : (
-                          <div className="h-10 w-16 rounded-md bg-muted flex items-center justify-center">
-                            <BookOpen className="h-5 w-5 text-muted-foreground" />
-                          </div>
-                        )}
-                        <div>
-                          <span className="font-medium line-clamp-1">{course.title}</span>
-                          <span className="text-xs text-muted-foreground block">{course.level}</span>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground">{course.instructorName}</td>
-                    <td className="px-4 py-3 text-muted-foreground">{course.category}</td>
-                    <td className="px-4 py-3">{course.price != null ? `$${course.price.toFixed(2)}` : t('admin:courses.free')}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-1">
-                        <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                        <span>{course.rating.toFixed(1)}</span>
-                        <span className="text-muted-foreground text-xs">({course.ratingCount})</span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={cn(
-                        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
-                        STATUS_COLORS[course.status as keyof typeof STATUS_COLORS]
-                      )}>
-                        {STATUS_LABELS[course.status]}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-end">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            disabled={actionLoading === course.id}
-                          >
-                            {actionLoading === course.id ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <MoreHorizontal className="h-4 w-4" />
-                            )}
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => navigate(`/courses/${course.id}`)}>
-                            <Eye className="me-2 h-4 w-4" />
-                            {t('admin:courses.viewCourse')}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => openCourseInsights(course)}>
-                            <FileText className="me-2 h-4 w-4" />
-                            {t('admin:courses.materialsRatings')}
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          {(course.status === "Draft" || course.status === "PendingReview") && (
-                            <DropdownMenuItem
-                              className="text-emerald-600"
-                              onClick={() => handlePublish(course)}
-                            >
-                              <CheckCircle className="me-2 h-4 w-4" />
-                              {t('admin:courses.publish')}
-                            </DropdownMenuItem>
-                          )}
-                          {course.status === "Published" && (
-                            <DropdownMenuItem
-                              className="text-amber-600"
-                              onClick={() => handleArchive(course)}
-                            >
-                              <Archive className="me-2 h-4 w-4" />
-                              {t('admin:courses.archive')}
-                            </DropdownMenuItem>
-                          )}
-                          <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={() => handleDeleteClick(course)}
-                          >
-                            <Trash2 className="me-2 h-4 w-4" />
-                            {t('admin:courses.delete')}
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {!loading && filteredCourses.length === 0 && (
-          <div className="py-12 text-center">
-            <BookOpen className="mx-auto h-12 w-12 text-muted-foreground/50" />
-            <p className="mt-2 text-sm text-muted-foreground">{t('admin:courses.empty')}</p>
-          </div>
-        )}
-
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between border-t px-4 py-3">
-            <p className="text-sm text-muted-foreground">
-              {t('admin:courses.pagination.showing', {
-                from: ((pageNumber - 1) * pageSize) + 1,
-                to: Math.min(pageNumber * pageSize, totalCount),
-                total: totalCount,
-              })}
-            </p>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPageNumber((p) => Math.max(1, p - 1))}
-                disabled={pageNumber === 1 || loading}
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <span className="text-sm">
-                {t('admin:courses.pagination.page', { current: pageNumber, total: totalPages })}
+      {(() => {
+        const courseColumns: ResponsiveTableColumn<AdminCourseDto>[] = [
+          {
+            id: 'course',
+            header: t('admin:courses.table.course'),
+            cell: (course) => (
+              <div className="flex items-center gap-3">
+                {course.thumbnailUrl ? (
+                  <img
+                    src={course.thumbnailUrl}
+                    alt={course.title}
+                    className="h-10 w-16 rounded-md object-cover"
+                  />
+                ) : (
+                  <div className="h-10 w-16 rounded-md bg-muted flex items-center justify-center">
+                    <BookOpen className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                )}
+                <div className="text-start">
+                  <span className="font-medium line-clamp-1">{course.title}</span>
+                  <span className="text-xs text-muted-foreground block">{course.level}</span>
+                </div>
+              </div>
+            ),
+          },
+          {
+            id: 'instructor',
+            header: t('admin:courses.table.instructor'),
+            cell: (course) => (
+              <span className="text-muted-foreground">{course.instructorName}</span>
+            ),
+          },
+          {
+            id: 'category',
+            header: t('admin:courses.table.category'),
+            hiddenOnMobile: true,
+            cell: (course) => (
+              <span className="text-muted-foreground">{course.category}</span>
+            ),
+          },
+          {
+            id: 'price',
+            header: t('admin:courses.table.price'),
+            cell: (course) => (
+              <span>{course.price != null ? `$${course.price.toFixed(2)}` : t('admin:courses.free')}</span>
+            ),
+          },
+          {
+            id: 'rating',
+            header: t('admin:courses.table.rating'),
+            hiddenOnMobile: true,
+            cell: (course) => (
+              <div className="flex items-center gap-1">
+                <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                <span>{course.rating.toFixed(1)}</span>
+                <span className="text-muted-foreground text-xs">({course.ratingCount})</span>
+              </div>
+            ),
+          },
+          {
+            id: 'status',
+            header: t('admin:courses.table.status'),
+            cell: (course) => (
+              <span className={cn(
+                "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
+                STATUS_COLORS[course.status as keyof typeof STATUS_COLORS]
+              )}>
+                {STATUS_LABELS[course.status]}
               </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPageNumber((p) => Math.min(totalPages, p + 1))}
-                disabled={pageNumber === totalPages || loading}
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
+            ),
+          },
+          {
+            id: 'actions',
+            header: t('admin:courses.table.actions'),
+            className: 'text-end',
+            cell: (course) => (
+              <div className="flex justify-end">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      disabled={actionLoading === course.id}
+                    >
+                      {actionLoading === course.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <MoreHorizontal className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => navigate(`/courses/${course.id}`)}>
+                      <Eye className="me-2 h-4 w-4" />
+                      {t('admin:courses.viewCourse')}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => openCourseInsights(course)}>
+                      <FileText className="me-2 h-4 w-4" />
+                      {t('admin:courses.materialsRatings')}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    {(course.status === "Draft" || course.status === "PendingReview") && (
+                      <DropdownMenuItem
+                        className="text-emerald-600"
+                        onClick={() => handlePublish(course)}
+                      >
+                        <CheckCircle className="me-2 h-4 w-4" />
+                        {t('admin:courses.publish')}
+                      </DropdownMenuItem>
+                    )}
+                    {course.status === "Published" && (
+                      <DropdownMenuItem
+                        className="text-amber-600"
+                        onClick={() => handleArchive(course)}
+                      >
+                        <Archive className="me-2 h-4 w-4" />
+                        {t('admin:courses.archive')}
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuItem
+                      className="text-destructive"
+                      onClick={() => handleDeleteClick(course)}
+                    >
+                      <Trash2 className="me-2 h-4 w-4" />
+                      {t('admin:courses.delete')}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            ),
+          },
+        ];
+
+        return (
+          <div className="rounded-xl border border-border bg-card overflow-hidden">
+            {loading ? (
+              <div className="p-4 space-y-2">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="flex items-center gap-3 py-2">
+                    <div className="h-10 w-16 animate-pulse rounded bg-muted" />
+                    <div className="h-4 w-40 animate-pulse rounded bg-muted" />
+                    <div className="h-4 w-24 animate-pulse rounded bg-muted ms-auto" />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-3 md:p-0">
+                <ResponsiveTable
+                  data={filteredCourses}
+                  columns={courseColumns}
+                  rowKey={(course) => course.id}
+                  empty={
+                    <div className="py-12 text-center">
+                      <BookOpen className="mx-auto h-12 w-12 text-muted-foreground/50" />
+                      <p className="mt-2 text-sm text-muted-foreground">{t('admin:courses.empty')}</p>
+                    </div>
+                  }
+                />
+              </div>
+            )}
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between border-t px-4 py-3">
+                <p className="text-sm text-muted-foreground">
+                  {t('admin:courses.pagination.showing', {
+                    from: ((pageNumber - 1) * pageSize) + 1,
+                    to: Math.min(pageNumber * pageSize, totalCount),
+                    total: totalCount,
+                  })}
+                </p>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPageNumber((p) => Math.max(1, p - 1))}
+                    disabled={pageNumber === 1 || loading}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <span className="text-sm">
+                    {t('admin:courses.pagination.page', { current: pageNumber, total: totalPages })}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPageNumber((p) => Math.min(totalPages, p + 1))}
+                    disabled={pageNumber === totalPages || loading}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        );
+      })()}
 
       <Dialog open={insightsOpen} onOpenChange={setInsightsOpen}>
         <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">

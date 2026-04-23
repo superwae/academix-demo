@@ -10,14 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../../components/ui/dialog'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '../../components/ui/table'
+import { ResponsiveTable, type ResponsiveTableColumn } from '../../components/ui/responsive-table'
 import { ArrowLeft, CalendarClock, ClipboardList, ExternalLink, Eye, FileText, Loader2, Pencil } from 'lucide-react'
 import { format } from 'date-fns'
 import { toast } from 'sonner'
@@ -157,83 +150,99 @@ export function TeacherAssignmentSubmissionsPage() {
           <CardDescription>{t('teacher:assignmentSubmissions.studentWorkDescription')}</CardDescription>
         </CardHeader>
         <CardContent>
-          {submissions.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-6 text-center">{t('teacher:assignmentSubmissions.noSubmissions')}</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>{t('teacher:assignmentSubmissions.columns.student')}</TableHead>
-                    <TableHead>{t('teacher:assignmentSubmissions.columns.submittedAt')}</TableHead>
-                    <TableHead>{t('teacher:assignmentSubmissions.columns.status')}</TableHead>
-                    <TableHead>{t('teacher:assignmentSubmissions.columns.score')}</TableHead>
-                    <TableHead className="text-end w-[1%] whitespace-nowrap">{t('teacher:assignmentSubmissions.columns.submission')}</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {submissions.map((s) => (
-                    <TableRow key={s.id}>
-                      <TableCell className="font-medium">{s.userName}</TableCell>
-                      <TableCell className="whitespace-nowrap text-muted-foreground">
-                        {(() => {
-                          try {
-                            return format(new Date(s.submittedAt), 'PP p')
-                          } catch {
-                            return s.submittedAt
-                          }
-                        })()}
-                      </TableCell>
-                      <TableCell>
-                        {s.isLate ? (
-                          <Badge variant="destructive" className="text-xs">
-                            {t('teacher:assignmentGrade.late')}
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline" className="text-xs">
-                            {t('teacher:assignmentSubmissions.onTime')}
-                          </Badge>
-                        )}
-                        {s.gradedAt ? (
-                          <Badge variant="secondary" className="text-xs ms-1">
-                            {t('teacher:assignmentSubmissions.graded')}
-                          </Badge>
-                        ) : null}
-                      </TableCell>
-                      <TableCell>
-                        {s.score != null ? (
-                          <span className="font-semibold">{Number(s.score)}</span>
-                        ) : (
-                          <span className="text-muted-foreground">—</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-end">
-                        <div className="flex flex-col items-end gap-1">
-                          <span className="text-[10px] text-muted-foreground hidden sm:inline">
-                            {s.text?.trim()
-                              ? (s.fileUrl ? t('teacher:assignmentSubmissions.textPlusFile') : t('teacher:assignmentSubmissions.textOnly'))
-                              : s.fileUrl
-                                ? t('teacher:assignmentSubmissions.fileOnly')
-                                : t('teacher:assignmentSubmissions.empty')}
-                          </span>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            className="shrink-0"
-                            onClick={() => setViewing(s)}
-                          >
-                            <Eye className="h-3.5 w-3.5 me-1.5" />
-                            {t('teacher:assignments.viewAction')}
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
+          {(() => {
+            const submissionColumns: ResponsiveTableColumn<AssignmentSubmissionDto>[] = [
+              {
+                id: 'student',
+                header: t('teacher:assignmentSubmissions.columns.student'),
+                cell: (s) => <span className="font-medium">{s.userName}</span>,
+              },
+              {
+                id: 'submittedAt',
+                header: t('teacher:assignmentSubmissions.columns.submittedAt'),
+                hiddenOnMobile: true,
+                cell: (s) => (
+                  <span className="whitespace-nowrap text-muted-foreground">
+                    {(() => {
+                      try {
+                        return format(new Date(s.submittedAt), 'PP p')
+                      } catch {
+                        return s.submittedAt
+                      }
+                    })()}
+                  </span>
+                ),
+              },
+              {
+                id: 'status',
+                header: t('teacher:assignmentSubmissions.columns.status'),
+                cell: (s) => (
+                  <div className="inline-flex flex-wrap items-center gap-1 justify-end md:justify-start">
+                    {s.isLate ? (
+                      <Badge variant="destructive" className="text-xs">
+                        {t('teacher:assignmentGrade.late')}
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-xs">
+                        {t('teacher:assignmentSubmissions.onTime')}
+                      </Badge>
+                    )}
+                    {s.gradedAt ? (
+                      <Badge variant="secondary" className="text-xs">
+                        {t('teacher:assignmentSubmissions.graded')}
+                      </Badge>
+                    ) : null}
+                  </div>
+                ),
+              },
+              {
+                id: 'score',
+                header: t('teacher:assignmentSubmissions.columns.score'),
+                cell: (s) =>
+                  s.score != null ? (
+                    <span className="font-semibold">{Number(s.score)}</span>
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  ),
+              },
+              {
+                id: 'submission',
+                header: t('teacher:assignmentSubmissions.columns.submission'),
+                className: 'text-end w-[1%] whitespace-nowrap',
+                cell: (s) => (
+                  <div className="flex flex-col items-end gap-1">
+                    <span className="text-[10px] text-muted-foreground hidden sm:inline">
+                      {s.text?.trim()
+                        ? (s.fileUrl ? t('teacher:assignmentSubmissions.textPlusFile') : t('teacher:assignmentSubmissions.textOnly'))
+                        : s.fileUrl
+                          ? t('teacher:assignmentSubmissions.fileOnly')
+                          : t('teacher:assignmentSubmissions.empty')}
+                    </span>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="shrink-0"
+                      onClick={() => setViewing(s)}
+                    >
+                      <Eye className="h-3.5 w-3.5 me-1.5" />
+                      {t('teacher:assignments.viewAction')}
+                    </Button>
+                  </div>
+                ),
+              },
+            ]
+            return (
+              <ResponsiveTable
+                data={submissions}
+                columns={submissionColumns}
+                rowKey={(s) => s.id}
+                empty={
+                  <p className="text-sm text-muted-foreground py-6 text-center">{t('teacher:assignmentSubmissions.noSubmissions')}</p>
+                }
+              />
+            )
+          })()}
         </CardContent>
       </Card>
 

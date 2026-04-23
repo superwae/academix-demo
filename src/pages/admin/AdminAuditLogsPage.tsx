@@ -24,9 +24,23 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "../../components/ui/dropdown-menu";
+import { ResponsiveTable, type ResponsiveTableColumn } from "../../components/ui/responsive-table";
+
+// Audit log shape
+interface AuditLogRow {
+  id: string;
+  action: string;
+  actor: string;
+  actorRole: string;
+  target: string;
+  description: string;
+  ipAddress: string;
+  timestamp: string;
+  status: string;
+}
 
 // Mock audit logs
-const MOCK_AUDIT_LOGS = [
+const MOCK_AUDIT_LOGS: AuditLogRow[] = [
   {
     id: "LOG001",
     action: "user.login",
@@ -277,55 +291,76 @@ export function AdminAuditLogsPage() {
       </div>
 
       {/* Logs Table */}
-      <div className="rounded-xl border border-border bg-card overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b bg-muted/50">
-                <th className="px-4 py-3 text-start font-medium text-muted-foreground">{t('admin:auditLogs.table.action')}</th>
-                <th className="px-4 py-3 text-start font-medium text-muted-foreground">{t('admin:auditLogs.table.actor')}</th>
-                <th className="px-4 py-3 text-start font-medium text-muted-foreground">{t('admin:auditLogs.table.target')}</th>
-                <th className="px-4 py-3 text-start font-medium text-muted-foreground">{t('admin:auditLogs.table.description')}</th>
-                <th className="px-4 py-3 text-start font-medium text-muted-foreground">{t('admin:auditLogs.table.ipAddress')}</th>
-                <th className="px-4 py-3 text-start font-medium text-muted-foreground">{t('admin:auditLogs.table.time')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredLogs.map((log) => (
-                <tr key={log.id} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <div className={cn("flex h-8 w-8 items-center justify-center rounded-lg", getActionColor(log.action, log.status))}>
-                        {getActionIcon(log.action)}
-                      </div>
-                      <span className="font-mono text-xs">{log.action}</span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div>
-                      <p className="font-medium">{log.actor}</p>
-                      <p className="text-xs text-muted-foreground">{log.actorRole}</p>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground">{log.target}</td>
-                  <td className="px-4 py-3 max-w-xs truncate">{log.description}</td>
-                  <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{log.ipAddress}</td>
-                  <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
-                    {formatTimestamp(log.timestamp)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {filteredLogs.length === 0 && (
-          <div className="py-12 text-center">
-            <ScrollText className="mx-auto h-12 w-12 text-muted-foreground/50" />
-            <p className="mt-2 text-sm text-muted-foreground">{t('admin:auditLogs.empty')}</p>
+      {(() => {
+        const logColumns: ResponsiveTableColumn<AuditLogRow>[] = [
+          {
+            id: 'action',
+            header: t('admin:auditLogs.table.action'),
+            cell: (log) => (
+              <div className="flex items-center gap-2">
+                <div className={cn("flex h-8 w-8 items-center justify-center rounded-lg", getActionColor(log.action, log.status))}>
+                  {getActionIcon(log.action)}
+                </div>
+                <span className="font-mono text-xs">{log.action}</span>
+              </div>
+            ),
+          },
+          {
+            id: 'actor',
+            header: t('admin:auditLogs.table.actor'),
+            cell: (log) => (
+              <div className="text-start">
+                <p className="font-medium">{log.actor}</p>
+                <p className="text-xs text-muted-foreground">{log.actorRole}</p>
+              </div>
+            ),
+          },
+          {
+            id: 'target',
+            header: t('admin:auditLogs.table.target'),
+            hiddenOnMobile: true,
+            cell: (log) => <span className="text-muted-foreground">{log.target}</span>,
+          },
+          {
+            id: 'description',
+            header: t('admin:auditLogs.table.description'),
+            className: 'max-w-xs truncate',
+            cell: (log) => <span className="truncate block">{log.description}</span>,
+          },
+          {
+            id: 'ipAddress',
+            header: t('admin:auditLogs.table.ipAddress'),
+            hiddenOnMobile: true,
+            cell: (log) => (
+              <span className="font-mono text-xs text-muted-foreground">{log.ipAddress}</span>
+            ),
+          },
+          {
+            id: 'time',
+            header: t('admin:auditLogs.table.time'),
+            cell: (log) => (
+              <span className="text-xs text-muted-foreground whitespace-nowrap">
+                {formatTimestamp(log.timestamp)}
+              </span>
+            ),
+          },
+        ];
+        return (
+          <div className="rounded-xl border border-border bg-card overflow-hidden p-3 md:p-0">
+            <ResponsiveTable
+              data={filteredLogs}
+              columns={logColumns}
+              rowKey={(log) => log.id}
+              empty={
+                <div className="py-12 text-center">
+                  <ScrollText className="mx-auto h-12 w-12 text-muted-foreground/50" />
+                  <p className="mt-2 text-sm text-muted-foreground">{t('admin:auditLogs.empty')}</p>
+                </div>
+              }
+            />
           </div>
-        )}
-      </div>
+        );
+      })()}
     </div>
   );
 }

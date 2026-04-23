@@ -9,6 +9,7 @@ import {
 import { cn } from "../../lib/cn";
 import { toast } from "sonner";
 import { paymentService, type PaymentDto } from "../../services/paymentService";
+import { ResponsiveTable, type ResponsiveTableColumn } from "../../components/ui/responsive-table";
 
 export function PaymentHistoryPage() {
   const { t } = useTranslation(['student', 'common', 'errors']);
@@ -65,64 +66,78 @@ export function PaymentHistoryPage() {
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-xl border border-border">
-        {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-        ) : (
-          <table className="w-full">
-            <thead className="border-b border-border bg-muted/50">
-              <tr>
-                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">{t('student:payments.columnDate')}</th>
-                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">{t('student:payments.columnCourse')}</th>
-                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">{t('student:payments.columnAmount')}</th>
-                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">{t('student:payments.columnStatus')}</th>
-                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">{t('student:payments.columnReference')}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {payments.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="px-4 py-12 text-center text-muted-foreground">
-                    <div className="flex flex-col items-center gap-2">
-                      <CreditCard className="h-8 w-8 text-muted-foreground/50" />
-                      <p>{t('student:payments.noPayments')}</p>
-                    </div>
-                  </td>
-                </tr>
-              ) : (
-                payments.map((payment) => (
-                  <tr key={payment.id} className="bg-card hover:bg-muted/50">
-                    <td className="px-4 py-3 text-sm">
-                      {new Date(payment.createdAt).toLocaleDateString()}
-                    </td>
-                    <td className="px-4 py-3">
-                      <p className="font-medium">{payment.courseTitle}</p>
-                    </td>
-                    <td className="px-4 py-3 text-sm font-medium">
-                      {payment.currency} {payment.amount.toFixed(2)}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={cn(
-                          "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium capitalize",
-                          getStatusBadge(payment.status)
-                        )}
-                      >
-                        {payment.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-muted-foreground font-mono">
-                      {payment.lahzaReference}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        )}
-      </div>
+      {loading ? (
+        <div className="flex items-center justify-center overflow-hidden rounded-xl border border-border py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      ) : (
+        (() => {
+          const paymentColumns: ResponsiveTableColumn<PaymentDto>[] = [
+            {
+              id: 'date',
+              header: t('student:payments.columnDate'),
+              cell: (payment) => (
+                <span className="text-sm">{new Date(payment.createdAt).toLocaleDateString()}</span>
+              ),
+            },
+            {
+              id: 'course',
+              header: t('student:payments.columnCourse'),
+              cell: (payment) => (
+                <p className="font-medium">{payment.courseTitle}</p>
+              ),
+            },
+            {
+              id: 'amount',
+              header: t('student:payments.columnAmount'),
+              cell: (payment) => (
+                <span className="text-sm font-medium">
+                  {payment.currency} {payment.amount.toFixed(2)}
+                </span>
+              ),
+            },
+            {
+              id: 'status',
+              header: t('student:payments.columnStatus'),
+              cell: (payment) => (
+                <span
+                  className={cn(
+                    "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium capitalize",
+                    getStatusBadge(payment.status)
+                  )}
+                >
+                  {payment.status}
+                </span>
+              ),
+            },
+            {
+              id: 'reference',
+              header: t('student:payments.columnReference'),
+              hiddenOnMobile: true,
+              cell: (payment) => (
+                <span className="text-sm text-muted-foreground font-mono">
+                  {payment.lahzaReference}
+                </span>
+              ),
+            },
+          ];
+          return (
+            <ResponsiveTable
+              data={payments}
+              columns={paymentColumns}
+              rowKey={(payment) => payment.id}
+              empty={
+                <div className="rounded-xl border border-dashed border-border bg-muted/20 px-4 py-12 text-center text-muted-foreground">
+                  <div className="flex flex-col items-center gap-2">
+                    <CreditCard className="h-8 w-8 text-muted-foreground/50" />
+                    <p>{t('student:payments.noPayments')}</p>
+                  </div>
+                </div>
+              }
+            />
+          );
+        })()
+      )}
 
       {/* Pagination */}
       {totalPages > 1 && (

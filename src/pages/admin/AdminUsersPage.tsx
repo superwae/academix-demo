@@ -34,6 +34,7 @@ import {
 import { cn } from "../../lib/cn";
 import { adminService, type AdminUserDto } from "../../services/adminService";
 import { ConfirmDialog } from '../../components/ui/confirm-dialog';
+import { ResponsiveTable, type ResponsiveTableColumn } from "../../components/ui/responsive-table";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -244,138 +245,157 @@ export function AdminUsersPage() {
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-xl border border-border">
-        {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-        ) : (
-          <table className="w-full">
-            <thead className="border-b border-border bg-muted/50">
-              <tr>
-                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">{t('admin:users.table.user')}</th>
-                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">{t('admin:users.table.role')}</th>
-                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">{t('admin:users.table.status')}</th>
-                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">{t('admin:users.table.created')}</th>
-                <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">{t('admin:users.table.lastLogin')}</th>
-                <th className="px-4 py-3 text-end text-sm font-medium text-muted-foreground">{t('admin:users.table.actions')}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {filteredUsers.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">
-                    {t('admin:users.empty')}
-                  </td>
-                </tr>
-              ) : (
-                filteredUsers.map((user) => (
-                  <tr key={user.id} className="bg-card hover:bg-muted/50">
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 font-medium text-primary">
-                          {user.firstName?.[0] || ""}{user.lastName?.[0] || ""}
-                        </div>
-                        <div>
-                          <p className="font-medium">{user.fullName}</p>
-                          <p className="text-sm text-muted-foreground">{user.email}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex flex-wrap gap-1">
-                        {user.roles.map((role) => (
-                          <span
-                            key={role}
-                            className={cn(
-                              "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium capitalize",
-                              getRoleBadgeColor(role)
-                            )}
-                          >
-                            {role}
-                          </span>
-                        ))}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={cn(
-                        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium capitalize",
-                        getStatusBadge(user.isActive)
-                      )}>
-                        <span className={cn(
-                          "h-1.5 w-1.5 rounded-full",
-                          user.isActive ? "bg-emerald-500" : "bg-red-500"
-                        )} />
-                        {user.isActive ? t('admin:users.statusActive') : t('admin:users.statusSuspended')}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-muted-foreground">
-                      {new Date(user.createdAt).toLocaleDateString()}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-muted-foreground">
-                      {user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString() : t('admin:users.never')}
-                    </td>
-                    <td className="px-4 py-3 text-end">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-8 gap-1.5"
-                          onClick={() => {
-                            navigate(`/admin/messages?user=${user.id}`);
-                          }}
-                        >
-                          <MessageSquare className="h-3.5 w-3.5" />
-                          {t('admin:users.message')}
-                        </Button>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <button className="rounded-lg p-1.5 hover:bg-accent" disabled={actionLoading === user.id}>
-                              {actionLoading === user.id ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              ) : (
-                                <MoreHorizontal className="h-4 w-4" />
-                              )}
-                            </button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => { setSelectedUser(user); setViewDialogOpen(true); }}>
-                              <Eye className="me-2 h-4 w-4" />
-                              {t('admin:users.viewDetails')}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => { setSelectedUser(user); setEditDialogOpen(true); }}>
-                              <Pencil className="me-2 h-4 w-4" />
-                              {t('admin:users.editAction')}
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => handleSuspend(user)}>
-                              {user.isActive ? (
-                                <>
-                                  <Ban className="me-2 h-4 w-4" />
-                                  {t('admin:users.suspend')}
-                                </>
-                              ) : (
-                                <>
-                                  <CheckCircle className="me-2 h-4 w-4" />
-                                  {t('admin:users.activate')}
-                                </>
-                              )}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setDeleteUser(user)} className="text-destructive">
-                              <UserX className="me-2 h-4 w-4" />
-                              {t('admin:users.deleteAction')}
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        )}
-      </div>
+      {loading ? (
+        <div className="flex items-center justify-center overflow-hidden rounded-xl border border-border py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      ) : (
+        (() => {
+          const columns: ResponsiveTableColumn<AdminUserDto>[] = [
+            {
+              id: 'user',
+              header: t('admin:users.table.user'),
+              cell: (user) => (
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 font-medium text-primary">
+                    {user.firstName?.[0] || ""}{user.lastName?.[0] || ""}
+                  </div>
+                  <div className="text-start">
+                    <p className="font-medium">{user.fullName}</p>
+                    <p className="text-sm text-muted-foreground">{user.email}</p>
+                  </div>
+                </div>
+              ),
+            },
+            {
+              id: 'role',
+              header: t('admin:users.table.role'),
+              cell: (user) => (
+                <div className="flex flex-wrap gap-1 justify-end md:justify-start">
+                  {user.roles.map((role) => (
+                    <span
+                      key={role}
+                      className={cn(
+                        "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium capitalize",
+                        getRoleBadgeColor(role)
+                      )}
+                    >
+                      {role}
+                    </span>
+                  ))}
+                </div>
+              ),
+            },
+            {
+              id: 'status',
+              header: t('admin:users.table.status'),
+              cell: (user) => (
+                <span className={cn(
+                  "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium capitalize",
+                  getStatusBadge(user.isActive)
+                )}>
+                  <span className={cn(
+                    "h-1.5 w-1.5 rounded-full",
+                    user.isActive ? "bg-emerald-500" : "bg-red-500"
+                  )} />
+                  {user.isActive ? t('admin:users.statusActive') : t('admin:users.statusSuspended')}
+                </span>
+              ),
+            },
+            {
+              id: 'created',
+              header: t('admin:users.table.created'),
+              hiddenOnMobile: true,
+              cell: (user) => (
+                <span className="text-sm text-muted-foreground">
+                  {new Date(user.createdAt).toLocaleDateString()}
+                </span>
+              ),
+            },
+            {
+              id: 'lastLogin',
+              header: t('admin:users.table.lastLogin'),
+              hiddenOnMobile: true,
+              cell: (user) => (
+                <span className="text-sm text-muted-foreground">
+                  {user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString() : t('admin:users.never')}
+                </span>
+              ),
+            },
+            {
+              id: 'actions',
+              header: t('admin:users.table.actions'),
+              className: 'text-end',
+              cell: (user) => (
+                <div className="flex items-center justify-end gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 gap-1.5"
+                    onClick={() => {
+                      navigate(`/admin/messages?user=${user.id}`);
+                    }}
+                  >
+                    <MessageSquare className="h-3.5 w-3.5" />
+                    {t('admin:users.message')}
+                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button className="rounded-lg p-1.5 hover:bg-accent" disabled={actionLoading === user.id}>
+                        {actionLoading === user.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <MoreHorizontal className="h-4 w-4" />
+                        )}
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => { setSelectedUser(user); setViewDialogOpen(true); }}>
+                        <Eye className="me-2 h-4 w-4" />
+                        {t('admin:users.viewDetails')}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => { setSelectedUser(user); setEditDialogOpen(true); }}>
+                        <Pencil className="me-2 h-4 w-4" />
+                        {t('admin:users.editAction')}
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => handleSuspend(user)}>
+                        {user.isActive ? (
+                          <>
+                            <Ban className="me-2 h-4 w-4" />
+                            {t('admin:users.suspend')}
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle className="me-2 h-4 w-4" />
+                            {t('admin:users.activate')}
+                          </>
+                        )}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setDeleteUser(user)} className="text-destructive">
+                        <UserX className="me-2 h-4 w-4" />
+                        {t('admin:users.deleteAction')}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              ),
+            },
+          ];
+          return (
+            <ResponsiveTable
+              data={filteredUsers}
+              columns={columns}
+              rowKey={(user) => user.id}
+              empty={
+                <div className="rounded-xl border border-dashed border-border bg-muted/20 p-12 text-center text-sm text-muted-foreground">
+                  {t('admin:users.empty')}
+                </div>
+              }
+            />
+          );
+        })()
+      )}
 
       {/* Pagination */}
       {totalPages > 1 && (
