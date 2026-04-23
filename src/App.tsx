@@ -101,9 +101,10 @@ import { OrgGuard } from './auth/OrgGuard'
 import { OrgDashboardPage } from './pages/org/OrgDashboardPage'
 import { OrgMembersPage } from './pages/org/OrgMembersPage'
 import { OrgSettingsPage } from './pages/org/OrgSettingsPage'
-import { OrgCatalogPage, OrgCompliancePage } from './pages/org/OrgStubPage'
+import { OrgCatalogPage } from './pages/org/OrgStubPage'
 import { OrgLicensesListPage } from './pages/org/OrgLicensesListPage'
 import { OrgLicenseDetailPage } from './pages/org/OrgLicenseDetailPage'
+import { OrgComplianceDashboardPage } from './pages/org/OrgComplianceDashboardPage'
 
 export default function App() {
   return (
@@ -272,7 +273,7 @@ export default function App() {
               <Route path="courses" element={<OrgCatalogPage />} />
               <Route path="licenses" element={<OrgLicensesListPage />} />
               <Route path="licenses/:licenseId" element={<OrgLicenseDetailPage />} />
-              <Route path="compliance" element={<OrgCompliancePage />} />
+              <Route path="compliance" element={<OrgComplianceDashboardPage />} />
               <Route path="settings" element={<OrgSettingsPage />} />
             </Route>
 

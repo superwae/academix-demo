@@ -6,7 +6,7 @@ import { Badge } from '../../components/ui/badge'
 import { Button } from '../../components/ui/button'
 import { enrollmentService, type EnrollmentDto } from '../../services/enrollmentService'
 import { courseService, type CourseDto } from '../../services/courseService'
-import { GraduationCap, BookOpen, Clock, MapPin, Calendar, TrendingUp, Award, BookMarked } from 'lucide-react'
+import { GraduationCap, BookOpen, Clock, MapPin, Calendar, TrendingUp, Award, BookMarked, Building2 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
@@ -78,6 +78,12 @@ function EnrollmentCard({ enrollment }: { enrollment: EnrollmentWithCourse }) {
             )}
             <Badge variant="outline">{enrollment.sectionName}</Badge>
             <Badge variant={enrollment.status === 'Active' ? 'default' : 'secondary'}>{enrollment.status}</Badge>
+            {enrollment.assignedByOrgName && (
+              <Badge variant="subtle" className="gap-1">
+                <Building2 className="h-3 w-3" />
+                {t('student:myClasses.assignedByOrg', { org: enrollment.assignedByOrgName })}
+              </Badge>
+            )}
           </div>
 
           {section && (

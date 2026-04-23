@@ -136,7 +136,32 @@
   "compliance": {
     "title": "Training compliance",
     "subtitle": "See who finished what, who's overdue, and export for audits.",
-    "comingSoon": "Compliance dashboard is on the way — needs an assigned license to populate with data."
+    "comingSoon": "Compliance dashboard is on the way — needs an assigned license to populate with data.",
+    "completionRate": "completion rate",
+    "empty": "No assignments match this filter.",
+    "kpis": {
+      "total": "Total assigned",
+      "active": "In progress",
+      "completed": "Completed",
+      "overdue": "Overdue",
+      "learners": "Unique learners"
+    },
+    "filters": {
+      "all": "All",
+      "active": "In progress",
+      "completed": "Completed",
+      "overdue": "Overdue"
+    },
+    "columnLearner": "Learner",
+    "columnCourse": "Course",
+    "columnProgress": "Progress",
+    "columnDue": "Due",
+    "columnStatus": "Status",
+    "statusLabels": {
+      "active": "In progress",
+      "completed": "Completed",
+      "overdue": "Overdue"
+    }
   },
   "createOrg": {
     "title": "Create an organization",

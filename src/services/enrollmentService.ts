@@ -14,6 +14,10 @@ export interface EnrollmentDto {
   status: string;
   progressPercentage: number;
   completedAt?: string;
+  /** Org that assigned this seat; null for self-enrolled. */
+  assignedByOrgId?: string | null;
+  assignedByOrgName?: string | null;
+  dueDate?: string | null;
 }
 
 export interface CreateEnrollmentRequest {

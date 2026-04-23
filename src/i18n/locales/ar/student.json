@@ -98,6 +98,7 @@
     "lessons": "الدروس",
     "viewCertificate": "عرض الشهادة",
     "progress": "{{percent}}٪ مكتمل",
+    "assignedByOrg": "مُسنَدة من {{org}}",
     "errors": {
       "loadFailed": "تعذّر تحميل التسجيلات"
     }

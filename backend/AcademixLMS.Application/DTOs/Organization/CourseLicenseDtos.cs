@@ -38,3 +38,27 @@ public record LicenseAssignmentDto(
     decimal ProgressPercentage,
     DateTime? CompletedAt,
     string Status);
+
+public record OrgComplianceSummaryDto(
+    int TotalAssignments,
+    int ActiveAssignments,
+    int CompletedAssignments,
+    int OverdueAssignments,
+    int UniqueLearners,
+    decimal AverageProgressPercent,
+    decimal CompletionRatePercent);
+
+public record OrgAssignmentRowDto(
+    Guid EnrollmentId,
+    Guid UserId,
+    string UserName,
+    string UserEmail,
+    Guid CourseId,
+    string CourseTitle,
+    Guid? CourseLicenseId,
+    DateTime EnrolledAt,
+    DateTime? DueDate,
+    decimal ProgressPercentage,
+    DateTime? CompletedAt,
+    bool IsOverdue,
+    string Status);

@@ -47,6 +47,7 @@ public class EnrollmentService : IEnrollmentService
             .Include(e => e.User)
             .Include(e => e.Course)
             .Include(e => e.Section)
+            .Include(e => e.AssignedByOrg)
             .Where(e => e.UserId == userId && !e.IsDeleted)
             .AsQueryable();
 
@@ -577,7 +578,10 @@ public class EnrollmentService : IEnrollmentService
             EnrolledAt = enrollment.EnrolledAt,
             Status = enrollment.Status.ToString(),
             ProgressPercentage = enrollment.ProgressPercentage,
-            CompletedAt = enrollment.CompletedAt
+            CompletedAt = enrollment.CompletedAt,
+            AssignedByOrgId = enrollment.AssignedByOrgId,
+            AssignedByOrgName = enrollment.AssignedByOrg?.Name,
+            DueDate = enrollment.DueDate
         };
     }
 

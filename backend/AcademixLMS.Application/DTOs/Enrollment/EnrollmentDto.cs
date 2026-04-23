@@ -14,6 +14,11 @@ public class EnrollmentDto
     public string Status { get; set; } = string.Empty;
     public decimal ProgressPercentage { get; set; }
     public DateTime? CompletedAt { get; set; }
+
+    /// <summary>Organization that assigned this seat (if any).</summary>
+    public Guid? AssignedByOrgId { get; set; }
+    public string? AssignedByOrgName { get; set; }
+    public DateTime? DueDate { get; set; }
 }
 
 public class CreateEnrollmentRequest
@@ -39,6 +44,11 @@ public class MyEnrollmentsDto
     public string Status { get; set; } = string.Empty;
     public decimal ProgressPercentage { get; set; }
     public DateTime? CompletedAt { get; set; }
+
+    /// <summary>Organization that assigned this seat (if any).</summary>
+    public Guid? AssignedByOrgId { get; set; }
+    public string? AssignedByOrgName { get; set; }
+    public DateTime? DueDate { get; set; }
 }
 
 public class UpdateProgressRequest
