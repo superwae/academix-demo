@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState, type ComponentType } from "react";
 import { useTranslation } from "react-i18next";
 import { LanguagePicker } from "../LanguagePicker";
 import { OrgSwitcher } from "../OrgSwitcher";
+import { HelpButton } from "../HelpButton";
 import {
   LayoutDashboard,
   Users,
@@ -23,6 +24,7 @@ import {
   PieChart,
   MessageSquare,
   Crown,
+  Inbox,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "../../lib/cn";
@@ -106,6 +108,7 @@ const ADMIN_NAV_SECTIONS: NavSection[] = [
     items: [
       { to: "/admin/reports", labelKey: "nav:reports", icon: FileText },
       { to: "/admin/audit-logs", labelKey: "nav:auditLogs", icon: ScrollText },
+      { to: "/admin/support-tickets", labelKey: "support:admin.title", icon: Inbox },
       { to: "/admin/settings", labelKey: "nav:settings", icon: Settings },
     ],
   },
@@ -359,6 +362,9 @@ export function AdminLayout() {
 
             {/* Org portal entry (when the admin is a member of any org) */}
             <OrgSwitcher />
+
+            {/* Contact support */}
+            <HelpButton />
 
             <NotificationBell />
 

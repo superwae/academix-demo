@@ -19,6 +19,7 @@ import { useAuthStore } from '../../store/useAuthStore'
 import { useOrgStore } from '../../store/useOrgStore'
 import { LanguagePicker } from '../LanguagePicker'
 import { NotificationBell } from '../NotificationBell'
+import { HelpButton } from '../HelpButton'
 import { useState } from 'react'
 
 type NavItem = {
@@ -149,6 +150,7 @@ export function OrgLayout() {
           </h1>
           <div className="ms-auto flex items-center gap-2">
             <LanguagePicker compact />
+            <HelpButton />
             <NotificationBell />
           </div>
         </header>

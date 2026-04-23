@@ -41,6 +41,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IOrganizationService, Services.OrganizationService>();
         services.AddScoped<ICourseLicenseService, Services.CourseLicenseService>();
         services.AddScoped<IOrgComplianceService, Services.OrgComplianceService>();
+        services.AddScoped<ISupportTicketService, Services.SupportTicketService>();
 
         // AI Services
         services.AddScoped<IRecommendationService, Services.RecommendationService>();

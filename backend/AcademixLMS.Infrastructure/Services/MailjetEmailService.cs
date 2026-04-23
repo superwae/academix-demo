@@ -99,6 +99,31 @@ public class MailjetEmailService : IEmailService
             cancellationToken);
     }
 
+    public async Task SendAsync(
+        string toEmail,
+        string? toName,
+        string subject,
+        string htmlBody,
+        string plainTextBody,
+        string logLabel,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrEmpty(_apiKey) || string.IsNullOrEmpty(_secretKey))
+        {
+            _logger.LogWarning("Mailjet not configured; skipping '{Label}' email to {Email}", logLabel, toEmail);
+            return;
+        }
+
+        await SendMailjetEmailAsync(
+            toEmail,
+            toName ?? toEmail,
+            subject,
+            plainTextBody,
+            htmlBody,
+            logLabel,
+            cancellationToken);
+    }
+
     private async Task SendMailjetEmailAsync(
         string toEmail,
         string toName,

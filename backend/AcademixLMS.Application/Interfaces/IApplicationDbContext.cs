@@ -61,6 +61,10 @@ public interface IApplicationDbContext
     DbSet<OrganizationMember> OrganizationMembers { get; }
     DbSet<CourseLicense> CourseLicenses { get; }
 
+    // Support
+    DbSet<SupportTicket> SupportTickets { get; }
+    DbSet<SupportTicketReply> SupportTicketReplies { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     int SaveChanges();
 }

@@ -1,0 +1,73 @@
+{
+  "helpButton": "المساعدة",
+  "helpMenu": "تواصل مع الدعم",
+  "myTickets": "تذاكري",
+  "title": "الدعم",
+  "subtitle": "تواصل مع فريقنا. سنرد عليك في أقرب وقت ممكن.",
+  "empty": "لم تفتح أي تذكرة بعد.",
+  "new": "تذكرة جديدة",
+  "newDialog": {
+    "title": "تواصل مع الدعم",
+    "description": "صف لنا ما تواجهه. سيرد فريقنا عبر البريد الإلكتروني وداخل التطبيق.",
+    "subjectLabel": "الموضوع",
+    "subjectPlaceholder": "صف المشكلة باختصار",
+    "categoryLabel": "التصنيف",
+    "messageLabel": "الرسالة",
+    "messagePlaceholder": "ماذا حدث؟ خطوات إعادة الإنتاج، لقطات الشاشة، ما كنت تتوقعه...",
+    "submit": "إرسال التذكرة",
+    "createdToast": "تم فتح التذكرة. سنرد عليك قريباً."
+  },
+  "categories": {
+    "Billing": "الفوترة والمدفوعات",
+    "Technical": "مشكلة تقنية",
+    "Course": "محتوى الدورة",
+    "Account": "الحساب / تسجيل الدخول",
+    "Feedback": "اقتراح أو ملاحظة",
+    "Other": "أخرى"
+  },
+  "statuses": {
+    "Open": "مفتوحة",
+    "InProgress": "قيد المعالجة",
+    "WaitingOnUser": "بانتظار ردّك",
+    "Resolved": "تم الحل",
+    "Closed": "مغلقة"
+  },
+  "priorities": {
+    "Low": "منخفضة",
+    "Normal": "عادية",
+    "High": "مرتفعة",
+    "Urgent": "عاجلة"
+  },
+  "detail": {
+    "backToList": "العودة إلى التذاكر",
+    "openedBy": "فتحها {{name}}",
+    "createdAt": "أُنشئت في {{date}}",
+    "replyLabel": "ردّك",
+    "replyPlaceholder": "اكتب رداً…",
+    "sendReply": "إرسال الرد",
+    "replyAddedToast": "تم نشر الرد.",
+    "staffBadge": "فريق الدعم",
+    "internalNote": "ملاحظة داخلية (للمسؤولين فقط)",
+    "internalToggle": "اجعلها ملاحظة داخلية",
+    "noReplies": "لا توجد ردود بعد — سنتواصل معك قريباً.",
+    "statusUpdatedToast": "تم تحديث الحالة.",
+    "priorityUpdatedToast": "تم تحديث الأولوية."
+  },
+  "admin": {
+    "title": "صندوق الدعم",
+    "subtitle": "كل التذاكر التي فتحها المستخدمون. يمكنك فرزها عبر تغيير الحالة أو الأولوية أو المسؤول.",
+    "filterAll": "الكل",
+    "filterOpen": "المفتوحة",
+    "filterInProgress": "قيد المعالجة",
+    "filterWaiting": "بانتظار المستخدم",
+    "filterResolved": "المحلولة",
+    "filterClosed": "المغلقة",
+    "columnSubject": "الموضوع",
+    "columnUser": "المستخدم",
+    "columnCategory": "التصنيف",
+    "columnStatus": "الحالة",
+    "columnPriority": "الأولوية",
+    "columnUpdated": "آخر تحديث",
+    "noTickets": "لا توجد تذاكر ضمن هذا التصنيف."
+  }
+}

@@ -8,6 +8,7 @@ import { AdminLayout } from './components/layouts/AdminLayout'
 import { AccountantLayout, SecretaryLayout } from './components/layouts/StaffPortalLayout'
 import { PublicLayout } from './components/PublicLayout'
 import { RoleGuard } from './auth/RoleGuard'
+import { AuthGuard } from './auth/AuthGuard'
 import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
@@ -294,6 +295,19 @@ const OrgComplianceDashboardPage = lazy(() =>
   }))
 )
 
+// Support pages (lazy)
+const MyTicketsPage = lazy(() =>
+  import('./pages/support/MyTicketsPage').then((m) => ({ default: m.MyTicketsPage }))
+)
+const TicketDetailPage = lazy(() =>
+  import('./pages/support/TicketDetailPage').then((m) => ({ default: m.TicketDetailPage }))
+)
+const AdminSupportInboxPage = lazy(() =>
+  import('./pages/support/AdminSupportInboxPage').then((m) => ({
+    default: m.AdminSupportInboxPage,
+  }))
+)
+
 function MinimalLoader() {
   const { t } = useTranslation(['common'])
   return (
@@ -418,6 +432,8 @@ export default function App() {
               <Route path="subscription-plans" element={<SubscriptionPlansPage />} />
               <Route path="payment/callback" element={<PaymentCallbackPage />} />
               <Route path="subscription" element={<AdminSubscriptionPage />} />
+              <Route path="support-tickets" element={<AdminSupportInboxPage />} />
+              <Route path="support-tickets/:ticketId" element={<TicketDetailPage adminView />} />
             </Route>
 
             {/* Accountant portal */}
@@ -475,6 +491,24 @@ export default function App() {
               <Route path="compliance" element={<OrgComplianceDashboardPage />} />
               <Route path="settings" element={<OrgSettingsPage />} />
             </Route>
+
+            {/* Support Tickets — available to any authenticated user */}
+            <Route
+              path="/support"
+              element={
+                <AuthGuard>
+                  <MyTicketsPage />
+                </AuthGuard>
+              }
+            />
+            <Route
+              path="/support/:ticketId"
+              element={
+                <AuthGuard>
+                  <TicketDetailPage />
+                </AuthGuard>
+              }
+            />
 
             {/* Legacy route redirects - redirect old paths to new portal paths */}
             <Route path="/dashboard" element={<Navigate to="/student/dashboard" replace />} />

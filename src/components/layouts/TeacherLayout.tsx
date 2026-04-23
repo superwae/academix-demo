@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState, useRef, type ComponentType } from "react"
 import { useTranslation } from "react-i18next";
 import { LanguagePicker } from "../LanguagePicker";
 import { OrgSwitcher } from "../OrgSwitcher";
+import { HelpButton } from "../HelpButton";
 import {
   GraduationCap,
   CalendarDays,
@@ -669,6 +670,9 @@ export function TeacherLayout() {
 
             {/* Org portal entry (only when user has org memberships) */}
             <OrgSwitcher />
+
+            {/* Contact support */}
+            <HelpButton />
           </div>
         </div>
       </header>

@@ -1,0 +1,73 @@
+{
+  "helpButton": "Help",
+  "helpMenu": "Contact support",
+  "myTickets": "My tickets",
+  "title": "Support",
+  "subtitle": "Get in touch with our team. We'll respond as soon as possible.",
+  "empty": "You haven't opened any tickets yet.",
+  "new": "New ticket",
+  "newDialog": {
+    "title": "Contact support",
+    "description": "Describe what you're running into. Our team will reply by email and in-app.",
+    "subjectLabel": "Subject",
+    "subjectPlaceholder": "Briefly describe the issue",
+    "categoryLabel": "Category",
+    "messageLabel": "Message",
+    "messagePlaceholder": "What happened? Steps to reproduce, screenshots, what you expected...",
+    "submit": "Send ticket",
+    "createdToast": "Ticket opened. We'll get back to you shortly."
+  },
+  "categories": {
+    "Billing": "Billing & payments",
+    "Technical": "Technical issue",
+    "Course": "Course content",
+    "Account": "Account / login",
+    "Feedback": "Feedback",
+    "Other": "Other"
+  },
+  "statuses": {
+    "Open": "Open",
+    "InProgress": "In progress",
+    "WaitingOnUser": "Waiting on you",
+    "Resolved": "Resolved",
+    "Closed": "Closed"
+  },
+  "priorities": {
+    "Low": "Low",
+    "Normal": "Normal",
+    "High": "High",
+    "Urgent": "Urgent"
+  },
+  "detail": {
+    "backToList": "Back to tickets",
+    "openedBy": "Opened by {{name}}",
+    "createdAt": "Created {{date}}",
+    "replyLabel": "Your reply",
+    "replyPlaceholder": "Type a reply…",
+    "sendReply": "Send reply",
+    "replyAddedToast": "Reply posted.",
+    "staffBadge": "Support team",
+    "internalNote": "Internal note (admins only)",
+    "internalToggle": "Mark as internal note",
+    "noReplies": "No replies yet — we'll get to it soon.",
+    "statusUpdatedToast": "Status updated.",
+    "priorityUpdatedToast": "Priority updated."
+  },
+  "admin": {
+    "title": "Support inbox",
+    "subtitle": "Every ticket opened by users. Triage by changing status, priority, or assignee.",
+    "filterAll": "All",
+    "filterOpen": "Open",
+    "filterInProgress": "In progress",
+    "filterWaiting": "Waiting on user",
+    "filterResolved": "Resolved",
+    "filterClosed": "Closed",
+    "columnSubject": "Subject",
+    "columnUser": "User",
+    "columnCategory": "Category",
+    "columnStatus": "Status",
+    "columnPriority": "Priority",
+    "columnUpdated": "Updated",
+    "noTickets": "No tickets in this view."
+  }
+}

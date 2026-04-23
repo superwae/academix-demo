@@ -196,3 +196,31 @@ public enum CourseLicenseStatus
     Expired = 3,   // past ValidUntil
     Revoked = 4    // manually revoked (refund, dispute)
 }
+
+/// <summary>Support ticket classification to help admins triage.</summary>
+public enum SupportTicketCategory
+{
+    Billing = 1,
+    Technical = 2,
+    Course = 3,
+    Account = 4,
+    Feedback = 5,
+    Other = 99
+}
+
+public enum SupportTicketStatus
+{
+    Open = 1,
+    InProgress = 2,
+    WaitingOnUser = 3,
+    Resolved = 4,
+    Closed = 5
+}
+
+public enum SupportTicketPriority
+{
+    Low = 1,
+    Normal = 2,
+    High = 3,
+    Urgent = 4
+}

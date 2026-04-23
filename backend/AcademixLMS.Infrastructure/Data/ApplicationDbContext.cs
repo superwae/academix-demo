@@ -68,6 +68,10 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<OrganizationMember> OrganizationMembers { get; set; }
     public DbSet<CourseLicense> CourseLicenses { get; set; }
 
+    // Support
+    public DbSet<SupportTicket> SupportTickets { get; set; }
+    public DbSet<SupportTicketReply> SupportTicketReplies { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

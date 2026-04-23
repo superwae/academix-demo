@@ -58,6 +58,7 @@ import { toast } from "sonner";
 import { AnimatedBackground } from "../AnimatedBackground";
 import { ColorPicker } from "../ui/color-picker";
 import { NotificationBell } from "../NotificationBell";
+import { HelpButton } from "../HelpButton";
 import { useUnreadMessages } from "../../hooks/useUnreadMessages";
 import { Badge } from "../ui/badge";
 
@@ -466,6 +467,8 @@ export function StaffPortalShell({
                 <Moon className="h-4 w-4" />
               )}
             </Button>
+
+            <HelpButton />
 
             <NotificationBell />
 
