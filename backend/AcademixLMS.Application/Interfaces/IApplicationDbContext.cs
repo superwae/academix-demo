@@ -56,6 +56,11 @@ public interface IApplicationDbContext
     DbSet<Payment> Payments { get; }
     DbSet<Discount> Discounts { get; }
 
+    // Organizations
+    DbSet<Organization> Organizations { get; }
+    DbSet<OrganizationMember> OrganizationMembers { get; }
+    DbSet<CourseLicense> CourseLicenses { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     int SaveChanges();
 }
