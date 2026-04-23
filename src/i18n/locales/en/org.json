@@ -86,7 +86,52 @@
   "licenses": {
     "title": "Course licenses",
     "subtitle": "Bulk-purchased seats you can assign to your members.",
-    "comingSoon": "Seat management UI is on the way — the data model already tracks seat totals and usage."
+    "comingSoon": "Seat management UI is on the way — the data model already tracks seat totals and usage.",
+    "active": "Active licenses",
+    "empty": "You haven't licensed any courses yet. Pick one from the catalog below.",
+    "browseCatalog": "Available on the public catalog",
+    "catalogEmpty": "No paid courses are currently published.",
+    "licenseForTeam": "License for team",
+    "backToList": "Back to licenses",
+    "seatsLabel": "Seats",
+    "seatsAssigned": "Seats assigned",
+    "seatsAvailable": "Seats available",
+    "validUntil": "Valid until",
+    "totalSpent": "Total spent",
+    "currentAssignments": "Current assignments",
+    "noAssignments": "No one is assigned yet. Click Assign seats to enroll team members.",
+    "assignSeats": "Assign seats",
+    "columnName": "Name",
+    "columnEmail": "Email",
+    "columnProgress": "Progress",
+    "columnDueDate": "Due date",
+    "columnStatus": "Status",
+    "purchasedToast": "License purchased. You can assign seats now.",
+    "assignedToast": "{{count}} member(s) enrolled.",
+    "revokedToast": "Assignment revoked. Seat is available again.",
+    "revokeConfirmTitle": "Revoke this assignment?",
+    "revokeConfirmMessage": "{{name}} will lose access to this course and their seat will be returned to the pool. Progress is preserved but will not be shared with this assignment.",
+    "status": {
+      "Pending": "Pending",
+      "Active": "Active",
+      "Expired": "Expired",
+      "Revoked": "Revoked",
+      "Completed": "Completed"
+    },
+    "purchaseDialog": {
+      "title": "License a course for your team",
+      "description": "Buying seats for \"{{course}}\". Employees won't pay anything — they enroll for free once you assign a seat.",
+      "seatsLabel": "Number of seats",
+      "submit": "Confirm purchase"
+    },
+    "assignDialog": {
+      "title": "Assign seats",
+      "description": "Pick members to enroll. {{available}} seat(s) available.",
+      "dueDateLabel": "Due date (optional)",
+      "pickMembers": "{{picked}} of {{available}} selected",
+      "noEligible": "All active members already have a seat on this course.",
+      "submit": "Assign {{count}}"
+    }
   },
   "compliance": {
     "title": "Training compliance",
