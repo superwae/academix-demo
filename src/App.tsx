@@ -95,6 +95,14 @@ import { SecretaryCalendarPage } from './pages/secretary/SecretaryCalendarPage'
 import { StaffSettingsPage } from './pages/staff/StaffSettingsPage'
 import { MessagesPage as StaffMessagesPage } from './pages/student/MessagesPage'
 
+// Organization portal
+import { OrgLayout } from './components/layouts/OrgLayout'
+import { OrgGuard } from './auth/OrgGuard'
+import { OrgDashboardPage } from './pages/org/OrgDashboardPage'
+import { OrgMembersPage } from './pages/org/OrgMembersPage'
+import { OrgSettingsPage } from './pages/org/OrgSettingsPage'
+import { OrgCatalogPage, OrgLicensesPage, OrgCompliancePage } from './pages/org/OrgStubPage'
+
 export default function App() {
   return (
     <ErrorBoundary>
@@ -245,6 +253,24 @@ export default function App() {
               <Route path="calendar" element={<SecretaryCalendarPage />} />
               <Route path="messages" element={<StaffMessagesPage />} />
               <Route path="settings" element={<StaffSettingsPage />} />
+            </Route>
+
+            {/* Organization Portal - /org/:slug/* */}
+            <Route
+              path="/org/:slug/*"
+              element={
+                <OrgGuard>
+                  <OrgLayout />
+                </OrgGuard>
+              }
+            >
+              <Route index element={<Navigate to="dashboard" replace />} />
+              <Route path="dashboard" element={<OrgDashboardPage />} />
+              <Route path="members" element={<OrgMembersPage />} />
+              <Route path="courses" element={<OrgCatalogPage />} />
+              <Route path="licenses" element={<OrgLicensesPage />} />
+              <Route path="compliance" element={<OrgCompliancePage />} />
+              <Route path="settings" element={<OrgSettingsPage />} />
             </Route>
 
             {/* Legacy route redirects - redirect old paths to new portal paths */}

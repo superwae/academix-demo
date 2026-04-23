@@ -1,0 +1,107 @@
+{
+  "portal": "Organization portal",
+  "switchToOrg": "Switch to organization portal",
+  "returnToPortal": "Return to your portal",
+  "select": "Choose an organization",
+  "noOrgs": "You're not a member of any organization yet.",
+  "ownerLabel": "Owner",
+  "roles": {
+    "OrgAdmin": "Admin",
+    "OrgManager": "Manager",
+    "OrgTeacher": "Teacher",
+    "OrgEmployee": "Employee"
+  },
+  "types": {
+    "TeachingInstitution": "Teaching institution",
+    "Employer": "Employer"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "members": "Members",
+    "courses": "Courses",
+    "licenses": "Licenses",
+    "compliance": "Compliance",
+    "billing": "Billing",
+    "settings": "Settings"
+  },
+  "dashboard": {
+    "title": "{{org}} — Dashboard",
+    "members": "Members",
+    "licenses": "Active licenses",
+    "courses": "Courses",
+    "seatsUsed": "Seats used",
+    "seatsTotal": "of {{total}} total seats",
+    "completionRate": "Completion rate",
+    "overdue": "Overdue learners",
+    "empty": "No data yet. Invite members to get started."
+  },
+  "members": {
+    "title": "Members",
+    "subtitle": "Invite, promote, or remove people under this organization.",
+    "columnName": "Name",
+    "columnEmail": "Email",
+    "columnRole": "Role",
+    "columnStatus": "Status",
+    "columnJoined": "Joined",
+    "columnActions": "Actions",
+    "statusActive": "Active",
+    "statusPending": "Pending invite",
+    "statusInactive": "Removed",
+    "invite": "Invite member",
+    "bulkInvite": "Bulk invite",
+    "empty": "No members yet. Click Invite to add your first person.",
+    "invitedToast": "Invitation sent to {{email}}.",
+    "roleUpdatedToast": "Role updated.",
+    "removedToast": "Member removed.",
+    "removeConfirmTitle": "Remove this member?",
+    "removeConfirmMessage": "{{name}} will lose access to organization courses immediately. Their personal enrollments are not affected.",
+    "dialog": {
+      "title": "Invite a new member",
+      "description": "They'll receive an email invite. If they don't have an account yet, we'll create one when they accept.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "name@company.com",
+      "roleLabel": "Role",
+      "externalRefLabel": "Employee ID (optional)",
+      "submit": "Send invite"
+    }
+  },
+  "settings": {
+    "title": "Organization settings",
+    "subtitle": "Update contact info, branding, and revenue splits.",
+    "nameLabel": "Name",
+    "descriptionLabel": "Description",
+    "websiteLabel": "Website",
+    "contactEmailLabel": "Contact email",
+    "logoUrlLabel": "Logo URL",
+    "platformFeeLabel": "Platform fee %",
+    "orgFeeLabel": "Org fee %",
+    "feeHelp": "For Teaching Institutions: platform + org + teacher splits must sum to 100%. Employers keep both fees at 0.",
+    "savedToast": "Organization updated."
+  },
+  "catalog": {
+    "title": "Browse courses",
+    "subtitle": "License seats for courses on the public catalog, or create your own internal courses.",
+    "comingSoon": "License checkout is being finalized. You can already browse the public catalog from the student portal."
+  },
+  "licenses": {
+    "title": "Course licenses",
+    "subtitle": "Bulk-purchased seats you can assign to your members.",
+    "comingSoon": "Seat management UI is on the way — the data model already tracks seat totals and usage."
+  },
+  "compliance": {
+    "title": "Training compliance",
+    "subtitle": "See who finished what, who's overdue, and export for audits.",
+    "comingSoon": "Compliance dashboard is on the way — needs an assigned license to populate with data."
+  },
+  "createOrg": {
+    "title": "Create an organization",
+    "subtitle": "Set up a teaching institution or a company training account.",
+    "nameLabel": "Name",
+    "typeLabel": "Type",
+    "typeTeaching": "Teaching institution (universities, bootcamps)",
+    "typeEmployer": "Employer (company training their employees)",
+    "descriptionLabel": "Short description",
+    "submit": "Create",
+    "createdToast": "Organization created."
+  }
+}

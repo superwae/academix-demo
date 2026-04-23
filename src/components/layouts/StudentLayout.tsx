@@ -2,6 +2,7 @@ import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState, useRef, type ComponentType } from "react";
 import { useTranslation } from "react-i18next";
 import { LanguagePicker } from "../LanguagePicker";
+import { OrgSwitcher } from "../OrgSwitcher";
 import {
   GraduationCap,
   CalendarDays,
@@ -758,6 +759,9 @@ export function StudentLayout() {
 
             {/* Language Picker */}
             <LanguagePicker compact />
+
+            {/* Org portal entry (only when user has org memberships) */}
+            <OrgSwitcher />
           </div>
         </div>
       </header>

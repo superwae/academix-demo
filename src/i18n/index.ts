@@ -28,6 +28,7 @@ import enPublic from './locales/en/public.json'
 import enStudent from './locales/en/student.json'
 import enTeacher from './locales/en/teacher.json'
 import enAdmin from './locales/en/admin.json'
+import enOrg from './locales/en/org.json'
 
 // Arabic resources (eager for now — small enough to ship in initial bundle).
 // If bundle size becomes a concern, switch to dynamic import + i18next-http-backend.
@@ -39,6 +40,7 @@ import arPublic from './locales/ar/public.json'
 import arStudent from './locales/ar/student.json'
 import arTeacher from './locales/ar/teacher.json'
 import arAdmin from './locales/ar/admin.json'
+import arOrg from './locales/ar/org.json'
 
 export type LocaleDirection = 'ltr' | 'rtl'
 
@@ -75,6 +77,7 @@ export const NAMESPACES = [
   'student',
   'teacher',
   'admin',
+  'org',
 ] as const
 export type Namespace = (typeof NAMESPACES)[number]
 
@@ -88,6 +91,7 @@ const resources = {
     student: enStudent,
     teacher: enTeacher,
     admin: enAdmin,
+    org: enOrg,
   },
   ar: {
     common: arCommon,
@@ -98,6 +102,7 @@ const resources = {
     student: arStudent,
     teacher: arTeacher,
     admin: arAdmin,
+    org: arOrg,
   },
 }
 

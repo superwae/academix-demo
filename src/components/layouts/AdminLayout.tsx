@@ -2,6 +2,7 @@ import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState, type ComponentType } from "react";
 import { useTranslation } from "react-i18next";
 import { LanguagePicker } from "../LanguagePicker";
+import { OrgSwitcher } from "../OrgSwitcher";
 import {
   LayoutDashboard,
   Users,
@@ -355,6 +356,9 @@ export function AdminLayout() {
 
             {/* Language Picker */}
             <LanguagePicker compact />
+
+            {/* Org portal entry (when the admin is a member of any org) */}
+            <OrgSwitcher />
 
             <NotificationBell />
 
