@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect, useRef } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import { useAppStore } from '../../store/useAppStore'
@@ -25,6 +25,7 @@ type Filters = {
 
 export function CatalogPage() {
   const { t } = useTranslation(['student', 'common', 'errors'])
+  const navigate = useNavigate()
   const { enrolled } = useAppStore((s) => s.data)
   const { isAuthenticated } = useAuthStore()
   const [myEnrollments, setMyEnrollments] = useState<{ courseId: string; sectionId: string }[]>([])
@@ -248,6 +249,15 @@ export function CatalogPage() {
     const res = checkConflict({ course: openCourse, section: selectedSection }, courses, myEnrollments)
     if (res.conflict) {
       setConflict({ withCourseTitle: res.withCourseTitle ?? t('student:catalog.anotherClass') })
+      return
+    }
+
+    // Paid courses go through checkout first. The server also rejects enrolling without
+    // a Completed payment, but redirecting here avoids the roundtrip error toast.
+    if (typeof openCourse.price === 'number' && openCourse.price > 0) {
+      setOpenCourseId(null)
+      setOpenCourseDetails(null)
+      navigate(`/student/checkout/${openCourse.id}?sectionId=${selectedSectionId}`)
       return
     }
 

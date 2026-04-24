@@ -95,4 +95,7 @@
   <data name="NoSectionsForEnrollment" xml:space="preserve">
     <value>Course has no sections available for enrollment.</value>
   </data>
+  <data name="PaymentRequired" xml:space="preserve">
+    <value>This course requires payment. Please complete checkout before enrolling.</value>
+  </data>
 </root>

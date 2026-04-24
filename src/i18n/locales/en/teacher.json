@@ -210,7 +210,7 @@
       "hybrid": "Hybrid",
       "onCampus": "On-campus"
     },
-    "priceUSD": "Price (USD)",
+    "priceUSD": "Price (ILS)",
     "pricePlaceholder": "0.00 (leave empty for free)",
     "expectedHoursTotal": "Expected hours (total)",
     "expectedHoursPlaceholder": "e.g., 40",

@@ -95,4 +95,7 @@
   <data name="NoSectionsForEnrollment" xml:space="preserve">
     <value>لا تحتوي الدورة على شُعب متاحة للتسجيل.</value>
   </data>
+  <data name="PaymentRequired" xml:space="preserve">
+    <value>تتطلب هذه الدورة الدفع. يرجى إكمال الدفع قبل التسجيل.</value>
+  </data>
 </root>

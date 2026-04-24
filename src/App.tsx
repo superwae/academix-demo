@@ -376,6 +376,8 @@ export default function App() {
               <Route index element={<Navigate to="/teacher/dashboard" replace />} />
               <Route path="dashboard" element={<TeacherDashboardPage />} />
               <Route path="courses" element={<TeacherMyCoursesPage />} />
+              {/* /teacher/courses/new is natural URL for create; aliased to /teacher/create-course. */}
+              <Route path="courses/new" element={<CreateCoursePage />} />
               <Route path="courses/:id" element={<Navigate to="edit" replace />} />
               <Route path="courses/:id/edit" element={<EditCoursePage />} />
               <Route path="courses/:id/lessons" element={<CourseLessonsManagementPage />} />
@@ -491,6 +493,10 @@ export default function App() {
               <Route path="compliance" element={<OrgComplianceDashboardPage />} />
               <Route path="settings" element={<OrgSettingsPage />} />
             </Route>
+
+            {/* Shortcut: /org or /org/dashboard (no slug) -> route to the user's first org */}
+            <Route path="/org" element={<OrgGuard><Navigate to="/" replace /></OrgGuard>} />
+            <Route path="/org/dashboard" element={<OrgGuard><Navigate to="/" replace /></OrgGuard>} />
 
             {/* Support Tickets — available to any authenticated user */}
             <Route

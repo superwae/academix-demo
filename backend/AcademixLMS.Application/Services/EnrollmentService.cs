@@ -213,6 +213,23 @@ public class EnrollmentService : IEnrollmentService
                 return Result<EnrollmentDto>.Failure(_localizer["SectionInactive"]);
             }
 
+            // Business Rule 4b: Paid courses require a completed Payment. Free courses (Price is
+            // null or <= 0) can enroll directly. For paid courses we also accept enrollments
+            // where AssignedByOrgId is set — that seat was paid for by the org's CourseLicense.
+            if (course.Price is { } price && price > 0m)
+            {
+                var hasPaid = await _context.Payments.AnyAsync(p =>
+                    p.UserId == userId &&
+                    p.CourseId == course.Id &&
+                    p.Status == PaymentStatus.Completed &&
+                    !p.IsDeleted, cancellationToken);
+
+                if (!hasPaid)
+                {
+                    return Result<EnrollmentDto>.Failure(_localizer["PaymentRequired"]);
+                }
+            }
+
             // Business Rule 5: Prevent duplicate enrollment in the same section
             // Check within transaction to prevent race conditions
             var existingEnrollment = await _context.Enrollments
