@@ -71,3 +71,24 @@ public record BulkInviteMembersRequest(
 
 public record UpdateMemberRoleRequest(
     OrgMemberRole Role);
+
+/// <summary>Lightweight preview of an invite before the invitee fills out the accept form.</summary>
+public record InvitePreviewDto(
+    string Email,
+    string OrganizationName,
+    OrganizationType OrganizationType,
+    OrgMemberRole Role,
+    DateTime? ExpiresAt,
+    bool NeedsPassword);
+
+public record AcceptInviteRequest(
+    string Token,
+    string FirstName,
+    string LastName,
+    string Password);
+
+public record AcceptInviteResponse(
+    Guid UserId,
+    string Email,
+    Guid OrganizationId,
+    string OrganizationSlug);

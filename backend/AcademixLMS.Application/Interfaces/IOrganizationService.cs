@@ -19,4 +19,8 @@ public interface IOrganizationService
     Task<Result<IReadOnlyList<OrganizationMemberDto>>> BulkInviteMembersAsync(Guid orgId, Guid requestingUserId, BulkInviteMembersRequest request, CancellationToken cancellationToken = default);
     Task<Result<OrganizationMemberDto>> UpdateMemberRoleAsync(Guid orgId, Guid memberId, Guid requestingUserId, UpdateMemberRoleRequest request, CancellationToken cancellationToken = default);
     Task<Result<bool>> RemoveMemberAsync(Guid orgId, Guid memberId, Guid requestingUserId, CancellationToken cancellationToken = default);
+
+    // Invite acceptance (public — no authentication required for preview & accept)
+    Task<Result<InvitePreviewDto>> PreviewInviteAsync(string token, CancellationToken cancellationToken = default);
+    Task<Result<AcceptInviteResponse>> AcceptInviteAsync(AcceptInviteRequest request, CancellationToken cancellationToken = default);
 }

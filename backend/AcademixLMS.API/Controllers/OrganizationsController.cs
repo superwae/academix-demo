@@ -121,4 +121,22 @@ public class OrganizationsController : ControllerBase
         var result = await _organizationService.RemoveMemberAsync(orgId, memberId, userId.Value, cancellationToken);
         return result.IsSuccess ? NoContent() : BadRequest(result.Error);
     }
+
+    // ---- Invite acceptance (public — token-based) ----
+
+    [HttpGet("invites/{token}")]
+    [AllowAnonymous]
+    public async Task<IActionResult> PreviewInvite(string token, CancellationToken cancellationToken)
+    {
+        var result = await _organizationService.PreviewInviteAsync(token, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : NotFound(result.Error);
+    }
+
+    [HttpPost("invites/accept")]
+    [AllowAnonymous]
+    public async Task<IActionResult> AcceptInvite([FromBody] AcceptInviteRequest request, CancellationToken cancellationToken)
+    {
+        var result = await _organizationService.AcceptInviteAsync(request, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+    }
 }

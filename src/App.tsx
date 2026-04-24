@@ -16,6 +16,7 @@ import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
 import { ResetPasswordPage } from './pages/ResetPasswordPage'
 import { VerifyEmailPage } from './pages/VerifyEmailPage'
 import { NotFoundPage } from './pages/NotFoundPage'
+import { AcceptInvitePage } from './pages/AcceptInvitePage'
 
 // Public pages (lazy)
 const PublicCoursesPage = lazy(() =>
@@ -331,6 +332,7 @@ export default function App() {
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/verify-email" element={<VerifyEmailPage />} />
+              <Route path="/accept-invite" element={<AcceptInvitePage />} />
               <Route path="/courses" element={<PublicCoursesPage />} />
               <Route path="/courses/:id" element={<CourseDetailsPage />} />
               {/* Payment callback (public so it works for any role after Lahza redirect) */}

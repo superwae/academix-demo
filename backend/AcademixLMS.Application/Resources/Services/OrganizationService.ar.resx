@@ -86,4 +86,16 @@
   <data name="CannotRemoveLastAdmin" xml:space="preserve">
     <value>لا يمكن إزالة آخر مسؤول للمنظمة.</value>
   </data>
+  <data name="InviteNotFound" xml:space="preserve">
+    <value>الدعوة غير موجودة أو مستخدمة بالفعل.</value>
+  </data>
+  <data name="InviteExpired" xml:space="preserve">
+    <value>انتهت صلاحية هذه الدعوة. اطلب من مسؤول المؤسسة دعوة جديدة.</value>
+  </data>
+  <data name="NameRequired" xml:space="preserve">
+    <value>الاسم الأول واسم العائلة مطلوبان.</value>
+  </data>
+  <data name="PasswordTooShort" xml:space="preserve">
+    <value>يجب أن تتكوّن كلمة المرور من 6 أحرف على الأقل.</value>
+  </data>
 </root>

@@ -1,7 +1,10 @@
 import { apiClient, type ApiError } from '../lib/api'
 import type {
+  AcceptInviteRequest,
+  AcceptInviteResponse,
   CreateOrganizationRequest,
   InviteMemberRequest,
+  InvitePreview,
   OrgMemberRole,
   Organization,
   OrganizationMember,
@@ -100,6 +103,22 @@ export const organizationService = {
       await apiClient.delete(`/organizations/${orgId}/members/${memberId}`)
     } catch (e) {
       rethrow(e, 'Failed to remove member.')
+    }
+  },
+
+  async previewInvite(token: string): Promise<InvitePreview> {
+    try {
+      return await apiClient.get<InvitePreview>(`/organizations/invites/${encodeURIComponent(token)}`)
+    } catch (e) {
+      rethrow(e, 'Invitation not found.')
+    }
+  },
+
+  async acceptInvite(request: AcceptInviteRequest): Promise<AcceptInviteResponse> {
+    try {
+      return await apiClient.post<AcceptInviteResponse>('/organizations/invites/accept', request)
+    } catch (e) {
+      rethrow(e, 'Failed to accept invite.')
     }
   },
 }

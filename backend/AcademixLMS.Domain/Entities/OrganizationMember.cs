@@ -25,6 +25,7 @@ public class OrganizationMember : BaseEntity
     /// <summary>Invite token set when a member was invited but hasn't accepted yet.</summary>
     public string? InviteToken { get; set; }
     public DateTime? InviteSentAt { get; set; }
+    public DateTime? InviteExpiresAt { get; set; }
     public DateTime? InviteAcceptedAt { get; set; }
 
     // Navigation

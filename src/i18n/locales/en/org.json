@@ -163,6 +163,19 @@
       "overdue": "Overdue"
     }
   },
+  "invite": {
+    "title": "Accept your invite",
+    "subtitle": "Set a password to join your organization on AcademiX.",
+    "invalid": "Invalid invitation",
+    "notFound": "This invitation link is no longer valid.",
+    "missingToken": "No invite token provided.",
+    "invitedEmail": "Invited as {{email}}",
+    "expiresAt": "Expires {{date}}",
+    "passwordHint": "Minimum 6 characters.",
+    "passwordTooShort": "Password must be at least 6 characters.",
+    "submit": "Accept invite",
+    "acceptedToast": "Welcome! Your account is ready."
+  },
   "createOrg": {
     "title": "Create an organization",
     "subtitle": "Set up a teaching institution or a company training account.",

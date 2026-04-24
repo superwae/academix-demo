@@ -86,4 +86,16 @@
   <data name="CannotRemoveLastAdmin" xml:space="preserve">
     <value>Cannot remove the last OrgAdmin.</value>
   </data>
+  <data name="InviteNotFound" xml:space="preserve">
+    <value>Invitation not found or already used.</value>
+  </data>
+  <data name="InviteExpired" xml:space="preserve">
+    <value>This invitation has expired. Ask the organization admin for a new one.</value>
+  </data>
+  <data name="NameRequired" xml:space="preserve">
+    <value>First and last name are required.</value>
+  </data>
+  <data name="PasswordTooShort" xml:space="preserve">
+    <value>Password must be at least 6 characters.</value>
+  </data>
 </root>

@@ -70,3 +70,26 @@ export interface InviteMemberRequest {
   role: OrgMemberRole
   externalReference?: string
 }
+
+export interface InvitePreview {
+  email: string
+  organizationName: string
+  organizationType: OrganizationType
+  role: OrgMemberRole
+  expiresAt: string | null
+  needsPassword: boolean
+}
+
+export interface AcceptInviteRequest {
+  token: string
+  firstName: string
+  lastName: string
+  password: string
+}
+
+export interface AcceptInviteResponse {
+  userId: string
+  email: string
+  organizationId: string
+  organizationSlug: string
+}
