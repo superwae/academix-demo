@@ -171,6 +171,8 @@ class CourseService {
     courseStartDate?: string;
     courseEndDate?: string;
     certificate?: CertificateSettingsPayload;
+    organizationId?: string;
+    isOrgExclusive?: boolean;
   }): Promise<CourseDto> {
     try {
       const response = await apiClient.post<CourseDto>('/courses', {
@@ -190,6 +192,8 @@ class CourseService {
         courseStartDate: request.courseStartDate,
         courseEndDate: request.courseEndDate,
         certificate: request.certificate,
+        organizationId: request.organizationId,
+        isOrgExclusive: request.isOrgExclusive ?? false,
       });
       return response;
     } catch (error) {

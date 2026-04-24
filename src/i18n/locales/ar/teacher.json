@@ -980,5 +980,35 @@
       "submissionLoadFailed": "تعذّر تحميل التسليم",
       "publishFailed": "تعذّر نشر الدرجة"
     }
+  },
+  "revenueSplit": {
+    "title": "كيف يتوزّع هذا السعر",
+    "empty": "حدّد سعراً لترى التوزيع."
+  },
+  "visibility": {
+    "title": "من يستطيع رؤية هذه الدورة",
+    "publicTitle": "الكتالوج العام",
+    "publicDescription": "يمكن لأي مستخدم على AcademiX اكتشافها والتسجيل فيها.",
+    "underOrgTitle": "تحت {{org}}",
+    "underOrgDescription": "تظهر في الكتالوج العام، لكن تُحسَب وتُقسَّم الإيرادات تحت المؤسسة.",
+    "exclusiveToggle": "اجعلها حصرية لـ {{org}} — لن تظهر في الكتالوج العام."
+  },
+  "earnings": {
+    "title": "أرباحي",
+    "subtitle": "أرباح دوراتك هذا الشهر. تتم التسوية مرة في الشهر.",
+    "thisMonth": "هذا الشهر",
+    "grossSales": "إجمالي المبيعات",
+    "platformCut": "نصيب المنصة",
+    "orgCut": "نصيب المؤسسة",
+    "netEarned": "صافي أرباحك",
+    "salesCount": "عدد المبيعات هذا الشهر",
+    "lifetime": "منذ البداية",
+    "unpaid": "الرصيد غير المسدد",
+    "byCourse": "حسب الدورة",
+    "columnCourse": "الدورة",
+    "columnSales": "المبيعات",
+    "columnGross": "الإجمالي",
+    "columnNet": "صافيك",
+    "noSales": "لا توجد مبيعات هذا الشهر بعد."
   }
 }

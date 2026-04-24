@@ -1,5 +1,7 @@
 import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { RevenueSplitPreview } from '../../components/RevenueSplitPreview'
+import { CourseVisibilityToggle } from '../../components/CourseVisibilityToggle'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
@@ -44,6 +46,8 @@ export function CreateCoursePage() {
     expectedDurationHours: '',
     courseStartDate: '',
     courseEndDate: '',
+    organizationId: '' as string, // set when the instructor belongs to an org
+    isOrgExclusive: false,
     sections: [] as {
       name: string
       locationLabel: string
@@ -262,6 +266,8 @@ export function CreateCoursePage() {
                   })),
               }))
             : [{ name: 'Default', locationLabel: t('teacher:createCoursePage.sectionPresets.online'), maxSeats: 999, meetingTimes: [] }],
+        organizationId: formData.organizationId || undefined,
+        isOrgExclusive: formData.isOrgExclusive,
       })
 
       // If publishing, update status
@@ -393,6 +399,19 @@ export function CreateCoursePage() {
                     />
                   </div>
                 </div>
+
+                <CourseVisibilityToggle
+                  organizationId={formData.organizationId}
+                  isExclusive={formData.isOrgExclusive}
+                  onChange={(orgId, exclusive) =>
+                    setFormData({ ...formData, organizationId: orgId, isOrgExclusive: exclusive })
+                  }
+                />
+
+                <RevenueSplitPreview
+                  price={formData.price ? parseFloat(formData.price) : 0}
+                  organizationId={formData.organizationId || null}
+                />
 
                 <div className="grid gap-3 md:grid-cols-3">
                   <div className="space-y-1.5">

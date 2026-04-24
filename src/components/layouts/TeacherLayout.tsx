@@ -26,6 +26,7 @@ import {
   Video,
   Crown,
   Radio,
+  Wallet,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "../../lib/cn";
@@ -80,6 +81,7 @@ const TEACHER_NAV: NavItem[] = [
   { to: "/teacher/assignments", labelKey: "nav:assignments", icon: ClipboardList },
   { to: "/teacher/exams", labelKey: "nav:examsQuizzes", icon: FileText },
   { to: "/teacher/students", labelKey: "nav:students", icon: Users },
+  { to: "/teacher/earnings", labelKey: "teacher:earnings.title", icon: Wallet },
   { to: "/teacher/subscription", labelKey: "nav:subscription", icon: Crown },
   { to: "/teacher/messages", labelKey: "nav:messages", icon: Inbox },
   { to: "/teacher/profile", labelKey: "nav:profile", icon: User },

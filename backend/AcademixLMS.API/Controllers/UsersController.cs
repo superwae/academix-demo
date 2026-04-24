@@ -235,6 +235,27 @@ public class UsersController : ControllerBase
     }
 
     /// <summary>
+    /// Super-admin-only: set a per-teacher platform-fee override. Null clears the override.
+    /// </summary>
+    [HttpPut("{id:guid}/platform-fee")]
+    [Authorize(Policy = "RequireAdmin")]
+    public async Task<IActionResult> SetPlatformFee(Guid id, [FromBody] UpdatePlatformFeeRequest request, CancellationToken cancellationToken)
+    {
+        var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == id && !u.IsDeleted, cancellationToken);
+        if (user is null) return NotFound();
+
+        if (request.PlatformFeePercentOverride is { } pct && (pct < 0 || pct > 100))
+            return BadRequest("Platform fee must be between 0 and 100.");
+
+        user.PlatformFeePercentOverride = request.PlatformFeePercentOverride;
+        user.UpdatedAt = DateTime.UtcNow;
+        user.UpdatedBy = User.GetUserId();
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return Ok(new { user.Id, user.PlatformFeePercentOverride });
+    }
+
+    /// <summary>
     /// Change password for the current authenticated user.
     /// </summary>
     [HttpPut("change-password")]
@@ -254,5 +275,8 @@ public class UsersController : ControllerBase
 
 /// <summary>Payload for PUT /users/me/language.</summary>
 public record UpdateLanguageRequest(string Language);
+
+/// <summary>Payload for admin platform-fee override on a teacher.</summary>
+public record UpdatePlatformFeeRequest(decimal? PlatformFeePercentOverride);
 
 

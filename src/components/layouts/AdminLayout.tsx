@@ -93,7 +93,6 @@ const ADMIN_NAV_SECTIONS: NavSection[] = [
       { to: "/admin/finance", labelKey: "nav:overview", icon: DollarSign },
       { to: "/admin/finance/transactions", labelKey: "nav:transactions", icon: CreditCard },
       { to: "/admin/finance/payouts", labelKey: "nav:payouts", icon: Wallet },
-      { to: "/admin/finance/revenue-split", labelKey: "nav:revenueSplit", icon: PieChart },
     ],
   },
   {

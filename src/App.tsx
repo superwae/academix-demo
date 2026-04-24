@@ -157,6 +157,9 @@ const AdminSubscriptionPage = lazy(() =>
 const TeacherSubscriptionPage = lazy(() =>
   import('./pages/teacher/SubscriptionPage').then((m) => ({ default: m.TeacherSubscriptionPage }))
 )
+const TeacherEarningsPage = lazy(() =>
+  import('./pages/teacher/TeacherEarningsPage').then((m) => ({ default: m.TeacherEarningsPage }))
+)
 const CourseDiscountsPage = lazy(() =>
   import('./pages/teacher/CourseDiscountsPage').then((m) => ({ default: m.CourseDiscountsPage }))
 )
@@ -210,12 +213,6 @@ const FinanceTransactionsPage = lazy(() =>
 const FinancePayoutsPage = lazy(() =>
   import('./pages/admin/finance/FinancePayoutsPage').then((m) => ({ default: m.FinancePayoutsPage }))
 )
-const FinanceRevenueSplitPage = lazy(() =>
-  import('./pages/admin/finance/FinanceRevenueSplitPage').then((m) => ({
-    default: m.FinanceRevenueSplitPage,
-  }))
-)
-
 // Accountant & Secretary portals (lazy)
 const AccountantDashboardPage = lazy(() =>
   import('./pages/accountant/AccountantDashboardPage').then((m) => ({
@@ -402,6 +399,7 @@ export default function App() {
               <Route path="profile" element={<TeacherProfilePage />} />
               <Route path="settings" element={<TeacherSettingsPage />} />
               <Route path="subscription" element={<TeacherSubscriptionPage />} />
+              <Route path="earnings" element={<TeacherEarningsPage />} />
               <Route path="payment/callback" element={<PaymentCallbackPage />} />
               <Route path="courses/:id/discounts" element={<CourseDiscountsPage />} />
             </Route>
@@ -425,7 +423,7 @@ export default function App() {
               <Route path="finance" element={<FinanceOverviewPage />} />
               <Route path="finance/transactions" element={<FinanceTransactionsPage />} />
               <Route path="finance/payouts" element={<FinancePayoutsPage />} />
-              <Route path="finance/revenue-split" element={<FinanceRevenueSplitPage />} />
+              <Route path="finance/revenue-split" element={<Navigate to="/admin/finance" replace />} />
 
               <Route path="transactions" element={<Navigate to="/admin/finance/transactions" replace />} />
               <Route path="reports" element={<AdminReportsPage />} />

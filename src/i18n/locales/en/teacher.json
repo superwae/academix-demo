@@ -980,5 +980,35 @@
       "submissionLoadFailed": "Failed to load submission",
       "publishFailed": "Failed to publish score"
     }
+  },
+  "revenueSplit": {
+    "title": "How this price splits",
+    "empty": "Set a price to see the breakdown."
+  },
+  "visibility": {
+    "title": "Who can see this course",
+    "publicTitle": "Public catalog",
+    "publicDescription": "Anyone on AcademiX can discover and enroll.",
+    "underOrgTitle": "Under {{org}}",
+    "underOrgDescription": "Listed in the public catalog, but branded and split under the org.",
+    "exclusiveToggle": "Make it exclusive to {{org}} — hidden from the public catalog."
+  },
+  "earnings": {
+    "title": "My earnings",
+    "subtitle": "Revenue from your courses this month. Payouts are processed once per month.",
+    "thisMonth": "This month",
+    "grossSales": "Gross sales",
+    "platformCut": "Platform cut",
+    "orgCut": "Org cut",
+    "netEarned": "Your net",
+    "salesCount": "Sales this month",
+    "lifetime": "Lifetime",
+    "unpaid": "Unpaid balance",
+    "byCourse": "By course",
+    "columnCourse": "Course",
+    "columnSales": "Sales",
+    "columnGross": "Gross",
+    "columnNet": "Your net",
+    "noSales": "No sales this month yet."
   }
 }

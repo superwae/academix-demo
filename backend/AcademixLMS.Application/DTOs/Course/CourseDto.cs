@@ -88,6 +88,12 @@ public class CreateCourseRequest
 
     /// <summary>When set, certificate fields are applied on create. Omitted = no certificates / defaults.</summary>
     public CertificateSettingsDto? Certificate { get; set; }
+
+    /// <summary>If the author is a member of an organization, set the org here to put the course under it.</summary>
+    public Guid? OrganizationId { get; set; }
+
+    /// <summary>When true, only members of OrganizationId can see / enroll. Public catalog hides it.</summary>
+    public bool IsOrgExclusive { get; set; }
 }
 
 public class UpdateCourseRequest

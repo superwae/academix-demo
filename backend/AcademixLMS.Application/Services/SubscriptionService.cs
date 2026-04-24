@@ -186,6 +186,43 @@ public class SubscriptionService : ISubscriptionService
 
     private async Task<SubscriptionStatusDto> BuildSubscriptionStatusAsync(Guid userId, CancellationToken cancellationToken)
     {
+        // If the user is an active OrgTeacher under a Teaching Institution, the org's subscription
+        // drives course capacity — not the teacher's personal plan. The quota is shared across every
+        // OrgTeacher in the institution (pooled).
+        var orgTeacherMembership = await _context.OrganizationMembers
+            .Include(m => m.Organization)
+            .FirstOrDefaultAsync(m =>
+                m.UserId == userId && m.IsActive && !m.IsDeleted &&
+                m.Role == OrgMemberRole.OrgTeacher &&
+                m.Organization.Type == OrganizationType.TeachingInstitution,
+                cancellationToken);
+
+        if (orgTeacherMembership?.Organization.SubscriptionId is { } orgSubscriptionId)
+        {
+            var orgSubscription = await _context.Subscriptions
+                .Include(s => s.Plan)
+                .FirstOrDefaultAsync(s => s.Id == orgSubscriptionId && s.Status == SubscriptionStatus.Active && !s.IsDeleted, cancellationToken);
+
+            if (orgSubscription is not null)
+            {
+                var orgCourseCount = await _context.Courses
+                    .CountAsync(c => c.OrganizationId == orgTeacherMembership.OrganizationId && !c.IsDeleted, cancellationToken);
+
+                var orgMax = orgSubscription.Plan.MaxCourses;
+                var orgCanCreate = !orgMax.HasValue || orgCourseCount < orgMax.Value;
+
+                return new SubscriptionStatusDto
+                {
+                    HasActiveSubscription = true,
+                    PlanName = orgSubscription.Plan.Name + " (org-pooled)",
+                    MaxCourses = orgMax,
+                    CurrentCourseCount = orgCourseCount,
+                    CanCreateCourse = orgCanCreate,
+                    RemainingCourses = orgMax.HasValue ? Math.Max(0, orgMax.Value - orgCourseCount) : null
+                };
+            }
+        }
+
         var subscription = await _context.Subscriptions
             .Include(s => s.Plan)
             .Where(s => s.UserId == userId && !s.IsDeleted && s.Status == SubscriptionStatus.Active)

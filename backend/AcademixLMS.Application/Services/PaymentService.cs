@@ -13,17 +13,20 @@ public class PaymentService : IPaymentService
 {
     private readonly IApplicationDbContext _context;
     private readonly ILahzaService _lahzaService;
+    private readonly IRevenueSplitService _revenueSplitService;
     private readonly ILogger<PaymentService> _logger;
     private readonly IStringLocalizer<PaymentService> _localizer;
 
     public PaymentService(
         IApplicationDbContext context,
         ILahzaService lahzaService,
+        IRevenueSplitService revenueSplitService,
         ILogger<PaymentService> logger,
         IStringLocalizer<PaymentService> localizer)
     {
         _context = context;
         _lahzaService = lahzaService;
+        _revenueSplitService = revenueSplitService;
         _logger = logger;
         _localizer = localizer;
     }
@@ -289,6 +292,21 @@ public class PaymentService : IPaymentService
             payment.PaidAt = verification.PaidAt ?? DateTime.UtcNow;
             payment.LahzaAuthorizationCode = verification.AuthorizationCode;
             payment.LahzaChannel = verification.Channel;
+
+            // Persist revenue split snapshot for course purchases.
+            if (payment.Type == PaymentType.CoursePurchase && payment.CourseId is { } courseId)
+            {
+                var splitResult = await _revenueSplitService.ComputeForPaymentAsync(courseId, payment.Amount, cancellationToken);
+                if (splitResult.IsSuccess)
+                {
+                    var (platformAmt, orgAmt, instructorAmt) = splitResult.Value;
+                    payment.PlatformAmount = platformAmt;
+                    payment.OrgAmount = orgAmt;
+                    payment.InstructorAmount = instructorAmt;
+                    payment.InstructorUserId = payment.Course?.InstructorId;
+                    payment.OrganizationId = payment.Course?.OrganizationId;
+                }
+            }
 
             // If this is a subscription payment, create the subscription record
             if (payment.Type == PaymentType.Subscription && verification.Metadata != null)

@@ -130,6 +130,16 @@ class UserService {
       throw new Error(apiError.error || 'Failed to change password');
     }
   }
+
+  /** Persist the user's language preference to the server (fires-and-forgets; failure is logged but doesn't block the UI). */
+  async updateLanguage(language: string): Promise<void> {
+    try {
+      await apiClient.put('/users/me/language', { language });
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.warn('[userService] Failed to persist language preference:', error);
+    }
+  }
 }
 
 export const userService = new UserService();

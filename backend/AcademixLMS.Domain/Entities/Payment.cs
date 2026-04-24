@@ -41,6 +41,13 @@ public class Payment : BaseEntity
     /// <summary>Original amount before discount (smallest currency unit).</summary>
     public long? OriginalAmount { get; set; }
 
+    // Revenue split snapshot (populated when Payment transitions to Completed for CoursePurchase payments).
+    // Stored in the smallest currency unit, just like Amount. Sum must equal Amount.
+    public long? PlatformAmount { get; set; }
+    public long? OrgAmount { get; set; }
+    public long? InstructorAmount { get; set; }
+    public Guid? InstructorUserId { get; set; }
+
     // Navigation
     public User User { get; set; } = null!;
     public Course? Course { get; set; }

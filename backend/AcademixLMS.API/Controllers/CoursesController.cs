@@ -1,5 +1,6 @@
 using AcademixLMS.Application.Common;
 using AcademixLMS.Application.DTOs.Course;
+using AcademixLMS.Application.DTOs.Payment;
 using AcademixLMS.Application.Interfaces;
 using AcademixLMS.API.Extensions;
 using Microsoft.AspNetCore.Authorization;
@@ -15,12 +16,31 @@ namespace AcademixLMS.API.Controllers;
 public class CoursesController : ControllerBase
 {
     private readonly ICourseService _courseService;
+    private readonly IRevenueSplitService _revenueSplitService;
     private readonly ILogger<CoursesController> _logger;
 
-    public CoursesController(ICourseService courseService, ILogger<CoursesController> logger)
+    public CoursesController(ICourseService courseService, IRevenueSplitService revenueSplitService, ILogger<CoursesController> logger)
     {
         _courseService = courseService;
+        _revenueSplitService = revenueSplitService;
         _logger = logger;
+    }
+
+    /// <summary>
+    /// Preview the revenue split for a given instructor+org+price triple. Used by the
+    /// course-creation form so the instructor can see what each party gets before publishing.
+    /// </summary>
+    [HttpPost("preview-split")]
+    [Authorize]
+    public async Task<IActionResult> PreviewSplit([FromBody] PreviewSplitForInstructorRequest request, CancellationToken cancellationToken)
+    {
+        var userId = User.GetUserId();
+        if (userId is null) return Unauthorized();
+
+        // If no instructor provided, use the caller's user id.
+        var instructorId = request.InstructorId ?? userId.Value;
+        var result = await _revenueSplitService.PreviewForInstructorAsync(instructorId, request.OrganizationId, request.Price, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
 
     /// <summary>

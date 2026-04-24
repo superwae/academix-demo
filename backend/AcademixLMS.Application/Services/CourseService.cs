@@ -67,6 +67,10 @@ public class CourseService : ICourseService
         // This can be overridden by Admin/Instructor in specific endpoints
         query = query.Where(c => c.Status == CourseStatus.Published);
 
+        // Hide org-exclusive courses from the public catalog entirely.
+        // Org members still see them via dedicated org endpoints / their enrollments.
+        query = query.Where(c => !c.IsOrgExclusive);
+
         // Sorting
         query = request.SortBy?.ToLower() switch
         {
@@ -111,7 +115,7 @@ public class CourseService : ICourseService
                 .ThenInclude(s => s.MeetingTimes)
             .Include(c => c.CourseTags)
                 .ThenInclude(ct => ct.Tag)
-            .Where(c => !c.IsDeleted && c.Category == category && c.Status == CourseStatus.Published)
+            .Where(c => !c.IsDeleted && c.Category == category && c.Status == CourseStatus.Published && !c.IsOrgExclusive)
             .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(request.SearchTerm))
@@ -195,7 +199,7 @@ public class CourseService : ICourseService
                 .ThenInclude(s => s.MeetingTimes)
             .Include(c => c.CourseTags)
                 .ThenInclude(ct => ct.Tag)
-            .Where(c => !c.IsDeleted && c.IsFeatured && c.Status == CourseStatus.Published)
+            .Where(c => !c.IsDeleted && c.IsFeatured && c.Status == CourseStatus.Published && !c.IsOrgExclusive)
             .OrderByDescending(c => c.Rating)
             .ThenByDescending(c => c.CreatedAt)
             .Take(10)
@@ -272,6 +276,22 @@ public class CourseService : ICourseService
 
         var cert = request.Certificate ?? new CertificateSettingsDto();
 
+        // Validate the requested OrganizationId: the instructor must be an active member with OrgTeacher or OrgAdmin role.
+        Guid? orgId = null;
+        if (request.OrganizationId.HasValue)
+        {
+            var membership = await _context.OrganizationMembers
+                .FirstOrDefaultAsync(m =>
+                    m.OrganizationId == request.OrganizationId.Value &&
+                    m.UserId == request.InstructorId &&
+                    m.IsActive && !m.IsDeleted &&
+                    (m.Role == OrgMemberRole.OrgTeacher || m.Role == OrgMemberRole.OrgAdmin),
+                    cancellationToken);
+            if (membership is null)
+                return Result<CourseDto>.Failure("Instructor is not an authorized member of that organization.");
+            orgId = request.OrganizationId.Value;
+        }
+
         // Create course (always starts as Draft)
         var course = new Course
         {
@@ -283,6 +303,8 @@ public class CourseService : ICourseService
             ProviderType = providerType,
             ProviderName = request.ProviderName,
             InstructorId = request.InstructorId,
+            OrganizationId = orgId,
+            IsOrgExclusive = orgId.HasValue && request.IsOrgExclusive,
             Price = request.Price,
             ThumbnailUrl = request.ThumbnailUrl,
             ExpectedDurationHours = request.ExpectedDurationHours,

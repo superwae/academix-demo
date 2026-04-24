@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
+import { RevenueSplitPreview } from '../../components/RevenueSplitPreview'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
@@ -816,6 +817,7 @@ export function EditCoursePage() {
                     placeholder="0.00"
                   />
                 </div>
+                <RevenueSplitPreview price={formData.price ? parseFloat(formData.price) : 0} />
               </CardContent>
             </Card>
 

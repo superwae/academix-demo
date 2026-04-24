@@ -36,6 +36,13 @@ public class User : BaseEntity
 
     /// <summary>Preferred UI language code (e.g. "en", "ar"). Drives server-side i18n.</summary>
     public string? PreferredLanguage { get; set; }
+
+    /// <summary>
+    /// SuperAdmin-managed override for the platform's cut on this user's course sales.
+    /// Null = use the global default from config (Payments:PlatformFeePercent).
+    /// Ignored when the user is an OrgTeacher under a TeachingInstitution — org override wins there.
+    /// </summary>
+    public decimal? PlatformFeePercentOverride { get; set; }
     
     // Navigation Properties
     public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
