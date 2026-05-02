@@ -1,9 +1,20 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig({
   plugins: [react()],
   appType: 'spa', // Serve index.html for direct URLs like /reset-password?token=...
+  resolve: {
+    alias: {
+      // Replace framer-motion with a no-op shim that renders plain DOM
+      // elements. See src/lib/motion-shim.tsx for the rationale (GPU load).
+      'framer-motion': path.resolve(__dirname, 'src/lib/motion-shim.tsx'),
+    },
+  },
   build: {
     rollupOptions: {
       output: {
@@ -22,7 +33,6 @@ export default defineConfig({
             }
             if (
               id.includes('date-fns') ||
-              id.includes('framer-motion') ||
               id.includes('lucide-react')
             ) {
               return 'vendor-ui'

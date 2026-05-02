@@ -22,7 +22,7 @@ export function Toaster() {
         unstyled: false,
         classNames: {
           toast:
-            'group flex w-[min(100vw-2rem,30rem)] items-start gap-3 rounded-2xl border-2 border-border bg-card px-4 py-4 text-foreground shadow-2xl shadow-black/15 backdrop-blur-md dark:bg-card/95',
+            'group flex w-[min(100vw-2rem,30rem)] items-start gap-3 rounded-2xl border-2 border-border bg-card px-4 py-4 text-foreground shadow-2xl shadow-black/15 dark:bg-card/95',
           title: 'text-[15px] font-semibold leading-snug text-foreground',
           description: 'text-sm leading-relaxed text-muted-foreground mt-1',
           closeButton:

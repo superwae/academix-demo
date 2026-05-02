@@ -14,6 +14,10 @@
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
     "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "framer-motion": ["src/lib/motion-shim.tsx"]
+    },
 
     /* Linting */
     "strict": true,

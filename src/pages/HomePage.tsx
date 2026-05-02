@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -193,7 +193,7 @@ const band = {
   /** Elevated card feel */
   deep: 'rounded-[2rem] border border-border/60 bg-gradient-to-br from-card/90 to-muted/40 px-5 py-10 sm:px-8 sm:py-12 shadow-lg shadow-primary/[0.06]',
   /** Glassy card strip */
-  card: 'rounded-[2rem] border border-border/55 bg-card/70 backdrop-blur-sm px-5 py-10 sm:px-8 sm:py-12 shadow-xl shadow-primary/[0.05]',
+  card: 'rounded-[2rem] border border-border/55 bg-card/70 px-5 py-10 sm:px-8 sm:py-12 shadow-xl shadow-primary/[0.05]',
   /** Diagonal gradient accent */
   stripe:
     'relative overflow-hidden rounded-[2rem] border border-border/45 px-5 py-10 sm:px-8 sm:py-12 before:pointer-events-none before:absolute before:inset-0 before:bg-[linear-gradient(125deg,hsl(var(--primary)/0.1)_0%,transparent_45%,hsl(var(--ring)/0.08)_100%)]',
@@ -221,14 +221,7 @@ function SectionLabel({ children }: { children: ReactNode }) {
 }
 
 function ScrollProgress() {
-  const { scrollYProgress } = useScroll();
-  const scaleX = useTransform(scrollYProgress, [0, 1], [0, 1]);
-  return (
-    <motion.div
-      className="fixed top-0 start-0 end-0 h-1 bg-primary origin-left z-[100]"
-      style={{ scaleX }}
-    />
-  );
+  return null;
 }
 
 type CelebrationState =
@@ -668,7 +661,7 @@ export function HomePage() {
               className="relative mx-auto w-full max-w-md lg:max-w-none"
             >
               <div className="absolute -inset-4 rounded-3xl bg-gradient-to-br from-primary/20 via-primary/5 to-transparent blur-2xl -z-10" />
-              <div className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm shadow-2xl shadow-primary/10 overflow-hidden ring-1 ring-border/40">
+              <div className="rounded-2xl border border-border/60 bg-card/80 shadow-2xl shadow-primary/10 overflow-hidden ring-1 ring-border/40">
                 <div className="flex items-center gap-2 px-4 py-3 border-b border-border/50 bg-muted/30">
                   <div className="flex gap-1.5">
                     <span className="h-3 w-3 rounded-full bg-red-400/80" />
@@ -820,7 +813,7 @@ export function HomePage() {
                 variants={staggerItem}
                 transition={spring}
                 whileHover={{ y: -4, transition: springSoft }}
-                className="flex items-center gap-3 rounded-2xl border border-border/60 bg-card/60 px-4 py-3 shadow-sm backdrop-blur-sm"
+                className="flex items-center gap-3 rounded-2xl border border-border/60 bg-card/60 px-4 py-3 shadow-sm"
               >
                 <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-primary/25 to-primary/10 text-xs font-bold text-primary ring-1 ring-primary/20">
                   {p.initials}
@@ -1540,7 +1533,7 @@ export function HomePage() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 20, scale: 0.96 }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="w-full max-w-sm rounded-2xl border border-border/60 bg-card/95 backdrop-blur-xl shadow-2xl p-4"
+              className="w-full max-w-sm rounded-2xl border border-border/60 bg-card/95 shadow-2xl p-4"
             >
               <div className="flex items-center justify-between mb-3">
                 <span className="font-semibold text-sm flex items-center gap-2">

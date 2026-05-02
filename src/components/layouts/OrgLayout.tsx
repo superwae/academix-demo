@@ -136,7 +136,7 @@ export function OrgLayout() {
 
       {/* Main */}
       <div className="flex-1 min-w-0 flex flex-col">
-        <header className="sticky top-0 z-20 h-16 border-b border-border bg-background/80 backdrop-blur flex items-center px-4 md:px-6 gap-3">
+        <header className="sticky top-0 z-20 h-16 border-b border-border bg-background/80 flex items-center px-4 md:px-6 gap-3">
           <button
             type="button"
             className="md:hidden p-2 rounded hover:bg-muted"

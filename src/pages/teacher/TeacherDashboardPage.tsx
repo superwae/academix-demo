@@ -148,7 +148,7 @@ export function TeacherDashboardPage() {
           <h1 className="text-3xl font-bold tracking-tight gradient-text">{t('teacher:dashboard.pageTitle')}</h1>
           <p className="mt-1 text-sm text-muted-foreground">{t('teacher:dashboard.pageSubtitle')}</p>
         </div>
-        <div className="flex items-center gap-2 rounded-xl border border-border/50 bg-background/50 px-3 py-1.5 backdrop-blur-sm">
+        <div className="flex items-center gap-2 rounded-xl border border-border/50 bg-background/50 px-3 py-1.5">
           <Calendar className="h-4 w-4 text-primary" />
           <span className="text-sm font-medium">{format(new Date(), 'EEEE, MMM d, yyyy')}</span>
         </div>

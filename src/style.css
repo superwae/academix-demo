@@ -347,8 +347,8 @@ html[dir="rtl"] .rtl-flip { transform: scaleX(-1); }
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
-    background-image: var(--background-gradient, none);
-    background-attachment: fixed;
+    /* `background-attachment: fixed` was forcing a full-viewport GPU repaint
+       on every scroll. Removed for client-side performance. */
     line-height: 1.6;
     letter-spacing: 0.01em;
     overflow-x: clip;
@@ -373,13 +373,16 @@ html[dir="rtl"] .rtl-flip { transform: scaleX(-1); }
 }
 
 @layer utilities {
+  /* `backdrop-blur` runs a continuous GPU blur shader for every visible
+     `.glass`/`.glass-strong` element (every sticky header, sidebar, modal in
+     the app). Replaced with opaque surfaces so no GPU shader runs. */
   .glass {
-    @apply backdrop-blur-xl bg-card/80 border border-border/50;
+    @apply bg-card border border-border/50;
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
   }
-  
+
   .glass-strong {
-    @apply backdrop-blur-2xl bg-card/90 border border-border/60;
+    @apply bg-card border border-border/60;
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.12), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
   }
   
@@ -447,13 +450,13 @@ html[dir="rtl"] .rtl-flip { transform: scaleX(-1); }
     background: hsl(var(--primary));
   }
   
-  /* Animated gradient border */
+  /* Static gradient border (animation removed for performance) */
   .gradient-border {
     position: relative;
     background: hsl(var(--card));
     border-radius: var(--radius);
   }
-  
+
   .gradient-border::before {
     content: '';
     position: absolute;
@@ -465,65 +468,17 @@ html[dir="rtl"] .rtl-flip { transform: scaleX(-1); }
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     opacity: 0.5;
-    animation: gradient-rotate 3s linear infinite;
   }
-  
-  @keyframes gradient-rotate {
-    0% {
-      background-position: 0% 50%;
-    }
-    50% {
-      background-position: 100% 50%;
-    }
-    100% {
-      background-position: 0% 50%;
-    }
-  }
-  
-  /* Shimmer effect */
+
+  /* Static shimmer placeholder — kept as a no-op so existing class names render. */
   .shimmer {
     position: relative;
     overflow: hidden;
   }
-  
-  .shimmer::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgba(255, 255, 255, 0.1),
-      transparent
-    );
-    transform: translateX(-100%);
-    animation: shimmer 2s infinite;
-  }
-  
-  @keyframes shimmer {
-    0% {
-      transform: translateX(-100%);
-    }
-    100% {
-      transform: translateX(100%);
-    }
-  }
-  
-  /* Pulse glow effect */
+
+  /* Static glow (no infinite animation) */
   .pulse-glow {
-    animation: pulse-glow 2s ease-in-out infinite;
-  }
-  
-  @keyframes pulse-glow {
-    0%, 100% {
-      box-shadow: 0 0 20px hsl(var(--primary) / 0.3);
-    }
-    50% {
-      box-shadow: 0 0 40px hsl(var(--primary) / 0.5), 0 0 60px hsl(var(--primary) / 0.3);
-    }
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.3);
   }
 }
 

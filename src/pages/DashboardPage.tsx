@@ -106,7 +106,7 @@ export function DashboardPage() {
           <h1 className="text-4xl font-bold tracking-tight gradient-text">Dashboard</h1>
           <p className="mt-2 text-lg text-muted-foreground">Your week at a glance</p>
         </div>
-        <div className="flex items-center gap-2 rounded-xl border border-border/50 bg-background/50 px-4 py-2 backdrop-blur-sm">
+        <div className="flex items-center gap-2 rounded-xl border border-border/50 bg-background/50 px-4 py-2">
           <Calendar className="h-4 w-4 text-primary" />
           <span className="text-sm font-medium">{format(new Date(), 'EEEE, MMM d, yyyy')}</span>
         </div>

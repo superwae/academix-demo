@@ -304,7 +304,7 @@ export function ProfilePage() {
           <div className="absolute bottom-0 start-0 end-0 h-24 bg-gradient-to-t from-background to-transparent rounded-b-2xl" />
           <button
             type="button"
-            className="absolute top-3 end-3 flex items-center gap-2 rounded-lg border border-white/30 bg-black/40 px-3 py-2 text-sm font-medium text-white backdrop-blur-sm opacity-0 transition-opacity group-hover/cover:opacity-100 focus:opacity-100 hover:bg-black/50"
+            className="absolute top-3 end-3 flex items-center gap-2 rounded-lg border border-white/30 bg-black/40 px-3 py-2 text-sm font-medium text-white opacity-0 transition-opacity group-hover/cover:opacity-100 focus:opacity-100 hover:bg-black/50"
             onClick={handleCoverUpload}
             disabled={uploadingCover}
             aria-label={t('student:profile.changeCoverAria')}

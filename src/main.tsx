@@ -4,7 +4,6 @@ import { BrowserRouter } from 'react-router-dom'
 import { HelmetProvider } from 'react-helmet-async'
 import App from './App'
 import './style.css'
-import 'lenis/dist/lenis.css'
 // Side-effect import: initializes i18next, detects browser language, applies
 // <html lang> + <html dir> + font class before the first render.
 import './i18n'

@@ -355,7 +355,7 @@ export function Layout() {
                   }
                 }}
                 placeholder="Search courses, assignments, messages…"
-                className="h-12 ps-11 pe-10 rounded-xl border-2 border-border/50 bg-background/50 backdrop-blur-sm focus-visible:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/20 transition-all"
+                className="h-12 ps-11 pe-10 rounded-xl border-2 border-border/50 bg-background/50 focus-visible:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/20 transition-all"
               />
               {search && (
                 <button
@@ -600,7 +600,7 @@ export function Layout() {
             {/* User Profile Card */}
             <motion.div
               whileHover={{ scale: 1.02 }}
-              className="mb-4 rounded-xl border-2 border-primary/20 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-4 backdrop-blur-sm"
+              className="mb-4 rounded-xl border-2 border-primary/20 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-4"
             >
               <div className="flex items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/70 text-primary-foreground shadow-lg shadow-primary/30">

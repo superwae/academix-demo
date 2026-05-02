@@ -361,7 +361,7 @@ const EmbeddedVideoPlayer = forwardRef<VideoPlayerHandle, {
     return (
       <div className={cn('relative bg-gradient-to-br from-blue-900 to-blue-700 rounded-lg overflow-hidden', className)}>
         <div className="aspect-video flex flex-col items-center justify-center p-8 text-center">
-          <div className="bg-white/10 backdrop-blur-sm rounded-full p-6 mb-6">
+          <div className="bg-white/10 rounded-full p-6 mb-6">
             <svg className="h-16 w-16 text-white" viewBox="0 0 24 24" fill="currentColor">
               <path d="M4 4h10v10H4V4zm12 0v10l4-5-4-5zM4 16h10v4H4v-4zm12 0v4h4v-4h-4z"/>
             </svg>
@@ -761,7 +761,7 @@ const NativeVideoPlayer = forwardRef<VideoPlayerHandle, {
     return (
       <div className={cn('relative bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg overflow-hidden', className)}>
         <div className="aspect-video flex flex-col items-center justify-center p-8 text-center">
-          <div className="bg-white/10 backdrop-blur-sm rounded-full p-6 mb-6">
+          <div className="bg-white/10 rounded-full p-6 mb-6">
             <Play className="h-12 w-12 text-white" />
           </div>
           <h3 className="text-xl font-semibold text-white mb-2">{t('student:components.videoPlayer.unavailableTitle')}</h3>
