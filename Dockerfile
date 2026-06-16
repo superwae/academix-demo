@@ -18,12 +18,13 @@ RUN npx vite build
 # ---- Stage 2: build & publish the .NET API ----
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS backend
 WORKDIR /src
-COPY backend/AcademixLMS.sln ./
+# The .sln isn't committed, so restore via the API project — its ProjectReferences
+# pull in Application, Domain and Infrastructure transitively.
 COPY backend/AcademixLMS.API/AcademixLMS.API.csproj ./AcademixLMS.API/
 COPY backend/AcademixLMS.Application/AcademixLMS.Application.csproj ./AcademixLMS.Application/
 COPY backend/AcademixLMS.Domain/AcademixLMS.Domain.csproj ./AcademixLMS.Domain/
 COPY backend/AcademixLMS.Infrastructure/AcademixLMS.Infrastructure.csproj ./AcademixLMS.Infrastructure/
-RUN dotnet restore AcademixLMS.sln
+RUN dotnet restore AcademixLMS.API/AcademixLMS.API.csproj
 COPY backend/. .
 RUN dotnet publish AcademixLMS.API/AcademixLMS.API.csproj -c Release -o /app/publish --no-restore
 
