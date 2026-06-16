@@ -314,11 +314,14 @@ export function TeacherAssignmentSubmissionsPage() {
                 {viewing.fileUrl ? (
                   <div className="rounded-lg border p-4 text-sm space-y-2">
                     <div className="font-medium">{t('teacher:assignmentSubmissions.attachment')}</div>
-                    <Button variant="secondary" size="sm" className="w-full sm:w-auto" asChild>
-                      <a href={viewing.fileUrl} target="_blank" rel="noopener noreferrer">
-                        <ExternalLink className="h-4 w-4 me-2" />
-                        {viewing.fileName || t('teacher:assignmentSubmissions.openFile')}
-                      </a>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="w-full sm:w-auto"
+                      onClick={() => fileService.openProtectedFile(viewing.fileUrl!).catch(() => toast.error(t('teacher:assignmentSubmissions.openFile')))}
+                    >
+                      <ExternalLink className="h-4 w-4 me-2" />
+                      {viewing.fileName || t('teacher:assignmentSubmissions.openFile')}
                     </Button>
                     {viewing.fileSize != null ? (
                       <p className="text-xs text-muted-foreground">

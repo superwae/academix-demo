@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { RevenueSplitPreview } from '../../components/RevenueSplitPreview'
 import { CourseVisibilityToggle } from '../../components/CourseVisibilityToggle'
@@ -17,10 +17,11 @@ import {
 } from '../../components/ui/select'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
-import { Save, Eye, Upload, X, Plus, MapPin, Clock, ChevronDown, ChevronUp } from 'lucide-react'
+import { Eye, Upload, X, Plus, MapPin, Clock, ChevronDown, ChevronUp } from 'lucide-react'
 import { Badge } from '../../components/ui/badge'
 import { countWords, MAX_CERTIFICATE_WORDS } from '../../lib/certificateText'
 import { useTranslation } from 'react-i18next'
+import { subscriptionService, type CanCreateCourseResponse } from '../../services/subscriptionService'
 
 export function CreateCoursePage() {
   const { t } = useTranslation(['teacher', 'common', 'errors'])
@@ -56,6 +57,33 @@ export function CreateCoursePage() {
     }[],
   })
   const [expandedSection, setExpandedSection] = useState<string | null>(null)
+  const [planStatus, setPlanStatus] = useState<CanCreateCourseResponse | null>(null)
+  const [planLoading, setPlanLoading] = useState(true)
+
+  useEffect(() => {
+    let cancelled = false
+
+    const loadPlanStatus = async () => {
+      try {
+        setPlanLoading(true)
+        const status = await subscriptionService.canCreateCourse({
+          organizationId: formData.organizationId || undefined,
+          personal: !formData.organizationId,
+        })
+        if (!cancelled) setPlanStatus(status)
+      } catch {
+        if (!cancelled) setPlanStatus(null)
+      } finally {
+        if (!cancelled) setPlanLoading(false)
+      }
+    }
+
+    void loadPlanStatus()
+
+    return () => {
+      cancelled = true
+    }
+  }, [formData.organizationId])
 
   const timeToMinutes = (timeStr: string): number => {
     if (!timeStr) return 0
@@ -73,11 +101,61 @@ export function CreateCoursePage() {
     { name: 'Section 4', locationLabel: t('teacher:createCoursePage.sectionPresets.section4') },
   ]
 
+  const formatLimit = (value?: number | null) =>
+    value == null ? t('teacher:createCoursePage.unlimited') : value.toLocaleString()
+
+  const clampSeatCount = (value: number) => {
+    let next = Math.max(1, Math.floor(value || 1))
+    if (planStatus?.maxSeatsPerCourse != null) {
+      next = Math.min(next, planStatus.maxSeatsPerCourse)
+    }
+    if (planStatus?.remainingTotalSeats != null && planStatus.remainingTotalSeats > 0) {
+      next = Math.min(next, planStatus.remainingTotalSeats)
+    }
+    return Math.max(1, next)
+  }
+
+  const getDefaultSectionSeats = () => {
+    const typed = parseInt(formData.enrollmentLimit, 10)
+    return clampSeatCount(Number.isFinite(typed) && typed > 0 ? typed : 30)
+  }
+
+  const requestedSeatTotal =
+    formData.sections.length > 0
+      ? formData.sections.reduce((sum, section) => sum + Math.max(0, section.maxSeats || 0), 0)
+      : getDefaultSectionSeats()
+
+  const getPlanCapacityError = (seatTotal: number) => {
+    if (!planStatus) return null
+    if (!planStatus.hasActiveSubscription) {
+      return t('teacher:createCoursePage.errors.noActivePlan')
+    }
+    if (!planStatus.canCreateCourse) {
+      return t('teacher:createCoursePage.errors.coursePlanLimit', {
+        plan: planStatus.planName || t('teacher:createCoursePage.currentPlan'),
+        max: formatLimit(planStatus.maxCourses),
+      })
+    }
+    if (planStatus.maxSeatsPerCourse != null && seatTotal > planStatus.maxSeatsPerCourse) {
+      return t('teacher:createCoursePage.errors.seatsPerCourseLimit', {
+        plan: planStatus.planName || t('teacher:createCoursePage.currentPlan'),
+        max: formatLimit(planStatus.maxSeatsPerCourse),
+      })
+    }
+    if (planStatus.remainingTotalSeats != null && seatTotal > planStatus.remainingTotalSeats) {
+      return t('teacher:createCoursePage.errors.totalSeatLimit', {
+        plan: planStatus.planName || t('teacher:createCoursePage.currentPlan'),
+        remaining: formatLimit(planStatus.remainingTotalSeats),
+      })
+    }
+    return null
+  }
+
   const addSection = (preset: { name: string; locationLabel: string }) => {
     if (formData.sections.some((s) => s.name === preset.name)) return
     setFormData({
       ...formData,
-      sections: [...formData.sections, { ...preset, maxSeats: 999, meetingTimes: [] }],
+      sections: [...formData.sections, { ...preset, maxSeats: getDefaultSectionSeats(), meetingTimes: [] }],
     })
     setExpandedSection(preset.name)
   }
@@ -138,7 +216,7 @@ export function CreateCoursePage() {
     setFormData({
       ...formData,
       sections: formData.sections.map((s) =>
-        s.name !== sectionName ? s : { ...s, maxSeats },
+        s.name !== sectionName ? s : { ...s, maxSeats: clampSeatCount(maxSeats) },
       ),
     })
   }
@@ -225,6 +303,41 @@ export function CreateCoursePage() {
         const [y, m, d] = dateStr.split('-').map(Number)
         return new Date(Date.UTC(y, m - 1, d)).toISOString()
       }
+
+      const defaultSectionSeats = getDefaultSectionSeats()
+      const sectionPayload =
+        formData.sections.length > 0
+          ? formData.sections.map((s) => ({
+              name: s.name,
+              locationLabel: s.locationLabel,
+              maxSeats: Math.max(1, Math.floor(s.maxSeats || 1)),
+              meetingTimes: s.meetingTimes
+                .filter(
+                  (mt) =>
+                    mt.startTime &&
+                    mt.endTime &&
+                    timeToMinutes(mt.startTime) < timeToMinutes(mt.endTime),
+                )
+                .map((mt) => ({
+                  day: mt.day,
+                  startMinutes: timeToMinutes(mt.startTime),
+                  endMinutes: timeToMinutes(mt.endTime),
+                })),
+            }))
+          : [{
+              name: 'Default',
+              locationLabel: t('teacher:createCoursePage.sectionPresets.online'),
+              maxSeats: defaultSectionSeats,
+              meetingTimes: [],
+            }]
+
+      const seatTotal = sectionPayload.reduce((sum, section) => sum + section.maxSeats, 0)
+      const planError = getPlanCapacityError(seatTotal)
+      if (planError) {
+        toast.error(planError)
+        setLoading(false)
+        return
+      }
       
       // Create the course
       const course = await courseService.createCourse({
@@ -246,39 +359,22 @@ export function CreateCoursePage() {
           summary: formData.certificateSummary.trim() || null,
           displayHours: certDisplayHoursParsed,
         },
-        sections:
-          formData.sections.length > 0
-            ? formData.sections.map((s) => ({
-                name: s.name,
-                locationLabel: s.locationLabel,
-                maxSeats: s.maxSeats,
-                meetingTimes: s.meetingTimes
-                  .filter(
-                    (mt) =>
-                      mt.startTime &&
-                      mt.endTime &&
-                      timeToMinutes(mt.startTime) < timeToMinutes(mt.endTime),
-                  )
-                  .map((mt) => ({
-                    day: mt.day,
-                    startMinutes: timeToMinutes(mt.startTime),
-                    endMinutes: timeToMinutes(mt.endTime),
-                  })),
-              }))
-            : [{ name: 'Default', locationLabel: t('teacher:createCoursePage.sectionPresets.online'), maxSeats: 999, meetingTimes: [] }],
+        sections: sectionPayload,
         organizationId: formData.organizationId || undefined,
         isOrgExclusive: formData.isOrgExclusive,
       })
 
-      // If publishing, update status
-      if (!saveAsDraft && formData.publish) {
+      // Only publish when the publish toggle is on (and not explicitly saving a draft)
+      const published = !saveAsDraft && formData.publish
+      if (published) {
         await courseService.publishCourse(course.id)
       }
-      
-      toast.success(saveAsDraft ? t('teacher:createCoursePage.toasts.draftSaved') : t('teacher:createCoursePage.toasts.published'), {
-        description: saveAsDraft
-          ? t('teacher:createCoursePage.toasts.draftSavedDescription')
-          : t('teacher:createCoursePage.toasts.publishedDescription'),
+
+      // Toast must reflect what actually happened (published vs draft saved)
+      toast.success(published ? t('teacher:createCoursePage.toasts.published') : t('teacher:createCoursePage.toasts.draftSaved'), {
+        description: published
+          ? t('teacher:createCoursePage.toasts.publishedDescription')
+          : t('teacher:createCoursePage.toasts.draftSavedDescription'),
       })
 
       navigate('/teacher/courses')
@@ -641,6 +737,7 @@ export function CreateCoursePage() {
                                       id={`max-seats-${s.name}`}
                                       type="number"
                                       min="1"
+                                      max={planStatus?.maxSeatsPerCourse ?? undefined}
                                       value={s.maxSeats}
                                       onChange={(e) =>
                                         updateSectionMaxSeats(
@@ -650,6 +747,13 @@ export function CreateCoursePage() {
                                       }
                                       className="h-8"
                                     />
+                                    {planStatus?.maxSeatsPerCourse != null && (
+                                      <p className="text-[11px] text-muted-foreground">
+                                        {t('teacher:createCoursePage.sectionSeatLimitHint', {
+                                          max: formatLimit(planStatus.maxSeatsPerCourse),
+                                        })}
+                                      </p>
+                                    )}
                                   </div>
                                 </div>
 
@@ -761,10 +865,56 @@ export function CreateCoursePage() {
                     id="enrollmentLimit"
                     type="number"
                     min="1"
+                    max={planStatus?.maxSeatsPerCourse ?? undefined}
                     value={formData.enrollmentLimit}
                     onChange={(e) => setFormData({ ...formData, enrollmentLimit: e.target.value })}
                     placeholder={t('teacher:createCoursePage.noLimit')}
                   />
+                  <div className="rounded-lg border border-border/60 bg-muted/30 p-3 text-xs text-muted-foreground">
+                    {planLoading ? (
+                      <span>{t('teacher:createCoursePage.loadingPlan')}</span>
+                    ) : planStatus ? (
+                      <div className="space-y-1">
+                        <div className="font-medium text-foreground">
+                          {planStatus.hasActiveSubscription
+                            ? planStatus.planName || t('teacher:createCoursePage.currentPlan')
+                            : t('teacher:createCoursePage.errors.noActivePlan')}
+                        </div>
+                        {planStatus.hasActiveSubscription ? (
+                          <>
+                            <div>
+                              {t('teacher:createCoursePage.planSeatsHint', {
+                                perCourse: formatLimit(planStatus.maxSeatsPerCourse),
+                                totalLeft: formatLimit(planStatus.remainingTotalSeats),
+                              })}
+                            </div>
+                            <div>
+                              {t('teacher:createCoursePage.requestedSeatsHint', {
+                                count: requestedSeatTotal,
+                              })}
+                            </div>
+                            {planStatus.maxCourses != null && (
+                              <div>
+                                {t('teacher:createCoursePage.planCoursesHint', {
+                                  used: planStatus.currentCourseCount.toLocaleString(),
+                                  max: formatLimit(planStatus.maxCourses),
+                                  remaining: formatLimit(planStatus.remainingCourses),
+                                })}
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <div>
+                            {t('teacher:createCoursePage.requestedSeatsHint', {
+                              count: requestedSeatTotal,
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <span>{t('teacher:createCoursePage.planUnavailable')}</span>
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex items-center justify-between">
@@ -859,16 +1009,6 @@ export function CreateCoursePage() {
                   </Button>
                   <Button
                     type="button"
-                    variant="outline"
-                    className="w-full"
-                    onClick={(e) => handleSubmit(e, true)}
-                    disabled={loading}
-                  >
-                    <Save className="h-4 w-4 me-2" />
-                    {t('teacher:createCourse.saveDraft')}
-                  </Button>
-                  <Button
-                    type="button"
                     variant="ghost"
                     className="w-full"
                     onClick={() => navigate('/teacher/courses')}
@@ -884,4 +1024,3 @@ export function CreateCoursePage() {
     </motion.div>
   )
 }
-

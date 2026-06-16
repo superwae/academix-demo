@@ -394,7 +394,7 @@ export function AdminDashboardPage() {
           title={t('admin:dashboard.sections.executiveOverview')}
           description={t('admin:dashboard.sections.executiveOverviewDesc')}
         />
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5">
           <StatCard
             title={t('admin:dashboard.totalStudents')}
             value={analytics?.totalStudents?.toLocaleString() || "0"}

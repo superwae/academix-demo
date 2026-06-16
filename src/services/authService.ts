@@ -165,7 +165,9 @@ class AuthService {
         (request.email.toLowerCase() === 'accountant@academix.com' ||
           request.email.toLowerCase() === 'secretary@academix.com');
 
+      // DEV ONLY: never fall back to hardcoded demo accounts in production builds.
       const canUseMock =
+        import.meta.env.DEV &&
         mockUser &&
         mockUser.password === request.password &&
         (isNetworkError || dev401StaffDemo);

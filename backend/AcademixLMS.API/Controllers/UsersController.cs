@@ -129,8 +129,15 @@ public class UsersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetUser(Guid id, CancellationToken cancellationToken)
     {
+        // Full profile (email/phone/roles) is only visible to admins or the user themselves.
+        // Return 404 (not 403) for others to avoid leaking which user IDs exist.
+        var currentUserId = User.GetRequiredUserId();
+        var isAdmin = User.HasRole("Admin") || User.HasRole("SuperAdmin");
+        if (!isAdmin && id != currentUserId)
+            return NotFound();
+
         var result = await _userService.GetByIdAsync(id, cancellationToken);
-        
+
         if (!result.IsSuccess)
             return NotFound(result.Error);
 
@@ -153,11 +160,22 @@ public class UsersController : ControllerBase
 
     [HttpPut("{id}")]
     [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateUserRequest request, CancellationToken cancellationToken)
     {
+        // Only admins may edit other users; non-admins may only edit their own profile.
+        var currentUserId = User.GetRequiredUserId();
+        var isAdmin = User.HasRole("Admin") || User.HasRole("SuperAdmin");
+        if (!isAdmin && id != currentUserId)
+            return Forbid();
+
+        // Only admins may change IsActive (activate/suspend); ignore it for self-updates.
+        if (!isAdmin)
+            request.IsActive = null;
+
         var result = await _userService.UpdateAsync(id, request, cancellationToken);
-        
+
         if (!result.IsSuccess)
             return NotFound(result.Error);
 

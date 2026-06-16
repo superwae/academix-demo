@@ -529,6 +529,53 @@ html {
   color: hsl(var(--foreground));
 }
 
+[data-admin-shell] {
+  background:
+    linear-gradient(90deg, hsl(var(--border) / 0.22) 1px, transparent 1px),
+    linear-gradient(0deg, hsl(var(--border) / 0.18) 1px, transparent 1px),
+    hsl(var(--background));
+  background-size: 48px 48px, 48px 48px, auto;
+}
+
+[data-admin-shell] h1 {
+  letter-spacing: 0;
+}
+
+[data-admin-shell] .recharts-wrapper,
+[data-admin-shell] .recharts-surface {
+  overflow: visible;
+}
+
+[data-admin-shell] table {
+  table-layout: auto;
+}
+
+html[dir='rtl'] .admin-shell-frame {
+  direction: ltr;
+}
+
+html[dir='rtl'] .admin-shell-sidebar {
+  direction: rtl;
+  order: 2;
+}
+
+html[dir='rtl'] .admin-shell-main {
+  direction: rtl;
+  order: 1;
+}
+
+html[dir='rtl'] .org-shell-frame {
+  direction: rtl;
+}
+
+html[dir='rtl'] .org-shell-sidebar {
+  direction: rtl;
+}
+
+html[dir='rtl'] .org-shell-main {
+  direction: rtl;
+}
+
 /* FullCalendar theme overrides */
 html[data-theme='dark'] .fc {
   color: hsl(var(--foreground)) !important;

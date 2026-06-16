@@ -12,5 +12,6 @@
   "passwordsDoNotMatch": "The passwords don't match.",
   "fileTooLarge": "That file is too large.",
   "unsupportedFileType": "That file type is not supported.",
-  "unknownError": "Something unexpected happened. Please try again."
+  "unknownError": "Something unexpected happened. Please try again.",
+  "generic": "Something went wrong. Please try again."
 }

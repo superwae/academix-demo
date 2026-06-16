@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
 import { Badge } from "../../components/ui/badge";
+import { DemoDataBadge } from "../../components/admin/finance/DemoDataBadge";
 
 type InvoiceStatus = "open" | "paid";
 
@@ -25,7 +26,7 @@ export function AccountantInvoicesPage() {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">{t("admin:accountant.invoices.title")}</h1>
+          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">{t("admin:accountant.invoices.title")} <DemoDataBadge /></h1>
           <p className="text-muted-foreground mt-1">
             {t("admin:accountant.invoices.subtitle")}
           </p>

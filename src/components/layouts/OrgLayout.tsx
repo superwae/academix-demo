@@ -33,21 +33,33 @@ export function OrgLayout() {
   const { slug = '' } = useParams<{ slug: string }>()
   const navigate = useNavigate()
   const { user } = useAuthStore()
-  const { currentOrg, loadingCurrent, loadOrg } = useOrgStore()
+  const { currentOrg, loadingCurrent, loadOrg, memberships } = useOrgStore()
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
     if (slug) void loadOrg(slug)
   }, [slug, loadOrg])
 
+  // Hide nav items the current member's org role can't access
+  // (routes are gated by OrgGuard requireRole in App.tsx — keep both in sync).
+  const roleInOrg = memberships.find((m) => m.slug === slug)?.roleInOrg
+  const isOrgAdmin = roleInOrg === 'OrgAdmin'
+  const isOrgManagerOrAbove = isOrgAdmin || roleInOrg === 'OrgManager'
+
   const base = `/org/${slug}`
   const nav: NavItem[] = [
     { to: `${base}/dashboard`, labelKey: 'org:nav.dashboard', icon: LayoutDashboard },
     { to: `${base}/members`, labelKey: 'org:nav.members', icon: Users },
     { to: `${base}/courses`, labelKey: 'org:nav.courses', icon: BookOpen },
-    { to: `${base}/licenses`, labelKey: 'org:nav.licenses', icon: Ticket },
-    { to: `${base}/compliance`, labelKey: 'org:nav.compliance', icon: ShieldCheck },
-    { to: `${base}/settings`, labelKey: 'org:nav.settings', icon: Settings },
+    ...(isOrgManagerOrAbove
+      ? [
+          { to: `${base}/licenses`, labelKey: 'org:nav.licenses', icon: Ticket },
+          { to: `${base}/compliance`, labelKey: 'org:nav.compliance', icon: ShieldCheck },
+        ]
+      : []),
+    ...(isOrgAdmin
+      ? [{ to: `${base}/settings`, labelKey: 'org:nav.settings', icon: Settings }]
+      : []),
   ]
 
   const backToPortal = () => {
@@ -60,11 +72,11 @@ export function OrgLayout() {
   }
 
   return (
-    <div className="min-h-dvh bg-background text-foreground flex">
+    <div className="org-shell-frame min-h-dvh bg-background text-foreground flex">
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed md:sticky md:top-0 inset-y-0 start-0 z-40 w-72 border-e border-border bg-card flex flex-col transition-transform md:translate-x-0',
+          'org-shell-sidebar fixed inset-y-0 start-0 z-40 flex w-72 flex-col border-e border-border bg-card transition-transform md:static md:h-dvh md:translate-x-0 md:rtl:translate-x-0',
           sidebarOpen ? 'translate-x-0' : 'rtl:translate-x-full -translate-x-full md:translate-x-0'
         )}
       >
@@ -135,7 +147,7 @@ export function OrgLayout() {
       )}
 
       {/* Main */}
-      <div className="flex-1 min-w-0 flex flex-col">
+      <div className="org-shell-main flex-1 min-w-0 flex flex-col">
         <header className="sticky top-0 z-20 h-16 border-b border-border bg-background/80 flex items-center px-4 md:px-6 gap-3">
           <button
             type="button"
@@ -150,7 +162,9 @@ export function OrgLayout() {
           </h1>
           <div className="ms-auto flex items-center gap-2">
             <LanguagePicker compact />
-            <HelpButton />
+            <div className="hidden lg:block">
+              <HelpButton />
+            </div>
             <NotificationBell />
           </div>
         </header>

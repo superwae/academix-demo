@@ -13,8 +13,7 @@ public interface  IAssignmentService
     Task<Result> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
     Task<Result<AssignmentSubmissionDto>> GetSubmissionAsync(Guid assignmentId, Guid userId, CancellationToken cancellationToken = default);
     Task<Result<AssignmentSubmissionDto>> SubmitAsync(Guid assignmentId, SubmitAssignmentRequest request, Guid userId, CancellationToken cancellationToken = default);
-    Task<Result<AssignmentSubmissionDto>> GradeSubmissionAsync(Guid submissionId, GradeSubmissionRequest request, Guid gradedBy, CancellationToken cancellationToken = default);
+    Task<Result<AssignmentSubmissionDto>> GradeSubmissionAsync(Guid submissionId, GradeSubmissionRequest request, Guid gradedBy, bool isAdmin = false, CancellationToken cancellationToken = default);
     Task<Result<PagedResult<AssignmentSubmissionDto>>> GetSubmissionsAsync(Guid assignmentId, PagedRequest request, CancellationToken cancellationToken = default);
 }
-
 

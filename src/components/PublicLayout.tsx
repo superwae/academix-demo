@@ -1,4 +1,4 @@
-import { Outlet, Link, useNavigate } from 'react-router-dom';
+import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { GraduationCap } from 'lucide-react';
@@ -13,6 +13,9 @@ import { LanguagePicker } from './LanguagePicker';
 export function PublicLayout() {
   const { isAuthenticated, user } = useAuthStore();
   const navigate = useNavigate();
+  const location = useLocation();
+  // The landing page ships its own full-width mega footer.
+  const hideFooter = location.pathname === '/';
   const mixTheme = useAppStore((s) => s.data.mixTheme);
   const { t } = useTranslation(['nav', 'common']);
 
@@ -37,7 +40,7 @@ export function PublicLayout() {
 
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-border/50 glass-strong" role="banner">
-        <div className="mx-auto flex h-20 max-w-[1920px] items-center gap-4 px-6">
+        <div className="mx-auto flex h-16 max-w-[1920px] items-center gap-3 px-4 sm:h-20 sm:gap-4 sm:px-6">
           {/* Logo — id for theme celebration firework target */}
           <Link to="/" id="academix-logo" className="flex items-center gap-3">
             <motion.div
@@ -58,7 +61,7 @@ export function PublicLayout() {
                   <GraduationCap className="h-6 w-6" />
                 </div>
               </div>
-              <div className="leading-tight">
+              <div className="hidden leading-tight sm:block">
                 <div className="text-lg font-bold tracking-tight gradient-text">
                   AcademiX
                 </div>
@@ -91,7 +94,7 @@ export function PublicLayout() {
             </Link>
             <Link
               to="/courses"
-              className="text-sm font-medium text-foreground/70 hover:text-foreground transition-colors px-2 py-1 rounded-md hover:bg-muted/50"
+              className="hidden text-sm font-medium text-foreground/70 hover:text-foreground transition-colors px-2 py-1 rounded-md hover:bg-muted/50 sm:inline-flex"
             >
               {t('nav:courses')}
             </Link>
@@ -109,7 +112,7 @@ export function PublicLayout() {
                 >
                   {t('common:login')}
                 </Button>
-                <Button onClick={() => navigate('/register')} variant="default">
+                <Button onClick={() => navigate('/register')} variant="default" className="h-9 px-3 sm:h-10 sm:px-4">
                   {t('common:signUp')}
                 </Button>
               </>
@@ -124,6 +127,7 @@ export function PublicLayout() {
       </main>
 
       {/* Footer */}
+      {!hideFooter && (
       <footer className="border-t border-border/50 bg-background/80 mt-auto" role="contentinfo">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -165,7 +169,7 @@ export function PublicLayout() {
           </div>
         </div>
       </footer>
+      )}
     </div>
   );
 }
-

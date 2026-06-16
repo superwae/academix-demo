@@ -256,13 +256,13 @@ export function AdminUsersPage() {
               id: 'user',
               header: t('admin:users.table.user'),
               cell: (user) => (
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 font-medium text-primary">
+                <div className="flex min-w-0 items-center gap-3">
+                  <div className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-primary/10 font-medium text-primary">
                     {user.firstName?.[0] || ""}{user.lastName?.[0] || ""}
                   </div>
-                  <div className="text-start">
-                    <p className="font-medium">{user.fullName}</p>
-                    <p className="text-sm text-muted-foreground">{user.email}</p>
+                  <div className="min-w-0 text-start">
+                    <p className="truncate font-medium">{user.fullName}</p>
+                    <p className="break-all text-sm text-muted-foreground">{user.email}</p>
                   </div>
                 </div>
               ),

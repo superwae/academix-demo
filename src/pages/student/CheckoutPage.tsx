@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   Loader2,
@@ -14,10 +14,14 @@ import { toast } from "sonner";
 import { courseService, type CourseDto } from "../../services/courseService";
 import { paymentService } from "../../services/paymentService";
 import { discountService } from "../../services/discountService";
+import { formatMoney } from "../../lib/money";
 
 export function CheckoutPage() {
   const { t } = useTranslation(['student', 'common', 'errors']);
   const { courseId } = useParams<{ courseId: string }>();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const sectionId = searchParams.get("sectionId") ?? undefined;
   const [loading, setLoading] = useState(true);
   const [course, setCourse] = useState<CourseDto | null>(null);
   const [discountCode, setDiscountCode] = useState("");
@@ -70,7 +74,7 @@ export function CheckoutPage() {
         discountAmount: discountAmt,
       });
       toast.success(t('student:checkout.discountAppliedTitle'), {
-        description: t('student:checkout.discountSaved', { amount: discountAmt.toFixed(2) }),
+        description: t('student:checkout.discountSaved', { amount: formatMoney(discountAmt) }),
       });
     } catch (error) {
       toast.error(t('student:checkout.errors.failedValidate'), {
@@ -85,6 +89,9 @@ export function CheckoutPage() {
   const originalPrice = course?.price ?? 0;
   const discountAmount = discountApplied?.discountAmount ?? 0;
   const finalPrice = Math.max(0, originalPrice - discountAmount);
+  const chosenSection = sectionId
+    ? course?.sections?.find((s) => s.id === sectionId)
+    : undefined;
 
   const handlePay = async () => {
     if (!courseId) return;
@@ -93,8 +100,18 @@ export function CheckoutPage() {
       setPaying(true);
       const result = await paymentService.initializeCoursePayment({
         courseId,
+        sectionId,
         discountCode: discountApplied?.code,
       });
+
+      // Demo gateway: payment already completed and enrollment created server-side
+      if (result.demoCompleted) {
+        toast.success(t('student:checkout.demoEnrolledTitle'), {
+          description: t('student:checkout.demoEnrolledBody'),
+        });
+        navigate('/student/my-classes');
+        return;
+      }
 
       // Redirect to Lahza payment page
       if (result.authorizationUrl) {
@@ -160,6 +177,12 @@ export function CheckoutPage() {
               <h3 className="font-semibold text-lg">{course.title}</h3>
               <p className="text-sm text-muted-foreground mt-1">{course.category}</p>
               <p className="text-sm text-muted-foreground">{course.level}</p>
+              {chosenSection && (
+                <p className="text-sm mt-1">
+                  <span className="text-muted-foreground">{t('student:checkout.sectionLabel')}: </span>
+                  <span className="font-medium">{chosenSection.name}</span>
+                </p>
+              )}
             </div>
           </div>
         </CardContent>
@@ -208,7 +231,7 @@ export function CheckoutPage() {
               <CheckCircle className="h-4 w-4" />
               {t('student:checkout.discountApplied', {
                 code: discountApplied.code,
-                amount: discountApplied.discountAmount.toFixed(2),
+                amount: formatMoney(discountApplied.discountAmount),
               })}
             </div>
           )}
@@ -223,18 +246,18 @@ export function CheckoutPage() {
         <CardContent className="space-y-3">
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">{t('student:checkout.originalPrice')}</span>
-            <span>${originalPrice.toFixed(2)}</span>
+            <span>{formatMoney(originalPrice)}</span>
           </div>
           {discountApplied && (
             <div className="flex justify-between text-sm text-emerald-600">
               <span>{t('student:checkout.discount', { code: discountApplied.code })}</span>
-              <span>-${discountAmount.toFixed(2)}</span>
+              <span>{formatMoney(-discountAmount)}</span>
             </div>
           )}
           <div className="border-t pt-3">
             <div className="flex justify-between">
               <span className="font-semibold">{t('student:checkout.total')}</span>
-              <span className="text-xl font-bold">${finalPrice.toFixed(2)}</span>
+              <span className="text-xl font-bold">{formatMoney(finalPrice)}</span>
             </div>
           </div>
 
@@ -250,7 +273,7 @@ export function CheckoutPage() {
                 {t('student:checkout.processing')}
               </>
             ) : (
-              t('student:checkout.pay', { amount: finalPrice.toFixed(2) })
+              t('student:checkout.pay', { amount: formatMoney(finalPrice) })
             )}
           </Button>
         </CardContent>

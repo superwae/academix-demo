@@ -30,6 +30,7 @@ import {
 import { countWords, MAX_CERTIFICATE_WORDS } from '../../lib/certificateText'
 import { ConfirmDialog } from '../../components/ui/confirm-dialog'
 import { useTranslation } from 'react-i18next'
+import { subscriptionService, type CanCreateCourseResponse } from '../../services/subscriptionService'
 
 export function EditCoursePage() {
   const { t } = useTranslation(['teacher', 'common', 'errors'])
@@ -67,6 +68,7 @@ export function EditCoursePage() {
   const [sectionsSaving, setSectionsSaving] = useState(false)
   const [deleteSectionId, setDeleteSectionId] = useState<string | null>(null)
   const [course, setCourse] = useState<CourseDto | null>(null)
+  const [planStatus, setPlanStatus] = useState<CanCreateCourseResponse | null>(null)
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -109,7 +111,8 @@ export function EditCoursePage() {
           tags: courseData.tags || [],
           tagInput: '',
           thumbnailUrl: courseData.thumbnailUrl || '',
-          enrollmentLimit: courseData.enrollmentLimit?.toString() || '',
+          enrollmentLimit:
+            courseData.sections?.reduce((sum, section) => sum + (section.maxSeats || 0), 0).toString() || '',
           certificateEnabled: courseData.issueCertificates ?? courseData.certificateEnabled ?? false,
           certificateSummary: courseData.certificateSummary ?? '',
           certificateDisplayHours:
@@ -120,6 +123,15 @@ export function EditCoursePage() {
           courseStartDate: courseData.courseStartDate ? courseData.courseStartDate.slice(0, 10) : '',
           courseEndDate: courseData.courseEndDate ? courseData.courseEndDate.slice(0, 10) : '',
         })
+        try {
+          const status = await subscriptionService.canCreateCourse({
+            organizationId: courseData.organizationId || undefined,
+            personal: !courseData.organizationId,
+          })
+          setPlanStatus(status)
+        } catch {
+          setPlanStatus(null)
+        }
       } catch (error) {
         toast.error(t('teacher:courseLessonsManagement.errors.loadFailed'), {
           description: error instanceof Error ? error.message : t('teacher:shared.tryAgainLater'),
@@ -198,6 +210,20 @@ export function EditCoursePage() {
     return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`
   }
 
+  const formatLimit = (value?: number | null) =>
+    value == null ? t('teacher:createCoursePage.unlimited') : value.toLocaleString()
+
+  const clampSeatCount = (value: number) => {
+    let next = Math.max(1, Math.floor(value || 1))
+    if (planStatus?.maxSeatsPerCourse != null) {
+      next = Math.min(next, planStatus.maxSeatsPerCourse)
+    }
+    if (planStatus?.remainingTotalSeats != null && planStatus.remainingTotalSeats > 0) {
+      next = Math.min(next, planStatus.remainingTotalSeats)
+    }
+    return Math.max(1, next)
+  }
+
   const openSectionsDialog = () => {
     setShowSectionsDialog(true)
     setEditingSection(null)
@@ -208,7 +234,7 @@ export function EditCoursePage() {
       name: '',
       locationLabel: '',
       joinUrl: '',
-      maxSeats: 30,
+      maxSeats: clampSeatCount(30),
       meetingTimes: [],
     })
   }
@@ -221,7 +247,7 @@ export function EditCoursePage() {
       await courseService.addSection(id, {
         name: preset.name,
         locationLabel: preset.locationLabel,
-        maxSeats: 999,
+        maxSeats: clampSeatCount(30),
       })
       const updated = await courseService.getCourseById(id)
       setCourse(updated)
@@ -290,6 +316,28 @@ export function EditCoursePage() {
     }
     if (editingSection.maxSeats < 1) {
       toast.error(t('teacher:teacherMyCourses.errors.maxSeatsAtLeastOne'))
+      return
+    }
+    const previousSeats = editingSection.id
+      ? course.sections?.find((section) => section.id === editingSection.id)?.maxSeats ?? 0
+      : 0
+    const courseSeatsAfterChange =
+      (course.sections?.reduce((sum, section) => sum + (section.maxSeats || 0), 0) ?? 0) -
+      previousSeats +
+      editingSection.maxSeats
+    const totalSeatDelta = editingSection.maxSeats - previousSeats
+    if (planStatus?.maxSeatsPerCourse != null && courseSeatsAfterChange > planStatus.maxSeatsPerCourse) {
+      toast.error(t('teacher:createCoursePage.errors.seatsPerCourseLimit', {
+        plan: planStatus.planName || t('teacher:createCoursePage.currentPlan'),
+        max: formatLimit(planStatus.maxSeatsPerCourse),
+      }))
+      return
+    }
+    if (planStatus?.remainingTotalSeats != null && totalSeatDelta > planStatus.remainingTotalSeats) {
+      toast.error(t('teacher:createCoursePage.errors.totalSeatLimit', {
+        plan: planStatus.planName || t('teacher:createCoursePage.currentPlan'),
+        remaining: formatLimit(planStatus.remainingTotalSeats),
+      }))
       return
     }
     setSectionsSaving(true)
@@ -407,15 +455,17 @@ export function EditCoursePage() {
         },
       })
 
-      // If publishing, update status
-      if (!saveAsDraft && formData.publish) {
+      // Only publish when the publish toggle is on (and not explicitly saving a draft)
+      const published = !saveAsDraft && formData.publish
+      if (published) {
         await courseService.publishCourse(id)
       }
-      
-      toast.success(saveAsDraft ? t('teacher:editCoursePage.toasts.updated') : t('teacher:createCoursePage.toasts.published'), {
-        description: saveAsDraft
-          ? t('teacher:editCoursePage.toasts.updatedDescription')
-          : t('teacher:createCoursePage.toasts.publishedDescription'),
+
+      // Toast must reflect what actually happened (published vs just updated)
+      toast.success(published ? t('teacher:createCoursePage.toasts.published') : t('teacher:editCoursePage.toasts.updated'), {
+        description: published
+          ? t('teacher:createCoursePage.toasts.publishedDescription')
+          : t('teacher:editCoursePage.toasts.updatedDescription'),
       })
 
       navigate('/teacher/courses')
@@ -982,14 +1032,22 @@ export function EditCoursePage() {
                     <Input
                       type="number"
                       min="1"
+                      max={planStatus?.maxSeatsPerCourse ?? undefined}
                       value={editingSection.maxSeats}
                       onChange={(e) =>
                         setEditingSection({
                           ...editingSection,
-                          maxSeats: parseInt(e.target.value) || 0,
+                          maxSeats: clampSeatCount(parseInt(e.target.value) || 1),
                         })
                       }
                     />
+                    {planStatus?.maxSeatsPerCourse != null && (
+                      <p className="text-xs text-muted-foreground">
+                        {t('teacher:createCoursePage.sectionSeatLimitHint', {
+                          max: formatLimit(planStatus.maxSeatsPerCourse),
+                        })}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -1020,7 +1078,7 @@ export function EditCoursePage() {
                       {editingSection.meetingTimes.map((mt, index) => (
                         <div
                           key={index}
-                          className="flex gap-2 items-end p-2 border rounded bg-muted/20"
+                          className="flex flex-wrap gap-2 items-end p-2 border rounded bg-muted/20"
                         >
                           <div className="flex-1">
                             <SelectRoot

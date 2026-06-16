@@ -9,6 +9,8 @@ import { Textarea } from '../../components/ui/textarea'
 import { AlertCircle, ArrowLeft, CalendarClock, CheckCircle2, ExternalLink, Loader2, Save } from 'lucide-react'
 import { format } from 'date-fns'
 import { motion } from 'framer-motion'
+import { toast } from 'sonner'
+import { fileService } from '../../services/fileService'
 import { cn } from '../../lib/cn'
 import {
   assignmentService,
@@ -281,15 +283,14 @@ export function TeacherAssignmentGradePage() {
                     <p className="text-muted-foreground italic">{t('teacher:assignmentGrade.noWrittenAnswer')}</p>
                   )}
                   {s.fileUrl ? (
-                    <a
-                      href={s.fileUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <button
+                      type="button"
+                      onClick={() => fileService.openProtectedFile(s.fileUrl!).catch(() => toast.error(t('teacher:assignmentGrade.openAttachment')))}
                       className="inline-flex items-center gap-1 text-primary text-sm font-medium hover:underline"
                     >
                       <ExternalLink className="h-3.5 w-3.5" />
                       {s.fileName || t('teacher:assignmentGrade.openAttachment')}
-                    </a>
+                    </button>
                   ) : null}
                 </div>
 

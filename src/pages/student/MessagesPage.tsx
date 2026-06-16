@@ -480,7 +480,9 @@ export function MessagesPage() {
                             )}
                           </div>
                           <p className="text-xs text-muted-foreground mt-1 ms-6">
-                            {formatDistanceToNow(new Date(conv.lastMessageAt), { addSuffix: true })}
+                            {conv.lastMessage && conv.lastMessageAt
+                              ? formatDistanceToNow(new Date(conv.lastMessageAt), { addSuffix: true })
+                              : t('student:messages.noMessagesYet', { defaultValue: 'No messages yet' })}
                           </p>
                         </button>
                       )

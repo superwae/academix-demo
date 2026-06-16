@@ -16,7 +16,7 @@ import { useAuthStore } from "../../store/useAuthStore";
 export function PaymentCallbackPage() {
   const { t } = useTranslation(['student', 'common', 'errors']);
   const [searchParams] = useSearchParams();
-  const reference = searchParams.get("reference");
+  const reference = searchParams.get("reference") ?? searchParams.get("trxref");
   const { user } = useAuthStore();
   const [loading, setLoading] = useState(true);
   const [success, setSuccess] = useState(false);

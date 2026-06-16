@@ -62,4 +62,7 @@
   <data name="PaymentNotFound" xml:space="preserve">
     <value>Payment not found for the given reference.</value>
   </data>
+  <data name="SubscriptionRequiresPayment" xml:space="preserve">
+    <value>Paid plans must be purchased through the payment checkout.</value>
+  </data>
 </root>

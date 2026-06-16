@@ -458,7 +458,7 @@ export function StaffPortalShell({
               variant="outline"
               size="icon"
               onClick={toggleDarkMode}
-              className="h-9 w-9"
+              className="hidden h-9 w-9 sm:inline-flex"
               title={isDarkMode ? t("admin:staffLayout.menu.switchToLightMode") : t("admin:staffLayout.menu.switchToDarkMode")}
             >
               {isDarkMode ? (
@@ -468,7 +468,9 @@ export function StaffPortalShell({
               )}
             </Button>
 
-            <HelpButton />
+            <div className="hidden lg:block">
+              <HelpButton />
+            </div>
 
             <NotificationBell />
 

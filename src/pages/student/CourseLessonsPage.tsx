@@ -40,10 +40,11 @@ import { cn } from '../../lib/cn';
 import { getLiveSessionBadge, type MeetingMeta } from '../../lib/liveSession';
 import {
   apiDayToDayName,
-  getLastPastSessionEnd,
+  getLastPastSessionWindow,
   isMeetingDismissedForOccurrence,
   dismissMeetingForOccurrence,
 } from '../../lib/sessionRatingPrompt';
+import { enrollmentService } from '../../services/enrollmentService';
 
 function isLiveLectureLessonId(id: string): boolean {
   return id.startsWith('lecture:');
@@ -185,6 +186,7 @@ export function CourseLessonsPage() {
     lastEndMs: number;
     myRating: number | null | undefined;
   } | null>(null);
+  const [currentEnrollmentStartedAt, setCurrentEnrollmentStartedAt] = useState<Date | null>(null);
   const [liveRatingSearchKey, setLiveRatingSearchKey] = useState(0);
   const [certificateInfo, setCertificateInfo] = useState<CertificateDto | null>(null);
   useEffect(() => {
@@ -340,16 +342,19 @@ export function CourseLessonsPage() {
           setContinueWatching({ lessonId: continueWatchingData.lessonId });
         }
 
-        const [mat, mr, cert] = await Promise.all([
+        const [mat, mr, cert, myEnrollments] = await Promise.all([
           courseExtrasService.getMaterials(courseId).catch(() => [] as CourseMaterialDto[]),
           courseExtrasService.getMeetingTimeRatingSummaries(courseId).catch(
             () => [] as MeetingTimeRatingSummaryDto[],
           ),
           courseExtrasService.getCertificate(courseId).catch(() => null),
+          enrollmentService.getMyEnrollments({ pageSize: 500 }).catch(() => null),
         ]);
         setMaterials(mat);
         setMeetingRatings(mr);
         setCertificateInfo(cert);
+        const currentEnrollment = myEnrollments?.items.find((e) => e.courseId === courseId);
+        setCurrentEnrollmentStartedAt(currentEnrollment?.enrolledAt ? new Date(currentEnrollment.enrolledAt) : null);
       } catch (error) {
         toast.error(t('student:courseLessons.errors.loadFailed'), {
           description: error instanceof Error ? error.message : t('student:courseLessons.errors.tryLater'),
@@ -373,9 +378,15 @@ export function CourseLessonsPage() {
         startMinutes: row.startMinutes,
         endMinutes: row.endMinutes,
       };
-      const lastEnd = getLastPastSessionEnd(meta, now);
-      if (!lastEnd) continue;
-      const lastEndMs = lastEnd.getTime();
+      const lastSessionWindow = getLastPastSessionWindow(meta, now);
+      if (!lastSessionWindow) continue;
+      if (
+        !currentEnrollmentStartedAt ||
+        currentEnrollmentStartedAt.getTime() > lastSessionWindow.start.getTime()
+      ) {
+        continue;
+      }
+      const lastEndMs = lastSessionWindow.end.getTime();
       if (isMeetingDismissedForOccurrence(row.sectionMeetingTimeId, lastEndMs)) continue;
       const sessionTitle = `${row.sectionName} — ${formatMeetingSlot(row.day, row.startMinutes, row.endMinutes)}`;
       setPendingLiveRating({
@@ -387,7 +398,7 @@ export function CourseLessonsPage() {
       return;
     }
     setPendingLiveRating(null);
-  }, [course, courseId, loading, meetingRatings, liveRatingSearchKey]);
+  }, [course, courseId, currentEnrollmentStartedAt, loading, meetingRatings, liveRatingSearchKey]);
 
   const refreshMeetingRatings = async () => {
     if (!courseId) return;
@@ -760,7 +771,7 @@ export function CourseLessonsPage() {
                       key={m.id}
                       type="button"
                       className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors text-start group"
-                      onClick={() => window.open(resolvePublicFileUrl(m.fileUrl), '_blank', 'noopener,noreferrer')}
+                      onClick={() => fileService.openProtectedFile(resolvePublicFileUrl(m.fileUrl)).catch(() => undefined)}
                     >
                       <FileText className="h-4 w-4 text-muted-foreground group-hover:text-primary shrink-0" />
                       <div className="flex-1 min-w-0">
@@ -838,4 +849,3 @@ export function CourseLessonsPage() {
     </div>
   );
 }
-

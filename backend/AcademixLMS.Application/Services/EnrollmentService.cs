@@ -199,6 +199,27 @@ public class EnrollmentService : IEnrollmentService
                 return Result<EnrollmentDto>.Failure(_localizer["CourseArchived"]);
             }
 
+            if (course.IsOrgExclusive)
+            {
+                if (!course.OrganizationId.HasValue)
+                {
+                    return Result<EnrollmentDto>.Failure("This course is not available for public enrollment.");
+                }
+
+                var isOrgMember = await _context.OrganizationMembers.AnyAsync(
+                    m => m.OrganizationId == course.OrganizationId.Value &&
+                         m.UserId == userId &&
+                         m.IsActive &&
+                         m.InviteAcceptedAt != null &&
+                         !m.IsDeleted,
+                    cancellationToken);
+
+                if (!isOrgMember)
+                {
+                    return Result<EnrollmentDto>.Failure("This course is only available to members of its organization.");
+                }
+            }
+
             // Business Rule 4: Validate section exists and belongs to course
             var section = await _context.CourseSections
                 .FirstOrDefaultAsync(s => s.Id == request.SectionId && s.CourseId == request.CourseId && !s.IsDeleted, cancellationToken);
@@ -524,6 +545,18 @@ public class EnrollmentService : IEnrollmentService
         return Result<bool>.Success(existingEnrollment);
     }
 
+    public async Task<Result<bool>> HasActiveEnrollmentAsync(Guid userId, Guid courseId, CancellationToken cancellationToken = default)
+    {
+        var hasAccess = await _context.Enrollments.AnyAsync(
+            e => e.UserId == userId &&
+                 e.CourseId == courseId &&
+                 !e.IsDeleted &&
+                 (e.Status == EnrollmentStatus.Active || e.Status == EnrollmentStatus.Completed),
+            cancellationToken);
+
+        return Result<bool>.Success(hasAccess);
+    }
+
     public async Task<Result<bool>> VerifyCourseInstructorAsync(Guid courseId, Guid userId, CancellationToken cancellationToken = default)
     {
         var course = await _context.Courses
@@ -606,7 +639,7 @@ public class EnrollmentService : IEnrollmentService
         };
     }
 
-    public async Task<Result> EnrollAfterPaymentAsync(Guid userId, Guid courseId, Guid paymentId, CancellationToken cancellationToken = default)
+    public async Task<Result> EnrollAfterPaymentAsync(Guid userId, Guid courseId, Guid paymentId, Guid? sectionId = null, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -620,7 +653,7 @@ public class EnrollmentService : IEnrollmentService
                 return Result.Success();
             }
 
-            // Get the course with its first section
+            // Get the course with its sections
             var course = await _context.Courses
                 .Include(c => c.Sections)
                 .FirstOrDefaultAsync(c => c.Id == courseId && !c.IsDeleted, cancellationToken);
@@ -628,15 +661,17 @@ public class EnrollmentService : IEnrollmentService
             if (course == null)
                 return Result.Failure(_localizer["CourseNotFound"]);
 
-            var firstSection = course.Sections?.OrderBy(s => s.Name).FirstOrDefault();
-            if (firstSection == null)
+            // Prefer the section chosen at checkout (must belong to the course, be active
+            // and have seats); otherwise fall back to the first active non-full section.
+            var targetSection = await ResolveSectionForPostPaymentEnrollmentAsync(course, sectionId, cancellationToken);
+            if (targetSection == null)
                 return Result.Failure(_localizer["NoSectionsForEnrollment"]);
 
             var enrollment = new Enrollment
             {
                 UserId = userId,
                 CourseId = courseId,
-                SectionId = firstSection.Id,
+                SectionId = targetSection.Id,
                 EnrolledAt = DateTime.UtcNow,
                 Status = EnrollmentStatus.Active,
                 ProgressPercentage = 0
@@ -645,7 +680,21 @@ public class EnrollmentService : IEnrollmentService
             _context.Enrollments.Add(enrollment);
             await _context.SaveChangesAsync(cancellationToken);
 
-            _logger.LogInformation("Auto-enrolled user {UserId} in course {CourseId} after payment {PaymentId}", userId, courseId, paymentId);
+            // Keep section seats remaining in sync (same bookkeeping as EnrollAsync)
+            if (targetSection.MaxSeats > 0)
+            {
+                var activeEnrollmentsCount = await _context.Enrollments
+                    .CountAsync(e =>
+                        e.SectionId == targetSection.Id &&
+                        !e.IsDeleted &&
+                        (e.Status == EnrollmentStatus.Active || e.Status == EnrollmentStatus.Completed),
+                        cancellationToken);
+
+                targetSection.SeatsRemaining = Math.Max(0, targetSection.MaxSeats - activeEnrollmentsCount);
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+
+            _logger.LogInformation("Auto-enrolled user {UserId} in course {CourseId}, section {SectionId} after payment {PaymentId}", userId, courseId, targetSection.Id, paymentId);
             return Result.Success();
         }
         catch (Exception ex)
@@ -653,6 +702,49 @@ public class EnrollmentService : IEnrollmentService
             _logger.LogError(ex, "Failed to auto-enroll user {UserId} in course {CourseId} after payment {PaymentId}", userId, courseId, paymentId);
             return Result.Failure($"Auto-enrollment failed: {ex.Message}");
         }
+    }
+
+    /// <summary>
+    /// Picks the section to enroll into after a completed payment: the requested section when it
+    /// belongs to the course, is active and has free seats; otherwise the first active non-full
+    /// section (ordered by name). Returns null when no section can take the student.
+    /// </summary>
+    private async Task<CourseSection?> ResolveSectionForPostPaymentEnrollmentAsync(Course course, Guid? preferredSectionId, CancellationToken cancellationToken)
+    {
+        var candidates = (course.Sections ?? new List<CourseSection>())
+            .Where(s => !s.IsDeleted && s.IsActive)
+            .OrderBy(s => s.Name)
+            .ToList();
+
+        if (preferredSectionId.HasValue)
+        {
+            var preferred = candidates.FirstOrDefault(s => s.Id == preferredSectionId.Value);
+            if (preferred != null && await SectionHasFreeSeatAsync(preferred, cancellationToken))
+                return preferred;
+        }
+
+        foreach (var section in candidates)
+        {
+            if (await SectionHasFreeSeatAsync(section, cancellationToken))
+                return section;
+        }
+
+        return null;
+    }
+
+    private async Task<bool> SectionHasFreeSeatAsync(CourseSection section, CancellationToken cancellationToken)
+    {
+        if (section.MaxSeats <= 0)
+            return true; // unlimited seats
+
+        var activeEnrollmentsCount = await _context.Enrollments
+            .CountAsync(e =>
+                e.SectionId == section.Id &&
+                !e.IsDeleted &&
+                (e.Status == EnrollmentStatus.Active || e.Status == EnrollmentStatus.Completed),
+                cancellationToken);
+
+        return activeEnrollmentsCount < section.MaxSeats;
     }
 }
 

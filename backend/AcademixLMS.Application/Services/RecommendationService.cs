@@ -135,7 +135,7 @@ public class RecommendationService : IRecommendationService
                 .Include(c => c.CourseTags)
                     .ThenInclude(ct => ct.Tag)
                 .Include(c => c.Instructor)
-                .FirstOrDefaultAsync(c => c.Id == courseId && !c.IsDeleted, cancellationToken);
+                .FirstOrDefaultAsync(c => c.Id == courseId && !c.IsDeleted && !c.IsOrgExclusive, cancellationToken);
 
             if (sourceCourse == null)
             {
@@ -152,7 +152,7 @@ public class RecommendationService : IRecommendationService
                 .Include(c => c.CourseTags)
                     .ThenInclude(ct => ct.Tag)
                 .Include(c => c.Instructor)
-                .Where(c => !c.IsDeleted && c.Status == CourseStatus.Published && c.Id != courseId)
+                .Where(c => !c.IsDeleted && !c.IsOrgExclusive && c.Status == CourseStatus.Published && c.Id != courseId)
                 .ToListAsync(cancellationToken);
 
             // Calculate similarity scores
@@ -240,7 +240,7 @@ public class RecommendationService : IRecommendationService
                 .Include(c => c.CourseTags)
                     .ThenInclude(ct => ct.Tag)
                 .Include(c => c.Instructor)
-                .Where(c => trendingCourseIds.Contains(c.Id) && !c.IsDeleted && c.Status == CourseStatus.Published)
+                .Where(c => trendingCourseIds.Contains(c.Id) && !c.IsDeleted && !c.IsOrgExclusive && c.Status == CourseStatus.Published)
                 .ToListAsync(cancellationToken);
 
             var recommendations = trendingData
@@ -302,6 +302,7 @@ public class RecommendationService : IRecommendationService
                 .Where(c => userInstructorIds.Contains(c.InstructorId)
                     && !enrolledCourseIds.Contains(c.Id)
                     && !c.IsDeleted
+                    && !c.IsOrgExclusive
                     && c.Status == CourseStatus.Published)
                 .OrderByDescending(c => c.Rating)
                 .ThenByDescending(c => c.CreatedAt)
@@ -363,6 +364,7 @@ public class RecommendationService : IRecommendationService
                 .Where(c => categoryCounts.Contains(c.Category)
                     && !enrolledCourseIds.Contains(c.Id)
                     && !c.IsDeleted
+                    && !c.IsOrgExclusive
                     && c.Status == CourseStatus.Published
                     && c.CreatedAt >= thirtyDaysAgo)
                 .OrderByDescending(c => c.CreatedAt)
@@ -462,7 +464,7 @@ public class RecommendationService : IRecommendationService
                 .Include(c => c.CourseTags)
                     .ThenInclude(ct => ct.Tag)
                 .Include(c => c.Instructor)
-                .Where(c => !c.IsDeleted && c.Status == CourseStatus.Published)
+                .Where(c => !c.IsDeleted && !c.IsOrgExclusive && c.Status == CourseStatus.Published)
                 .OrderByDescending(c => c.Rating)
                 .ThenByDescending(c => c.RatingCount)
                 .Take(limit)
@@ -514,6 +516,7 @@ public class RecommendationService : IRecommendationService
                 .ThenInclude(ct => ct.Tag)
             .Include(c => c.Instructor)
             .Where(c => !c.IsDeleted
+                && !c.IsOrgExclusive
                 && c.Status == CourseStatus.Published
                 && !enrolledCourseIds.Contains(c.Id))
             .ToListAsync(cancellationToken);
@@ -655,7 +658,8 @@ public class RecommendationService : IRecommendationService
             .Where(e => similarUserIds.Contains(e.UserId)
                 && !enrolledCourseIds.Contains(e.CourseId)
                 && !e.IsDeleted
-                && e.Course.Status == CourseStatus.Published)
+                && e.Course.Status == CourseStatus.Published
+                && !e.Course.IsOrgExclusive)
             .GroupBy(e => e.Course)
             .Select(g => new { Course = g.Key, Count = g.Count() })
             .OrderByDescending(x => x.Count)
@@ -714,6 +718,7 @@ public class RecommendationService : IRecommendationService
                 .ThenInclude(ct => ct.Tag)
             .Include(c => c.Instructor)
             .Where(c => !c.IsDeleted
+                && !c.IsOrgExclusive
                 && c.Status == CourseStatus.Published
                 && !enrolledCourseIds.Contains(c.Id))
             .ToListAsync(cancellationToken);

@@ -1,0 +1,10 @@
+{
+  "_readme": "Copy to appsettings.Local.json (gitignored) for machine-local secrets. Loaded last, overrides everything.",
+  "Mailjet": {
+    "ApiKey": "your-mailjet-api-key",
+    "SecretKey": "your-mailjet-secret-key"
+  },
+  "Jwt": {
+    "SecretKey": "generate-a-long-random-secret-for-production"
+  }
+}

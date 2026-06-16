@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { subscriptionService, type SubscriptionDto } from "../../services/subscriptionService";
 import { subscriptionPlanService, type SubscriptionPlanDto } from "../../services/subscriptionPlanService";
 import { paymentService } from "../../services/paymentService";
+import { formatMoney } from "../../lib/money";
 import { useTranslation } from "react-i18next";
 
 export function TeacherSubscriptionPage() {
@@ -27,27 +28,28 @@ export function TeacherSubscriptionPage() {
   const [cancelOpen, setCancelOpen] = useState(false);
   const [billingInterval, setBillingInterval] = useState<"Monthly" | "Yearly">("Monthly");
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const [sub, allPlans] = await Promise.all([
-          subscriptionService.getMySubscription().catch(() => null),
-          subscriptionPlanService.getPlans(),
-        ]);
-        setSubscription(sub);
-        setPlans(allPlans.filter((p: SubscriptionPlanDto) => p.isActive));
-      } catch (error) {
-        console.error("Failed to load subscription data:", error);
-        toast.error(t('teacher:subscription.errors.loadFailed'), {
-          description: error instanceof Error ? error.message : t('teacher:shared.errorOccurred'),
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const [sub, allPlans] = await Promise.all([
+        subscriptionService.getMySubscription().catch(() => null),
+        subscriptionPlanService.getPlans(),
+      ]);
+      setSubscription(sub);
+      setPlans(allPlans.filter((p: SubscriptionPlanDto) => p.isActive));
+    } catch (error) {
+      console.error("Failed to load subscription data:", error);
+      toast.error(t('teacher:subscription.errors.loadFailed'), {
+        description: error instanceof Error ? error.message : t('teacher:shared.errorOccurred'),
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSubscribe = async (planId: string) => {
@@ -58,7 +60,13 @@ export function TeacherSubscriptionPage() {
         planId,
         billingInterval,
       });
-      if (result.authorizationUrl) {
+      if (result.demoCompleted) {
+        // Demo gateway: subscription already activated server-side, no redirect
+        toast.success(t('teacher:subscription.toasts.demoActivated'), {
+          description: t('teacher:subscription.toasts.demoActivatedDescription'),
+        });
+        await fetchData();
+      } else if (result.authorizationUrl) {
         window.location.href = result.authorizationUrl;
       } else {
         toast.error(t('teacher:subscription.errors.startPaymentFailed'), {
@@ -238,7 +246,7 @@ export function TeacherSubscriptionPage() {
                 <CardContent className="space-y-4">
                   <div>
                     <span className="text-3xl font-bold">
-                      ${billingInterval === "Monthly" ? plan.monthlyPrice : plan.yearlyPrice}
+                      {formatMoney(billingInterval === "Monthly" ? plan.monthlyPrice : plan.yearlyPrice)}
                     </span>
                     <span className="text-muted-foreground">
                       /{billingInterval === "Monthly" ? t('teacher:subscription.mo') : t('teacher:subscription.yr')}

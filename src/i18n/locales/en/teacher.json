@@ -246,6 +246,14 @@
     "courseConfiguration": "Course configuration",
     "enrollmentLimit": "Enrollment Limit",
     "noLimit": "No limit",
+    "unlimited": "Unlimited",
+    "currentPlan": "Current plan",
+    "loadingPlan": "Checking plan limits...",
+    "planUnavailable": "Plan limits could not be loaded. The server will still validate this course before saving.",
+    "planSeatsHint": "Seats per course: {{perCourse}}. Total seats left: {{totalLeft}}.",
+    "requestedSeatsHint": "This course is requesting {{count}} seats.",
+    "planCoursesHint": "Courses used: {{used}} / {{max}}. Remaining: {{remaining}}.",
+    "sectionSeatLimitHint": "Plan limit: {{max}} seats per course.",
     "certificateEnabled": "Certificate Enabled",
     "certificateEnabledHint": "Issue certificates upon completion; set text and hours for the certificate layout",
     "certificateSummary": "Certificate summary",
@@ -272,7 +280,11 @@
       "certificateWordLimit": "Certificate summary must be at most {{max}} words",
       "certificateHoursInvalid": "Certificate hours must be a valid non-negative number",
       "maxTags": "Maximum 5 tags allowed",
-      "saveFailed": "Failed to save course"
+      "saveFailed": "Failed to save course",
+      "noActivePlan": "An active plan is required before creating courses.",
+      "coursePlanLimit": "The {{plan}} plan allows {{max}} courses. Upgrade or archive a course before creating another.",
+      "seatsPerCourseLimit": "The {{plan}} plan allows {{max}} seats per course. Lower the section capacity or upgrade.",
+      "totalSeatLimit": "The {{plan}} plan has {{remaining}} seats left across all courses. Lower the requested seats or upgrade."
     }
   },
   "editCoursePage": {
@@ -668,7 +680,9 @@
     "yr": "yr",
     "noPlans": "No subscription plans available at this time.",
     "toasts": {
-      "cancelled": "Subscription cancelled"
+      "cancelled": "Subscription cancelled",
+      "demoActivated": "Subscription activated!",
+      "demoActivatedDescription": "Demo payment recorded — your plan is now active."
     },
     "errors": {
       "loadFailed": "Failed to load subscription data",
@@ -987,11 +1001,17 @@
   },
   "visibility": {
     "title": "Who can see this course",
+    "subtitle": "Choose the discovery path and billing owner before students see it.",
     "publicTitle": "Public catalog",
-    "publicDescription": "Anyone on AcademiX can discover and enroll.",
-    "underOrgTitle": "Under {{org}}",
-    "underOrgDescription": "Listed in the public catalog, but branded and split under the org.",
-    "exclusiveToggle": "Make it exclusive to {{org}} — hidden from the public catalog."
+    "publicDescription": "Any student browsing AcademiX can find it. Capacity uses the teacher plan.",
+    "underOrgTitle": "{{org}} + public catalog",
+    "underOrgDescription": "Public students and {{org}} students can find it. Capacity and revenue belong to the academy.",
+    "exclusiveTitle": "{{org}} students only",
+    "exclusiveDescription": "Only students inside {{org}} can see or enroll. It is hidden from the public catalog.",
+    "currentLabel": "Current visibility:",
+    "currentPublic": "Public catalog, teacher-owned.",
+    "currentUnderOrgPublic": "{{org}} owned, still visible in the public catalog.",
+    "currentExclusive": "{{org}} owned and visible only inside the academy."
   },
   "earnings": {
     "title": "My earnings",

@@ -8,6 +8,37 @@ using AspNetCoreRateLimit;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Machine-local secrets (gitignored). Loaded after the standard appsettings files so it
+// overrides them; environment variables still take precedence over everything.
+builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
+builder.Configuration.AddEnvironmentVariables();
+
+// Cloud hosting (e.g. Render/Heroku) provides Postgres as a DATABASE_URL in URI form.
+// Npgsql needs keyword form, so translate it into ConnectionStrings:DefaultConnection
+// before any service (DbContext) reads the connection string.
+var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+if (!string.IsNullOrWhiteSpace(databaseUrl))
+{
+    var uri = new Uri(databaseUrl);
+    var userInfo = uri.UserInfo.Split(':', 2);
+    var npgsql =
+        $"Host={uri.Host};Port={(uri.Port > 0 ? uri.Port : 5432)};" +
+        $"Database={uri.AbsolutePath.TrimStart('/')};" +
+        $"Username={Uri.UnescapeDataString(userInfo[0])};" +
+        $"Password={Uri.UnescapeDataString(userInfo.Length > 1 ? userInfo[1] : string.Empty)};" +
+        "SSL Mode=Require;Trust Server Certificate=true";
+    builder.Configuration["ConnectionStrings:DefaultConnection"] = npgsql;
+}
+
+// On Render the public URL is injected as RENDER_EXTERNAL_URL. Use it for email
+// links and payment callbacks so they point at the live site instead of localhost.
+var externalUrl = Environment.GetEnvironmentVariable("RENDER_EXTERNAL_URL");
+if (!string.IsNullOrWhiteSpace(externalUrl))
+{
+    builder.Configuration["App:FrontendBaseUrl"] = externalUrl;
+    builder.Configuration["Lahza:CallbackBaseUrl"] = externalUrl;
+}
+
 // Configure Serilog
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
@@ -90,6 +121,11 @@ app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 // Rate Limiting (before other middleware)
 app.UseIpRateLimiting();
 
+// Serve the built React SPA (copied into wwwroot during the Docker build).
+// Static assets are public and must be served before auth.
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
 // HTTPS Redirection - DISABLED in development to prevent CORS issues
 // app.UseHttpsRedirection();
 
@@ -120,6 +156,10 @@ app.MapHub<AcademixLMS.API.Hubs.MessagingHub>("/hubs/messaging");
 
 // Controllers
 app.MapControllers();
+
+// SPA fallback: any non-API, non-hub, non-health route returns index.html so
+// client-side routing (e.g. /reset-password) works on a hard refresh.
+app.MapFallbackToFile("index.html");
 
 // Migrate database and seed initial data
 await app.MigrateDatabaseAsync();

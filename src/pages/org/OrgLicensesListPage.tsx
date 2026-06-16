@@ -131,7 +131,7 @@ export function OrgLicensesListPage() {
                         {t(`org:licenses.status.${l.status}`)}
                       </div>
                     </div>
-                    <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition" />
+                    <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition rtl:rotate-180" />
                   </div>
 
                   <div className="mt-4 space-y-2">
@@ -148,7 +148,7 @@ export function OrgLicensesListPage() {
                       />
                     </div>
                     <div className="flex items-center justify-between text-xs text-muted-foreground pt-1">
-                      <span>{formatMoney(l.pricePerSeat, l.currency)} / seat</span>
+                      <span>{t('org:licenses.perSeat', { defaultValue: '{{price}} / seat', price: formatMoney(l.pricePerSeat, l.currency) })}</span>
                       <span>{formatDate(l.validUntil)}</span>
                     </div>
                   </div>

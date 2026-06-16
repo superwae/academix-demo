@@ -189,7 +189,10 @@
       "failedLoadCourse": "Failed to load course"
     },
     "discountSaved": "You saved ${{amount}}",
-    "discountAppliedTitle": "Discount applied"
+    "discountAppliedTitle": "Discount applied",
+    "demoEnrolledTitle": "Enrolled successfully!",
+    "demoEnrolledBody": "Demo payment recorded — you are now enrolled in this course.",
+    "sectionLabel": "Section"
   },
   "paymentCallback": {
     "verifying": "Verifying your payment...",

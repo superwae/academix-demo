@@ -84,7 +84,7 @@ const ADMIN_NAV_SECTIONS: NavSection[] = [
     items: [
       { to: "/admin/users", labelKey: "nav:users", icon: Users },
       { to: "/admin/messages", labelKey: "nav:messages", icon: MessageSquare },
-      { to: "/admin/courses", labelKey: "nav:courses", icon: BookOpen, badge: 3 },
+      { to: "/admin/courses", labelKey: "nav:courses", icon: BookOpen },
     ],
   },
   {
@@ -151,7 +151,7 @@ export function AdminLayout() {
   }, [theme, customThemeColor, mixTheme]);
 
   return (
-    <div className="relative min-h-dvh bg-background text-foreground">
+    <div data-admin-shell className="relative min-h-dvh bg-background text-foreground">
       <AnimatedBackground />
 
       <header
@@ -346,7 +346,7 @@ export function AdminLayout() {
               variant="outline"
               size="icon"
               onClick={toggleDarkMode}
-              className="h-9 w-9"
+              className="hidden h-9 w-9 sm:inline-flex"
               title={isDarkMode ? t('common:switchToLightMode') : t('common:switchToDarkMode')}
             >
               {isDarkMode ? (
@@ -363,7 +363,9 @@ export function AdminLayout() {
             <OrgSwitcher />
 
             {/* Contact support */}
-            <HelpButton />
+            <div className="hidden lg:block">
+              <HelpButton />
+            </div>
 
             <NotificationBell />
 
@@ -456,24 +458,24 @@ export function AdminLayout() {
         </DialogContent>
       </Dialog>
 
-      <div className="mx-auto grid max-w-[1920px] grid-cols-1 gap-4 px-3 py-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:gap-6 sm:px-6 sm:py-6 lg:grid-cols-[260px_1fr] lg:gap-6 lg:px-6 lg:py-6">
-        <aside className="hidden lg:block" role="complementary" aria-label="Navigation sidebar">
+      <div className="admin-shell-frame mx-auto flex max-w-[1920px] flex-col gap-4 px-3 py-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:gap-6 sm:px-6 sm:py-6 lg:flex-row lg:gap-6 lg:px-6 lg:py-6">
+        <aside className="admin-shell-sidebar hidden w-[280px] shrink-0 lg:block" role="complementary" aria-label="Navigation sidebar">
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
             transition={{ duration: 0.3 }}
-            className="sticky top-[5.5rem] glass-strong rounded-2xl border border-border/60 p-3 shadow-xl max-h-[calc(100vh-6.5rem)] overflow-y-auto"
+            className="sticky top-[5.5rem] max-h-[calc(100vh-6.5rem)] overflow-y-auto rounded-xl border border-border/60 bg-card/95 p-3 shadow-xl shadow-primary/5"
           >
             <AdminNavList unreadMessages={unreadMessages} />
           </motion.div>
         </aside>
 
-        <main id="main-content" className="min-w-0" role="main" tabIndex={-1}>
+        <main id="main-content" className="admin-shell-main min-w-0 flex-1 overflow-x-hidden" role="main" tabIndex={-1}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="min-w-0 rounded-2xl border border-border/60 bg-card p-4 shadow-xl sm:p-6 md:p-8"
+            className="min-w-0"
           >
             <Outlet />
           </motion.div>
@@ -490,7 +492,7 @@ function AdminNavList({
   onNavigate?: () => void;
   unreadMessages?: number;
 }) {
-  const { t } = useTranslation(['nav']);
+  const { t } = useTranslation(['nav', 'support']);
   return (
     <nav className="flex flex-col gap-4" aria-label="Main navigation">
       {ADMIN_NAV_SECTIONS.map((section) => (
@@ -509,16 +511,22 @@ function AdminNavList({
                 onClick={onNavigate}
                 className={({ isActive }) =>
                   cn(
-                    "group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 min-h-[40px]",
+                    "group relative flex min-h-[42px] items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
                     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
                     isActive
-                      ? "bg-primary/10 text-primary border border-primary/20"
-                      : "text-foreground/70 hover:text-foreground hover:bg-muted/50"
+                      ? "border border-primary/25 bg-primary/10 text-primary shadow-sm shadow-primary/10"
+                      : "text-foreground/70 hover:bg-muted/60 hover:text-foreground"
                   )
                 }
               >
                 {({ isActive }) => (
                   <>
+                    <span
+                      className={cn(
+                        "absolute inset-y-2 start-0 w-1 rounded-e-full bg-primary opacity-0 transition-opacity",
+                        isActive && "opacity-100"
+                      )}
+                    />
                     <item.icon
                       className={cn(
                         "h-4 w-4 shrink-0 transition-colors",

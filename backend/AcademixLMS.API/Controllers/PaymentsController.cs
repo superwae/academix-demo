@@ -45,7 +45,7 @@ public class PaymentsController : ControllerBase
     public async Task<IActionResult> InitializeCoursePayment([FromBody] InitializePaymentRequest request, CancellationToken cancellationToken)
     {
         var userId = User.GetRequiredUserId();
-        var result = await _paymentService.InitializeCoursePaymentAsync(userId, request.CourseId, request.DiscountCode, cancellationToken);
+        var result = await _paymentService.InitializeCoursePaymentAsync(userId, request.CourseId, request.DiscountCode, request.SectionId, cancellationToken);
 
         if (!result.IsSuccess || result.Value == null)
             return BadRequest(result.Error);
@@ -82,7 +82,9 @@ public class PaymentsController : ControllerBase
     public async Task<IActionResult> VerifyPayment(string reference, CancellationToken cancellationToken)
     {
         var userId = User.GetRequiredUserId();
-        var result = await _paymentService.VerifyPaymentAsync(reference, cancellationToken);
+        // Scoped to the caller: the service returns "not found" when the payment
+        // belongs to another user, so references cannot be replayed for free enrollment.
+        var result = await _paymentService.VerifyPaymentAsync(reference, userId, cancellationToken);
 
         if (!result.IsSuccess || result.Value == null)
         {
@@ -91,10 +93,14 @@ public class PaymentsController : ControllerBase
             return BadRequest(result.Error);
         }
 
+        // Defense in depth: never act on (or return) a payment owned by someone else.
+        if (result.Value.UserId != userId)
+            return NotFound();
+
         // Auto-enroll student in the course on successful payment
         if (result.Value.Status == "Completed" && result.Value.CourseId.HasValue)
         {
-            var enrollResult = await _enrollmentService.EnrollAfterPaymentAsync(userId, result.Value.CourseId.Value, result.Value.Id, cancellationToken);
+            var enrollResult = await _enrollmentService.EnrollAfterPaymentAsync(userId, result.Value.CourseId.Value, result.Value.Id, result.Value.SectionId, cancellationToken);
             if (!enrollResult.IsSuccess)
             {
                 _logger.LogWarning("Auto-enrollment failed for user {UserId} in course {CourseId} after payment {Reference}: {Error}",
@@ -111,30 +117,45 @@ public class PaymentsController : ControllerBase
     [HttpPost("webhook")]
     [AllowAnonymous]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Webhook(CancellationToken cancellationToken)
     {
         // Read the request body
         using var reader = new StreamReader(Request.Body);
         var body = await reader.ReadToEndAsync(cancellationToken);
 
-        // Verify the Lahza signature
+        // Verify the Lahza signature. Prefer the dedicated webhook secret; fall back to
+        // the API secret key when no webhook secret is configured.
         var signature = Request.Headers["x-lahza-signature"].FirstOrDefault();
-        var secretKey = _configuration["Lahza:SecretKey"] ?? "";
+        var secretKey = _configuration["Lahza:WebhookSecret"];
+        if (string.IsNullOrWhiteSpace(secretKey))
+            secretKey = _configuration["Lahza:SecretKey"] ?? "";
 
         if (string.IsNullOrEmpty(signature))
         {
             _logger.LogWarning("Webhook received without signature header");
-            return Ok(); // Return 200 to prevent retries
+            return Unauthorized();
         }
 
         using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(secretKey));
         var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(body));
-        var computedSignature = BitConverter.ToString(computedHash).Replace("-", "").ToLowerInvariant();
 
-        if (!string.Equals(signature, computedSignature, StringComparison.OrdinalIgnoreCase))
+        byte[] providedHash;
+        try
+        {
+            providedHash = Convert.FromHexString(signature);
+        }
+        catch (FormatException)
+        {
+            _logger.LogWarning("Webhook signature header is not valid hex");
+            return Unauthorized();
+        }
+
+        // Constant-time comparison to prevent timing attacks
+        if (!CryptographicOperations.FixedTimeEquals(computedHash, providedHash))
         {
             _logger.LogWarning("Webhook signature verification failed");
-            return Ok(); // Return 200 to prevent retries
+            return Unauthorized();
         }
 
         // Process the webhook event
@@ -166,10 +187,10 @@ public class PaymentsController : ControllerBase
     }
 
     /// <summary>
-    /// Get all payments (admin)
+    /// Get all payments (admin + accountant)
     /// </summary>
     [HttpGet]
-    [Authorize(Policy = "RequireAdmin")]
+    [Authorize(Policy = "RequireFinance")]
     [ProducesResponseType(typeof(PagedResult<PaymentListDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllPayments([FromQuery] PagedRequest pagedRequest, [FromQuery] PaymentFilterRequest? filters, CancellationToken cancellationToken)
     {
@@ -182,13 +203,14 @@ public class PaymentsController : ControllerBase
     }
 
     /// <summary>
-    /// Get payment dashboard summary stats (admin)
+    /// Get payment dashboard summary stats (admin + accountant)
     /// </summary>
     [HttpGet("summary")]
-    [Authorize(Policy = "RequireAdmin")]
+    [Authorize(Policy = "RequireFinance")]
     [ProducesResponseType(typeof(PaymentSummaryDto), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetPaymentSummary(CancellationToken cancellationToken)
     {
+        // Summary powers the admin finance overview KPIs.
         var result = await _paymentService.GetPaymentSummaryAsync(cancellationToken);
 
         if (!result.IsSuccess)

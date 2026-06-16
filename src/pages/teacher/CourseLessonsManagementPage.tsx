@@ -320,17 +320,17 @@ export function CourseLessonsManagementPage() {
       className="space-y-3"
     >
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => navigate('/teacher/courses')}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <div>
+          <div className="min-w-0">
             <h1 className="text-3xl font-bold tracking-tight gradient-text">{t('teacher:courseLessonsManagement.pageTitle')}</h1>
-            <p className="mt-1 text-sm text-muted-foreground">{course.title}</p>
+            <p className="mt-1 truncate text-sm text-muted-foreground">{course.title}</p>
           </div>
         </div>
-        <Button onClick={handleAddLesson} disabled={!selectedSection || loading}>
+        <Button className="w-full sm:w-auto" onClick={handleAddLesson} disabled={!selectedSection || loading}>
           <PlusCircle className="h-4 w-4 me-2" />
           {t('teacher:courseLessonsManagement.addLesson')}
         </Button>
@@ -401,7 +401,7 @@ export function CourseLessonsManagementPage() {
               {materials.map((m) => (
                 <div
                   key={m.id}
-                  className="flex items-center justify-between gap-2 p-2 rounded-md border text-sm"
+                  className="flex flex-col gap-2 p-2 rounded-md border text-sm sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div className="min-w-0">
                     <div className="font-medium truncate">{m.title}</div>
@@ -519,13 +519,13 @@ export function CourseLessonsManagementPage() {
               {filteredLessons.map((lesson) => (
                 <div
                   key={lesson.id}
-                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50"
+                  className="flex flex-col gap-3 p-3 border rounded-lg hover:bg-muted/50 sm:flex-row sm:items-center sm:justify-between"
                 >
-                  <div className="flex items-center gap-3 flex-1">
-                    <Video className="h-5 w-5 text-primary" />
-                    <div className="flex-1">
-                      <div className="font-medium">{lesson.title}</div>
-                      <div className="text-sm text-muted-foreground flex items-center gap-2">
+                  <div className="flex min-w-0 items-center gap-3 flex-1">
+                    <Video className="h-5 w-5 shrink-0 text-primary" />
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate font-medium">{lesson.title}</div>
+                      <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                         <Clock className="h-3 w-3" />
                         {t('teacher:courseLessonsManagement.minutes', { count: lesson.durationMinutes || 0 })}
                         {lesson.isPreview && (
@@ -534,7 +534,7 @@ export function CourseLessonsManagementPage() {
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex shrink-0 items-center justify-end gap-2">
                     <Button
                       variant="ghost"
                       size="icon"
@@ -571,7 +571,7 @@ export function CourseLessonsManagementPage() {
 
       {/* Edit Lesson Dialog */}
       <Dialog open={!!editingLesson} onOpenChange={(open) => !open && setEditingLesson(null)}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-4xl">
           <DialogHeader>
             <DialogTitle>{t('teacher:courseLessonsManagement.editLesson')}</DialogTitle>
             <DialogDescription>{t('teacher:courseLessonsManagement.updateLessonDetails')}</DialogDescription>
@@ -610,7 +610,7 @@ export function CourseLessonsManagementPage() {
                   {t('teacher:courseLessonsManagement.videoUrlHint')}
                 </p>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium">{t('teacher:courseLessonsManagement.durationRequired')}</label>
                   <Input

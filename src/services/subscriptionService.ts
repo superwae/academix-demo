@@ -15,9 +15,22 @@ export interface SubscriptionDto {
 }
 
 export interface CanCreateCourseResponse {
-  allowed: boolean;
+  hasActiveSubscription: boolean;
+  planName?: string;
+  maxCourses?: number;
+  currentCourseCount: number;
+  canCreateCourse: boolean;
+  remainingCourses?: number;
+  maxSeatsPerCourse?: number;
+  maxTotalSeats?: number;
+  currentTotalSeats?: number;
+  remainingTotalSeats?: number;
+  /** @deprecated use canCreateCourse */
+  allowed?: boolean;
   reason?: string;
-  currentCount: number;
+  /** @deprecated use currentCourseCount */
+  currentCount?: number;
+  /** @deprecated use maxCourses */
   maxAllowed?: number;
 }
 
@@ -41,9 +54,15 @@ class SubscriptionService {
     }
   }
 
-  async canCreateCourse(): Promise<CanCreateCourseResponse> {
+  async canCreateCourse(options: { organizationId?: string | null; personal?: boolean } = {}): Promise<CanCreateCourseResponse> {
     try {
-      const response = await apiClient.get<CanCreateCourseResponse>('/subscriptions/me/can-create-course');
+      const params = new URLSearchParams();
+      if (options.organizationId) params.set('organizationId', options.organizationId);
+      if (options.personal) params.set('personal', 'true');
+      const query = params.toString();
+      const response = await apiClient.get<CanCreateCourseResponse>(
+        `/subscriptions/me/can-create-course${query ? `?${query}` : ''}`
+      );
       return response;
     } catch (error) {
       const apiError = error as ApiError;

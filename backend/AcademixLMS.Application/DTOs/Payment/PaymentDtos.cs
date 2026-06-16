@@ -18,6 +18,8 @@ public class PaymentDto
     public DateTime? PaidAt { get; set; }
     public Guid? CourseId { get; set; }
     public string? CourseTitle { get; set; }
+    /// <summary>Section the buyer chose at checkout (carried through gateway metadata), if any.</summary>
+    public Guid? SectionId { get; set; }
     public Guid? SubscriptionId { get; set; }
     public Guid? DiscountId { get; set; }
     public long? OriginalAmount { get; set; }
@@ -31,6 +33,8 @@ public class InitializePaymentRequest
 {
     public Guid CourseId { get; set; }
     public string? DiscountCode { get; set; }
+    /// <summary>Optional section to enroll into once payment completes. Falls back to the first active non-full section.</summary>
+    public Guid? SectionId { get; set; }
 }
 
 /// <summary>
@@ -50,6 +54,8 @@ public class InitializePaymentResponse
     public Guid PaymentId { get; set; }
     public string AuthorizationUrl { get; set; } = string.Empty;
     public string Reference { get; set; } = string.Empty;
+    /// <summary>True when Payments:DemoMode completed the payment instantly (no gateway redirect; AuthorizationUrl is empty).</summary>
+    public bool DemoCompleted { get; set; }
 }
 
 /// <summary>

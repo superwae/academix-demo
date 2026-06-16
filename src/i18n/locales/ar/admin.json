@@ -661,7 +661,9 @@
       "confirmLabel": "إلغاء الاشتراك"
     },
     "toasts": {
-      "cancelled": "تمّ إلغاء الاشتراك"
+      "cancelled": "تمّ إلغاء الاشتراك",
+      "demoActivated": "تم تفعيل الاشتراك!",
+      "demoActivatedDescription": "تم تسجيل دفعة تجريبية — الخطة مفعّلة الآن."
     },
     "errors": {
       "loadFailed": "تعذّر تحميل بيانات الاشتراك",
@@ -751,7 +753,12 @@
         "viewAllPurchases": "عرض جميع المشتريات",
         "viewRefundHistory": "عرض سجل المبالغ المستردّة",
         "viewRevenueBreakdown": "عرض تفصيل الإيرادات",
-        "instructorsAwaiting": "{{count}} مدرّبين في انتظار الدفع"
+        "instructorsAwaiting": "{{count}} مدرّبين في انتظار الدفع",
+        "revenueThisMonth": "إيرادات هذا الشهر",
+        "completedPayments": "المدفوعات المكتملة",
+        "ofTotalPayments": "من أصل {{count}}",
+        "pendingFailed": "معلّقة / فاشلة",
+        "needsAttention": "قد تحتاج إلى متابعة"
       },
       "charts": {
         "revenueTrend": "اتجاه الإيرادات",
@@ -1067,7 +1074,8 @@
           "refundReason": "سبب الاسترداد",
           "failureReason": "سبب الفشل"
         }
-      }
+      },
+      "subscriptionItem": "اشتراك"
     },
     "components": {
       "dataTable": {
@@ -1089,7 +1097,8 @@
         "all": "الكل"
       },
       "kpiStatCard": {}
-    }
+    },
+    "noTransactions": "لا توجد معاملات بعد."
   },
   "accountant": {
     "dashboard": {

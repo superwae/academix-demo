@@ -55,7 +55,12 @@ public class JwtService : IJwtService
 
     public string GenerateRefreshToken()
     {
-        return Guid.NewGuid().ToString();
+        // 512-bit CSPRNG token — refresh tokens are long-lived bearer credentials.
+        var bytes = System.Security.Cryptography.RandomNumberGenerator.GetBytes(64);
+        return Convert.ToBase64String(bytes)
+            .Replace('+', '-')
+            .Replace('/', '_')
+            .TrimEnd('=');
     }
 
     public ClaimsPrincipal? GetPrincipalFromExpiredToken(string token)
@@ -65,8 +70,10 @@ public class JwtService : IJwtService
 
         var tokenValidationParameters = new TokenValidationParameters
         {
-            ValidateAudience = false,
-            ValidateIssuer = false,
+            ValidateAudience = true,
+            ValidAudience = jwtSettings["Audience"],
+            ValidateIssuer = true,
+            ValidIssuer = jwtSettings["Issuer"],
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
             ValidateLifetime = false // We want to validate expired tokens

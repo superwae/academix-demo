@@ -66,7 +66,8 @@ export function RoleGuard({ allowedRole, children }: RoleGuardProps) {
     r.toLowerCase() === 'admin' || r.toLowerCase() === 'superadmin'
   )
   
-  // Pick highest-privilege role so multi-role users (e.g. Student + Admin) are not treated as Student only.
+  // Pick highest-privilege role so multi-role users (e.g. Student + Accountant) are not treated
+  // as Student only. Staff roles always win over Student — check Student LAST.
   const normalizedUserRole = (() => {
     const lower = userRoles.map((r) => r.toLowerCase())
     if (lower.some((r) => r === 'superadmin')) return 'superadmin'
@@ -74,6 +75,8 @@ export function RoleGuard({ allowedRole, children }: RoleGuardProps) {
     if (lower.some((r) => r === 'instructor' || r === 'teacher')) {
       return lower.find((r) => r === 'instructor' || r === 'teacher')!
     }
+    if (lower.some((r) => r === 'accountant')) return 'accountant'
+    if (lower.some((r) => r === 'secretary')) return 'secretary'
     if (lower.some((r) => r === 'student')) return 'student'
     return lower[0]
   })()
@@ -89,14 +92,6 @@ export function RoleGuard({ allowedRole, children }: RoleGuardProps) {
     (normalizedAllowedRole === 'accountant' && normalizedUserRole === 'accountant') ||
     (normalizedAllowedRole === 'secretary' && normalizedUserRole === 'secretary') ||
     isAdminUser
-
-  console.log('[RoleGuard] Access check:', { 
-    userRoles, 
-    normalizedUserRole, 
-    normalizedAllowedRole, 
-    isAdminUser,
-    hasAccess 
-  })
 
   if (!hasAccess) {
     // Redirect to correct portal based on user's role

@@ -238,22 +238,22 @@ export function OnboardingModal({ open, onComplete, userId }: OnboardingModalPro
 
   return (
     <Dialog open={open} onOpenChange={() => {}}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden p-0">
+      <DialogContent className="h-[min(860px,calc(100dvh-2rem))] max-h-[92dvh] overflow-hidden p-0 sm:w-[min(1120px,calc(100vw-2rem))] sm:max-w-5xl">
         {loading ? (
-          <div className="flex items-center justify-center p-12">
+          <div className="flex h-full items-center justify-center p-12">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : (
-          <div className="flex flex-col h-full">
+          <div className="flex h-full min-h-0 flex-col">
             {/* Header */}
-            <DialogHeader className="p-6 pb-4 border-b">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/80 text-primary-foreground">
+            <DialogHeader className="border-b p-4 pb-3 sm:p-6 sm:pb-4">
+              <div className="flex items-start gap-3 pe-8 sm:items-center">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-cyan-500 text-primary-foreground shadow-lg shadow-primary/20">
                   <Sparkles className="h-5 w-5" />
                 </div>
-                <div>
-                  <DialogTitle className="text-xl">{t('student:components.onboarding.title')}</DialogTitle>
-                  <DialogDescription>
+                <div className="min-w-0">
+                  <DialogTitle className="text-lg sm:text-xl">{t('student:components.onboarding.title')}</DialogTitle>
+                  <DialogDescription className="max-w-3xl">
                     {t('student:components.onboarding.subtitle')}
                   </DialogDescription>
                 </div>
@@ -273,7 +273,7 @@ export function OnboardingModal({ open, onComplete, userId }: OnboardingModalPro
             </DialogHeader>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
               <AnimatePresence mode="wait">
                 {step === 1 && (
                   <motion.div
@@ -285,36 +285,38 @@ export function OnboardingModal({ open, onComplete, userId }: OnboardingModalPro
                   >
                     <h3 className="font-semibold text-lg">{t('student:components.onboarding.step1Heading')}</h3>
                     <p className="text-sm text-muted-foreground">{t('student:components.onboarding.step1Subtitle')}</p>
-                    <div className="grid grid-cols-2 gap-3 mt-4">
+                    <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
                       {categories.map((category) => (
                         <button
                           key={category.id}
                           onClick={() => toggleCategory(category.id)}
                           className={cn(
-                            'flex items-start gap-3 p-4 rounded-lg border-2 text-start transition-all hover:shadow-md',
+                            'min-h-[112px] w-full rounded-xl border-2 p-4 text-start transition-all hover:shadow-md',
                             selectedCategories.has(category.id)
                               ? 'border-primary bg-primary/5 shadow-sm'
                               : 'border-border hover:border-primary/50'
                           )}
                         >
-                          <div className={cn(
-                            'flex h-10 w-10 items-center justify-center rounded-lg',
-                            selectedCategories.has(category.id)
-                              ? 'bg-primary text-primary-foreground'
-                              : 'bg-muted text-muted-foreground'
-                          )}>
-                            {getCategoryIcon(category.icon)}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="font-medium flex items-center gap-2">
-                              {category.name}
-                              {selectedCategories.has(category.id) && (
-                                <Check className="h-4 w-4 text-primary" />
-                              )}
+                          <div className="flex items-start gap-3">
+                            <div className={cn(
+                              'flex h-11 w-11 shrink-0 items-center justify-center rounded-lg',
+                              selectedCategories.has(category.id)
+                                ? 'bg-primary text-primary-foreground'
+                                : 'bg-muted text-muted-foreground'
+                            )}>
+                              {getCategoryIcon(category.icon)}
                             </div>
-                            <p className="text-xs text-muted-foreground line-clamp-2">
-                              {category.description}
-                            </p>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-start gap-2 font-medium leading-snug">
+                                <span className="min-w-0 flex-1">{category.name}</span>
+                                {selectedCategories.has(category.id) && (
+                                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                                )}
+                              </div>
+                              <p className="mt-1 text-xs leading-relaxed text-muted-foreground line-clamp-3">
+                                {category.description}
+                              </p>
+                            </div>
                           </div>
                         </button>
                       ))}
@@ -451,15 +453,16 @@ export function OnboardingModal({ open, onComplete, userId }: OnboardingModalPro
             </div>
 
             {/* Footer */}
-            <div className="p-6 pt-4 border-t flex items-center justify-between">
+            <div className="flex flex-col gap-3 border-t p-4 pt-3 sm:flex-row sm:items-center sm:justify-between sm:p-6 sm:pt-4">
               <Button
                 variant="ghost"
                 onClick={handleSkip}
                 disabled={saving}
+                className="justify-center sm:justify-start"
               >
                 {t('student:components.onboarding.skipForNow')}
               </Button>
-              <div className="flex gap-2">
+              <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
                 {step > 1 && (
                   <Button
                     variant="outline"
@@ -474,6 +477,7 @@ export function OnboardingModal({ open, onComplete, userId }: OnboardingModalPro
                   <Button
                     onClick={() => setStep(step + 1)}
                     disabled={!canProceed()}
+                    className="sm:min-w-28"
                   >
                     {t('student:components.onboarding.next')}
                     <ChevronRight className="h-4 w-4 ms-1" />

@@ -5,7 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/ca
 import { Button } from '../../components/ui/button';
 import { lessonService, type LessonDto } from '../../services/lessonService';
 import { courseService, type CourseDto } from '../../services/courseService';
-import { EnhancedVideoPlayer, type VideoPlayerHandle } from '../../components/EnhancedVideoPlayer';
+import {
+  EnhancedVideoPlayer,
+  type CompletionReason,
+  type VideoPlayerHandle,
+} from '../../components/EnhancedVideoPlayer';
 import { LessonNotesPanel } from '../../components/LessonNotesPanel';
 import { CourseDiscussion } from '../../components/CourseDiscussion';
 import { progressService } from '../../services/progressService';
@@ -28,6 +32,7 @@ export function LessonViewerPage() {
   const [lesson, setLesson] = useState<LessonDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentTime, setCurrentTime] = useState(0);
+  const currentTimeRef = useRef(0);
   const [isCompleted, setIsCompleted] = useState(false);
   const videoPlayerRef = useRef<VideoPlayerHandle | null>(null);
   const [lessonMaterials, setLessonMaterials] = useState<CourseMaterialDto[]>([]);
@@ -100,14 +105,49 @@ export function LessonViewerPage() {
     completionRatingGateRef.current = false;
   }, [lessonId]);
 
-  const handleLessonComplete = useCallback(() => {
+  const shouldPromptForRating = useCallback(() => {
+    const durationSeconds = lesson?.durationMinutes ? lesson.durationMinutes * 60 : 0;
+    const minimumWatchSeconds = durationSeconds > 0
+      ? Math.min(60, Math.max(15, durationSeconds * 0.25))
+      : 30;
+
+    return currentTime >= minimumWatchSeconds;
+  }, [currentTime, lesson?.durationMinutes]);
+
+  const handleProgressUpdate = useCallback((time: number) => {
+    const nextSecond = Math.max(0, Math.floor(time));
+    if (Math.abs(nextSecond - currentTimeRef.current) < 1) return;
+
+    currentTimeRef.current = nextSecond;
+    setCurrentTime(nextSecond);
+  }, []);
+
+  const handleLessonComplete = useCallback((reason: CompletionReason) => {
     setIsCompleted(true);
     toast.success(t('student:lessonViewer.completedToast'));
-    if (!completionRatingGateRef.current) {
+    const canRateNow = reason === 'watched' || shouldPromptForRating();
+    if (canRateNow && !completionRatingGateRef.current) {
       completionRatingGateRef.current = true;
       setRatingDialogOpen(true);
     }
-  }, [t]);
+  }, [shouldPromptForRating, t]);
+
+  const handleManualMarkComplete = useCallback(async () => {
+    if (!courseId || !lessonId || !lesson || isCompleted) return;
+
+    const durationSeconds = Math.max(
+      1,
+      Math.floor((lesson.durationMinutes || 0) * 60) || currentTimeRef.current || 1,
+    );
+
+    try {
+      await progressService.markLessonCompleted(lessonId, courseId, durationSeconds);
+      handleLessonComplete('manual');
+    } catch (error) {
+      console.error('Failed to mark lesson as completed:', error);
+      toast.error(t('student:lessonViewer.errors.tryLater'));
+    }
+  }, [courseId, lessonId, lesson, isCompleted, handleLessonComplete, t]);
 
   const formatDuration = (minutes?: number): string => {
     if (!minutes) return '';
@@ -185,7 +225,7 @@ export function LessonViewerPage() {
               lessonId={lessonId}
               courseId={courseId}
               totalDuration={lesson.durationMinutes ? lesson.durationMinutes * 60 : undefined}
-              onProgressUpdate={(time) => setCurrentTime(time)}
+              onProgressUpdate={handleProgressUpdate}
               onComplete={handleLessonComplete}
               className="aspect-video"
             />
@@ -198,6 +238,19 @@ export function LessonViewerPage() {
             </div>
           )}
         </CardContent>
+        <div className="flex justify-end border-t p-3 sm:p-4">
+          <Button
+            variant={isCompleted ? 'secondary' : 'outline'}
+            onClick={handleManualMarkComplete}
+            disabled={isCompleted}
+            className="w-full sm:w-auto"
+          >
+            <CheckCircle2 className="h-4 w-4 me-2" />
+            {isCompleted
+              ? t('student:lessonViewer.completed')
+              : t('student:components.videoPlayer.markAsCompleted')}
+          </Button>
+        </div>
       </Card>
 
       {/* Lesson Details and Sidebar */}
@@ -306,6 +359,4 @@ export function LessonViewerPage() {
     </div>
   );
 }
-
-
 

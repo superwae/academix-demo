@@ -82,10 +82,8 @@ export class ApiClient {
     options: RequestInit = {},
     retryOn401: boolean = true
   ): Promise<T> {
-    // Force HTTP - replace any HTTPS with HTTP to prevent browser redirects
-    let url = `${this.baseUrl}${endpoint}`;
-    url = url.replace('https://localhost:7261', 'http://localhost:5261');
-    
+    const url = `${this.baseUrl}${endpoint}`;
+
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       ...(options.headers as Record<string, string> || {}),
@@ -137,8 +135,11 @@ export class ApiClient {
           // Refresh failed, logout user and throw error
           console.error('[API] Token refresh failed, logging out user');
           if (typeof window !== 'undefined') {
-            const { authService } = await import('../services/authService');
-            authService.logout();
+            // Route through the auth store so the full logout flow runs
+            // (token cleanup + theme reset + org store cleanup).
+            // Dynamic import avoids a circular dependency (store -> service -> api).
+            const { useAuthStore } = await import('../store/useAuthStore');
+            useAuthStore.getState().logout();
             // Redirect to login if we're not already there
             if (!window.location.pathname.includes('/login')) {
               window.location.href = '/login';
@@ -153,9 +154,9 @@ export class ApiClient {
       }
       
       if (!response.ok) {
-        // When using mock auth and backend is unavailable (5xx), return an empty
-        // mock response so the UI degrades gracefully for demos.
-        if (response.status >= 500 && this.accessToken?.startsWith('mock-')) {
+        // DEV ONLY: when using mock auth and backend is unavailable (5xx), return an
+        // empty mock response so the UI degrades gracefully for demos.
+        if (import.meta.env.DEV && response.status >= 500 && this.accessToken?.startsWith('mock-')) {
           console.warn(`[API] Backend unavailable (${response.status}), returning empty mock for: ${endpoint}`);
           // Return an array with PagedResult properties so it works for both
           // array endpoints (response.map()) and paginated endpoints (response.items).

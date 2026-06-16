@@ -1,6 +1,10 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { formatDistanceToNow } from "date-fns";
+import { paymentService, type PaymentDto, type PaymentSummaryDto } from "../../../services/paymentService";
+import { formatMoney } from "../../../lib/money";
+import { DemoDataBadge } from "../../../components/admin/finance/DemoDataBadge";
 import {
   DollarSign,
   TrendingUp,
@@ -74,14 +78,6 @@ const TOP_COURSES = [
   { id: "CRS005", title: "UI/UX Design Principles", revenue: 18450, enrollments: 134, growth: 6.4, instructor: "Jennifer White" },
 ];
 
-const RECENT_TRANSACTIONS = [
-  { id: "TXN-2026-001234", user: "James Taylor", amount: 99.99, type: "purchase", status: "completed", time: "5 min ago", course: "Advanced React Patterns" },
-  { id: "TXN-2026-001233", user: "Michelle Garcia", amount: 149.99, type: "purchase", status: "completed", time: "12 min ago", course: "Machine Learning Fundamentals" },
-  { id: "TXN-2026-001232", user: "Robert Martinez", amount: 99.99, type: "refund", status: "completed", time: "1 hour ago", course: "DevOps & Cloud Computing" },
-  { id: "TXN-2026-001231", user: "Sarah Chen", amount: 79.99, type: "purchase", status: "pending", time: "2 hours ago", course: "UI/UX Design Principles" },
-  { id: "TXN-2026-001230", user: "Michael Brown", amount: 129.99, type: "purchase", status: "completed", time: "3 hours ago", course: "Python for Data Science" },
-];
-
 const PENDING_PAYOUTS = [
   { id: "PAY-2026-001", instructor: "Dr. Sarah Johnson", avatar: "SJ", amount: 4250, courses: 2, status: "pending", scheduledDate: "Jan 20, 2026" },
   { id: "PAY-2026-002", instructor: "Prof. Michael Chen", avatar: "MC", amount: 3180, courses: 2, status: "pending", scheduledDate: "Jan 20, 2026" },
@@ -99,6 +95,29 @@ export function FinanceOverviewPage() {
   const { t } = useTranslation(['admin', 'common', 'errors']);
   const navigate = useNavigate();
   const [timeRange, setTimeRange] = useState<TimeRangeId>("30d");
+  const [summary, setSummary] = useState<PaymentSummaryDto | null>(null);
+  const [recentPayments, setRecentPayments] = useState<PaymentDto[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const [s, p] = await Promise.all([
+          paymentService.getPaymentSummary(),
+          paymentService.getAllPayments(1, 5),
+        ]);
+        if (!cancelled) {
+          setSummary(s);
+          setRecentPayments(p.items ?? []);
+        }
+      } catch {
+        // Endpoint unavailable (e.g. backend offline) — KPI cards fall back to zeros.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const timeRangeLabels: Record<TimeRangeId, string> = {
     "7d": t('admin:finance.overview.timeRanges.last7Days'),
@@ -114,32 +133,34 @@ export function FinanceOverviewPage() {
     "Other": t('admin:finance.overview.categories.other'),
   };
 
-  // Format currency
-  const formatCurrency = (value: number) =>
-    new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value);
+  // Format currency (gateway charges ILS; summary amounts arrive in agorot)
+  const currency = summary?.currency || "ILS";
+  const formatCurrency = (value: number) => formatMoney(value, currency);
 
-  // Calculate KPI values
+  // KPI values from the real payment summary (zeros until loaded / when backend offline)
   const kpis = useMemo(() => {
-    const totalRevenue = REVENUE_TREND_DATA.reduce((sum, d) => sum + d.revenue, 0);
-    const totalExpenses = REVENUE_TREND_DATA.reduce((sum, d) => sum + d.expenses, 0);
-    const totalRefunds = REVENUE_TREND_DATA.reduce((sum, d) => sum + d.refunds, 0);
-    const netProfit = totalRevenue - totalExpenses - totalRefunds;
+    const totalRevenue = (summary?.totalRevenue ?? 0) / 100;
+    const revenueThisMonth = (summary?.revenueThisMonth ?? 0) / 100;
+    const revenueLastMonth = (summary?.revenueLastMonth ?? 0) / 100;
+    const monthChange =
+      revenueLastMonth > 0
+        ? Math.round(((revenueThisMonth - revenueLastMonth) / revenueLastMonth) * 1000) / 10
+        : 0;
     const pendingPayoutsTotal = PENDING_PAYOUTS.reduce((sum, p) => sum + p.amount, 0);
 
     return {
       totalRevenue,
-      totalExpenses,
-      totalRefunds,
-      netProfit,
+      revenueThisMonth,
+      monthChange,
+      completedPayments: summary?.completedPayments ?? 0,
+      pendingPayments: summary?.pendingPayments ?? 0,
+      failedPayments: summary?.failedPayments ?? 0,
+      refundedPayments: summary?.refundedPayments ?? 0,
+      totalPayments: summary?.totalPayments ?? 0,
       pendingPayoutsTotal,
       pendingPayoutsCount: PENDING_PAYOUTS.length,
     };
-  }, []);
+  }, [summary]);
 
   const timeRangeLabel = timeRangeLabels[timeRange] || timeRangeLabels["30d"];
 
@@ -186,40 +207,36 @@ export function FinanceOverviewPage() {
         <KPIStatCard
           title={t('admin:finance.overview.kpi.totalRevenue')}
           value={formatCurrency(kpis.totalRevenue)}
-          change={{ value: 12.5, label: t('admin:finance.overview.kpi.vsLastPeriod') }}
-          trend="up"
           icon={DollarSign}
           iconColor="bg-emerald-500/10 text-emerald-500"
           href="/admin/finance/transactions?type=purchase"
           subtitle={t('admin:finance.overview.kpi.viewAllPurchases')}
         />
         <KPIStatCard
-          title={t('admin:finance.overview.kpi.totalRefunds')}
-          value={formatCurrency(kpis.totalRefunds)}
-          change={{ value: 5.2, label: t('admin:finance.overview.kpi.vsLastPeriod') }}
-          trend="down"
-          icon={Receipt}
-          iconColor="bg-red-500/10 text-red-500"
-          href="/admin/finance/transactions?type=refund"
-          subtitle={t('admin:finance.overview.kpi.viewRefundHistory')}
-        />
-        <KPIStatCard
-          title={t('admin:finance.overview.kpi.netProfit')}
-          value={formatCurrency(kpis.netProfit)}
-          change={{ value: 8.3, label: t('admin:finance.overview.kpi.vsLastPeriod') }}
-          trend="up"
+          title={t('admin:finance.overview.kpi.revenueThisMonth', { defaultValue: 'Revenue This Month' })}
+          value={formatCurrency(kpis.revenueThisMonth)}
+          change={{ value: kpis.monthChange, label: t('admin:finance.overview.kpi.vsLastPeriod') }}
+          trend={kpis.monthChange >= 0 ? "up" : "down"}
           icon={PiggyBank}
           iconColor="bg-blue-500/10 text-blue-500"
-          href="/admin/finance/revenue-split"
-          subtitle={t('admin:finance.overview.kpi.viewRevenueBreakdown')}
+          href="/admin/finance/transactions"
+          subtitle={t('admin:finance.overview.kpi.viewAllPurchases')}
         />
         <KPIStatCard
-          title={t('admin:finance.overview.kpi.pendingPayouts')}
-          value={formatCurrency(kpis.pendingPayoutsTotal)}
-          subtitle={t('admin:finance.overview.kpi.instructorsAwaiting', { count: kpis.pendingPayoutsCount })}
+          title={t('admin:finance.overview.kpi.completedPayments', { defaultValue: 'Completed Payments' })}
+          value={String(kpis.completedPayments)}
+          icon={Receipt}
+          iconColor="bg-emerald-500/10 text-emerald-500"
+          href="/admin/finance/transactions"
+          subtitle={t('admin:finance.overview.kpi.ofTotalPayments', { defaultValue: 'of {{count}} total', count: kpis.totalPayments })}
+        />
+        <KPIStatCard
+          title={t('admin:finance.overview.kpi.pendingFailed', { defaultValue: 'Pending / Failed' })}
+          value={`${kpis.pendingPayments} / ${kpis.failedPayments}`}
           icon={Wallet}
           iconColor="bg-amber-500/10 text-amber-500"
-          href="/admin/finance/payouts"
+          href="/admin/finance/transactions"
+          subtitle={t('admin:finance.overview.kpi.needsAttention', { defaultValue: 'May need attention' })}
         />
       </div>
 
@@ -229,7 +246,10 @@ export function FinanceOverviewPage() {
         <div className="lg:col-span-2 rounded-xl border border-border bg-card p-5">
           <div className="mb-4 flex items-center justify-between">
             <div>
-              <h3 className="font-semibold">{t('admin:finance.overview.charts.revenueTrend')}</h3>
+              <h3 className="font-semibold flex items-center gap-2">
+                {t('admin:finance.overview.charts.revenueTrend')}
+                <DemoDataBadge />
+              </h3>
               <p className="text-xs text-muted-foreground">{t('admin:finance.overview.charts.revenueTrendDesc')}</p>
             </div>
             <Button
@@ -322,7 +342,10 @@ export function FinanceOverviewPage() {
         {/* Revenue by Category */}
         <div className="rounded-xl border border-border bg-card p-5">
           <div className="mb-4">
-            <h3 className="font-semibold">{t('admin:finance.overview.charts.revenueByCategory')}</h3>
+            <h3 className="font-semibold flex items-center gap-2">
+              {t('admin:finance.overview.charts.revenueByCategory')}
+              <DemoDataBadge />
+            </h3>
             <p className="text-xs text-muted-foreground">{t('admin:finance.overview.charts.revenueByCategoryDesc')}</p>
           </div>
           <div className="h-52">
@@ -387,57 +410,63 @@ export function FinanceOverviewPage() {
             </Button>
           </div>
           <div className="divide-y divide-border">
-            {RECENT_TRANSACTIONS.map((txn) => (
-              <div
-                key={txn.id}
-                className="flex items-center justify-between p-4 hover:bg-muted/30 cursor-pointer transition-colors"
-                onClick={() => navigate(`/admin/finance/transactions?id=${txn.id}`)}
-              >
-                <div className="flex items-center gap-3">
-                  <div
-                    className={cn(
-                      "flex h-9 w-9 items-center justify-center rounded-lg",
-                      txn.type === "purchase"
-                        ? "bg-emerald-500/10 text-emerald-500"
-                        : "bg-red-500/10 text-red-500"
-                    )}
-                  >
-                    {txn.type === "purchase" ? (
-                      <ArrowUpRight className="h-4 w-4" />
-                    ) : (
-                      <ArrowDownRight className="h-4 w-4" />
-                    )}
+            {recentPayments.length === 0 ? (
+              <p className="p-6 text-sm text-muted-foreground text-center">
+                {t('admin:finance.noTransactions', { defaultValue: 'No transactions yet.' })}
+              </p>
+            ) : (
+              recentPayments.map((txn) => (
+                <div
+                  key={txn.id}
+                  className="flex items-center justify-between p-4 hover:bg-muted/30 cursor-pointer transition-colors"
+                  onClick={() => navigate(`/admin/finance/transactions?id=${txn.id}`)}
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={cn(
+                        "flex h-9 w-9 items-center justify-center rounded-lg",
+                        txn.status === "Refunded"
+                          ? "bg-red-500/10 text-red-500"
+                          : "bg-emerald-500/10 text-emerald-500"
+                      )}
+                    >
+                      {txn.status === "Refunded" ? (
+                        <ArrowDownRight className="h-4 w-4" />
+                      ) : (
+                        <ArrowUpRight className="h-4 w-4" />
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">{txn.userName || '—'}</p>
+                      <p className="text-xs text-muted-foreground">{txn.courseTitle || txn.type}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium">{txn.user}</p>
-                    <p className="text-xs text-muted-foreground">{txn.course}</p>
+                  <div className="text-end">
+                    <p
+                      className={cn(
+                        "text-sm font-semibold",
+                        txn.status === "Refunded" ? "text-red-500" : "text-emerald-500"
+                      )}
+                    >
+                      {txn.status === "Refunded" ? "-" : "+"}
+                      {formatMoney(txn.amount / 100, txn.currency || currency)}
+                    </p>
+                    <p
+                      className={cn(
+                        "text-xs",
+                        txn.status === "Completed" ? "text-emerald-500" : "text-amber-500"
+                      )}
+                    >
+                      {txn.status === "Completed"
+                        ? t('admin:finance.overview.recentTransactions.status.completed')
+                        : t('admin:finance.overview.recentTransactions.status.pending')}
+                      {" · "}
+                      {formatDistanceToNow(new Date(txn.paidAt || txn.createdAt), { addSuffix: true })}
+                    </p>
                   </div>
                 </div>
-                <div className="text-end">
-                  <p
-                    className={cn(
-                      "text-sm font-semibold",
-                      txn.type === "refund" ? "text-red-500" : "text-emerald-500"
-                    )}
-                  >
-                    {txn.type === "refund" ? "-" : "+"}
-                    {formatCurrency(txn.amount)}
-                  </p>
-                  <p
-                    className={cn(
-                      "text-xs",
-                      txn.status === "completed"
-                        ? "text-emerald-500"
-                        : "text-amber-500"
-                    )}
-                  >
-                    {txn.status === "completed"
-                      ? t('admin:finance.overview.recentTransactions.status.completed')
-                      : t('admin:finance.overview.recentTransactions.status.pending')}
-                  </p>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
 
@@ -445,7 +474,10 @@ export function FinanceOverviewPage() {
         <div className="rounded-xl border border-border bg-card overflow-hidden">
           <div className="flex items-center justify-between border-b p-4">
             <div>
-              <h3 className="font-semibold">{t('admin:finance.overview.pendingPayouts.title')}</h3>
+              <h3 className="font-semibold flex items-center gap-2">
+                {t('admin:finance.overview.pendingPayouts.title')}
+                <DemoDataBadge />
+              </h3>
               <p className="text-xs text-muted-foreground">{t('admin:finance.overview.pendingPayouts.subtitle')}</p>
             </div>
             <Button
@@ -514,7 +546,10 @@ export function FinanceOverviewPage() {
       <div className="rounded-xl border border-border bg-card overflow-hidden">
         <div className="flex items-center justify-between border-b p-4">
           <div>
-            <h3 className="font-semibold">{t('admin:finance.overview.topCourses.title')}</h3>
+            <h3 className="font-semibold flex items-center gap-2">
+              {t('admin:finance.overview.topCourses.title')}
+              <DemoDataBadge />
+            </h3>
             <p className="text-xs text-muted-foreground">{t('admin:finance.overview.topCourses.subtitle')}</p>
           </div>
           <Button

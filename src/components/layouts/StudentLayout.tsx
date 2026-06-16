@@ -22,6 +22,7 @@ import {
   Sun,
   CreditCard,
   Radio,
+  HelpCircle,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "../../lib/cn";
@@ -96,7 +97,7 @@ interface SearchResult {
 }
 
 export function StudentLayout() {
-  const { t } = useTranslation(['nav', 'common', 'auth']);
+  const { t } = useTranslation(['nav', 'common', 'auth', 'support']);
   const theme = useAppStore((s) => s.data.theme);
   const customThemeColor = useAppStore((s) => s.data.customThemeColor);
   const mixTheme = useAppStore((s) => s.data.mixTheme);
@@ -128,14 +129,12 @@ export function StudentLayout() {
       const oldGlobalSkip = localStorage.getItem('onboarding_skipped');
       if (oldGlobalSkip) {
         localStorage.removeItem('onboarding_skipped');
-        console.log('Removed old global onboarding_skipped key');
       }
 
       // Check if user has already skipped onboarding (stored per user)
       const skipKey = `onboarding_skipped_${user.id}`;
       const skipped = localStorage.getItem(skipKey);
       if (skipped === 'true') {
-        console.log('User has previously skipped onboarding');
         setOnboardingChecked(true);
         return;
       }
@@ -144,11 +143,8 @@ export function StudentLayout() {
       await new Promise(resolve => setTimeout(resolve, 300));
 
       try {
-        console.log('Checking onboarding status for user:', user.email);
         const status = await onboardingService.getOnboardingStatus();
-        console.log('Onboarding status:', status);
         if (!status.isCompleted) {
-          console.log('User has not completed onboarding, showing modal');
           setShowOnboarding(true);
         }
       } catch (error) {
@@ -284,28 +280,6 @@ export function StudentLayout() {
         console.error('Error searching assignments:', error);
       }
 
-      // Search messages (from app store)
-      try {
-        const messages = useAppStore.getState().data.messages || [];
-        messages.forEach((message) => {
-          if (
-            message.subject.toLowerCase().includes(lowerQuery) ||
-            message.body.toLowerCase().includes(lowerQuery) ||
-            message.from.toLowerCase().includes(lowerQuery)
-          ) {
-            results.push({
-              type: 'message',
-              id: message.id,
-              title: message.subject,
-              description: `From: ${message.from}`,
-              url: `/student/messages`,
-            });
-          }
-        });
-      } catch (error) {
-        console.error('Error searching messages:', error);
-      }
-
       setSearchResults(results.slice(0, 10)); // Limit to 10 results
       setShowResults(results.length > 0);
     } catch (error) {
@@ -391,6 +365,17 @@ export function StudentLayout() {
                     unreadMessages={unreadMessages}
                     unreadNewGrades={unreadNewGrades}
                   />
+                  {/* Help/Support — the header HelpButton is hidden below lg, so expose it here */}
+                  <div className="mt-2 border-t border-border/60 pt-2">
+                    <NavLink
+                      to="/support"
+                      onClick={() => setMobileOpen(false)}
+                      className="flex min-h-[44px] items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-foreground/70 transition-colors hover:bg-accent/50 hover:text-foreground"
+                    >
+                      <HelpCircle className="h-5 w-5" />
+                      <span className="flex-1">{t('support:helpButton', { defaultValue: 'Help & Support' })}</span>
+                    </NavLink>
+                  </div>
                 </div>
               </DialogContent>
             </Dialog>
@@ -420,11 +405,11 @@ export function StudentLayout() {
                   <Sparkles className="h-3 w-3 text-primary" />
                 </motion.div>
               </div>
-              <div className="leading-tight min-w-0">
+              <div className="hidden leading-tight min-w-0 sm:block">
                 <div className="text-base font-bold tracking-tight gradient-text sm:text-lg">
                   AcademiX
                 </div>
-                <div className="hidden text-xs text-muted-foreground font-medium sm:block">
+                <div className="text-xs text-muted-foreground font-medium">
                   {t('nav:studentPortal')}
                 </div>
               </div>
@@ -624,18 +609,20 @@ export function StudentLayout() {
             </DropdownMenu>
             
             {theme === 'custom' ? (
-              <ColorPicker
-                value={customThemeColor || 'hsl(222, 84%, 60%)'}
-                onChange={(color) => {
-                  setCustomThemeColor(color);
-                }}
-              />
+              <div className="hidden sm:block">
+                <ColorPicker
+                  value={customThemeColor || 'hsl(222, 84%, 60%)'}
+                  onChange={(color) => {
+                    setCustomThemeColor(color);
+                  }}
+                />
+              </div>
             ) : (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
-                  className="h-10 gap-2 border-2 rounded-xl px-2.5 sm:h-11 sm:px-3"
+                  className="hidden h-10 gap-2 rounded-xl border-2 px-2.5 sm:flex sm:h-11 sm:px-3"
                   title={t('common:theme')}
                 >
                   <span
@@ -742,7 +729,7 @@ export function StudentLayout() {
               variant="outline"
               size="sm"
               onClick={toggleDarkMode}
-              className="h-11 gap-2 border-2 rounded-xl"
+              className="hidden h-11 gap-2 rounded-xl border-2 sm:inline-flex"
               title={isDarkMode ? t('common:switchToLightMode') : t('common:switchToDarkMode')}
             >
               {isDarkMode ? (
@@ -765,7 +752,9 @@ export function StudentLayout() {
             <OrgSwitcher />
 
             {/* Contact support */}
-            <HelpButton />
+            <div className="hidden lg:block">
+              <HelpButton />
+            </div>
           </div>
         </div>
       </header>

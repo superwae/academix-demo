@@ -742,7 +742,9 @@ public class ConversationService : IConversationService
             CourseId = conversation.CourseId,
             CourseTitle = conversation.Course?.Title,
             Title = conversation.Title,
-            LastMessageAt = conversation.LastMessageAt,
+            // A thread created via "Message" but never written to has no real activity —
+            // surface null so clients show "No messages yet" instead of a misleading timestamp.
+            LastMessageAt = lastMessage != null ? conversation.LastMessageAt : null,
             UnreadCount = unreadCount,
             LastMessage = lastMessage != null ? MapToMessageDto(lastMessage) : null,
             Participants = participants,

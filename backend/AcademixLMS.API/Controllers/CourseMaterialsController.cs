@@ -9,7 +9,7 @@ namespace AcademixLMS.API.Controllers;
 [ApiController]
 [Route("api/v{version:apiVersion}/courses/{courseId:guid}/materials")]
 [ApiVersion("1.0")]
-[Authorize(Policy = "RequireStudent")]
+[Authorize]
 [Tags("3. Courses")]
 public class CourseMaterialsController : ControllerBase
 {

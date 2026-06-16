@@ -106,5 +106,8 @@
     "typeAtLeast": "Type at least {{count}} characters to search.",
     "searching": "Searching…",
     "noResults": "No results found."
-  }
+  },
+  "refresh": "Refresh",
+  "demoData": "Demo data",
+  "demoDataTooltip": "This section shows sample data for demonstration purposes"
 }

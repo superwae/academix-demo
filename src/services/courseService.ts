@@ -11,6 +11,8 @@ export interface CourseDto {
   providerName: string;
   instructorId: string;
   instructorName: string;
+  organizationId?: string | null;
+  isOrgExclusive?: boolean;
   rating: number;
   ratingCount: number;
   isFeatured: boolean;
@@ -329,4 +331,3 @@ class CourseService {
 }
 
 export const courseService = new CourseService();
-

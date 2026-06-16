@@ -283,7 +283,7 @@ export function NotificationBell() {
           type="button"
           variant="outline"
           size="sm"
-          className="h-8 gap-1.5 px-2 text-xs shrink-0 hidden sm:inline-flex"
+          className="h-8 gap-1.5 px-2 text-xs shrink-0 hidden xl:inline-flex"
           onClick={handleEnablePushNotifications}
           disabled={pushPermission === 'denied'}
           title={
@@ -420,4 +420,3 @@ export function NotificationBell() {
     </div>
   );
 }
-

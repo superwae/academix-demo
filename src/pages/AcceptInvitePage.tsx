@@ -49,7 +49,7 @@ export function AcceptInvitePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!preview || !token) return
-    if (password.length < 6) {
+    if (password.length < 8) {
       toast.error(t('org:invite.passwordTooShort'))
       return
     }
@@ -169,7 +169,7 @@ export function AcceptInvitePage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                minLength={6}
+                minLength={8}
                 autoComplete="new-password"
               />
               <p className="mt-1 text-xs text-muted-foreground">{t('org:invite.passwordHint')}</p>

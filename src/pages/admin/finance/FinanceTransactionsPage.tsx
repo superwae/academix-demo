@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
@@ -29,6 +29,7 @@ import {
   type FilterConfig,
 } from "../../../components/admin/finance";
 import { toast } from "sonner";
+import { paymentService, type PaymentDto } from "../../../services/paymentService";
 
 // =====================
 // TYPES
@@ -47,6 +48,7 @@ interface Transaction {
     instructor: string;
   };
   amount: number;
+  currency: string;
   fee: number;
   net: number;
   type: "purchase" | "refund";
@@ -58,197 +60,65 @@ interface Transaction {
   failureReason?: string;
 }
 
-// =====================
-// MOCK DATA
-// =====================
+// Backend GET /payments returns PaymentListDto items; userEmail is present on the
+// wire but missing from the frontend PaymentDto interface, so widen it here.
+type BackendPayment = PaymentDto & { userEmail?: string };
 
-const MOCK_TRANSACTIONS: Transaction[] = [
-  {
-    id: "TXN-2026-001234",
-    user: { name: "James Taylor", email: "james.taylor@email.com", id: "USR001" },
-    course: { title: "Advanced React Patterns", id: "CRS001", instructor: "Dr. Sarah Johnson" },
-    amount: 99.99,
-    fee: 9.99,
-    net: 90.00,
-    type: "purchase",
-    status: "completed",
-    paymentMethod: "Visa •••• 4242",
-    date: "2026-01-19T08:45:00Z",
-    ip: "192.168.1.100",
-  },
-  {
-    id: "TXN-2026-001233",
-    user: { name: "Michelle Garcia", email: "m.garcia@email.com", id: "USR002" },
-    course: { title: "Machine Learning Fundamentals", id: "CRS002", instructor: "Dr. Emily Watson" },
-    amount: 149.99,
-    fee: 14.99,
-    net: 135.00,
-    type: "purchase",
-    status: "completed",
-    paymentMethod: "Mastercard •••• 5555",
-    date: "2026-01-19T07:30:00Z",
-    ip: "203.45.67.89",
-  },
-  {
-    id: "TXN-2026-001232",
-    user: { name: "Robert Martinez", email: "r.martinez@email.com", id: "USR003" },
-    course: { title: "DevOps & Cloud Computing", id: "CRS003", instructor: "Prof. Michael Chen" },
-    amount: 99.99,
-    fee: 0,
-    net: -99.99,
-    type: "refund",
-    status: "completed",
-    paymentMethod: "Visa •••• 1234",
-    date: "2026-01-18T16:00:00Z",
-    ip: "10.0.0.1",
-    refundReason: "Course content not as expected",
-  },
-  {
-    id: "TXN-2026-001231",
-    user: { name: "Sarah Chen", email: "s.chen@email.com", id: "USR004" },
-    course: { title: "UI/UX Design Principles", id: "CRS004", instructor: "Jennifer White" },
-    amount: 79.99,
-    fee: 7.99,
-    net: 72.00,
-    type: "purchase",
-    status: "pending",
-    paymentMethod: "PayPal",
-    date: "2026-01-18T14:30:00Z",
-    ip: "156.78.90.12",
-  },
-  {
-    id: "TXN-2026-001230",
-    user: { name: "Michael Brown", email: "m.brown@email.com", id: "USR005" },
-    course: { title: "Python for Data Science", id: "CRS005", instructor: "Dr. Lisa Park" },
-    amount: 129.99,
-    fee: 12.99,
-    net: 117.00,
-    type: "purchase",
-    status: "completed",
-    paymentMethod: "Amex •••• 9876",
-    date: "2026-01-17T10:15:00Z",
-    ip: "45.67.89.123",
-  },
-  {
-    id: "TXN-2026-001229",
-    user: { name: "Emily Johnson", email: "e.johnson@email.com", id: "USR006" },
-    course: { title: "Advanced React Patterns", id: "CRS001", instructor: "Dr. Sarah Johnson" },
-    amount: 99.99,
-    fee: 0,
-    net: -99.99,
-    type: "refund",
-    status: "processing",
-    paymentMethod: "Visa •••• 7890",
-    date: "2026-01-17T09:00:00Z",
-    ip: "78.90.12.34",
-    refundReason: "Duplicate purchase",
-  },
-  {
-    id: "TXN-2026-001228",
-    user: { name: "David Wilson", email: "d.wilson@email.com", id: "USR007" },
-    course: { title: "Node.js Backend Masterclass", id: "CRS006", instructor: "Prof. Michael Chen" },
-    amount: 119.99,
-    fee: 11.99,
-    net: 108.00,
-    type: "purchase",
-    status: "failed",
-    paymentMethod: "Visa •••• 3456",
-    date: "2026-01-16T15:45:00Z",
-    ip: "90.12.34.56",
-    failureReason: "Card declined - insufficient funds",
-  },
-  {
-    id: "TXN-2026-001227",
-    user: { name: "Lisa Anderson", email: "l.anderson@email.com", id: "USR008" },
-    course: { title: "Data Structures & Algorithms", id: "CRS007", instructor: "Dr. Alan Turing" },
-    amount: 89.99,
-    fee: 8.99,
-    net: 81.00,
-    type: "purchase",
-    status: "completed",
-    paymentMethod: "Visa •••• 1111",
-    date: "2026-01-16T12:00:00Z",
-    ip: "123.45.67.89",
-  },
-  {
-    id: "TXN-2026-001226",
-    user: { name: "Kevin Smith", email: "k.smith@email.com", id: "USR009" },
-    course: { title: "Mobile App Development", id: "CRS008", instructor: "Jennifer White" },
-    amount: 139.99,
-    fee: 13.99,
-    net: 126.00,
-    type: "purchase",
-    status: "completed",
-    paymentMethod: "Mastercard •••• 2222",
-    date: "2026-01-15T18:30:00Z",
-    ip: "234.56.78.90",
-  },
-  {
-    id: "TXN-2026-001225",
-    user: { name: "Amanda White", email: "a.white@email.com", id: "USR010" },
-    course: { title: "Cloud Architecture", id: "CRS009", instructor: "Prof. Michael Chen" },
-    amount: 159.99,
-    fee: 15.99,
-    net: 144.00,
-    type: "purchase",
-    status: "completed",
-    paymentMethod: "PayPal",
-    date: "2026-01-15T09:15:00Z",
-    ip: "345.67.89.01",
-  },
-  {
-    id: "TXN-2026-001224",
-    user: { name: "Brian Davis", email: "b.davis@email.com", id: "USR011" },
-    course: { title: "Machine Learning Fundamentals", id: "CRS002", instructor: "Dr. Emily Watson" },
-    amount: 149.99,
-    fee: 0,
-    net: -149.99,
-    type: "refund",
-    status: "completed",
-    paymentMethod: "Visa •••• 3333",
-    date: "2026-01-14T14:00:00Z",
-    ip: "456.78.90.12",
-    refundReason: "Technical issues with course videos",
-  },
-  {
-    id: "TXN-2026-001223",
-    user: { name: "Christina Lee", email: "c.lee@email.com", id: "USR012" },
-    course: { title: "UI/UX Design Principles", id: "CRS004", instructor: "Jennifer White" },
-    amount: 79.99,
-    fee: 7.99,
-    net: 72.00,
-    type: "purchase",
-    status: "completed",
-    paymentMethod: "Amex •••• 4444",
-    date: "2026-01-14T11:30:00Z",
-    ip: "567.89.01.23",
-  },
-];
+const mapStatus = (status: string): Transaction["status"] => {
+  switch (status) {
+    case "Completed":
+    case "Refunded":
+    case "PartiallyRefunded":
+      return "completed";
+    case "Failed":
+      return "failed";
+    case "Pending":
+    default:
+      return "pending";
+  }
+};
 
-const COURSE_OPTIONS = [
-  { id: "all", label: "All Courses" },
-  { id: "CRS001", label: "Advanced React Patterns" },
-  { id: "CRS002", label: "Machine Learning Fundamentals" },
-  { id: "CRS003", label: "DevOps & Cloud Computing" },
-  { id: "CRS004", label: "UI/UX Design Principles" },
-  { id: "CRS005", label: "Python for Data Science" },
-];
+/** Backend stores amounts in the smallest currency unit (cents/agorot). */
+const toMajorUnits = (amount: number) => amount / 100;
 
-const INSTRUCTOR_OPTIONS = [
-  { id: "all", label: "All Instructors" },
-  { id: "Dr. Sarah Johnson", label: "Dr. Sarah Johnson" },
-  { id: "Dr. Emily Watson", label: "Dr. Emily Watson" },
-  { id: "Prof. Michael Chen", label: "Prof. Michael Chen" },
-  { id: "Jennifer White", label: "Jennifer White" },
-  { id: "Dr. Lisa Park", label: "Dr. Lisa Park" },
-];
+const mapPaymentToTransaction = (p: BackendPayment, subscriptionLabel: string): Transaction => {
+  const isRefund = p.type === "Refund" || p.status === "Refunded" || p.status === "PartiallyRefunded";
+  const amount = toMajorUnits(p.amount);
+  return {
+    id: p.lahzaReference || p.id,
+    user: {
+      name: p.userName || "—",
+      email: p.userEmail || "",
+      id: p.userId || "",
+    },
+    course: {
+      title: p.courseTitle || (p.type === "Subscription" ? subscriptionLabel : "—"),
+      id: p.courseId || "",
+      instructor: "—",
+    },
+    amount,
+    currency: p.currency,
+    fee: 0,
+    net: isRefund ? -amount : amount,
+    type: isRefund ? "refund" : "purchase",
+    status: mapStatus(p.status),
+    paymentMethod: p.lahzaReference ? "Lahza" : "—",
+    date: p.paidAt || p.createdAt,
+    ip: "—",
+  };
+};
 
 // =====================
 // HELPERS
 // =====================
 
-const formatCurrency = (value: number) =>
-  new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
+const formatCurrency = (value: number, currency?: string) => {
+  try {
+    return new Intl.NumberFormat("en-US", { style: "currency", currency: currency || "USD" }).format(value);
+  } catch {
+    return `${value.toFixed(2)} ${currency ?? ""}`.trim();
+  }
+};
 
 const formatDate = (date: string) =>
   new Date(date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
@@ -317,16 +187,55 @@ export function FinanceTransactionsPage() {
   const [typeFilter, setTypeFilter] = useState(searchParams.get("type") || "all");
   const [statusFilter, setStatusFilter] = useState(searchParams.get("status") || "all");
   const [courseFilter, setCourseFilter] = useState("all");
-  const [instructorFilter, setInstructorFilter] = useState("all");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+
+  // Data state
+  const [rawPayments, setRawPayments] = useState<BackendPayment[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  const loadPayments = useCallback(async () => {
+    setIsLoading(true);
+    setLoadError(null);
+    try {
+      const result = await paymentService.getAllPayments(1, 100);
+      setRawPayments((result.items ?? []) as BackendPayment[]);
+    } catch (error) {
+      setLoadError((error as Error).message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadPayments();
+  }, [loadPayments]);
+
+  const subscriptionLabel = t('admin:finance.transactions.subscriptionItem', { defaultValue: 'Subscription' });
+
+  const transactions = useMemo(
+    () => rawPayments.map((p) => mapPaymentToTransaction(p, subscriptionLabel)),
+    [rawPayments, subscriptionLabel]
+  );
+
+  // Course filter options derived from the loaded payments
+  const courseOptions = useMemo(() => {
+    const titles = Array.from(
+      new Set(transactions.map((txn) => txn.course.title).filter((title) => title && title !== "—"))
+    ).sort();
+    return [
+      { id: "all", label: t('admin:finance.transactions.filters.allCourses') },
+      ...titles.map((title) => ({ id: title, label: title })),
+    ];
+  }, [transactions, t]);
 
   // UI state
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
 
   // Filter transactions
   const filteredTransactions = useMemo(() => {
-    return MOCK_TRANSACTIONS.filter((txn) => {
+    return transactions.filter((txn) => {
       // Search
       const searchLower = searchQuery.toLowerCase();
       const matchesSearch =
@@ -343,11 +252,7 @@ export function FinanceTransactionsPage() {
       const matchesStatus = statusFilter === "all" || txn.status === statusFilter;
 
       // Course
-      const matchesCourse = courseFilter === "all" || txn.course.id === courseFilter;
-
-      // Instructor
-      const matchesInstructor =
-        instructorFilter === "all" || txn.course.instructor === instructorFilter;
+      const matchesCourse = courseFilter === "all" || txn.course.title === courseFilter;
 
       // Date range
       let matchesDate = true;
@@ -358,9 +263,9 @@ export function FinanceTransactionsPage() {
         matchesDate = matchesDate && new Date(txn.date) <= new Date(dateTo + "T23:59:59");
       }
 
-      return matchesSearch && matchesType && matchesStatus && matchesCourse && matchesInstructor && matchesDate;
+      return matchesSearch && matchesType && matchesStatus && matchesCourse && matchesDate;
     });
-  }, [searchQuery, typeFilter, statusFilter, courseFilter, instructorFilter, dateFrom, dateTo]);
+  }, [transactions, searchQuery, typeFilter, statusFilter, courseFilter, dateFrom, dateTo]);
 
   // Statistics
   const stats = useMemo(() => {
@@ -374,13 +279,15 @@ export function FinanceTransactionsPage() {
     };
   }, [filteredTransactions]);
 
+  // Currency for aggregated stats (payments share the platform currency)
+  const statsCurrency = transactions[0]?.currency;
+
   // Clear all filters
   const clearFilters = () => {
     setSearchQuery("");
     setTypeFilter("all");
     setStatusFilter("all");
     setCourseFilter("all");
-    setInstructorFilter("all");
     setDateFrom("");
     setDateTo("");
   };
@@ -452,7 +359,7 @@ export function FinanceTransactionsPage() {
           )}
         >
           {txn.type === "refund" ? "-" : "+"}
-          {formatCurrency(txn.amount)}
+          {formatCurrency(txn.amount, txn.currency)}
         </span>
       ),
     },
@@ -642,11 +549,11 @@ export function FinanceTransactionsPage() {
         </div>
         <div className="rounded-lg border bg-card p-4">
           <p className="text-xs text-muted-foreground">{t('admin:finance.transactions.stats.revenue')}</p>
-          <p className="text-2xl font-bold text-emerald-500">{formatCurrency(stats.totalRevenue)}</p>
+          <p className="text-2xl font-bold text-emerald-500">{formatCurrency(stats.totalRevenue, statsCurrency)}</p>
         </div>
         <div className="rounded-lg border bg-card p-4">
           <p className="text-xs text-muted-foreground">{t('admin:finance.transactions.stats.refunds')}</p>
-          <p className="text-2xl font-bold text-red-500">{formatCurrency(stats.totalRefunds)}</p>
+          <p className="text-2xl font-bold text-red-500">{formatCurrency(stats.totalRefunds, statsCurrency)}</p>
         </div>
         <div className="rounded-lg border bg-card p-4">
           <p className="text-xs text-muted-foreground">{t('admin:finance.transactions.stats.pending')}</p>
@@ -677,23 +584,9 @@ export function FinanceTransactionsPage() {
                 onChange={(e) => setCourseFilter(e.target.value)}
                 className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
               >
-                {COURSE_OPTIONS.map((c) => (
+                {courseOptions.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.id === "all" ? t('admin:finance.transactions.filters.allCourses') : c.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium">{t('admin:finance.transactions.filters.instructor')}</label>
-              <select
-                value={instructorFilter}
-                onChange={(e) => setInstructorFilter(e.target.value)}
-                className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-              >
-                {INSTRUCTOR_OPTIONS.map((i) => (
-                  <option key={i.id} value={i.id}>
-                    {i.id === "all" ? t('admin:finance.transactions.filters.allInstructors') : i.label}
+                    {c.label}
                   </option>
                 ))}
               </select>
@@ -703,21 +596,36 @@ export function FinanceTransactionsPage() {
       />
 
       {/* Data Table */}
-      <DataTable
-        data={filteredTransactions}
-        columns={columns}
-        keyExtractor={(txn) => txn.id}
-        rowActions={rowActions}
-        onRowClick={(txn) => setSelectedTransaction(txn)}
-        emptyIcon={CreditCard}
-        emptyMessage={t('admin:finance.transactions.empty.message')}
-        emptyAction={
-          <Button variant="link" size="sm" onClick={clearFilters}>
-            {t('admin:finance.transactions.empty.clearFilters')}
+      {isLoading ? (
+        <div className="flex items-center justify-center gap-2 rounded-xl border border-border bg-card py-16">
+          <RefreshCw className="h-5 w-5 animate-spin text-muted-foreground" />
+          <span className="text-sm text-muted-foreground">{t('common:loading')}</span>
+        </div>
+      ) : loadError ? (
+        <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-8 text-center">
+          <AlertCircle className="mx-auto h-8 w-8 text-destructive" />
+          <p className="mt-2 text-sm text-destructive">{loadError}</p>
+          <Button variant="outline" size="sm" className="mt-4" onClick={() => void loadPayments()}>
+            {t('common:retry', { defaultValue: 'Retry' })}
           </Button>
-        }
-        pageSize={10}
-      />
+        </div>
+      ) : (
+        <DataTable
+          data={filteredTransactions}
+          columns={columns}
+          keyExtractor={(txn) => txn.id}
+          rowActions={rowActions}
+          onRowClick={(txn) => setSelectedTransaction(txn)}
+          emptyIcon={CreditCard}
+          emptyMessage={t('admin:finance.transactions.empty.message')}
+          emptyAction={
+            <Button variant="link" size="sm" onClick={clearFilters}>
+              {t('admin:finance.transactions.empty.clearFilters')}
+            </Button>
+          }
+          pageSize={10}
+        />
+      )}
 
       {/* Transaction Detail Modal */}
       {selectedTransaction && (
@@ -727,7 +635,7 @@ export function FinanceTransactionsPage() {
           title={t('admin:finance.transactions.detail.title')}
           icon={CreditCard}
           badge={{
-            label: getStatusLabel(selectedTransaction.status),
+            label: getStatusLabel(selectedTransaction.status) ?? selectedTransaction.status,
             variant:
               selectedTransaction.status === "completed"
                 ? "success"
@@ -740,7 +648,7 @@ export function FinanceTransactionsPage() {
           headerContent={
             <DetailAmount
               label={t('admin:finance.transactions.detail.amountLabel')}
-              amount={`${selectedTransaction.type === "refund" ? "-" : "+"}${formatCurrency(selectedTransaction.amount)}`}
+              amount={`${selectedTransaction.type === "refund" ? "-" : "+"}${formatCurrency(selectedTransaction.amount, selectedTransaction.currency)}`}
               variant={selectedTransaction.type === "refund" ? "error" : "success"}
             />
           }

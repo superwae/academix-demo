@@ -246,6 +246,14 @@
     "courseConfiguration": "إعدادات الدورة",
     "enrollmentLimit": "حد التسجيل",
     "noLimit": "بدون حد",
+    "unlimited": "غير محدود",
+    "currentPlan": "الخطة الحالية",
+    "loadingPlan": "جارٍ فحص حدود الخطة...",
+    "planUnavailable": "تعذر تحميل حدود الخطة. سيقوم الخادم بالتحقق من الدورة قبل الحفظ.",
+    "planSeatsHint": "المقاعد لكل دورة: {{perCourse}}. المقاعد المتبقية إجمالاً: {{totalLeft}}.",
+    "requestedSeatsHint": "هذه الدورة تطلب {{count}} مقعداً.",
+    "planCoursesHint": "الدورات المستخدمة: {{used}} / {{max}}. المتبقي: {{remaining}}.",
+    "sectionSeatLimitHint": "حد الخطة: {{max}} مقعداً لكل دورة.",
     "certificateEnabled": "تفعيل الشهادة",
     "certificateEnabledHint": "إصدار شهادات عند الإكمال؛ اضبط النص والساعات لتنسيق الشهادة",
     "certificateSummary": "ملخّص الشهادة",
@@ -272,7 +280,11 @@
       "certificateWordLimit": "يجب ألا يتجاوز ملخّص الشهادة {{max}} كلمة",
       "certificateHoursInvalid": "يجب أن تكون ساعات الشهادة رقماً صالحاً غير سالب",
       "maxTags": "يُسمح بحد أقصى 5 وسوم",
-      "saveFailed": "تعذّر حفظ الدورة"
+      "saveFailed": "تعذّر حفظ الدورة",
+      "noActivePlan": "يجب وجود خطة فعالة قبل إنشاء الدورات.",
+      "coursePlanLimit": "تسمح خطة {{plan}} بعدد {{max}} من الدورات. قم بالترقية أو أرشف دورة قبل إنشاء دورة جديدة.",
+      "seatsPerCourseLimit": "تسمح خطة {{plan}} بعدد {{max}} مقعداً لكل دورة. قلل سعة الشُعب أو قم بالترقية.",
+      "totalSeatLimit": "تبقى في خطة {{plan}} عدد {{remaining}} مقعداً عبر كل الدورات. قلل المقاعد المطلوبة أو قم بالترقية."
     }
   },
   "editCoursePage": {
@@ -668,7 +680,9 @@
     "yr": "سنة",
     "noPlans": "لا توجد خطط اشتراك متاحة في الوقت الحالي.",
     "toasts": {
-      "cancelled": "تم إلغاء الاشتراك"
+      "cancelled": "تم إلغاء الاشتراك",
+      "demoActivated": "تم تفعيل الاشتراك!",
+      "demoActivatedDescription": "تم تسجيل دفعة تجريبية — خطتك مفعّلة الآن."
     },
     "errors": {
       "loadFailed": "تعذّر تحميل بيانات الاشتراك",
@@ -987,11 +1001,17 @@
   },
   "visibility": {
     "title": "من يستطيع رؤية هذه الدورة",
+    "subtitle": "اختر مسار الظهور والجهة المالكة للاشتراك قبل أن تظهر للطلاب.",
     "publicTitle": "الكتالوج العام",
-    "publicDescription": "يمكن لأي مستخدم على AcademiX اكتشافها والتسجيل فيها.",
-    "underOrgTitle": "تحت {{org}}",
-    "underOrgDescription": "تظهر في الكتالوج العام، لكن تُحسَب وتُقسَّم الإيرادات تحت المؤسسة.",
-    "exclusiveToggle": "اجعلها حصرية لـ {{org}} — لن تظهر في الكتالوج العام."
+    "publicDescription": "يمكن لأي طالب يتصفح AcademiX العثور عليها. السعة تُحتسب من خطة المدرّس.",
+    "underOrgTitle": "{{org}} + الكتالوج العام",
+    "underOrgDescription": "طلاب الكتالوج العام وطلاب {{org}} يمكنهم العثور عليها. السعة والإيرادات تحت الأكاديمية.",
+    "exclusiveTitle": "طلاب {{org}} فقط",
+    "exclusiveDescription": "فقط الطلاب داخل {{org}} يمكنهم رؤيتها أو التسجيل فيها. لن تظهر في الكتالوج العام.",
+    "currentLabel": "الرؤية الحالية:",
+    "currentPublic": "الكتالوج العام، تحت حساب المدرّس.",
+    "currentUnderOrgPublic": "تحت {{org}}، وما زالت ظاهرة في الكتالوج العام.",
+    "currentExclusive": "تحت {{org}}، وتظهر فقط داخل الأكاديمية."
   },
   "earnings": {
     "title": "أرباحي",

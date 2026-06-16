@@ -83,4 +83,7 @@
   <data name="AssignmentNotFound" xml:space="preserve">
     <value>Assignment not found.</value>
   </data>
+  <data name="LicensePaymentRequiresGateway" xml:space="preserve">
+    <value>License purchases require the online payment gateway, which is not enabled in this environment.</value>
+  </data>
 </root>

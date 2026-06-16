@@ -83,4 +83,7 @@
   <data name="AssignmentNotFound" xml:space="preserve">
     <value>التعيين غير موجود.</value>
   </data>
+  <data name="LicensePaymentRequiresGateway" xml:space="preserve">
+    <value>يتطلب شراء التراخيص بوابة الدفع الإلكتروني، وهي غير مفعّلة في هذه البيئة.</value>
+  </data>
 </root>

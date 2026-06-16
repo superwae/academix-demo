@@ -183,7 +183,10 @@ public enum OrgMemberRole
     OrgTeacher = 3,
 
     /// <summary>Employee of an Employer org. Learner owned by the org.</summary>
-    OrgEmployee = 4
+    OrgEmployee = 4,
+
+    /// <summary>Student enrolled under a TeachingInstitution. Can see/enroll in org-exclusive courses.</summary>
+    OrgStudent = 5
 }
 
 /// <summary>

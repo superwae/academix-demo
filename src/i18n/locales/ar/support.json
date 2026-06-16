@@ -69,5 +69,6 @@
     "columnPriority": "الأولوية",
     "columnUpdated": "آخر تحديث",
     "noTickets": "لا توجد تذاكر ضمن هذا التصنيف."
-  }
+  },
+  "replyCount": "{{count}} ردود"
 }

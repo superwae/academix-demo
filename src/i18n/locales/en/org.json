@@ -9,7 +9,8 @@
     "OrgAdmin": "Admin",
     "OrgManager": "Manager",
     "OrgTeacher": "Teacher",
-    "OrgEmployee": "Employee"
+    "OrgEmployee": "Employee",
+    "OrgStudent": "Student"
   },
   "types": {
     "TeachingInstitution": "Teaching institution",
@@ -131,7 +132,8 @@
       "pickMembers": "{{picked}} of {{available}} selected",
       "noEligible": "All active members already have a seat on this course.",
       "submit": "Assign {{count}}"
-    }
+    },
+    "perSeat": "{{price}} / seat"
   },
   "compliance": {
     "title": "Training compliance",

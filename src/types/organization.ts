@@ -1,5 +1,5 @@
 export type OrganizationType = 'TeachingInstitution' | 'Employer'
-export type OrgMemberRole = 'OrgAdmin' | 'OrgManager' | 'OrgTeacher' | 'OrgEmployee'
+export type OrgMemberRole = 'OrgAdmin' | 'OrgManager' | 'OrgTeacher' | 'OrgEmployee' | 'OrgStudent'
 
 export interface OrganizationSummary {
   id: string

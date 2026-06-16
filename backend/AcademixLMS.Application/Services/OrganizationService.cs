@@ -191,7 +191,7 @@ public class OrganizationService : IOrganizationService
 
         if (org.Type == OrganizationType.TeachingInstitution && request.Role == OrgMemberRole.OrgEmployee)
             return Result<OrganizationMemberDto>.Failure(_localizer["TeachingInstitutionsNoEmployees"]);
-        if (org.Type == OrganizationType.Employer && request.Role == OrgMemberRole.OrgTeacher)
+        if (org.Type == OrganizationType.Employer && (request.Role == OrgMemberRole.OrgTeacher || request.Role == OrgMemberRole.OrgStudent))
             return Result<OrganizationMemberDto>.Failure(_localizer["EmployersNoTeachers"]);
 
         var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == email && !u.IsDeleted, cancellationToken);
@@ -508,7 +508,8 @@ public class OrganizationService : IOrganizationService
             user.Id, user.Email, member.OrganizationId, member.Organization.Slug));
     }
 
-    private static string GenerateInviteToken() => Convert.ToHexString(Guid.NewGuid().ToByteArray()) + Convert.ToHexString(Guid.NewGuid().ToByteArray());
+    private static string GenerateInviteToken() =>
+        Convert.ToHexString(System.Security.Cryptography.RandomNumberGenerator.GetBytes(32)).ToLowerInvariant();
 
     private static string BuildInviteEmailText(string orgName, OrgMemberRole role, string link, int days) =>
         $"You've been invited to join {orgName} on AcademiX as {role}.\n\n" +

@@ -21,7 +21,7 @@ import { useOrgStore } from '../../store/useOrgStore'
 import type { OrgMemberRole, OrganizationMember } from '../../types/organization'
 
 const ROLES_BY_TYPE: Record<string, OrgMemberRole[]> = {
-  TeachingInstitution: ['OrgAdmin', 'OrgTeacher'],
+  TeachingInstitution: ['OrgAdmin', 'OrgTeacher', 'OrgStudent'],
   Employer: ['OrgAdmin', 'OrgManager', 'OrgEmployee'],
 }
 
@@ -136,7 +136,7 @@ export function OrgMembersPage() {
       ) : (
         <div className="rounded-xl border border-border overflow-hidden">
           {/* Desktop table */}
-          <table className="hidden md:table w-full text-sm">
+          <table className="hidden xl:table w-full text-sm">
             <thead className="bg-muted/50 text-start">
               <tr>
                 <th className="px-4 py-3 text-start">{t('org:members.columnName')}</th>
@@ -191,16 +191,16 @@ export function OrgMembersPage() {
             </tbody>
           </table>
 
-          {/* Mobile cards */}
-          <ul className="md:hidden divide-y divide-border">
+          {/* Compact cards */}
+          <ul className="xl:hidden divide-y divide-border">
             {members.map((m) => (
-              <li key={m.id} className="p-4 space-y-1">
+              <li key={m.id} className="p-4 space-y-3">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <div className="font-medium truncate">
                       {m.firstName} {m.lastName}
                     </div>
-                    <div className="text-xs text-muted-foreground truncate">{m.email}</div>
+                    <div className="break-all text-xs text-muted-foreground">{m.email}</div>
                   </div>
                   {canManage && m.isActive && (
                     <Button
@@ -213,9 +213,19 @@ export function OrgMembersPage() {
                     </Button>
                   )}
                 </div>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <span>{t(`org:roles.${m.role}`)}</span>
-                  <span>•</span>
+                <div className="flex flex-col gap-3 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    {canManage && m.isActive ? (
+                      <Select
+                        value={m.role}
+                        onValueChange={(v) => handleRoleChange(m, v as OrgMemberRole)}
+                        className="h-9 w-full min-w-40 sm:w-48"
+                        options={availableRoles.map((r) => ({ value: r, label: t(`org:roles.${r}`) }))}
+                      />
+                    ) : (
+                      <span>{t(`org:roles.${m.role}`)}</span>
+                    )}
+                  </div>
                   <span>
                     {!m.isActive
                       ? t('org:members.statusInactive')

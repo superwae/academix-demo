@@ -3,6 +3,7 @@ import { CalendarDays } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
 import { cn } from "../../lib/cn";
+import { DemoDataBadge } from "../../components/admin/finance/DemoDataBadge";
 
 type BlockKey = "officeHours" | "registrarSync" | "certificates";
 
@@ -18,7 +19,7 @@ export function SecretaryCalendarPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">{t('admin:secretary.calendar.title')}</h1>
+        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">{t('admin:secretary.calendar.title')} <DemoDataBadge /></h1>
         <p className="text-muted-foreground mt-1">
           {t('admin:secretary.calendar.subtitle')}
         </p>

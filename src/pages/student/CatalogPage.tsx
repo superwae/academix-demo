@@ -580,7 +580,7 @@ export function CatalogPage() {
           }
         }}
       >
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-h-[90dvh] overflow-y-auto sm:w-[min(1120px,calc(100vw-2rem))] sm:max-w-5xl">
           {loadingCourseDetails ? (
             <div className="flex items-center justify-center py-12">
               <div className="text-center space-y-4">
@@ -597,7 +597,7 @@ export function CatalogPage() {
                 </DialogDescription>
               </DialogHeader>
 
-              <div className="mt-4 grid gap-4 md:grid-cols-2">
+              <div className="mt-4 grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
                 <div className="space-y-2">
                   <div className="text-sm font-medium">{t('student:catalog.about')}</div>
                   <div className="text-sm text-muted-foreground">{openCourse.description}</div>
@@ -622,7 +622,7 @@ export function CatalogPage() {
                     </div>
                   )}
                   {openCourse.sections && openCourse.sections.length > 0 ? (
-                    <div className="space-y-3 max-h-[400px] overflow-y-auto pe-2 scroll-fancy">
+                    <div className="grid max-h-[56dvh] gap-3 overflow-y-auto pe-2 scroll-fancy xl:grid-cols-2">
                       {openCourse.sections.map((sec) => (
                         <label
                           key={sec.id}
@@ -643,7 +643,7 @@ export function CatalogPage() {
                             />
                           </div>
                           <div className="min-w-0 flex-1">
-                            <div className="flex items-start justify-between gap-2 mb-2">
+                            <div className="flex flex-wrap items-start justify-between gap-2 mb-2">
                               <div className="text-sm font-semibold">
                                 {sec.name}
                               </div>
@@ -652,9 +652,9 @@ export function CatalogPage() {
                               </Badge>
                             </div>
                             {sec.meetingTimes && sec.meetingTimes.length > 0 ? (
-                              <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1.5">
+                              <div className="flex items-start gap-2 text-xs text-muted-foreground mb-1.5">
                                 <Calendar className="h-3.5 w-3.5 shrink-0 text-primary/70" />
-                                <span>{formatMeetingTimesForDisplay(sec.meetingTimes)}</span>
+                                <span className="min-w-0 leading-relaxed">{formatMeetingTimesForDisplay(sec.meetingTimes)}</span>
                               </div>
                             ) : (
                               <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1.5">
@@ -707,7 +707,7 @@ export function CatalogPage() {
                 </div>
               )}
 
-              <div className="mt-5 flex items-center justify-end gap-2">
+              <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-end">
                 <Button variant="outline" onClick={() => setOpenCourseId(null)}>
                   {t('student:catalog.close')}
                 </Button>

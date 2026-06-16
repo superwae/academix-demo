@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Input } from "../../components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
+import { DemoDataBadge } from "../../components/admin/finance/DemoDataBadge";
 
 type RoleKey = "student" | "guardian" | "instructor";
 type CohortKey = "spring2026" | "fall2025" | "faculty" | "none";
@@ -20,7 +21,7 @@ export function SecretaryDirectoryPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">{t('admin:secretary.directory.title')}</h1>
+        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">{t('admin:secretary.directory.title')} <DemoDataBadge /></h1>
         <p className="text-muted-foreground mt-1">
           {t('admin:secretary.directory.subtitle')}
         </p>

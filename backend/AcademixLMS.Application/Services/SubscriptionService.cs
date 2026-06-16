@@ -4,6 +4,7 @@ using AcademixLMS.Application.Interfaces;
 using AcademixLMS.Domain.Common;
 using AcademixLMS.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 
@@ -12,15 +13,18 @@ namespace AcademixLMS.Application.Services;
 public class SubscriptionService : ISubscriptionService
 {
     private readonly IApplicationDbContext _context;
+    private readonly IConfiguration _configuration;
     private readonly ILogger<SubscriptionService> _logger;
     private readonly IStringLocalizer<SubscriptionService> _localizer;
 
     public SubscriptionService(
         IApplicationDbContext context,
+        IConfiguration configuration,
         ILogger<SubscriptionService> logger,
         IStringLocalizer<SubscriptionService> localizer)
     {
         _context = context;
+        _configuration = configuration;
         _logger = logger;
         _localizer = localizer;
     }
@@ -44,13 +48,17 @@ public class SubscriptionService : ISubscriptionService
 
     public async Task<Result<bool>> CanCreateCourseAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-        var status = await BuildSubscriptionStatusAsync(userId, cancellationToken);
+        var status = await BuildSubscriptionStatusAsync(userId, organizationId: null, forcePersonal: false, cancellationToken);
         return Result<bool>.Success(status.CanCreateCourse);
     }
 
-    public async Task<Result<SubscriptionStatusDto>> GetSubscriptionStatusAsync(Guid userId, CancellationToken cancellationToken = default)
+    public async Task<Result<SubscriptionStatusDto>> GetSubscriptionStatusAsync(
+        Guid userId,
+        Guid? organizationId = null,
+        bool forcePersonal = false,
+        CancellationToken cancellationToken = default)
     {
-        var status = await BuildSubscriptionStatusAsync(userId, cancellationToken);
+        var status = await BuildSubscriptionStatusAsync(userId, organizationId, forcePersonal, cancellationToken);
         return Result<SubscriptionStatusDto>.Success(status);
     }
 
@@ -89,6 +97,15 @@ public class SubscriptionService : ISubscriptionService
             return Result<SubscriptionDto>.Failure(_localizer["UserNotFound"]);
         }
 
+        // Paid plans must go through the payment flow (POST /payments/initialize/subscription).
+        // This direct endpoint only activates free plans — or any plan when demo mode is on.
+        var price = billingInterval == BillingInterval.Monthly ? plan.MonthlyPrice : plan.YearlyPrice;
+        var demoMode = bool.TryParse(_configuration["Payments:DemoMode"], out var dm) && dm;
+        if (price > 0 && !demoMode)
+        {
+            return Result<SubscriptionDto>.Failure(_localizer["SubscriptionRequiresPayment"]);
+        }
+
         var now = DateTime.UtcNow;
         var periodEnd = billingInterval == BillingInterval.Monthly
             ? now.AddMonths(1)
@@ -113,6 +130,96 @@ public class SubscriptionService : ISubscriptionService
         subscription.Plan = plan;
 
         _logger.LogInformation("User {UserId} subscribed to plan '{PlanName}' ({Interval}).", userId, plan.Name, billingInterval);
+        return Result<SubscriptionDto>.Success(MapToSubscriptionDto(subscription));
+    }
+
+    public async Task<Result<SubscriptionDto>> SubscribeOrganizationAsync(
+        Guid requestingUserId,
+        Guid organizationId,
+        Guid planId,
+        BillingInterval billingInterval,
+        CancellationToken cancellationToken = default)
+    {
+        var organization = await _context.Organizations
+            .Include(o => o.Owner)
+            .FirstOrDefaultAsync(o => o.Id == organizationId && !o.IsDeleted, cancellationToken);
+
+        if (organization == null)
+            return Result<SubscriptionDto>.Failure("Organization not found.");
+
+        var isOrgAdmin = await _context.OrganizationMembers.AnyAsync(m =>
+            m.OrganizationId == organizationId &&
+            m.UserId == requestingUserId &&
+            m.IsActive &&
+            !m.IsDeleted &&
+            m.Role == OrgMemberRole.OrgAdmin,
+            cancellationToken);
+
+        var isPlatformAdmin = await _context.UserRoles
+            .Include(ur => ur.Role)
+            .AnyAsync(ur =>
+                ur.UserId == requestingUserId &&
+                !ur.IsDeleted &&
+                !ur.Role.IsDeleted &&
+                (ur.Role.Name == "Admin" || ur.Role.Name == "SuperAdmin"),
+                cancellationToken);
+
+        if (!isOrgAdmin && !isPlatformAdmin)
+            return Result<SubscriptionDto>.Failure("Only organization admins can manage this organization's subscription.");
+
+        if (organization.SubscriptionId.HasValue)
+        {
+            var activeExisting = await _context.Subscriptions.AnyAsync(s =>
+                s.Id == organization.SubscriptionId.Value &&
+                s.Status == SubscriptionStatus.Active &&
+                !s.IsDeleted,
+                cancellationToken);
+
+            if (activeExisting)
+                return Result<SubscriptionDto>.Failure("Organization already has an active subscription.");
+        }
+
+        var plan = await _context.SubscriptionPlans
+            .FirstOrDefaultAsync(p => p.Id == planId && !p.IsDeleted && p.IsActive, cancellationToken);
+
+        if (plan == null)
+            return Result<SubscriptionDto>.Failure(_localizer["PlanNotFound"]);
+
+        var owner = organization.Owner ?? await _context.Users
+            .FirstOrDefaultAsync(u => u.Id == organization.OwnerUserId && !u.IsDeleted, cancellationToken);
+
+        if (owner == null)
+            return Result<SubscriptionDto>.Failure("Organization owner not found.");
+
+        var now = DateTime.UtcNow;
+        var subscription = new Subscription
+        {
+            UserId = owner.Id,
+            PlanId = plan.Id,
+            BillingInterval = billingInterval,
+            Status = SubscriptionStatus.Active,
+            CurrentPeriodStart = now,
+            CurrentPeriodEnd = billingInterval == BillingInterval.Monthly ? now.AddMonths(1) : now.AddYears(1),
+            CreatedBy = requestingUserId
+        };
+
+        _context.Subscriptions.Add(subscription);
+        await _context.SaveChangesAsync(cancellationToken);
+
+        organization.SubscriptionId = subscription.Id;
+        organization.UpdatedAt = DateTime.UtcNow;
+        organization.UpdatedBy = requestingUserId;
+        await _context.SaveChangesAsync(cancellationToken);
+
+        subscription.User = owner;
+        subscription.Plan = plan;
+
+        _logger.LogInformation(
+            "Organization {OrganizationId} subscribed to plan '{PlanName}' by user {UserId}.",
+            organizationId,
+            plan.Name,
+            requestingUserId);
+
         return Result<SubscriptionDto>.Success(MapToSubscriptionDto(subscription));
     }
 
@@ -184,43 +291,50 @@ public class SubscriptionService : ISubscriptionService
         return Result.Success();
     }
 
-    private async Task<SubscriptionStatusDto> BuildSubscriptionStatusAsync(Guid userId, CancellationToken cancellationToken)
+    private async Task<SubscriptionStatusDto> BuildSubscriptionStatusAsync(
+        Guid userId,
+        Guid? organizationId,
+        bool forcePersonal,
+        CancellationToken cancellationToken)
     {
+        if (organizationId.HasValue && !forcePersonal)
+        {
+            var orgMembership = await _context.OrganizationMembers
+                .Include(m => m.Organization)
+                .FirstOrDefaultAsync(m =>
+                    m.OrganizationId == organizationId.Value &&
+                    m.UserId == userId && m.IsActive && !m.IsDeleted &&
+                    (m.Role == OrgMemberRole.OrgTeacher || m.Role == OrgMemberRole.OrgAdmin),
+                    cancellationToken);
+
+            if (orgMembership is not null)
+            {
+                return await BuildOrganizationSubscriptionStatusAsync(
+                    orgMembership.Organization,
+                    orgMembership.OrganizationId,
+                    cancellationToken);
+            }
+        }
+
         // If the user is an active OrgTeacher under a Teaching Institution, the org's subscription
         // drives course capacity — not the teacher's personal plan. The quota is shared across every
         // OrgTeacher in the institution (pooled).
-        var orgTeacherMembership = await _context.OrganizationMembers
-            .Include(m => m.Organization)
-            .FirstOrDefaultAsync(m =>
-                m.UserId == userId && m.IsActive && !m.IsDeleted &&
-                m.Role == OrgMemberRole.OrgTeacher &&
-                m.Organization.Type == OrganizationType.TeachingInstitution,
-                cancellationToken);
+        var orgTeacherMembership = forcePersonal
+            ? null
+            : await _context.OrganizationMembers
+                .Include(m => m.Organization)
+                .FirstOrDefaultAsync(m =>
+                    m.UserId == userId && m.IsActive && !m.IsDeleted &&
+                    m.Role == OrgMemberRole.OrgTeacher &&
+                    m.Organization.Type == OrganizationType.TeachingInstitution,
+                    cancellationToken);
 
-        if (orgTeacherMembership?.Organization.SubscriptionId is { } orgSubscriptionId)
+        if (orgTeacherMembership is not null)
         {
-            var orgSubscription = await _context.Subscriptions
-                .Include(s => s.Plan)
-                .FirstOrDefaultAsync(s => s.Id == orgSubscriptionId && s.Status == SubscriptionStatus.Active && !s.IsDeleted, cancellationToken);
-
-            if (orgSubscription is not null)
-            {
-                var orgCourseCount = await _context.Courses
-                    .CountAsync(c => c.OrganizationId == orgTeacherMembership.OrganizationId && !c.IsDeleted, cancellationToken);
-
-                var orgMax = orgSubscription.Plan.MaxCourses;
-                var orgCanCreate = !orgMax.HasValue || orgCourseCount < orgMax.Value;
-
-                return new SubscriptionStatusDto
-                {
-                    HasActiveSubscription = true,
-                    PlanName = orgSubscription.Plan.Name + " (org-pooled)",
-                    MaxCourses = orgMax,
-                    CurrentCourseCount = orgCourseCount,
-                    CanCreateCourse = orgCanCreate,
-                    RemainingCourses = orgMax.HasValue ? Math.Max(0, orgMax.Value - orgCourseCount) : null
-                };
-            }
+            return await BuildOrganizationSubscriptionStatusAsync(
+                orgTeacherMembership.Organization,
+                orgTeacherMembership.OrganizationId,
+                cancellationToken);
         }
 
         var subscription = await _context.Subscriptions
@@ -230,7 +344,10 @@ public class SubscriptionService : ISubscriptionService
             .FirstOrDefaultAsync(cancellationToken);
 
         var courseCount = await _context.Courses
-            .CountAsync(c => c.InstructorId == userId && !c.IsDeleted, cancellationToken);
+            .CountAsync(c => c.InstructorId == userId && c.OrganizationId == null && !c.IsDeleted, cancellationToken);
+        var totalSeats = await _context.CourseSections
+            .Where(s => !s.IsDeleted && !s.Course.IsDeleted && s.Course.InstructorId == userId && s.Course.OrganizationId == null)
+            .SumAsync(s => (int?)s.MaxSeats, cancellationToken) ?? 0;
 
         if (subscription == null)
         {
@@ -238,7 +355,8 @@ public class SubscriptionService : ISubscriptionService
             {
                 HasActiveSubscription = false,
                 CurrentCourseCount = courseCount,
-                CanCreateCourse = false
+                CanCreateCourse = false,
+                CurrentTotalSeats = totalSeats
             };
         }
 
@@ -252,7 +370,72 @@ public class SubscriptionService : ISubscriptionService
             MaxCourses = maxCourses,
             CurrentCourseCount = courseCount,
             CanCreateCourse = canCreate,
-            RemainingCourses = maxCourses.HasValue ? Math.Max(0, maxCourses.Value - courseCount) : null
+            RemainingCourses = maxCourses.HasValue ? Math.Max(0, maxCourses.Value - courseCount) : null,
+            MaxSeatsPerCourse = subscription.Plan.MaxSeatsPerCourse,
+            MaxTotalSeats = subscription.Plan.MaxTotalSeats,
+            CurrentTotalSeats = totalSeats,
+            RemainingTotalSeats = subscription.Plan.MaxTotalSeats.HasValue
+                ? Math.Max(0, subscription.Plan.MaxTotalSeats.Value - totalSeats)
+                : null
+        };
+    }
+
+    private async Task<SubscriptionStatusDto> BuildOrganizationSubscriptionStatusAsync(
+        Organization organization,
+        Guid organizationId,
+        CancellationToken cancellationToken)
+    {
+        var courseCount = await _context.Courses
+            .CountAsync(c => c.OrganizationId == organizationId && !c.IsDeleted, cancellationToken);
+        var totalSeats = await _context.CourseSections
+            .Where(s => !s.IsDeleted && !s.Course.IsDeleted && s.Course.OrganizationId == organizationId)
+            .SumAsync(s => (int?)s.MaxSeats, cancellationToken) ?? 0;
+
+        if (organization.SubscriptionId is not { } subscriptionId)
+        {
+            return new SubscriptionStatusDto
+            {
+                HasActiveSubscription = false,
+                PlanName = organization.Name,
+                CurrentCourseCount = courseCount,
+                CanCreateCourse = false,
+                CurrentTotalSeats = totalSeats
+            };
+        }
+
+        var subscription = await _context.Subscriptions
+            .Include(s => s.Plan)
+            .FirstOrDefaultAsync(s => s.Id == subscriptionId && s.Status == SubscriptionStatus.Active && !s.IsDeleted, cancellationToken);
+
+        if (subscription is null)
+        {
+            return new SubscriptionStatusDto
+            {
+                HasActiveSubscription = false,
+                PlanName = organization.Name,
+                CurrentCourseCount = courseCount,
+                CanCreateCourse = false,
+                CurrentTotalSeats = totalSeats
+            };
+        }
+
+        var maxCourses = subscription.Plan.MaxCourses;
+        var canCreate = !maxCourses.HasValue || courseCount < maxCourses.Value;
+
+        return new SubscriptionStatusDto
+        {
+            HasActiveSubscription = true,
+            PlanName = subscription.Plan.Name + " (org-pooled)",
+            MaxCourses = maxCourses,
+            CurrentCourseCount = courseCount,
+            CanCreateCourse = canCreate,
+            RemainingCourses = maxCourses.HasValue ? Math.Max(0, maxCourses.Value - courseCount) : null,
+            MaxSeatsPerCourse = subscription.Plan.MaxSeatsPerCourse,
+            MaxTotalSeats = subscription.Plan.MaxTotalSeats,
+            CurrentTotalSeats = totalSeats,
+            RemainingTotalSeats = subscription.Plan.MaxTotalSeats.HasValue
+                ? Math.Max(0, subscription.Plan.MaxTotalSeats.Value - totalSeats)
+                : null
         };
     }
 

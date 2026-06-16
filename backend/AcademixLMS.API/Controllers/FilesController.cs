@@ -16,6 +16,19 @@ public class FilesController : ControllerBase
     private readonly ILogger<FilesController> _logger;
 
     private const long MaxFileSizeBytes = 25 * 1024 * 1024; // 25 MB
+
+    /// <summary>Folders that may be uploaded into. Prevents arbitrary folder creation.</summary>
+    private static readonly HashSet<string> AllowedFolders = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "assignments", "course-materials", "profile-photos", "cover-images"
+    };
+
+    /// <summary>Folders whose files are display assets (avatars/covers) rendered via plain &lt;img&gt; tags — these stay public. Everything else requires authentication.</summary>
+    private static readonly HashSet<string> PublicFolders = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "profile-photos", "cover-images"
+    };
+
     private static readonly HashSet<string> AllowedContentTypes = new(StringComparer.OrdinalIgnoreCase)
     {
         "application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -45,6 +58,9 @@ public class FilesController : ControllerBase
         if (file == null || file.Length == 0)
             return BadRequest(new { error = "No file provided." });
 
+        if (!AllowedFolders.Contains(folder))
+            return BadRequest(new { error = "Invalid upload folder." });
+
         if (file.Length > MaxFileSizeBytes)
             return BadRequest(new { error = $"File size exceeds maximum allowed ({MaxFileSizeBytes / (1024 * 1024)} MB)." });
 
@@ -72,14 +88,21 @@ public class FilesController : ControllerBase
     }
 
     /// <summary>
-    /// Download/serve an uploaded file.
+    /// Download/serve an uploaded file. Public display assets (avatars, covers) are served
+    /// anonymously; everything else (assignment submissions, course materials) requires auth.
     /// </summary>
     [HttpGet("{folder}/{fileName}")]
     [AllowAnonymous]
     [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public IActionResult GetFile(string folder, string fileName)
     {
+        // Authentication middleware still runs for [AllowAnonymous] endpoints, so a valid
+        // Bearer token populates User even here.
+        if (!PublicFolders.Contains(folder) && User?.Identity?.IsAuthenticated != true)
+            return Unauthorized();
+
         var relativePath = $"{folder}/{fileName}";
         var fullPath = _storage.GetFullPath(relativePath);
         if (string.IsNullOrEmpty(fullPath) || !System.IO.File.Exists(fullPath))

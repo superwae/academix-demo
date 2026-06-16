@@ -93,6 +93,9 @@ public static class DemoOrganizationSeeder
         await EnsureMemberAsync(context, acme.Id, acmeOwner.Id, OrgMemberRole.OrgAdmin, cancellationToken);
         await EnsureMemberAsync(context, amman.Id, ammanOwner.Id, OrgMemberRole.OrgAdmin, cancellationToken);
 
+        await EnsureOrganizationSubscriptionAsync(context, acme, acmeOwner.Id, "Enterprise", cancellationToken);
+        await EnsureOrganizationSubscriptionAsync(context, amman, ammanOwner.Id, "Enterprise", cancellationToken);
+
         // Promote the demo student01..03 accounts to Acme employees so the member list has content
         foreach (var email in new[] { "student01@academix.com", "student02@academix.com", "student03@academix.com" })
         {
@@ -150,9 +153,15 @@ public static class DemoOrganizationSeeder
         OrgMemberRole role,
         CancellationToken cancellationToken)
     {
-        var exists = await context.OrganizationMembers
-            .AnyAsync(m => m.OrganizationId == orgId && m.UserId == userId && m.IsActive && !m.IsDeleted, cancellationToken);
-        if (exists) return;
+        var existing = await context.OrganizationMembers
+            .FirstOrDefaultAsync(m => m.OrganizationId == orgId && m.UserId == userId && m.IsActive && !m.IsDeleted, cancellationToken);
+        if (existing is not null)
+        {
+            existing.Role = role;
+            existing.InviteAcceptedAt ??= DateTime.UtcNow;
+            existing.UpdatedAt = DateTime.UtcNow;
+            return;
+        }
 
         context.OrganizationMembers.Add(new OrganizationMember
         {
@@ -164,5 +173,44 @@ public static class DemoOrganizationSeeder
             IsActive = true,
             InviteAcceptedAt = DateTime.UtcNow
         });
+    }
+
+    private static async Task EnsureOrganizationSubscriptionAsync(
+        ApplicationDbContext context,
+        Organization org,
+        Guid ownerUserId,
+        string planName,
+        CancellationToken cancellationToken)
+    {
+        if (org.SubscriptionId is { } existingId)
+        {
+            var activeExisting = await context.Subscriptions.AnyAsync(
+                s => s.Id == existingId && s.Status == SubscriptionStatus.Active && !s.IsDeleted,
+                cancellationToken);
+            if (activeExisting) return;
+        }
+
+        var plan = await context.SubscriptionPlans
+            .FirstOrDefaultAsync(p => p.Name == planName && p.IsActive && !p.IsDeleted, cancellationToken);
+        if (plan is null) return;
+
+        var now = DateTime.UtcNow;
+        var subscription = new Subscription
+        {
+            Id = Guid.NewGuid(),
+            UserId = ownerUserId,
+            PlanId = plan.Id,
+            BillingInterval = BillingInterval.Yearly,
+            Status = SubscriptionStatus.Active,
+            CurrentPeriodStart = now,
+            CurrentPeriodEnd = now.AddYears(1),
+            CreatedAt = now,
+            CreatedBy = ownerUserId
+        };
+
+        context.Subscriptions.Add(subscription);
+        org.SubscriptionId = subscription.Id;
+        org.UpdatedAt = now;
+        await context.SaveChangesAsync(cancellationToken);
     }
 }

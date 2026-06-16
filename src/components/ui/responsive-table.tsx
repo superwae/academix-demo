@@ -45,35 +45,37 @@ export function ResponsiveTable<T>({
   return (
     <>
       {/* Desktop / tablet: real table */}
-      <div className="hidden md:block">
+      <div className="hidden overflow-x-auto md:block">
         {isEmpty ? (
           emptyNode
         ) : (
-          <Table>
-            {caption ? (
-              <caption className="mt-2 text-sm text-muted-foreground">{caption}</caption>
-            ) : null}
-            <TableHeader>
-              <TableRow>
-                {columns.map((column) => (
-                  <TableHead key={column.id} className={column.className}>
-                    {column.header}
-                  </TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data.map((row) => (
-                <TableRow key={rowKey(row)}>
+          <div className="min-w-[760px]">
+            <Table>
+              {caption ? (
+                <caption className="mt-2 text-sm text-muted-foreground">{caption}</caption>
+              ) : null}
+              <TableHeader>
+                <TableRow>
                   {columns.map((column) => (
-                    <TableCell key={column.id} className={column.className}>
-                      {column.cell(row)}
-                    </TableCell>
+                    <TableHead key={column.id} className={column.className}>
+                      {column.header}
+                    </TableHead>
                   ))}
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {data.map((row) => (
+                  <TableRow key={rowKey(row)}>
+                    {columns.map((column) => (
+                      <TableCell key={column.id} className={column.className}>
+                        {column.cell(row)}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         )}
       </div>
 
@@ -96,10 +98,10 @@ export function ResponsiveTable<T>({
                   {visibleColumns.map((column) => (
                     <div
                       key={column.id}
-                      className="flex justify-between gap-3 text-sm"
+                      className="flex min-w-0 flex-col gap-1 rounded-lg bg-background/60 p-2 text-sm"
                     >
                       <span className="text-muted-foreground">{column.header}</span>
-                      <span className="font-medium text-end">{column.cell(row)}</span>
+                      <span className="block min-w-0 font-medium [&_*]:min-w-0">{column.cell(row)}</span>
                     </div>
                   ))}
                 </div>

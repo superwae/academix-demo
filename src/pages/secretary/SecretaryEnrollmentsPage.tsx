@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
 import { Badge } from "../../components/ui/badge";
+import { DemoDataBadge } from "../../components/admin/finance/DemoDataBadge";
 
 type RowStatus = "pending" | "review" | "approved";
 type RowChannel = "Web" | "Referral";
@@ -36,7 +37,7 @@ export function SecretaryEnrollmentsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">{t("admin:secretary.enrollments.title")}</h1>
+        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">{t("admin:secretary.enrollments.title")} <DemoDataBadge /></h1>
         <p className="text-muted-foreground mt-1">
           {t("admin:secretary.enrollments.subtitle")}
         </p>

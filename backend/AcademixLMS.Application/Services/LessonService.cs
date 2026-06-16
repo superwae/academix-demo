@@ -1,6 +1,7 @@
 using AcademixLMS.Application.Common;
 using AcademixLMS.Application.DTOs.Lesson;
 using AcademixLMS.Application.Interfaces;
+using AcademixLMS.Domain.Common;
 using AcademixLMS.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -20,7 +21,7 @@ public class LessonService : ILessonService
         _logger = logger;
     }
 
-    public async Task<Result<LessonDto>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<Result<LessonDto>> GetByIdAsync(Guid id, Guid userId, bool isAdmin, CancellationToken cancellationToken = default)
     {
         var lesson = await _context.Lessons
             .Include(l => l.Course)
@@ -32,12 +33,22 @@ public class LessonService : ILessonService
             return Result<LessonDto>.Failure("Lesson not found.");
         }
 
+        if (!await CanViewCourseLessonsAsync(lesson.CourseId, userId, isAdmin, cancellationToken))
+        {
+            return Result<LessonDto>.Failure("You do not have access to this lesson.");
+        }
+
         var dto = MapToLessonDto(lesson);
         return Result<LessonDto>.Success(dto);
     }
 
-    public async Task<Result<List<LessonDto>>> GetByCourseAsync(Guid courseId, CancellationToken cancellationToken = default)
+    public async Task<Result<List<LessonDto>>> GetByCourseAsync(Guid courseId, Guid userId, bool isAdmin, CancellationToken cancellationToken = default)
     {
+        if (!await CanViewCourseLessonsAsync(courseId, userId, isAdmin, cancellationToken))
+        {
+            return Result<List<LessonDto>>.Failure("You do not have access to this course lessons.");
+        }
+
         var lessons = await _context.Lessons
             .Include(l => l.Section)
             .Where(l => l.CourseId == courseId && !l.IsDeleted)
@@ -48,8 +59,23 @@ public class LessonService : ILessonService
         return Result<List<LessonDto>>.Success(dtos);
     }
 
-    public async Task<Result<List<LessonDto>>> GetBySectionAsync(Guid sectionId, CancellationToken cancellationToken = default)
+    public async Task<Result<List<LessonDto>>> GetBySectionAsync(Guid sectionId, Guid userId, bool isAdmin, CancellationToken cancellationToken = default)
     {
+        var courseId = await _context.LessonSections
+            .Where(s => s.Id == sectionId && !s.IsDeleted)
+            .Select(s => (Guid?)s.CourseId)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (!courseId.HasValue)
+        {
+            return Result<List<LessonDto>>.Failure("Lesson section not found.");
+        }
+
+        if (!await CanViewCourseLessonsAsync(courseId.Value, userId, isAdmin, cancellationToken))
+        {
+            return Result<List<LessonDto>>.Failure("You do not have access to this course lessons.");
+        }
+
         var lessons = await _context.Lessons
             .Include(l => l.Section)
             .Where(l => l.SectionId == sectionId && !l.IsDeleted)
@@ -60,7 +86,7 @@ public class LessonService : ILessonService
         return Result<List<LessonDto>>.Success(dtos);
     }
 
-    public async Task<Result<LessonDto>> CreateAsync(CreateLessonRequest request, Guid userId, CancellationToken cancellationToken = default)
+    public async Task<Result<LessonDto>> CreateAsync(CreateLessonRequest request, Guid userId, bool isAdmin, CancellationToken cancellationToken = default)
     {
         // Verify course exists
         var course = await _context.Courses
@@ -69,6 +95,11 @@ public class LessonService : ILessonService
         if (course == null)
         {
             return Result<LessonDto>.Failure("Course not found.");
+        }
+
+        if (!CanManageCourseLessons(course, userId, isAdmin))
+        {
+            return Result<LessonDto>.Failure("Only the course instructor or an admin can add lessons.");
         }
 
         // Verify section exists if provided
@@ -111,14 +142,20 @@ public class LessonService : ILessonService
         }
     }
 
-    public async Task<Result<LessonDto>> UpdateAsync(Guid id, UpdateLessonRequest request, Guid userId, CancellationToken cancellationToken = default)
+    public async Task<Result<LessonDto>> UpdateAsync(Guid id, UpdateLessonRequest request, Guid userId, bool isAdmin, CancellationToken cancellationToken = default)
     {
         var lesson = await _context.Lessons
+            .Include(l => l.Course)
             .FirstOrDefaultAsync(l => l.Id == id && !l.IsDeleted, cancellationToken);
 
         if (lesson == null)
         {
             return Result<LessonDto>.Failure("Lesson not found.");
+        }
+
+        if (!CanManageCourseLessons(lesson.Course, userId, isAdmin))
+        {
+            return Result<LessonDto>.Failure("Only the course instructor or an admin can update lessons.");
         }
 
         // Verify section if provided
@@ -157,14 +194,20 @@ public class LessonService : ILessonService
         }
     }
 
-    public async Task<Result<bool>> DeleteAsync(Guid id, Guid userId, CancellationToken cancellationToken = default)
+    public async Task<Result<bool>> DeleteAsync(Guid id, Guid userId, bool isAdmin, CancellationToken cancellationToken = default)
     {
         var lesson = await _context.Lessons
+            .Include(l => l.Course)
             .FirstOrDefaultAsync(l => l.Id == id && !l.IsDeleted, cancellationToken);
 
         if (lesson == null)
         {
             return Result<bool>.Failure("Lesson not found.");
+        }
+
+        if (!CanManageCourseLessons(lesson.Course, userId, isAdmin))
+        {
+            return Result<bool>.Failure("Only the course instructor or an admin can delete lessons.");
         }
 
         lesson.IsDeleted = true;
@@ -183,8 +226,13 @@ public class LessonService : ILessonService
         }
     }
 
-    public async Task<Result<List<LessonSectionDto>>> GetCourseSectionsAsync(Guid courseId, CancellationToken cancellationToken = default)
+    public async Task<Result<List<LessonSectionDto>>> GetCourseSectionsAsync(Guid courseId, Guid userId, bool isAdmin, CancellationToken cancellationToken = default)
     {
+        if (!await CanViewCourseLessonsAsync(courseId, userId, isAdmin, cancellationToken))
+        {
+            return Result<List<LessonSectionDto>>.Failure("You do not have access to this course sections.");
+        }
+
         var sections = await _context.LessonSections
             .Where(s => s.CourseId == courseId && !s.IsDeleted)
             .OrderBy(s => s.Order)
@@ -194,7 +242,7 @@ public class LessonService : ILessonService
         return Result<List<LessonSectionDto>>.Success(dtos);
     }
 
-    public async Task<Result<LessonSectionDto>> GetSectionByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<Result<LessonSectionDto>> GetSectionByIdAsync(Guid id, Guid userId, bool isAdmin, CancellationToken cancellationToken = default)
     {
         var section = await _context.LessonSections
             .FirstOrDefaultAsync(s => s.Id == id && !s.IsDeleted, cancellationToken);
@@ -204,11 +252,16 @@ public class LessonService : ILessonService
             return Result<LessonSectionDto>.Failure("Lesson section not found.");
         }
 
+        if (!await CanViewCourseLessonsAsync(section.CourseId, userId, isAdmin, cancellationToken))
+        {
+            return Result<LessonSectionDto>.Failure("You do not have access to this course section.");
+        }
+
         var dto = MapToSectionDto(section);
         return Result<LessonSectionDto>.Success(dto);
     }
 
-    public async Task<Result<LessonSectionDto>> CreateSectionAsync(CreateLessonSectionRequest request, Guid userId, CancellationToken cancellationToken = default)
+    public async Task<Result<LessonSectionDto>> CreateSectionAsync(CreateLessonSectionRequest request, Guid userId, bool isAdmin, CancellationToken cancellationToken = default)
     {
         // Verify course exists
         var course = await _context.Courses
@@ -217,6 +270,11 @@ public class LessonService : ILessonService
         if (course == null)
         {
             return Result<LessonSectionDto>.Failure("Course not found.");
+        }
+
+        if (!CanManageCourseLessons(course, userId, isAdmin))
+        {
+            return Result<LessonSectionDto>.Failure("Only the course instructor or an admin can add lesson sections.");
         }
 
         var section = new LessonSection
@@ -243,14 +301,20 @@ public class LessonService : ILessonService
         }
     }
 
-    public async Task<Result<LessonSectionDto>> UpdateSectionAsync(Guid id, UpdateLessonSectionRequest request, Guid userId, CancellationToken cancellationToken = default)
+    public async Task<Result<LessonSectionDto>> UpdateSectionAsync(Guid id, UpdateLessonSectionRequest request, Guid userId, bool isAdmin, CancellationToken cancellationToken = default)
     {
         var section = await _context.LessonSections
+            .Include(s => s.Course)
             .FirstOrDefaultAsync(s => s.Id == id && !s.IsDeleted, cancellationToken);
 
         if (section == null)
         {
             return Result<LessonSectionDto>.Failure("Lesson section not found.");
+        }
+
+        if (!CanManageCourseLessons(section.Course, userId, isAdmin))
+        {
+            return Result<LessonSectionDto>.Failure("Only the course instructor or an admin can update lesson sections.");
         }
 
         if (request.Title != null) section.Title = request.Title;
@@ -272,14 +336,20 @@ public class LessonService : ILessonService
         }
     }
 
-    public async Task<Result<bool>> DeleteSectionAsync(Guid id, Guid userId, CancellationToken cancellationToken = default)
+    public async Task<Result<bool>> DeleteSectionAsync(Guid id, Guid userId, bool isAdmin, CancellationToken cancellationToken = default)
     {
         var section = await _context.LessonSections
+            .Include(s => s.Course)
             .FirstOrDefaultAsync(s => s.Id == id && !s.IsDeleted, cancellationToken);
 
         if (section == null)
         {
             return Result<bool>.Failure("Lesson section not found.");
+        }
+
+        if (!CanManageCourseLessons(section.Course, userId, isAdmin))
+        {
+            return Result<bool>.Failure("Only the course instructor or an admin can delete lesson sections.");
         }
 
         section.IsDeleted = true;
@@ -298,6 +368,32 @@ public class LessonService : ILessonService
             _logger.LogError(ex, "Error deleting lesson section {SectionId}", id);
             return Result<bool>.Failure("Failed to delete lesson section.");
         }
+    }
+
+    private async Task<bool> CanViewCourseLessonsAsync(Guid courseId, Guid userId, bool isAdmin, CancellationToken ct)
+    {
+        if (isAdmin)
+            return true;
+
+        var course = await _context.Courses
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.Id == courseId && !c.IsDeleted, ct);
+        if (course == null)
+            return false;
+        if (course.InstructorId == userId)
+            return true;
+
+        return await _context.Enrollments.AnyAsync(
+            e => e.UserId == userId &&
+                 e.CourseId == courseId &&
+                 !e.IsDeleted &&
+                 (e.Status == EnrollmentStatus.Active || e.Status == EnrollmentStatus.Completed),
+            ct);
+    }
+
+    private static bool CanManageCourseLessons(Course course, Guid userId, bool isAdmin)
+    {
+        return isAdmin || course.InstructorId == userId;
     }
 
     private static LessonDto MapToLessonDto(Lesson lesson)

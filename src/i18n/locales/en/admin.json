@@ -661,7 +661,9 @@
       "confirmLabel": "Cancel Subscription"
     },
     "toasts": {
-      "cancelled": "Subscription cancelled"
+      "cancelled": "Subscription cancelled",
+      "demoActivated": "Subscription activated!",
+      "demoActivatedDescription": "Demo payment recorded — the plan is now active."
     },
     "errors": {
       "loadFailed": "Failed to load subscription data",
@@ -751,7 +753,12 @@
         "viewAllPurchases": "View all purchases",
         "viewRefundHistory": "View refund history",
         "viewRevenueBreakdown": "View revenue breakdown",
-        "instructorsAwaiting": "{{count}} instructors awaiting"
+        "instructorsAwaiting": "{{count}} instructors awaiting",
+        "revenueThisMonth": "Revenue This Month",
+        "completedPayments": "Completed Payments",
+        "ofTotalPayments": "of {{count}} total",
+        "pendingFailed": "Pending / Failed",
+        "needsAttention": "May need attention"
       },
       "charts": {
         "revenueTrend": "Revenue Trend",
@@ -1067,7 +1074,8 @@
           "refundReason": "Refund Reason",
           "failureReason": "Failure Reason"
         }
-      }
+      },
+      "subscriptionItem": "Subscription"
     },
     "components": {
       "dataTable": {
@@ -1089,7 +1097,8 @@
         "all": "All"
       },
       "kpiStatCard": {}
-    }
+    },
+    "noTransactions": "No transactions yet."
   },
   "accountant": {
     "dashboard": {

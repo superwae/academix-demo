@@ -48,6 +48,7 @@ export interface YTPlayer {
   destroy(): void;
   seekTo(seconds: number, allowSeekAhead: boolean): void;
   getCurrentTime(): number;
+  getDuration?(): number;
 }
 
 let vimeoApiPromise: Promise<void> | null = null;

@@ -70,7 +70,7 @@ export function OrgLicenseDetailPage() {
         (m) =>
           m.isActive &&
           m.inviteAccepted &&
-          (m.role === 'OrgEmployee' || m.role === 'OrgTeacher') &&
+          (m.role === 'OrgEmployee' || m.role === 'OrgTeacher' || m.role === 'OrgStudent') &&
           !assignedUserIds.has(m.userId)
       ),
     [members, assignedUserIds]

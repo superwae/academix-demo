@@ -31,7 +31,9 @@ public class LessonsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetLesson(Guid id, CancellationToken cancellationToken)
     {
-        var result = await _lessonService.GetByIdAsync(id, cancellationToken);
+        var userId = User.GetRequiredUserId();
+        var isAdmin = User.HasRole("Admin") || User.HasRole("SuperAdmin");
+        var result = await _lessonService.GetByIdAsync(id, userId, isAdmin, cancellationToken);
         
         if (!result.IsSuccess)
             return NotFound(result.Error);
@@ -47,7 +49,9 @@ public class LessonsController : ControllerBase
     [ProducesResponseType(typeof(List<LessonDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetCourseLessons(Guid courseId, CancellationToken cancellationToken)
     {
-        var result = await _lessonService.GetByCourseAsync(courseId, cancellationToken);
+        var userId = User.GetRequiredUserId();
+        var isAdmin = User.HasRole("Admin") || User.HasRole("SuperAdmin");
+        var result = await _lessonService.GetByCourseAsync(courseId, userId, isAdmin, cancellationToken);
         
         if (!result.IsSuccess)
             return BadRequest(result.Error);
@@ -63,7 +67,9 @@ public class LessonsController : ControllerBase
     [ProducesResponseType(typeof(List<LessonDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetSectionLessons(Guid sectionId, CancellationToken cancellationToken)
     {
-        var result = await _lessonService.GetBySectionAsync(sectionId, cancellationToken);
+        var userId = User.GetRequiredUserId();
+        var isAdmin = User.HasRole("Admin") || User.HasRole("SuperAdmin");
+        var result = await _lessonService.GetBySectionAsync(sectionId, userId, isAdmin, cancellationToken);
         
         if (!result.IsSuccess)
             return BadRequest(result.Error);
@@ -81,8 +87,9 @@ public class LessonsController : ControllerBase
     public async Task<IActionResult> CreateLesson([FromBody] CreateLessonRequest request, CancellationToken cancellationToken)
     {
         var userId = User.GetRequiredUserId();
+        var isAdmin = User.HasRole("Admin") || User.HasRole("SuperAdmin");
         
-        var result = await _lessonService.CreateAsync(request, userId, cancellationToken);
+        var result = await _lessonService.CreateAsync(request, userId, isAdmin, cancellationToken);
         
         if (!result.IsSuccess)
             return BadRequest(result.Error);
@@ -101,8 +108,9 @@ public class LessonsController : ControllerBase
     public async Task<IActionResult> UpdateLesson(Guid id, [FromBody] UpdateLessonRequest request, CancellationToken cancellationToken)
     {
         var userId = User.GetRequiredUserId();
+        var isAdmin = User.HasRole("Admin") || User.HasRole("SuperAdmin");
         
-        var result = await _lessonService.UpdateAsync(id, request, userId, cancellationToken);
+        var result = await _lessonService.UpdateAsync(id, request, userId, isAdmin, cancellationToken);
         
         if (!result.IsSuccess)
         {
@@ -125,8 +133,9 @@ public class LessonsController : ControllerBase
     public async Task<IActionResult> DeleteLesson(Guid id, CancellationToken cancellationToken)
     {
         var userId = User.GetRequiredUserId();
+        var isAdmin = User.HasRole("Admin") || User.HasRole("SuperAdmin");
         
-        var result = await _lessonService.DeleteAsync(id, userId, cancellationToken);
+        var result = await _lessonService.DeleteAsync(id, userId, isAdmin, cancellationToken);
         
         if (!result.IsSuccess)
         {
@@ -146,7 +155,9 @@ public class LessonsController : ControllerBase
     [ProducesResponseType(typeof(List<LessonSectionDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetCourseSections(Guid courseId, CancellationToken cancellationToken)
     {
-        var result = await _lessonService.GetCourseSectionsAsync(courseId, cancellationToken);
+        var userId = User.GetRequiredUserId();
+        var isAdmin = User.HasRole("Admin") || User.HasRole("SuperAdmin");
+        var result = await _lessonService.GetCourseSectionsAsync(courseId, userId, isAdmin, cancellationToken);
         
         if (!result.IsSuccess)
             return BadRequest(result.Error);
@@ -163,7 +174,9 @@ public class LessonsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetSection(Guid id, CancellationToken cancellationToken)
     {
-        var result = await _lessonService.GetSectionByIdAsync(id, cancellationToken);
+        var userId = User.GetRequiredUserId();
+        var isAdmin = User.HasRole("Admin") || User.HasRole("SuperAdmin");
+        var result = await _lessonService.GetSectionByIdAsync(id, userId, isAdmin, cancellationToken);
         
         if (!result.IsSuccess)
             return NotFound(result.Error);
@@ -181,8 +194,9 @@ public class LessonsController : ControllerBase
     public async Task<IActionResult> CreateSection([FromBody] CreateLessonSectionRequest request, CancellationToken cancellationToken)
     {
         var userId = User.GetRequiredUserId();
+        var isAdmin = User.HasRole("Admin") || User.HasRole("SuperAdmin");
         
-        var result = await _lessonService.CreateSectionAsync(request, userId, cancellationToken);
+        var result = await _lessonService.CreateSectionAsync(request, userId, isAdmin, cancellationToken);
         
         if (!result.IsSuccess)
             return BadRequest(result.Error);
@@ -201,8 +215,9 @@ public class LessonsController : ControllerBase
     public async Task<IActionResult> UpdateSection(Guid id, [FromBody] UpdateLessonSectionRequest request, CancellationToken cancellationToken)
     {
         var userId = User.GetRequiredUserId();
+        var isAdmin = User.HasRole("Admin") || User.HasRole("SuperAdmin");
         
-        var result = await _lessonService.UpdateSectionAsync(id, request, userId, cancellationToken);
+        var result = await _lessonService.UpdateSectionAsync(id, request, userId, isAdmin, cancellationToken);
         
         if (!result.IsSuccess)
         {
@@ -225,8 +240,9 @@ public class LessonsController : ControllerBase
     public async Task<IActionResult> DeleteSection(Guid id, CancellationToken cancellationToken)
     {
         var userId = User.GetRequiredUserId();
+        var isAdmin = User.HasRole("Admin") || User.HasRole("SuperAdmin");
         
-        var result = await _lessonService.DeleteSectionAsync(id, userId, cancellationToken);
+        var result = await _lessonService.DeleteSectionAsync(id, userId, isAdmin, cancellationToken);
         
         if (!result.IsSuccess)
         {

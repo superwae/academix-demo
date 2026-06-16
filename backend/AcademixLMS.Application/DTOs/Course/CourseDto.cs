@@ -20,6 +20,8 @@ public class CourseDto
     public string ProviderName { get; set; } = string.Empty;
     public Guid InstructorId { get; set; }
     public string InstructorName { get; set; } = string.Empty;
+    public Guid? OrganizationId { get; set; }
+    public bool IsOrgExclusive { get; set; }
     public decimal Rating { get; set; }
     public int RatingCount { get; set; }
     public bool IsFeatured { get; set; }

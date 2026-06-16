@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { authService, type User } from '../services/authService';
+// Safe static import: useOrgStore does not import useAuthStore (no cycle).
+import { useOrgStore } from './useOrgStore';
 
 interface AuthState {
   user: User | null;
@@ -33,14 +35,7 @@ export const useAuthStore = create<AuthState>()(
           // If we have user and at least refresh token, consider authenticated
           // The access token will be refreshed if needed
           const isAuthenticated = !!user && (!!accessToken || !!refreshToken);
-          
-          console.log('[Auth] Initializing:', { 
-            hasUser: !!user, 
-            hasAccessToken: !!accessToken, 
-            hasRefreshToken: !!refreshToken,
-            isAuthenticated 
-          });
-          
+
           set({ user, isAuthenticated, isLoading: false });
         } catch (error) {
           console.error('Error initializing auth:', error);
@@ -51,6 +46,8 @@ export const useAuthStore = create<AuthState>()(
       login: async (email: string, password: string) => {
         try {
           const response = await authService.login({ email, password });
+          // Fresh user: drop any org memberships cached for the previous account.
+          useOrgStore.getState().clear();
           set({
             user: response.user,
             isAuthenticated: true,
@@ -75,6 +72,8 @@ export const useAuthStore = create<AuthState>()(
             phoneNumber,
             role,
           });
+          // Fresh user: drop any org memberships cached for the previous account.
+          useOrgStore.getState().clear();
           set({
             user: response.user,
             isAuthenticated: true,
@@ -91,6 +90,8 @@ export const useAuthStore = create<AuthState>()(
 
       logout: () => {
         authService.logout();
+        // Clear org memberships so the next user doesn't see the previous user's orgs.
+        useOrgStore.getState().clear();
         set({
           user: null,
           isAuthenticated: false,

@@ -101,12 +101,12 @@ export function MyTicketsPage() {
                   {tkt.replyCount > 0 && (
                     <>
                       <span>•</span>
-                      <span>{tkt.replyCount} replies</span>
+                      <span>{t('support:replyCount', { defaultValue: '{{count}} replies', count: tkt.replyCount })}</span>
                     </>
                   )}
                 </div>
               </div>
-              <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition mt-1" />
+              <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition mt-1 rtl:rotate-180" />
             </Link>
           ))}
         </div>

@@ -92,4 +92,7 @@
   <data name="CurrentPasswordIncorrect" xml:space="preserve">
     <value>كلمة المرور الحالية غير صحيحة.</value>
   </data>
+  <data name="TooManyLoginAttempts" xml:space="preserve">
+    <value>محاولات تسجيل دخول فاشلة كثيرة. يرجى المحاولة مرة أخرى بعد عدة دقائق.</value>
+  </data>
 </root>

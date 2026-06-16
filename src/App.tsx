@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Loader2 } from 'lucide-react'
 import { StudentLayout } from './components/layouts/StudentLayout'
@@ -316,6 +316,18 @@ function MinimalLoader() {
   )
 }
 
+/**
+ * Redirect legacy /my-classes/... URLs to the /student/... equivalents.
+ * <Navigate to> does NOT interpolate :params, so we rebuild the path with useParams().
+ */
+function LegacyMyClassesRedirect() {
+  const { courseId = '', lessonId } = useParams<{ courseId: string; lessonId?: string }>()
+  const target = lessonId
+    ? `/student/my-classes/${courseId}/lessons/${lessonId}`
+    : `/student/my-classes/${courseId}/lessons`
+  return <Navigate to={target} replace />
+}
+
 export default function App() {
   return (
     <ErrorBoundary>
@@ -362,6 +374,7 @@ export default function App() {
               <Route path="payments" element={<PaymentHistoryPage />} />
               <Route path="checkout/:courseId" element={<CheckoutPage />} />
               <Route path="payment/callback" element={<PaymentCallbackPage />} />
+              <Route path="*" element={<NotFoundPage />} />
             </Route>
 
             {/* Teacher Portal - /teacher/* */}
@@ -404,6 +417,9 @@ export default function App() {
               <Route path="earnings" element={<TeacherEarningsPage />} />
               <Route path="payment/callback" element={<PaymentCallbackPage />} />
               <Route path="courses/:id/discounts" element={<CourseDiscountsPage />} />
+              {/* Old QA URL — discounts now live per-course under /teacher/courses/:id/discounts */}
+              <Route path="discounts" element={<Navigate to="/teacher/courses" replace />} />
+              <Route path="*" element={<NotFoundPage />} />
             </Route>
 
             {/* Admin Portal - /admin/* */}
@@ -436,6 +452,7 @@ export default function App() {
               <Route path="subscription" element={<AdminSubscriptionPage />} />
               <Route path="support-tickets" element={<AdminSupportInboxPage />} />
               <Route path="support-tickets/:ticketId" element={<TicketDetailPage adminView />} />
+              <Route path="*" element={<NotFoundPage />} />
             </Route>
 
             {/* Accountant portal */}
@@ -455,6 +472,7 @@ export default function App() {
               <Route path="reports" element={<AccountantReportsPage />} />
               <Route path="messages" element={<StaffMessagesPage />} />
               <Route path="settings" element={<StaffSettingsPage />} />
+              <Route path="*" element={<NotFoundPage />} />
             </Route>
 
             {/* Secretary portal */}
@@ -473,6 +491,7 @@ export default function App() {
               <Route path="calendar" element={<SecretaryCalendarPage />} />
               <Route path="messages" element={<StaffMessagesPage />} />
               <Route path="settings" element={<StaffSettingsPage />} />
+              <Route path="*" element={<NotFoundPage />} />
             </Route>
 
             {/* Organization Portal - /org/:slug/* */}
@@ -488,10 +507,41 @@ export default function App() {
               <Route path="dashboard" element={<OrgDashboardPage />} />
               <Route path="members" element={<OrgMembersPage />} />
               <Route path="courses" element={<OrgCatalogPage />} />
-              <Route path="licenses" element={<OrgLicensesListPage />} />
-              <Route path="licenses/:licenseId" element={<OrgLicenseDetailPage />} />
-              <Route path="compliance" element={<OrgComplianceDashboardPage />} />
-              <Route path="settings" element={<OrgSettingsPage />} />
+              {/* Licenses & compliance: OrgManager and up (OrgAdmin always passes OrgGuard). */}
+              <Route
+                path="licenses"
+                element={
+                  <OrgGuard requireRole="OrgManager">
+                    <OrgLicensesListPage />
+                  </OrgGuard>
+                }
+              />
+              <Route
+                path="licenses/:licenseId"
+                element={
+                  <OrgGuard requireRole="OrgManager">
+                    <OrgLicenseDetailPage />
+                  </OrgGuard>
+                }
+              />
+              <Route
+                path="compliance"
+                element={
+                  <OrgGuard requireRole="OrgManager">
+                    <OrgComplianceDashboardPage />
+                  </OrgGuard>
+                }
+              />
+              {/* Settings: OrgAdmin only. */}
+              <Route
+                path="settings"
+                element={
+                  <OrgGuard requireRole="OrgAdmin">
+                    <OrgSettingsPage />
+                  </OrgGuard>
+                }
+              />
+              <Route path="*" element={<NotFoundPage />} />
             </Route>
 
             {/* Shortcut: /org or /org/dashboard (no slug) -> route to the user's first org */}
@@ -520,8 +570,8 @@ export default function App() {
             <Route path="/dashboard" element={<Navigate to="/student/dashboard" replace />} />
             <Route path="/catalog" element={<Navigate to="/student/catalog" replace />} />
             <Route path="/my-classes" element={<Navigate to="/student/my-classes" replace />} />
-            <Route path="/my-classes/:courseId/lessons" element={<Navigate to="/student/my-classes/:courseId/lessons" replace />} />
-            <Route path="/my-classes/:courseId/lessons/:lessonId" element={<Navigate to="/student/my-classes/:courseId/lessons/:lessonId" replace />} />
+            <Route path="/my-classes/:courseId/lessons" element={<LegacyMyClassesRedirect />} />
+            <Route path="/my-classes/:courseId/lessons/:lessonId" element={<LegacyMyClassesRedirect />} />
             <Route path="/calendar" element={<Navigate to="/student/calendar" replace />} />
             <Route path="/assignments" element={<Navigate to="/student/assignments" replace />} />
             <Route path="/exams" element={<Navigate to="/student/exams" replace />} />

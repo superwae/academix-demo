@@ -81,7 +81,9 @@ public class CoursesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetCourse(Guid id, CancellationToken cancellationToken)
     {
-        var result = await _courseService.GetByIdAsync(id, cancellationToken);
+        var userId = User.GetUserId();
+        var isAdmin = User.HasRole("Admin") || User.HasRole("SuperAdmin");
+        var result = await _courseService.GetByIdForUserAsync(id, userId, isAdmin, cancellationToken);
         
         if (!result.IsSuccess || result.Value == null)
             return NotFound(result.Error);
@@ -174,6 +176,13 @@ public class CoursesController : ControllerBase
             return Forbid("Only administrators can set featured status.");
         }
 
+        // Only Admin can change Status directly (publishing goes through POST {id}/publish).
+        // Strip it for non-admin callers so instructors cannot self-publish via update.
+        if (!isAdmin)
+        {
+            request.Status = null;
+        }
+
         var result = await _courseService.UpdateAsync(id, request, currentUserId, isAdmin, cancellationToken);
         
         if (!result.IsSuccess || result.Value == null)
@@ -187,21 +196,26 @@ public class CoursesController : ControllerBase
     }
 
     /// <summary>
-    /// Publish course - Admin only
+    /// Publish course - Instructor (owner only) or Admin
     /// </summary>
     [HttpPost("{id}/publish")]
-    [Authorize(Policy = "RequireAdmin")]
+    [Authorize(Policy = "RequireInstructor")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> PublishCourse(Guid id, CancellationToken cancellationToken)
     {
-        var result = await _courseService.PublishAsync(id, cancellationToken);
-        
+        var currentUserId = User.GetRequiredUserId();
+        var isAdmin = User.HasRole("Admin") || User.HasRole("SuperAdmin");
+        var result = await _courseService.PublishAsync(id, currentUserId, isAdmin, cancellationToken);
+
         if (!result.IsSuccess)
         {
             if (result.Error.Contains("not found"))
                 return NotFound(result.Error);
+            if (result.Error.Contains("own"))
+                return Forbid();
             return BadRequest(result.Error);
         }
 
@@ -209,21 +223,26 @@ public class CoursesController : ControllerBase
     }
 
     /// <summary>
-    /// Archive course - Admin only
+    /// Archive course - Instructor (owner only) or Admin
     /// </summary>
     [HttpPost("{id}/archive")]
-    [Authorize(Policy = "RequireAdmin")]
+    [Authorize(Policy = "RequireInstructor")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> ArchiveCourse(Guid id, CancellationToken cancellationToken)
     {
-        var result = await _courseService.ArchiveAsync(id, cancellationToken);
-        
+        var currentUserId = User.GetRequiredUserId();
+        var isAdmin = User.HasRole("Admin") || User.HasRole("SuperAdmin");
+        var result = await _courseService.ArchiveAsync(id, currentUserId, isAdmin, cancellationToken);
+
         if (!result.IsSuccess)
         {
             if (result.Error.Contains("not found"))
                 return NotFound(result.Error);
+            if (result.Error.Contains("own"))
+                return Forbid();
             return BadRequest(result.Error);
         }
 
@@ -231,21 +250,26 @@ public class CoursesController : ControllerBase
     }
 
     /// <summary>
-    /// Delete course - Admin only
+    /// Delete course - Instructor (owner only) or Admin
     /// </summary>
     [HttpDelete("{id}")]
-    [Authorize(Policy = "RequireAdmin")]
+    [Authorize(Policy = "RequireInstructor")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteCourse(Guid id, CancellationToken cancellationToken)
     {
-        var result = await _courseService.DeleteAsync(id, cancellationToken);
-        
+        var currentUserId = User.GetRequiredUserId();
+        var isAdmin = User.HasRole("Admin") || User.HasRole("SuperAdmin");
+        var result = await _courseService.DeleteAsync(id, currentUserId, isAdmin, cancellationToken);
+
         if (!result.IsSuccess)
         {
             if (result.Error.Contains("not found"))
                 return NotFound(result.Error);
+            if (result.Error.Contains("own"))
+                return Forbid();
             return BadRequest(result.Error);
         }
 
@@ -268,7 +292,7 @@ public class CoursesController : ControllerBase
         // Verify the requesting user is the course instructor or an admin
         if (!isAdmin)
         {
-            var courseCheck = await _courseService.GetByIdAsync(id, cancellationToken);
+            var courseCheck = await _courseService.GetByIdForUserAsync(id, currentUserId, isAdmin, cancellationToken);
             if (!courseCheck.IsSuccess || courseCheck.Value == null)
                 return NotFound(courseCheck.Error);
 

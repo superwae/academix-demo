@@ -12,6 +12,8 @@ import { toast } from 'sonner';
 import { Star, ArrowLeft, User, BookOpen, Clock, MapPin, Calendar, AlertCircle } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 import { useAppStore } from '../store/useAppStore';
+import { hasElevatedRole } from '../lib/userRoles';
+import { formatMoney } from '../lib/money';
 
 
 export function CourseDetailsPage() {
@@ -29,7 +31,7 @@ export function CourseDetailsPage() {
 
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
   const [course, setCourse] = useState<CourseDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [enrollingSectionId, setEnrollingSectionId] = useState<string | null>(null);
@@ -81,6 +83,11 @@ export function CourseDetailsPage() {
       return; // Prevent double-click
     }
 
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+
     // Block re-enrollment if student is currently active in this course
     if (existingEnrollment && existingEnrollment.status === 'Active') {
       toast.error(t('public:courseDetails.alreadyEnrolledTitle'), {
@@ -88,6 +95,18 @@ export function CourseDetailsPage() {
           section: existingEnrollment.sectionName || t('public:courseDetails.alreadyEnrolledFallbackSection'),
         }),
       });
+      return;
+    }
+
+    // Paid courses go through checkout first (mirrors CatalogPage). The server
+    // also rejects enrolling without a Completed payment, but redirecting here
+    // avoids the roundtrip error and dead-end inline message.
+    if (
+      typeof course.price === 'number' &&
+      course.price > 0 &&
+      !hasElevatedRole(user?.roles)
+    ) {
+      navigate(`/student/checkout/${id}?sectionId=${sectionId}`);
       return;
     }
 
@@ -209,7 +228,7 @@ export function CourseDetailsPage() {
                 <Badge variant="secondary">{course.level}</Badge>
                 <Badge variant="outline">{course.modality}</Badge>
                 <Badge variant="default" className={course.price ? "text-lg" : "text-lg bg-emerald-500/15 text-emerald-600 border-emerald-500/30"}>
-                  {course.price ? `$${course.price.toFixed(2)}` : t('public:courseDetails.free')}
+                  {course.price ? formatMoney(course.price) : t('public:courseDetails.free')}
                 </Badge>
               </div>
             </CardContent>
@@ -239,6 +258,21 @@ export function CourseDetailsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              {isAuthenticated && existingEnrollment?.status === 'Active' && (
+                <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-primary/30 bg-primary/10 p-4 text-sm">
+                  <div>
+                    <p className="font-medium text-primary">{t('public:courseDetails.alreadyEnrolledTitle')}</p>
+                    <p className="mt-1 text-muted-foreground">
+                      {t('public:courseDetails.alreadyEnrolledBody', {
+                        section: existingEnrollment.sectionName || t('public:courseDetails.alreadyEnrolledFallbackSection'),
+                      })}
+                    </p>
+                  </div>
+                  <Button asChild variant="outline" size="sm" className="shrink-0">
+                    <Link to="/student/my-classes">{t('public:courseDetails.goToMyClasses')}</Link>
+                  </Button>
+                </div>
+              )}
               {enrollmentError && (
                 <div className="flex items-start gap-3 rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm">
                   <AlertCircle className="h-5 w-5 shrink-0 text-destructive mt-0.5" />
@@ -256,20 +290,21 @@ export function CourseDetailsPage() {
                 </div>
               )}
               {course.sections.length > 0 ? (
-                course.sections.map((section) => (
+                <div className="grid gap-4 xl:grid-cols-2">
+                {course.sections.map((section) => (
                   <motion.div
                     key={section.id}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="border rounded-lg p-4 space-y-3"
+                    className="border rounded-xl bg-background/60 p-4 space-y-3"
                   >
-                    <div className="flex items-start justify-between">
-                      <div>
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div className="min-w-0">
                         <h4 className="font-semibold">{section.name}</h4>
-                        <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                          <div className="flex items-center gap-1">
+                        <div className="mt-2 flex flex-wrap gap-3 text-sm text-muted-foreground">
+                          <div className="flex min-w-0 items-center gap-1">
                             <MapPin className="h-4 w-4" />
-                            {section.locationLabel}
+                            <span className="truncate">{section.locationLabel}</span>
                           </div>
                           <div className="flex items-center gap-1">
                             <User className="h-4 w-4" />
@@ -287,7 +322,7 @@ export function CourseDetailsPage() {
                         {section.meetingTimes.map((mt, idx) => (
                           <div
                             key={idx}
-                            className="flex items-center gap-2 text-sm text-muted-foreground"
+                            className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground"
                           >
                             <Calendar className="h-4 w-4" />
                             <span className="font-medium">{mt.day}</span>
@@ -303,9 +338,15 @@ export function CourseDetailsPage() {
                       <Button
                         className="w-full sm:w-auto"
                         onClick={() => handleEnroll(section.id, section.name)}
-                        disabled={enrollingSectionId === section.id || section.seatsRemaining <= 0}
+                        disabled={
+                          enrollingSectionId === section.id ||
+                          section.seatsRemaining <= 0 ||
+                          existingEnrollment?.status === 'Active'
+                        }
                       >
-                        {enrollingSectionId === section.id
+                        {existingEnrollment?.status === 'Active'
+                          ? t('public:courseDetails.alreadyEnrolledLabel')
+                          : enrollingSectionId === section.id
                           ? t('public:courseDetails.enrollingDots')
                           : section.seatsRemaining <= 0
                           ? t('public:courseDetails.sectionFull')
@@ -318,7 +359,8 @@ export function CourseDetailsPage() {
                       </Button>
                     )}
                   </motion.div>
-                ))
+                ))}
+                </div>
               ) : (
                 <p className="text-muted-foreground text-center py-4">
                   {t('public:courseDetails.noSectionsForCourse')}
@@ -372,7 +414,7 @@ export function CourseDetailsPage() {
               </div>
               <div className="space-y-2">
                 <div className="text-sm font-medium text-muted-foreground">{t('public:courseDetails.price')}</div>
-                <div className="text-2xl font-bold">{course.price ? `$${course.price.toFixed(2)}` : <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-500/30 text-base">{t('public:courseDetails.free')}</Badge>}</div>
+                <div className="text-2xl font-bold">{course.price ? formatMoney(course.price) : <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-500/30 text-base">{t('public:courseDetails.free')}</Badge>}</div>
               </div>
             </CardContent>
           </Card>
@@ -412,4 +454,3 @@ export function CourseDetailsPage() {
     </div>
   );
 }
-

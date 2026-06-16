@@ -1,0 +1,16 @@
+# Keep the Docker build context small and reproducible.
+.git
+node_modules
+dist
+dist-ssr
+**/bin
+**/obj
+**/logs
+.vs
+.codex-*
+*.log
+presentation-screenshots
+uploads
+backend/AcademixLMS.API/uploads
+backend/AcademixLMS.API/logs
+**/appsettings.Local.json

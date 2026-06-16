@@ -16,15 +16,18 @@ public class OnboardingController : ControllerBase
 {
     private readonly IOnboardingService _onboardingService;
     private readonly IApplicationDbContext _context;
+    private readonly IWebHostEnvironment _environment;
     private readonly ILogger<OnboardingController> _logger;
 
     public OnboardingController(
         IOnboardingService onboardingService,
         IApplicationDbContext context,
+        IWebHostEnvironment environment,
         ILogger<OnboardingController> logger)
     {
         _onboardingService = onboardingService;
         _context = context;
+        _environment = environment;
         _logger = logger;
     }
 
@@ -142,6 +145,9 @@ public class OnboardingController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DebugGetUserInterests(string email, CancellationToken cancellationToken = default)
     {
+        if (!_environment.IsDevelopment())
+            return NotFound();
+
         var user = await _context.Users
             .FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted, cancellationToken);
 
@@ -208,6 +214,9 @@ public class OnboardingController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DebugClearEnrollments(string email, CancellationToken cancellationToken = default)
     {
+        if (!_environment.IsDevelopment())
+            return NotFound();
+
         var user = await _context.Users
             .FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted, cancellationToken);
 

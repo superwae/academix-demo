@@ -189,7 +189,10 @@
       "failedLoadCourse": "تعذّر تحميل الدورة"
     },
     "discountSaved": "لقد وفّرت ${{amount}}",
-    "discountAppliedTitle": "تم تطبيق الخصم"
+    "discountAppliedTitle": "تم تطبيق الخصم",
+    "demoEnrolledTitle": "تم التسجيل بنجاح!",
+    "demoEnrolledBody": "تم تسجيل دفعة تجريبية — أنت الآن مسجّل في هذه الدورة.",
+    "sectionLabel": "الشعبة"
   },
   "paymentCallback": {
     "verifying": "جارٍ التحقّق من دفعتك...",

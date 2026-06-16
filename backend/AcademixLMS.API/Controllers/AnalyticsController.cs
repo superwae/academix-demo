@@ -14,13 +14,16 @@ namespace AcademixLMS.API.Controllers;
 public class AnalyticsController : ControllerBase
 {
     private readonly IAnalyticsService _analyticsService;
+    private readonly IEnrollmentService _enrollmentService;
     private readonly ILogger<AnalyticsController> _logger;
 
     public AnalyticsController(
         IAnalyticsService analyticsService,
+        IEnrollmentService enrollmentService,
         ILogger<AnalyticsController> logger)
     {
         _analyticsService = analyticsService;
+        _enrollmentService = enrollmentService;
         _logger = logger;
     }
 
@@ -54,6 +57,11 @@ public class AnalyticsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetStudentAnalytics(Guid studentId, CancellationToken cancellationToken = default)
     {
+        var userId = User.GetUserId();
+        if (userId == null) return Unauthorized();
+        if (!await CanViewStudentAnalyticsAsync(studentId, userId.Value, cancellationToken))
+            return Forbidden("You can only view analytics for students enrolled in your courses.");
+
         var result = await _analyticsService.GetStudentAnalyticsAsync(studentId, cancellationToken);
 
         if (!result.IsSuccess)
@@ -122,6 +130,11 @@ public class AnalyticsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetCourseAnalytics(Guid courseId, CancellationToken cancellationToken = default)
     {
+        var userId = User.GetUserId();
+        if (userId == null) return Unauthorized();
+        if (!await CanViewCourseAnalyticsAsync(courseId, userId.Value, cancellationToken))
+            return Forbidden("You can only view analytics for courses you teach.");
+
         var result = await _analyticsService.GetCourseAnalyticsAsync(courseId, cancellationToken);
 
         if (!result.IsSuccess)
@@ -165,6 +178,11 @@ public class AnalyticsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetCourseAtRiskStudents(Guid courseId, CancellationToken cancellationToken = default)
     {
+        var userId = User.GetUserId();
+        if (userId == null) return Unauthorized();
+        if (!await CanViewCourseAnalyticsAsync(courseId, userId.Value, cancellationToken))
+            return Forbidden("You can only view analytics for courses you teach.");
+
         var result = await _analyticsService.GetCourseAtRiskStudentsAsync(courseId, cancellationToken);
 
         if (!result.IsSuccess)
@@ -230,6 +248,11 @@ public class AnalyticsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetLessonAnalytics(Guid courseId, CancellationToken cancellationToken = default)
     {
+        var userId = User.GetUserId();
+        if (userId == null) return Unauthorized();
+        if (!await CanViewCourseAnalyticsAsync(courseId, userId.Value, cancellationToken))
+            return Forbidden("You can only view analytics for courses you teach.");
+
         var result = await _analyticsService.GetLessonAnalyticsAsync(courseId, cancellationToken);
 
         if (!result.IsSuccess)
@@ -254,6 +277,19 @@ public class AnalyticsController : ControllerBase
         [FromQuery] Guid courseId,
         CancellationToken cancellationToken = default)
     {
+        var userId = User.GetUserId();
+        if (userId == null) return Unauthorized();
+        if (!User.HasRole("Admin") && !User.HasRole("SuperAdmin"))
+        {
+            var scoped = await _analyticsService.GetStudentInstructorCoursesAsync(studentId, userId.Value, cancellationToken);
+            var canViewStudentCourse = scoped.IsSuccess &&
+                scoped.Value != null &&
+                (scoped.Value.ActiveCourses.Any(c => c.CourseId == courseId) ||
+                 scoped.Value.CompletedCourses.Any(c => c.CourseId == courseId));
+            if (!canViewStudentCourse)
+                return Forbidden("You can only predict grades for students enrolled in your courses.");
+        }
+
         var result = await _analyticsService.PredictStudentGradeAsync(studentId, courseId, cancellationToken);
 
         if (!result.IsSuccess)
@@ -263,4 +299,27 @@ public class AnalyticsController : ControllerBase
 
         return Ok(new { predictedGrade = result.Value });
     }
+
+    private async Task<bool> CanViewCourseAnalyticsAsync(Guid courseId, Guid userId, CancellationToken cancellationToken)
+    {
+        if (User.HasRole("Admin") || User.HasRole("SuperAdmin"))
+            return true;
+
+        var courseResult = await _enrollmentService.VerifyCourseInstructorAsync(courseId, userId, cancellationToken);
+        return courseResult.IsSuccess && courseResult.Value;
+    }
+
+    private async Task<bool> CanViewStudentAnalyticsAsync(Guid studentId, Guid instructorId, CancellationToken cancellationToken)
+    {
+        if (User.HasRole("Admin") || User.HasRole("SuperAdmin"))
+            return true;
+
+        var scoped = await _analyticsService.GetStudentInstructorCoursesAsync(studentId, instructorId, cancellationToken);
+        return scoped.IsSuccess &&
+            scoped.Value != null &&
+            (scoped.Value.ActiveCourses.Any() || scoped.Value.CompletedCourses.Any());
+    }
+
+    private ObjectResult Forbidden(string message) =>
+        StatusCode(StatusCodes.Status403Forbidden, new { error = message });
 }

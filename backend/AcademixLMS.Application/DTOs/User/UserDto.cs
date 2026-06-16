@@ -19,6 +19,7 @@ public class UserDto
     public bool IsActive { get; set; }
     public bool IsEmailVerified { get; set; }
     public DateTime CreatedAt { get; set; }
+    public DateTime? LastLoginAt { get; set; }
     public List<string> Roles { get; set; } = new();
 
     public UserUiPreferencesDto? UiPreferences { get; set; }

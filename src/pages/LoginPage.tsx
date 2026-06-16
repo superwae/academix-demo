@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate, Navigate } from 'react-router-dom';
+import { Link, useNavigate, Navigate, useSearchParams } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
@@ -23,9 +23,16 @@ export function LoginPage() {
   const [formError, setFormError] = useState<string | null>(null);
   const { login, user, isAuthenticated } = useAuthStore();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // Deep link the guards preserved (e.g. /login?returnTo=/org/acme/members).
+  // Only same-origin relative paths are honored to prevent open redirects.
+  const rawReturnTo = searchParams.get('returnTo');
+  const returnTo = rawReturnTo && rawReturnTo.startsWith('/') && !rawReturnTo.startsWith('//') ? rawReturnTo : null;
 
   // Redirect if already authenticated
   if (isAuthenticated && user) {
+    if (returnTo) return <Navigate to={returnTo} replace />;
     const roles = user.roles?.map(r => r.toLowerCase()) || [];
     if (roles.includes('admin') || roles.includes('superadmin')) return <Navigate to="/admin/dashboard" replace />;
     if (roles.includes('instructor') || roles.includes('teacher')) return <Navigate to="/teacher/dashboard" replace />;
@@ -60,12 +67,12 @@ export function LoginPage() {
       );
       const isAccountant = userRoles.some((r) => r.toLowerCase() === 'accountant');
       const isSecretary = userRoles.some((r) => r.toLowerCase() === 'secretary');
-      
-      console.log('[Login] User roles:', userRoles, { isAdmin, isInstructor, isAccountant, isSecretary });
-      
-      // Redirect — no corner toast; success is the new page
-      // Redirect based on role - use portal-specific paths
-      if (isAdmin) {
+
+      // Redirect — no corner toast; success is the new page.
+      // Honor the deep link preserved by the guards, otherwise route by role.
+      if (returnTo) {
+        navigate(returnTo);
+      } else if (isAdmin) {
         navigate('/admin/dashboard');
       } else if (isInstructor) {
         navigate('/teacher/dashboard');

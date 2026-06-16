@@ -15,11 +15,13 @@ namespace AcademixLMS.API.Controllers;
 public class AssignmentsController : ControllerBase
 {
     private readonly IAssignmentService _assignmentService;
+    private readonly IEnrollmentService _enrollmentService;
     private readonly ILogger<AssignmentsController> _logger;
 
-    public AssignmentsController(IAssignmentService assignmentService, ILogger<AssignmentsController> logger)
+    public AssignmentsController(IAssignmentService assignmentService, IEnrollmentService enrollmentService, ILogger<AssignmentsController> logger)
     {
         _assignmentService = assignmentService;
+        _enrollmentService = enrollmentService;
         _logger = logger;
     }
 
@@ -36,6 +38,10 @@ public class AssignmentsController : ControllerBase
         if (!result.IsSuccess)
             return NotFound(result.Error);
 
+        var userId = User.GetRequiredUserId();
+        if (!await CanViewCourseContentAsync(result.Value!.CourseId, userId, cancellationToken))
+            return Forbidden("You do not have access to this assignment.");
+
         return Ok(result.Value);
     }
 
@@ -47,6 +53,10 @@ public class AssignmentsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetCourseAssignments(Guid courseId, [FromQuery] PagedRequest request, CancellationToken cancellationToken)
     {
+        var userId = User.GetRequiredUserId();
+        if (!await CanViewCourseContentAsync(courseId, userId, cancellationToken))
+            return Forbidden("You do not have access to this course assignments.");
+
         var result = await _assignmentService.GetByCourseAsync(courseId, request, cancellationToken);
         
         if (!result.IsSuccess)
@@ -82,6 +92,10 @@ public class AssignmentsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateAssignment([FromBody] CreateAssignmentRequest request, CancellationToken cancellationToken)
     {
+        var userId = User.GetRequiredUserId();
+        if (!await CanManageCourseContentAsync(request.CourseId, userId, cancellationToken))
+            return Forbidden("You can only create assignments for courses you teach.");
+
         var result = await _assignmentService.CreateAsync(request, cancellationToken);
         
         if (!result.IsSuccess)
@@ -100,6 +114,13 @@ public class AssignmentsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateAssignment(Guid id, [FromBody] UpdateAssignmentRequest request, CancellationToken cancellationToken)
     {
+        var existing = await _assignmentService.GetByIdAsync(id, cancellationToken);
+        if (!existing.IsSuccess || existing.Value == null)
+            return NotFound(existing.Error);
+        var userId = User.GetRequiredUserId();
+        if (!await CanManageCourseContentAsync(existing.Value.CourseId, userId, cancellationToken))
+            return Forbidden("You can only update assignments for courses you teach.");
+
         var result = await _assignmentService.UpdateAsync(id, request, cancellationToken);
         
         if (!result.IsSuccess)
@@ -122,6 +143,13 @@ public class AssignmentsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteAssignment(Guid id, CancellationToken cancellationToken)
     {
+        var existing = await _assignmentService.GetByIdAsync(id, cancellationToken);
+        if (!existing.IsSuccess || existing.Value == null)
+            return NotFound(existing.Error);
+        var userId = User.GetRequiredUserId();
+        if (!await CanManageCourseContentAsync(existing.Value.CourseId, userId, cancellationToken))
+            return Forbidden("You can only delete assignments for courses you teach.");
+
         var result = await _assignmentService.DeleteAsync(id, cancellationToken);
         
         if (!result.IsSuccess)
@@ -181,6 +209,13 @@ public class AssignmentsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetSubmissions(Guid assignmentId, [FromQuery] PagedRequest request, CancellationToken cancellationToken)
     {
+        var existing = await _assignmentService.GetByIdAsync(assignmentId, cancellationToken);
+        if (!existing.IsSuccess || existing.Value == null)
+            return NotFound(existing.Error);
+        var userId = User.GetRequiredUserId();
+        if (!await CanManageCourseContentAsync(existing.Value.CourseId, userId, cancellationToken))
+            return Forbidden("You can only view submissions for courses you teach.");
+
         var result = await _assignmentService.GetSubmissionsAsync(assignmentId, request, cancellationToken);
         
         if (!result.IsSuccess)
@@ -200,8 +235,9 @@ public class AssignmentsController : ControllerBase
     public async Task<IActionResult> GradeSubmission(Guid submissionId, [FromBody] GradeSubmissionRequest request, CancellationToken cancellationToken)
     {
         var gradedBy = User.GetRequiredUserId();
+        var isAdmin = User.HasRole("Admin") || User.HasRole("SuperAdmin");
         
-        var result = await _assignmentService.GradeSubmissionAsync(submissionId, request, gradedBy, cancellationToken);
+        var result = await _assignmentService.GradeSubmissionAsync(submissionId, request, gradedBy, isAdmin, cancellationToken);
         
         if (!result.IsSuccess)
         {
@@ -212,6 +248,31 @@ public class AssignmentsController : ControllerBase
 
         return Ok(result.Value);
     }
+
+    private async Task<bool> CanViewCourseContentAsync(Guid courseId, Guid userId, CancellationToken cancellationToken)
+    {
+        if (User.HasRole("Admin") || User.HasRole("SuperAdmin"))
+            return true;
+
+        var teaches = await _enrollmentService.VerifyCourseInstructorAsync(courseId, userId, cancellationToken);
+        if (teaches.IsSuccess && teaches.Value)
+            return true;
+
+        var enrolled = await _enrollmentService.HasActiveEnrollmentAsync(userId, courseId, cancellationToken);
+        return enrolled.IsSuccess && enrolled.Value;
+    }
+
+    private async Task<bool> CanManageCourseContentAsync(Guid courseId, Guid userId, CancellationToken cancellationToken)
+    {
+        if (User.HasRole("Admin") || User.HasRole("SuperAdmin"))
+            return true;
+
+        var teaches = await _enrollmentService.VerifyCourseInstructorAsync(courseId, userId, cancellationToken);
+        return teaches.IsSuccess && teaches.Value;
+    }
+
+    private ObjectResult Forbidden(string message) =>
+        StatusCode(StatusCodes.Status403Forbidden, new { error = message });
 }
 
 

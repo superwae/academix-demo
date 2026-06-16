@@ -1,4 +1,7 @@
+using System.Collections.Concurrent;
 using System.Globalization;
+using System.Security.Cryptography;
+using System.Text;
 using AcademixLMS.Application.Common;
 using AcademixLMS.Application.DTOs.Auth;
 using AcademixLMS.Application.DTOs.User;
@@ -37,10 +40,50 @@ public class AuthService : IAuthService
         _localizer = localizer;
     }
 
+    // ── Brute-force protection ────────────────────────────────────────────────
+    // Per-email failed-attempt tracking (in-memory; complements the per-IP rate limiter).
+    private static readonly ConcurrentDictionary<string, FailedLoginState> FailedLogins = new();
+    private const int MaxFailedLoginAttempts = 5;
+    private static readonly TimeSpan LoginLockoutDuration = TimeSpan.FromMinutes(5);
+    private static readonly TimeSpan FailedLoginWindow = TimeSpan.FromMinutes(15);
+
+    private sealed record FailedLoginState(int Count, DateTime FirstFailureUtc, DateTime? LockedUntilUtc);
+
+    private static bool IsLockedOut(string email) =>
+        FailedLogins.TryGetValue(email, out var state) &&
+        state.LockedUntilUtc.HasValue && state.LockedUntilUtc.Value > DateTime.UtcNow;
+
+    private static void RecordFailedLogin(string email)
+    {
+        FailedLogins.AddOrUpdate(
+            email,
+            _ => new FailedLoginState(1, DateTime.UtcNow, null),
+            (_, state) =>
+            {
+                // Stale window — start counting fresh.
+                if (DateTime.UtcNow - state.FirstFailureUtc > FailedLoginWindow)
+                    return new FailedLoginState(1, DateTime.UtcNow, null);
+
+                var count = state.Count + 1;
+                var lockedUntil = count >= MaxFailedLoginAttempts
+                    ? DateTime.UtcNow.Add(LoginLockoutDuration)
+                    : state.LockedUntilUtc;
+                return new FailedLoginState(count, state.FirstFailureUtc, lockedUntil);
+            });
+    }
+
+    private static void ClearFailedLogins(string email) => FailedLogins.TryRemove(email, out _);
+
     public async Task<Result<LoginResponse>> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default)
     {
         var normalizedEmail = request.Email.Trim().ToLowerInvariant();
         _logger.LogInformation("[AUTH] Login attempt for email {Email}", normalizedEmail);
+
+        if (IsLockedOut(normalizedEmail))
+        {
+            _logger.LogWarning("[AUTH] Login blocked - account temporarily locked for email {Email}", normalizedEmail);
+            return Result<LoginResponse>.Failure(_localizer["TooManyLoginAttempts"]);
+        }
 
         // Find user by email (case-insensitive; stored emails are lowercase from seed/register)
         var user = await _context.Users
@@ -50,6 +93,7 @@ public class AuthService : IAuthService
 
         if (user == null)
         {
+            RecordFailedLogin(normalizedEmail);
             _logger.LogWarning("[AUTH] Login failed - user not found for email {Email}", normalizedEmail);
             return Result<LoginResponse>.Failure(_localizer["InvalidEmailOrPassword"]);
         }
@@ -63,9 +107,12 @@ public class AuthService : IAuthService
         // Verify password (BCrypt can throw on malformed hashes — treat as invalid)
         if (!VerifyPassword(request.Password, user.PasswordHash, "Login"))
         {
+            RecordFailedLogin(normalizedEmail);
             _logger.LogWarning("[AUTH] Login failed - invalid password for user {UserId}", user.Id);
             return Result<LoginResponse>.Failure(_localizer["InvalidEmailOrPassword"]);
         }
+
+        ClearFailedLogins(normalizedEmail);
 
         // Honor stored user language preference for the rest of this request
         TryApplyUserCulture(user.PreferredLanguage);
@@ -185,9 +232,9 @@ public class AuthService : IAuthService
         _context.UserRoles.Add(userRole);
         await _context.SaveChangesAsync(cancellationToken);
 
-        // Email verification: generate token and send email
-        var verificationToken = Guid.NewGuid().ToString("N");
-        user.EmailVerificationToken = verificationToken;
+        // Email verification: generate token (raw goes in the email; only its hash is stored)
+        var verificationToken = GenerateSecureToken();
+        user.EmailVerificationToken = HashToken(verificationToken);
         user.EmailVerificationTokenExpiresAt = DateTime.UtcNow.AddHours(24);
         await _context.SaveChangesAsync(cancellationToken);
 
@@ -326,8 +373,8 @@ public class AuthService : IAuthService
             return Result.Success();
         }
 
-        var resetToken = Guid.NewGuid().ToString("N");
-        user.PasswordResetToken = resetToken;
+        var resetToken = GenerateSecureToken();
+        user.PasswordResetToken = HashToken(resetToken);
         user.PasswordResetTokenExpiresAt = DateTime.UtcNow.AddHours(1);
         await _context.SaveChangesAsync(cancellationToken);
 
@@ -345,10 +392,11 @@ public class AuthService : IAuthService
         if (newPassword.Length < 8)
             return Result.Failure(_localizer["PasswordTooShort"]);
 
-        // Normalize token so link casing (e.g. from email client) does not invalidate it
-        var normalizedToken = token.Trim().ToLowerInvariant();
+        // Tokens are lowercase hex, so trimming + lowercasing is lossless; we then compare
+        // the SHA-256 hash against the stored hash (raw tokens are never persisted).
+        var tokenHash = HashToken(token.Trim().ToLowerInvariant());
         var user = await _context.Users
-            .FirstOrDefaultAsync(u => u.PasswordResetToken != null && u.PasswordResetToken.ToLower() == normalizedToken && !u.IsDeleted, cancellationToken);
+            .FirstOrDefaultAsync(u => u.PasswordResetToken != null && u.PasswordResetToken == tokenHash && !u.IsDeleted, cancellationToken);
 
         if (user == null || user.PasswordResetTokenExpiresAt == null || user.PasswordResetTokenExpiresAt < DateTime.UtcNow)
             return Result.Failure(_localizer["InvalidOrExpiredResetLink"]);
@@ -365,9 +413,9 @@ public class AuthService : IAuthService
         if (string.IsNullOrWhiteSpace(token))
             return Result.Failure(_localizer["InvalidVerificationLink"]);
 
-        var normalizedToken = token.Trim().ToLowerInvariant();
+        var tokenHash = HashToken(token.Trim().ToLowerInvariant());
         var user = await _context.Users
-            .FirstOrDefaultAsync(u => u.EmailVerificationToken != null && u.EmailVerificationToken.ToLower() == normalizedToken && !u.IsDeleted, cancellationToken);
+            .FirstOrDefaultAsync(u => u.EmailVerificationToken != null && u.EmailVerificationToken == tokenHash && !u.IsDeleted, cancellationToken);
 
         if (user == null || user.EmailVerificationTokenExpiresAt == null || user.EmailVerificationTokenExpiresAt < DateTime.UtcNow)
             return Result.Failure(_localizer["InvalidOrExpiredVerificationLink"]);
@@ -394,8 +442,8 @@ public class AuthService : IAuthService
         if (user.IsEmailVerified)
             return Result.Success(); // Already verified, no need to resend
 
-        var verificationToken = Guid.NewGuid().ToString("N");
-        user.EmailVerificationToken = verificationToken;
+        var verificationToken = GenerateSecureToken();
+        user.EmailVerificationToken = HashToken(verificationToken);
         user.EmailVerificationTokenExpiresAt = DateTime.UtcNow.AddHours(24);
         await _context.SaveChangesAsync(cancellationToken);
 
@@ -404,6 +452,20 @@ public class AuthService : IAuthService
         await _emailService.SendVerificationEmailAsync(user.Email, user.FirstName, verifyLink, cancellationToken);
 
         return Result.Success();
+    }
+
+    /// <summary>256-bit CSPRNG token rendered as lowercase hex (URL-safe, case-normalizable).</summary>
+    private static string GenerateSecureToken()
+    {
+        var bytes = RandomNumberGenerator.GetBytes(32);
+        return Convert.ToHexString(bytes).ToLowerInvariant();
+    }
+
+    /// <summary>SHA-256 hash of a token, stored instead of the raw value so a DB leak yields nothing usable.</summary>
+    private static string HashToken(string rawToken)
+    {
+        var hash = SHA256.HashData(Encoding.UTF8.GetBytes(rawToken));
+        return Convert.ToHexString(hash).ToLowerInvariant();
     }
 
     public async Task<Result> ChangePasswordAsync(Guid userId, string currentPassword, string newPassword, CancellationToken cancellationToken = default)
@@ -490,6 +552,7 @@ public class AuthService : IAuthService
             IsActive = user.IsActive,
             IsEmailVerified = user.IsEmailVerified,
             CreatedAt = user.CreatedAt,
+            LastLoginAt = user.LastLoginAt,
             Roles = roles,
             UiPreferences = UserUiPreferencesJson.Deserialize(user.UiPreferencesJson)
         };

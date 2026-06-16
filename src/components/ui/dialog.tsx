@@ -19,8 +19,8 @@ export function DialogContent({
         className={cn(
           // Mobile: bottom sheet — full-width, pinned to the bottom, rounded top.
           'fixed inset-x-0 bottom-0 left-auto top-auto z-50 max-h-[92dvh] w-full translate-x-0 translate-y-0 overflow-y-auto rounded-t-2xl rounded-b-none border-t border-x border-b-0 border-border bg-card p-5 text-card-foreground shadow-lg outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom',
-          // sm+: centered modal (original treatment).
-          'sm:inset-x-auto sm:bottom-auto sm:start-1/2 sm:top-1/2 sm:left-auto sm:max-h-[min(92dvh,920px)] sm:w-[calc(100%-2rem)] sm:max-w-lg sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-xl sm:border sm:border-b sm:border-border sm:data-[state=closed]:slide-out-to-bottom-0 sm:data-[state=open]:slide-in-from-bottom-0 sm:data-[state=closed]:fade-out-0 sm:data-[state=open]:fade-in-0 sm:data-[state=closed]:zoom-out-95 sm:data-[state=open]:zoom-in-95',
+          // sm+: centered modal. Use physical left/right here so RTL pages stay truly centered.
+          'sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:right-auto sm:top-1/2 sm:max-h-[min(92dvh,920px)] sm:w-[calc(100%-2rem)] sm:max-w-lg sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-xl sm:border sm:border-b sm:border-border sm:data-[state=closed]:slide-out-to-bottom-0 sm:data-[state=open]:slide-in-from-bottom-0 sm:data-[state=closed]:fade-out-0 sm:data-[state=open]:fade-in-0 sm:data-[state=closed]:zoom-out-95 sm:data-[state=open]:zoom-in-95',
           'pb-[max(1.25rem,env(safe-area-inset-bottom,0px))] pt-[max(0.25rem,env(safe-area-inset-top,0px))]',
           className,
         )}
@@ -72,6 +72,5 @@ export function DialogFooter({ className, ...props }: React.HTMLAttributes<HTMLD
     />
   )
 }
-
 
 

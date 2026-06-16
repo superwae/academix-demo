@@ -15,11 +15,13 @@ namespace AcademixLMS.API.Controllers;
 public class ExamsController : ControllerBase
 {
     private readonly IExamService _examService;
+    private readonly IEnrollmentService _enrollmentService;
     private readonly ILogger<ExamsController> _logger;
 
-    public ExamsController(IExamService examService, ILogger<ExamsController> logger)
+    public ExamsController(IExamService examService, IEnrollmentService enrollmentService, ILogger<ExamsController> logger)
     {
         _examService = examService;
+        _enrollmentService = enrollmentService;
         _logger = logger;
     }
 
@@ -36,6 +38,10 @@ public class ExamsController : ControllerBase
         if (!result.IsSuccess)
             return NotFound(result.Error);
 
+        var userId = User.GetRequiredUserId();
+        if (!await CanViewCourseContentAsync(result.Value!.CourseId, userId, cancellationToken))
+            return Forbidden("You do not have access to this exam.");
+
         return Ok(result.Value);
     }
 
@@ -47,6 +53,10 @@ public class ExamsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetCourseExams(Guid courseId, [FromQuery] PagedRequest request, CancellationToken cancellationToken)
     {
+        var userId = User.GetRequiredUserId();
+        if (!await CanViewCourseContentAsync(courseId, userId, cancellationToken))
+            return Forbidden("You do not have access to this course exams.");
+
         var result = await _examService.GetByCourseAsync(courseId, request, cancellationToken);
         
         if (!result.IsSuccess)
@@ -64,6 +74,10 @@ public class ExamsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateExam([FromBody] CreateExamRequest request, CancellationToken cancellationToken)
     {
+        var userId = User.GetRequiredUserId();
+        if (!await CanManageCourseContentAsync(request.CourseId, userId, cancellationToken))
+            return Forbidden("You can only create exams for courses you teach.");
+
         var result = await _examService.CreateAsync(request, cancellationToken);
         
         if (!result.IsSuccess)
@@ -82,6 +96,13 @@ public class ExamsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateExam(Guid id, [FromBody] CreateExamRequest request, CancellationToken cancellationToken)
     {
+        var existing = await _examService.GetByIdAsync(id, cancellationToken);
+        if (!existing.IsSuccess || existing.Value == null)
+            return NotFound(existing.Error);
+        var userId = User.GetRequiredUserId();
+        if (!await CanManageCourseContentAsync(existing.Value.CourseId, userId, cancellationToken))
+            return Forbidden("You can only update exams for courses you teach.");
+
         var result = await _examService.UpdateAsync(id, request, cancellationToken);
         
         if (!result.IsSuccess)
@@ -104,6 +125,13 @@ public class ExamsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteExam(Guid id, CancellationToken cancellationToken)
     {
+        var existing = await _examService.GetByIdAsync(id, cancellationToken);
+        if (!existing.IsSuccess || existing.Value == null)
+            return NotFound(existing.Error);
+        var userId = User.GetRequiredUserId();
+        if (!await CanManageCourseContentAsync(existing.Value.CourseId, userId, cancellationToken))
+            return Forbidden("You can only delete exams for courses you teach.");
+
         var result = await _examService.DeleteAsync(id, cancellationToken);
         
         if (!result.IsSuccess)
@@ -221,6 +249,13 @@ public class ExamsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetExamAttempts(Guid examId, [FromQuery] PagedRequest request, CancellationToken cancellationToken)
     {
+        var existing = await _examService.GetByIdAsync(examId, cancellationToken);
+        if (!existing.IsSuccess || existing.Value == null)
+            return NotFound(existing.Error);
+        var userId = User.GetRequiredUserId();
+        if (!await CanManageCourseContentAsync(existing.Value.CourseId, userId, cancellationToken))
+            return Forbidden("You can only view attempts for courses you teach.");
+
         var result = await _examService.GetAttemptsByExamAsync(examId, request, cancellationToken);
         
         if (!result.IsSuccess)
@@ -292,9 +327,32 @@ public class ExamsController : ControllerBase
 
         return Ok(result.Value);
     }
+
+    private async Task<bool> CanViewCourseContentAsync(Guid courseId, Guid userId, CancellationToken cancellationToken)
+    {
+        if (User.HasRole("Admin") || User.HasRole("SuperAdmin"))
+            return true;
+
+        var teaches = await _enrollmentService.VerifyCourseInstructorAsync(courseId, userId, cancellationToken);
+        if (teaches.IsSuccess && teaches.Value)
+            return true;
+
+        var enrolled = await _enrollmentService.HasActiveEnrollmentAsync(userId, courseId, cancellationToken);
+        return enrolled.IsSuccess && enrolled.Value;
+    }
+
+    private async Task<bool> CanManageCourseContentAsync(Guid courseId, Guid userId, CancellationToken cancellationToken)
+    {
+        if (User.HasRole("Admin") || User.HasRole("SuperAdmin"))
+            return true;
+
+        var teaches = await _enrollmentService.VerifyCourseInstructorAsync(courseId, userId, cancellationToken);
+        return teaches.IsSuccess && teaches.Value;
+    }
+
+    private ObjectResult Forbidden(string message) =>
+        StatusCode(StatusCodes.Status403Forbidden, new { error = message });
 }
-
-
 
 
 

@@ -329,11 +329,11 @@ export function TeacherLayout() {
                   <Sparkles className="h-3 w-3 text-primary" />
                 </motion.div>
               </div>
-              <div className="min-w-0 leading-tight">
+              <div className="hidden min-w-0 leading-tight sm:block">
                 <div className="text-base font-bold tracking-tight gradient-text sm:text-lg">
                   AcademiX
                 </div>
-                <div className="hidden text-xs text-muted-foreground font-medium sm:block">
+                <div className="text-xs text-muted-foreground font-medium">
                   {t('nav:teacherPortal')}
                 </div>
               </div>
@@ -533,18 +533,20 @@ export function TeacherLayout() {
             </DropdownMenu>
             
             {theme === 'custom' ? (
-              <ColorPicker
-                value={customThemeColor || 'hsl(222, 84%, 60%)'}
-                onChange={(color) => {
-                  setCustomThemeColor(color);
-                }}
-              />
+              <div className="hidden sm:block">
+                <ColorPicker
+                  value={customThemeColor || 'hsl(222, 84%, 60%)'}
+                  onChange={(color) => {
+                    setCustomThemeColor(color);
+                  }}
+                />
+              </div>
             ) : (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
-                  className="h-10 gap-2 border-2 rounded-xl px-2.5 sm:h-11 sm:px-3"
+                  className="hidden h-10 gap-2 rounded-xl border-2 px-2.5 sm:flex sm:h-11 sm:px-3"
                   title={t('common:theme')}
                 >
                   <span
@@ -651,7 +653,7 @@ export function TeacherLayout() {
               variant="outline"
               size="sm"
               onClick={toggleDarkMode}
-              className="h-11 gap-2 border-2 rounded-xl"
+              className="hidden h-11 gap-2 rounded-xl border-2 sm:inline-flex"
               title={isDarkMode ? t('common:switchToLightMode') : t('common:switchToDarkMode')}
             >
               {isDarkMode ? (
@@ -674,7 +676,9 @@ export function TeacherLayout() {
             <OrgSwitcher />
 
             {/* Contact support */}
-            <HelpButton />
+            <div className="hidden lg:block">
+              <HelpButton />
+            </div>
           </div>
         </div>
       </header>

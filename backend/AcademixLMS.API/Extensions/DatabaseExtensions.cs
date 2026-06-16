@@ -134,7 +134,11 @@ public static class DatabaseExtensions
                 logger.LogWarning("Users table truncated.");
             }
 
-            if (app.Environment.IsDevelopment())
+            // Seed demo data in Development, or in any environment when Seed:DemoData
+            // is enabled (used by the free hosted demo deployment).
+            var seedDemoData = app.Environment.IsDevelopment()
+                || configuration.GetValue<bool>("Seed:DemoData", false);
+            if (seedDemoData)
             {
                 await DevAccountsSeeder.EnsureDefaultAccountsAsync(context, logger, cancellationToken: default);
                 await DemoFacultyBulkSeeder.EnsureAsync(context, logger, cancellationToken: default);

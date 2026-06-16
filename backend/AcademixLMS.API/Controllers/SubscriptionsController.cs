@@ -45,10 +45,13 @@ public class SubscriptionsController : ControllerBase
     /// </summary>
     [HttpGet("me/can-create-course")]
     [ProducesResponseType(typeof(SubscriptionStatusDto), StatusCodes.Status200OK)]
-    public async Task<IActionResult> CanCreateCourse(CancellationToken cancellationToken)
+    public async Task<IActionResult> CanCreateCourse(
+        [FromQuery] Guid? organizationId,
+        [FromQuery] bool personal = false,
+        CancellationToken cancellationToken = default)
     {
         var userId = User.GetRequiredUserId();
-        var result = await _subscriptionService.GetSubscriptionStatusAsync(userId, cancellationToken);
+        var result = await _subscriptionService.GetSubscriptionStatusAsync(userId, organizationId, personal, cancellationToken);
 
         if (!result.IsSuccess)
             return BadRequest(result.Error);
@@ -66,6 +69,31 @@ public class SubscriptionsController : ControllerBase
     {
         var userId = User.GetRequiredUserId();
         var result = await _subscriptionService.SubscribeAsync(userId, request.PlanId, request.BillingInterval, cancellationToken);
+
+        if (!result.IsSuccess || result.Value == null)
+            return BadRequest(result.Error);
+
+        return CreatedAtAction(nameof(GetMySubscription), result.Value);
+    }
+
+    /// <summary>
+    /// Attach a subscription plan to an organization/school. Org admins manage their own org; platform admins can support any org.
+    /// </summary>
+    [HttpPost("organizations/{organizationId:guid}")]
+    [ProducesResponseType(typeof(SubscriptionDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> SubscribeOrganization(
+        Guid organizationId,
+        [FromBody] CreateSubscriptionRequest request,
+        CancellationToken cancellationToken)
+    {
+        var userId = User.GetRequiredUserId();
+        var result = await _subscriptionService.SubscribeOrganizationAsync(
+            userId,
+            organizationId,
+            request.PlanId,
+            request.BillingInterval,
+            cancellationToken);
 
         if (!result.IsSuccess || result.Value == null)
             return BadRequest(result.Error);

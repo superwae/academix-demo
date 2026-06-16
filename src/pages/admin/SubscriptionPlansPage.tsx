@@ -23,6 +23,7 @@ import { ConfirmDialog } from "../../components/ui/confirm-dialog";
 import { cn } from "../../lib/cn";
 import { toast } from "sonner";
 import { subscriptionPlanService, type SubscriptionPlanDto } from "../../services/subscriptionPlanService";
+import { formatMoney } from "../../lib/money";
 
 const emptyForm = {
   name: "",
@@ -157,14 +158,97 @@ export function SubscriptionPlansPage() {
         </Button>
       </div>
 
-      {/* Table */}
-      <div className="overflow-hidden rounded-xl border border-border">
-        {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      {/* Plans */}
+      {loading ? (
+        <div className="flex items-center justify-center rounded-xl border border-border bg-card py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      ) : plans.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-border bg-muted/20 p-12 text-center text-sm text-muted-foreground">
+          {t('admin:subscriptionPlans.empty')}
+        </div>
+      ) : (
+        <>
+          <div className="grid gap-3 md:hidden">
+            {plans.map((plan) => (
+              <div key={plan.id} className="rounded-xl border border-border bg-card p-4">
+                <div className="flex min-w-0 items-start justify-between gap-3">
+                  <div className="flex min-w-0 items-start gap-3">
+                    <div className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-primary/10">
+                      <Crown className="h-4 w-4 text-primary" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="truncate font-medium">{plan.name}</p>
+                      <p className="line-clamp-2 text-sm text-muted-foreground">{plan.description}</p>
+                    </div>
+                  </div>
+                  <span
+                    className={cn(
+                      "inline-flex flex-none items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium",
+                      plan.isActive
+                        ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
+                        : "bg-red-500/10 text-red-500 border-red-500/20"
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "h-1.5 w-1.5 rounded-full",
+                        plan.isActive ? "bg-emerald-500" : "bg-red-500"
+                      )}
+                    />
+                    {plan.isActive ? t('admin:users.statusActive') : t('admin:subscriptionPlans.inactive')}
+                  </span>
+                </div>
+
+                <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                  <div className="rounded-lg bg-muted/40 p-3">
+                    <dt className="text-muted-foreground">{t('admin:subscriptionPlans.table.monthly')}</dt>
+                    <dd className="mt-1 font-medium">{formatMoney(plan.monthlyPrice)}{t('admin:subscriptionPlans.perMonth')}</dd>
+                  </div>
+                  <div className="rounded-lg bg-muted/40 p-3">
+                    <dt className="text-muted-foreground">{t('admin:subscriptionPlans.table.yearly')}</dt>
+                    <dd className="mt-1 font-medium">{formatMoney(plan.yearlyPrice)}{t('admin:subscriptionPlans.perYear')}</dd>
+                  </div>
+                  <div className="rounded-lg bg-muted/40 p-3">
+                    <dt className="text-muted-foreground">{t('admin:subscriptionPlans.table.courses')}</dt>
+                    <dd className="mt-1 font-medium">{plan.maxCourses != null && plan.maxCourses > 0 ? plan.maxCourses : t('admin:subscriptionPlans.unlimited')}</dd>
+                  </div>
+                  <div className="rounded-lg bg-muted/40 p-3">
+                    <dt className="text-muted-foreground">{t('admin:subscriptionPlans.table.totalSeats')}</dt>
+                    <dd className="mt-1 font-medium">{plan.maxTotalSeats != null && plan.maxTotalSeats > 0 ? plan.maxTotalSeats : t('admin:subscriptionPlans.unlimited')}</dd>
+                  </div>
+                  <div className="col-span-2 rounded-lg bg-muted/40 p-3">
+                    <dt className="text-muted-foreground">{t('admin:subscriptionPlans.table.seatsPerCourse')}</dt>
+                    <dd className="mt-1 font-medium">{plan.maxSeatsPerCourse != null && plan.maxSeatsPerCourse > 0 ? plan.maxSeatsPerCourse : t('admin:subscriptionPlans.unlimited')}</dd>
+                  </div>
+                </dl>
+
+                <div className="mt-4 flex items-center justify-end gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 gap-1.5"
+                    onClick={() => openEditDialog(plan)}
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                    {t('common:edit')}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 gap-1.5 text-destructive hover:text-destructive"
+                    onClick={() => setDeletePlan(plan)}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              </div>
+            ))}
           </div>
-        ) : (
-          <table className="w-full">
+
+          <div className="hidden overflow-hidden rounded-xl border border-border bg-card md:block">
+            <div className="overflow-x-auto">
+          <table className="min-w-[920px] w-full">
             <thead className="border-b border-border bg-muted/50">
               <tr>
                 <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">{t('admin:subscriptionPlans.table.plan')}</th>
@@ -178,14 +262,7 @@ export function SubscriptionPlansPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {plans.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="px-4 py-12 text-center text-muted-foreground">
-                    {t('admin:subscriptionPlans.empty')}
-                  </td>
-                </tr>
-              ) : (
-                plans.map((plan) => (
+              {plans.map((plan) => (
                   <tr key={plan.id} className="bg-card hover:bg-muted/50">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
@@ -198,8 +275,8 @@ export function SubscriptionPlansPage() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-sm">${plan.monthlyPrice}{t('admin:subscriptionPlans.perMonth')}</td>
-                    <td className="px-4 py-3 text-sm">${plan.yearlyPrice}{t('admin:subscriptionPlans.perYear')}</td>
+                    <td className="px-4 py-3 text-sm">{formatMoney(plan.monthlyPrice)}{t('admin:subscriptionPlans.perMonth')}</td>
+                    <td className="px-4 py-3 text-sm">{formatMoney(plan.yearlyPrice)}{t('admin:subscriptionPlans.perYear')}</td>
                     <td className="px-4 py-3 text-sm">{plan.maxCourses != null && plan.maxCourses > 0 ? plan.maxCourses : <span className="text-muted-foreground italic">{t('admin:subscriptionPlans.unlimited')}</span>}</td>
                     <td className="px-4 py-3 text-sm">{plan.maxSeatsPerCourse != null && plan.maxSeatsPerCourse > 0 ? plan.maxSeatsPerCourse : <span className="text-muted-foreground italic">{t('admin:subscriptionPlans.unlimited')}</span>}</td>
                     <td className="px-4 py-3 text-sm">{plan.maxTotalSeats != null && plan.maxTotalSeats > 0 ? plan.maxTotalSeats : <span className="text-muted-foreground italic">{t('admin:subscriptionPlans.unlimited')}</span>}</td>
@@ -243,16 +320,17 @@ export function SubscriptionPlansPage() {
                       </div>
                     </td>
                   </tr>
-                ))
-              )}
+                ))}
             </tbody>
           </table>
-        )}
-      </div>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Create/Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-3xl">
           <DialogHeader>
             <DialogTitle>{editingPlan ? t('admin:subscriptionPlans.editPlan') : t('admin:subscriptionPlans.createPlan')}</DialogTitle>
           </DialogHeader>

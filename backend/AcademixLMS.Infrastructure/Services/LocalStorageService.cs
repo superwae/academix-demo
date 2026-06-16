@@ -20,7 +20,7 @@ public class LocalStorageService : IStorageService
     {
         var uploadsPath = configuration["Storage:UploadsPath"] ?? "uploads";
         var contentRoot = configuration["ContentRoot"] ?? AppContext.BaseDirectory ?? Directory.GetCurrentDirectory();
-        _uploadsRoot = Path.Combine(contentRoot, uploadsPath);
+        _uploadsRoot = Path.GetFullPath(Path.Combine(contentRoot, uploadsPath));
         Directory.CreateDirectory(_uploadsRoot);
     }
 
@@ -31,7 +31,8 @@ public class LocalStorageService : IStorageService
             throw new ArgumentException($"File type not allowed. Allowed: {string.Join(", ", AllowedExtensions)}");
 
         var safeFileName = $"{Guid.NewGuid():N}{ext}";
-        var folderPath = Path.Combine(_uploadsRoot, folder);
+        var relativeFolder = NormalizeRelativePath(folder);
+        var folderPath = ResolveUnderUploads(relativeFolder);
         Directory.CreateDirectory(folderPath);
         var fullPath = Path.Combine(folderPath, safeFileName);
 
@@ -47,15 +48,12 @@ public class LocalStorageService : IStorageService
             throw new InvalidOperationException($"File size exceeds maximum allowed ({MaxFileSizeBytes / (1024 * 1024)} MB).");
         }
 
-        return $"{folder}/{safeFileName}";
+        return $"{relativeFolder.Replace(Path.DirectorySeparatorChar, '/')}/{safeFileName}";
     }
 
     public Task DeleteFileAsync(string filePath, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(filePath) || filePath.Contains(".."))
-            throw new ArgumentException("Invalid file path.");
-
-        var fullPath = Path.Combine(_uploadsRoot, filePath.Replace('/', Path.DirectorySeparatorChar));
+        var fullPath = ResolveUnderUploads(filePath);
         if (File.Exists(fullPath))
             File.Delete(fullPath);
 
@@ -64,8 +62,54 @@ public class LocalStorageService : IStorageService
 
     public string GetFullPath(string relativePath)
     {
-        if (string.IsNullOrWhiteSpace(relativePath) || relativePath.Contains(".."))
+        try
+        {
+            return ResolveUnderUploads(relativePath);
+        }
+        catch (ArgumentException)
+        {
             return null!;
-        return Path.Combine(_uploadsRoot, relativePath.Replace('/', Path.DirectorySeparatorChar));
+        }
+    }
+
+    private string ResolveUnderUploads(string relativePath)
+    {
+        var normalized = NormalizeRelativePath(relativePath);
+        var fullPath = Path.GetFullPath(Path.Combine(_uploadsRoot, normalized));
+        var rootWithSeparator = _uploadsRoot.EndsWith(Path.DirectorySeparatorChar)
+            ? _uploadsRoot
+            : $"{_uploadsRoot}{Path.DirectorySeparatorChar}";
+
+        if (!fullPath.StartsWith(rootWithSeparator, StringComparison.OrdinalIgnoreCase) &&
+            !string.Equals(fullPath, _uploadsRoot, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new ArgumentException("Invalid file path.");
+        }
+
+        return fullPath;
+    }
+
+    private static string NormalizeRelativePath(string relativePath)
+    {
+        if (string.IsNullOrWhiteSpace(relativePath) || Path.IsPathRooted(relativePath))
+            throw new ArgumentException("Invalid file path.");
+
+        var invalidChars = Path.GetInvalidPathChars();
+        var segments = relativePath
+            .Replace('\\', '/')
+            .Split('/', StringSplitOptions.RemoveEmptyEntries);
+
+        if (segments.Length == 0)
+            throw new ArgumentException("Invalid file path.");
+
+        if (segments.Any(segment =>
+                segment is "." or ".." ||
+                segment.IndexOfAny(invalidChars) >= 0 ||
+                segment.Contains(':')))
+        {
+            throw new ArgumentException("Invalid file path.");
+        }
+
+        return Path.Combine(segments);
     }
 }

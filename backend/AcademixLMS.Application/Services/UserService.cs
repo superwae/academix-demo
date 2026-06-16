@@ -401,6 +401,7 @@ public class UserService : IUserService
             IsActive = user.IsActive,
             IsEmailVerified = user.IsEmailVerified,
             CreatedAt = user.CreatedAt,
+            LastLoginAt = user.LastLoginAt,
             Roles = roles,
             UiPreferences = UserUiPreferencesJson.Deserialize(user.UiPreferencesJson)
         };

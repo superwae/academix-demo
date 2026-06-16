@@ -13,7 +13,109 @@
     "featuresTitle": "Everything you need to teach and learn",
     "faqTitle": "Frequently asked questions",
     "ctaTitle": "Ready to start learning?",
-    "ctaSubtitle": "Join AcademiX today and unlock hundreds of courses."
+    "ctaSubtitle": "Join AcademiX today and unlock hundreds of courses.",
+    "hero": {
+      "kicker": "The platform behind modern classrooms",
+      "titleA": "One platform,",
+      "titleB": "every classroom.",
+      "subtitle": "AcademiX powers independent instructors, teaching institutions, and employee training — courses, live sessions, exams, certificates, and payments in one place.",
+      "ctaPrimary": "Browse courses",
+      "ctaSecondary": "Start teaching",
+      "scrollHint": "Scroll to see how it works"
+    },
+    "chapters": {
+      "author": {
+        "title": "Author once, teach forever",
+        "body": "Build courses with sections, lessons, live sessions, assignments, and exams. See your revenue split before you publish — you always know what you earn."
+      },
+      "enroll": {
+        "title": "Seats that fill themselves",
+        "body": "Students enroll from the public catalog. Universities pool their teachers under one subscription, and employers buy seat licenses and assign them to their teams — every seat tracked."
+      },
+      "learn": {
+        "title": "Live, graded, on track",
+        "body": "Live sessions, self-paced lessons, auto-graded exams, and instructor feedback. Progress stays visible to students, teachers, and training managers alike."
+      },
+      "certify": {
+        "title": "Proof of work, instantly",
+        "body": "Completion unlocks verified certificates, and every sale is split automatically between the platform, the organization, and the instructor — earnings land on your dashboard in real time."
+      }
+    },
+    "features": {
+      "heading": "Designed for how education actually works.",
+      "sub": "Four kinds of people run a modern classroom. AcademiX gives each of them a portal of their own — on the same course, the same data, the same platform."
+    },
+    "audiences": {
+      "students": {
+        "title": "Students",
+        "body": "Browse the catalog, enroll in sections that fit your schedule, learn at your own pace, and walk away with a verified certificate.",
+        "cta": "Find a course"
+      },
+      "instructors": {
+        "title": "Independent instructors",
+        "body": "Author courses, teach live, grade with rubrics, and keep most of every sale — your earnings dashboard updates in real time.",
+        "cta": "Start teaching"
+      },
+      "institutions": {
+        "title": "Teaching institutions",
+        "body": "Universities and bootcamps pool teachers under one subscription, publish org-exclusive courses, and share revenue transparently.",
+        "cta": "Bring your faculty"
+      },
+      "employers": {
+        "title": "Employers",
+        "body": "Buy seat licenses in bulk, assign them to employees, and track training compliance from a dedicated dashboard.",
+        "cta": "Train your team"
+      }
+    },
+    "stats": {
+      "organizations": "Partner organizations"
+    },
+    "courses": {
+      "heading": "Start with a course people love",
+      "sub": "Top-rated right now on AcademiX.",
+      "viewAll": "View all courses",
+      "free": "Free",
+      "fallbackCategory": "Course"
+    },
+    "faq": {
+      "heading": "Questions, answered."
+    },
+    "footer": {
+      "tagline": "Learn anything. Teach everything. AcademiX is where courses come to life.",
+      "rowCourses": "Browse courses",
+      "rowTeach": "Become an instructor",
+      "rowOrgs": "Train your team",
+      "rights": "All rights reserved.",
+      "support": "Support"
+    },
+    "scenes": {
+      "author": {
+        "course": "Your course",
+        "video": "Video lesson",
+        "reading": "Reading",
+        "quiz": "Quiz",
+        "split": "Revenue split preview"
+      },
+      "enroll": {
+        "org": "Organization",
+        "assign": "Org assigns seats to its team",
+        "seatTaken": "Enrolled seat",
+        "seatOpen": "Open seat"
+      },
+      "learn": {
+        "live": "Live session",
+        "progress": "Course progress",
+        "assignments": "Assignments graded",
+        "students": "Students attending from anywhere"
+      },
+      "certify": {
+        "cert": "Verified certificate",
+        "split": "Every sale splits automatically",
+        "platform": "PLATFORM",
+        "org": "ORGANIZATION",
+        "instructor": "INSTRUCTOR"
+      }
+    }
   },
   "catalog": {
     "title": "Course catalog",
@@ -144,7 +246,8 @@
       "courseNotPublished": "This course is not yet available for enrollment.",
       "unableEnroll": "Unable to complete enrollment. Please try again.",
       "tryLater": "Please try again later"
-    }
+    },
+    "alreadyEnrolledLabel": "Already Enrolled"
   },
   "home": {
     "metaDescription": "Discover thousands of courses from expert instructors. Learn at your pace with assignments, exams, and certificates on AcademiX.",
@@ -378,6 +481,8 @@
     "page": "Page {{current}} of {{total}}",
     "previous": "Previous",
     "next": "Next",
-    "noResultsAdjust": "Try adjusting your search or filters"
+    "noResultsAdjust": "Try adjusting your search or filters",
+    "kicker": "Course catalog",
+    "newBadge": "New"
   }
 }

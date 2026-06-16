@@ -4,6 +4,7 @@ using AcademixLMS.Application.Interfaces;
 using AcademixLMS.Domain.Common;
 using AcademixLMS.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 
@@ -14,6 +15,8 @@ public class PaymentService : IPaymentService
     private readonly IApplicationDbContext _context;
     private readonly ILahzaService _lahzaService;
     private readonly IRevenueSplitService _revenueSplitService;
+    private readonly IEnrollmentService _enrollmentService;
+    private readonly IConfiguration _configuration;
     private readonly ILogger<PaymentService> _logger;
     private readonly IStringLocalizer<PaymentService> _localizer;
 
@@ -21,17 +24,25 @@ public class PaymentService : IPaymentService
         IApplicationDbContext context,
         ILahzaService lahzaService,
         IRevenueSplitService revenueSplitService,
+        IEnrollmentService enrollmentService,
+        IConfiguration configuration,
         ILogger<PaymentService> logger,
         IStringLocalizer<PaymentService> localizer)
     {
         _context = context;
         _lahzaService = lahzaService;
         _revenueSplitService = revenueSplitService;
+        _enrollmentService = enrollmentService;
+        _configuration = configuration;
         _logger = logger;
         _localizer = localizer;
     }
 
-    public async Task<Result<InitializePaymentResponse>> InitializeCoursePaymentAsync(Guid userId, Guid courseId, string? discountCode = null, CancellationToken cancellationToken = default)
+    /// <summary>Payments:DemoMode — completes payments instantly without the Lahza gateway.</summary>
+    private bool IsDemoMode =>
+        bool.TryParse(_configuration["Payments:DemoMode"], out var demoMode) && demoMode;
+
+    public async Task<Result<InitializePaymentResponse>> InitializeCoursePaymentAsync(Guid userId, Guid courseId, string? discountCode = null, Guid? sectionId = null, CancellationToken cancellationToken = default)
     {
         // 1. Check if user already paid for this course
         var alreadyPaid = await _context.Payments
@@ -54,6 +65,17 @@ public class PaymentService : IPaymentService
         if (!course.Price.HasValue || course.Price.Value <= 0)
         {
             return Result<InitializePaymentResponse>.Failure(_localizer["CourseIsFree"]);
+        }
+
+        // Validate the chosen section up-front so we never take money for an invalid section.
+        if (sectionId.HasValue)
+        {
+            var sectionValid = await _context.CourseSections
+                .AnyAsync(s => s.Id == sectionId.Value && s.CourseId == courseId && s.IsActive && !s.IsDeleted, cancellationToken);
+            if (!sectionValid)
+            {
+                return Result<InitializePaymentResponse>.Failure(_localizer["SectionNotFound"]);
+            }
         }
 
         // Load user
@@ -93,9 +115,9 @@ public class PaymentService : IPaymentService
                     finalAmount = Math.Max(0, originalAmount - (long)(discount.Value * 100));
                 }
 
-                // Increment usage count
-                discount.UsedCount++;
-                discount.UpdatedAt = DateTime.UtcNow;
+                // Note: UsedCount is incremented only when the payment actually completes
+                // (demo completion below, or gateway verification) so abandoned checkouts
+                // can't exhaust a discount's MaxUses.
             }
         }
 
@@ -116,6 +138,37 @@ public class PaymentService : IPaymentService
         _context.Payments.Add(payment);
         await _context.SaveChangesAsync(cancellationToken);
 
+        // 3b. Demo mode: complete the payment instantly and enroll — no gateway round-trip.
+        if (IsDemoMode)
+        {
+            payment.Status = PaymentStatus.Completed;
+            payment.PaidAt = DateTime.UtcNow;
+            payment.LahzaReference = $"demo_{payment.Id:N}";
+            payment.LahzaChannel = "demo";
+
+            await ApplyRevenueSplitAsync(payment, cancellationToken);
+            await ConsumeDiscountAsync(payment.DiscountId, cancellationToken);
+
+            payment.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync(cancellationToken);
+
+            var enrollResult = await _enrollmentService.EnrollAfterPaymentAsync(userId, courseId, payment.Id, sectionId, cancellationToken);
+            if (!enrollResult.IsSuccess)
+            {
+                _logger.LogWarning("Demo payment {PaymentId} completed but auto-enrollment failed: {Error}", payment.Id, enrollResult.Error);
+            }
+
+            _logger.LogInformation("Demo-mode course payment {PaymentId} completed for user {UserId}, course {CourseId}, amount {Amount}.", payment.Id, userId, courseId, finalAmount);
+
+            return Result<InitializePaymentResponse>.Success(new InitializePaymentResponse
+            {
+                PaymentId = payment.Id,
+                AuthorizationUrl = string.Empty,
+                Reference = payment.LahzaReference,
+                DemoCompleted = true
+            });
+        }
+
         // 4. Call Lahza initialize
         var lahzaRequest = new LahzaInitializeRequest
         {
@@ -128,7 +181,8 @@ public class PaymentService : IPaymentService
             {
                 { "payment_id", payment.Id.ToString() },
                 { "course_id", courseId.ToString() },
-                { "user_id", userId.ToString() }
+                { "user_id", userId.ToString() },
+                { "section_id", sectionId?.ToString() ?? string.Empty }
             }
         };
 
@@ -218,6 +272,42 @@ public class PaymentService : IPaymentService
         _context.Payments.Add(payment);
         await _context.SaveChangesAsync(cancellationToken);
 
+        // Demo mode: activate the subscription instantly — no gateway round-trip.
+        if (IsDemoMode)
+        {
+            var now = DateTime.UtcNow;
+            var subscription = new Subscription
+            {
+                UserId = userId,
+                PlanId = planId,
+                BillingInterval = interval,
+                Status = SubscriptionStatus.Active,
+                CurrentPeriodStart = now,
+                CurrentPeriodEnd = interval == BillingInterval.Monthly ? now.AddMonths(1) : now.AddYears(1),
+                CreatedBy = userId
+            };
+            _context.Subscriptions.Add(subscription);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            payment.Status = PaymentStatus.Completed;
+            payment.PaidAt = now;
+            payment.LahzaReference = $"demo_{payment.Id:N}";
+            payment.LahzaChannel = "demo";
+            payment.SubscriptionId = subscription.Id;
+            payment.UpdatedAt = now;
+            await _context.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Demo-mode subscription payment {PaymentId} completed for user {UserId}, plan {PlanId}; subscription {SubscriptionId} active.", payment.Id, userId, planId, subscription.Id);
+
+            return Result<InitializePaymentResponse>.Success(new InitializePaymentResponse
+            {
+                PaymentId = payment.Id,
+                AuthorizationUrl = string.Empty,
+                Reference = payment.LahzaReference,
+                DemoCompleted = true
+            });
+        }
+
         // Call Lahza
         var lahzaRequest = new LahzaInitializeRequest
         {
@@ -260,7 +350,7 @@ public class PaymentService : IPaymentService
         });
     }
 
-    public async Task<Result<PaymentDto>> VerifyPaymentAsync(string lahzaReference, CancellationToken cancellationToken = default)
+    public async Task<Result<PaymentDto>> VerifyPaymentAsync(string lahzaReference, Guid? requestingUserId = null, CancellationToken cancellationToken = default)
     {
         var payment = await _context.Payments
             .Include(p => p.User)
@@ -268,6 +358,12 @@ public class PaymentService : IPaymentService
             .FirstOrDefaultAsync(p => p.LahzaReference == lahzaReference && !p.IsDeleted, cancellationToken);
 
         if (payment == null)
+        {
+            return Result<PaymentDto>.Failure(_localizer["PaymentNotFound"]);
+        }
+
+        // Scope to the requesting user: never confirm (or act on) someone else's payment.
+        if (requestingUserId.HasValue && payment.UserId != requestingUserId.Value)
         {
             return Result<PaymentDto>.Failure(_localizer["PaymentNotFound"]);
         }
@@ -285,6 +381,7 @@ public class PaymentService : IPaymentService
         }
 
         var verification = verifyResult.Value!;
+        Guid? checkoutSectionId = null;
 
         if (verification.Status == "success")
         {
@@ -293,20 +390,19 @@ public class PaymentService : IPaymentService
             payment.LahzaAuthorizationCode = verification.AuthorizationCode;
             payment.LahzaChannel = verification.Channel;
 
-            // Persist revenue split snapshot for course purchases.
-            if (payment.Type == PaymentType.CoursePurchase && payment.CourseId is { } courseId)
+            // Section the buyer chose at checkout, carried through gateway metadata.
+            if (verification.Metadata != null &&
+                verification.Metadata.TryGetValue("section_id", out var sectionIdStr) &&
+                Guid.TryParse(sectionIdStr, out var parsedSectionId))
             {
-                var splitResult = await _revenueSplitService.ComputeForPaymentAsync(courseId, payment.Amount, cancellationToken);
-                if (splitResult.IsSuccess)
-                {
-                    var (platformAmt, orgAmt, instructorAmt) = splitResult.Value;
-                    payment.PlatformAmount = platformAmt;
-                    payment.OrgAmount = orgAmt;
-                    payment.InstructorAmount = instructorAmt;
-                    payment.InstructorUserId = payment.Course?.InstructorId;
-                    payment.OrganizationId = payment.Course?.OrganizationId;
-                }
+                checkoutSectionId = parsedSectionId;
             }
+
+            // Persist revenue split snapshot for course purchases.
+            await ApplyRevenueSplitAsync(payment, cancellationToken);
+
+            // Count discount usage only on confirmed completion.
+            await ConsumeDiscountAsync(payment.DiscountId, cancellationToken);
 
             // If this is a subscription payment, create the subscription record
             if (payment.Type == PaymentType.Subscription && verification.Metadata != null)
@@ -344,7 +440,45 @@ public class PaymentService : IPaymentService
         await _context.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation("Payment {PaymentId} verified with status '{Status}'.", payment.Id, payment.Status);
-        return Result<PaymentDto>.Success(MapToPaymentDto(payment));
+        var dto = MapToPaymentDto(payment);
+        dto.SectionId = checkoutSectionId;
+        return Result<PaymentDto>.Success(dto);
+    }
+
+    /// <summary>Computes and stores the platform/org/instructor revenue split on a completed course purchase.</summary>
+    private async Task ApplyRevenueSplitAsync(Payment payment, CancellationToken cancellationToken)
+    {
+        if (payment.Type != PaymentType.CoursePurchase || payment.CourseId is not { } courseId)
+            return;
+
+        var splitResult = await _revenueSplitService.ComputeForPaymentAsync(courseId, payment.Amount, cancellationToken);
+        if (splitResult.IsSuccess)
+        {
+            var (platformAmt, orgAmt, instructorAmt) = splitResult.Value;
+            payment.PlatformAmount = platformAmt;
+            payment.OrgAmount = orgAmt;
+            payment.InstructorAmount = instructorAmt;
+
+            var course = payment.Course ?? await _context.Courses
+                .FirstOrDefaultAsync(c => c.Id == courseId && !c.IsDeleted, cancellationToken);
+            payment.InstructorUserId = course?.InstructorId;
+            payment.OrganizationId = course?.OrganizationId;
+        }
+    }
+
+    /// <summary>Increments a discount's usage count. Called only when a payment actually completes.</summary>
+    private async Task ConsumeDiscountAsync(Guid? discountId, CancellationToken cancellationToken)
+    {
+        if (!discountId.HasValue)
+            return;
+
+        var discount = await _context.Discounts
+            .FirstOrDefaultAsync(d => d.Id == discountId.Value && !d.IsDeleted, cancellationToken);
+        if (discount != null)
+        {
+            discount.UsedCount++;
+            discount.UpdatedAt = DateTime.UtcNow;
+        }
     }
 
     public async Task<Result<PagedResult<PaymentDto>>> GetPaymentsByUserAsync(Guid userId, PagedRequest request, CancellationToken cancellationToken = default)

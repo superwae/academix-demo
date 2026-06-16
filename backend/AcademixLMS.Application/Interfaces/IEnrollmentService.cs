@@ -14,8 +14,9 @@ public interface IEnrollmentService
     Task<Result> UpdateProgressAsync(Guid enrollmentId, decimal progressPercentage, CancellationToken cancellationToken = default);
     Task<Result> CompleteAsync(Guid enrollmentId, CancellationToken cancellationToken = default);
     Task<Result<bool>> CheckConflictAsync(Guid userId, Guid courseId, Guid sectionId, CancellationToken cancellationToken = default);
+    Task<Result<bool>> HasActiveEnrollmentAsync(Guid userId, Guid courseId, CancellationToken cancellationToken = default);
     Task<Result<bool>> VerifyCourseInstructorAsync(Guid courseId, Guid userId, CancellationToken cancellationToken = default);
-    Task<Result> EnrollAfterPaymentAsync(Guid userId, Guid courseId, Guid paymentId, CancellationToken cancellationToken = default);
+    Task<Result> EnrollAfterPaymentAsync(Guid userId, Guid courseId, Guid paymentId, Guid? sectionId = null, CancellationToken cancellationToken = default);
 }
 
 

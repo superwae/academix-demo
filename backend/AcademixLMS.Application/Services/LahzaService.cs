@@ -17,6 +17,8 @@ public class LahzaService : ILahzaService
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+        PropertyNameCaseInsensitive = true,
+        NumberHandling = JsonNumberHandling.AllowReadingFromString,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
 
@@ -210,8 +212,14 @@ public class LahzaService : ILahzaService
         [JsonPropertyName("channel")]
         public string? Channel { get; set; }
 
+        [JsonIgnore]
+        public DateTime? PaidAt => PaidAtCamel ?? PaidAtSnake;
+
+        [JsonPropertyName("paidAt")]
+        public DateTime? PaidAtCamel { get; set; }
+
         [JsonPropertyName("paid_at")]
-        public DateTime? PaidAt { get; set; }
+        public DateTime? PaidAtSnake { get; set; }
 
         [JsonPropertyName("authorization")]
         public LahzaAuthorizationData? Authorization { get; set; }

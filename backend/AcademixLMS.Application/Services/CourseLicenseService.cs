@@ -4,6 +4,7 @@ using AcademixLMS.Application.Interfaces;
 using AcademixLMS.Domain.Common;
 using AcademixLMS.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 
@@ -12,15 +13,18 @@ namespace AcademixLMS.Application.Services;
 public class CourseLicenseService : ICourseLicenseService
 {
     private readonly IApplicationDbContext _context;
+    private readonly IConfiguration _configuration;
     private readonly ILogger<CourseLicenseService> _logger;
     private readonly IStringLocalizer<CourseLicenseService> _localizer;
 
     public CourseLicenseService(
         IApplicationDbContext context,
+        IConfiguration configuration,
         ILogger<CourseLicenseService> logger,
         IStringLocalizer<CourseLicenseService> localizer)
     {
         _context = context;
+        _configuration = configuration;
         _logger = logger;
         _localizer = localizer;
     }
@@ -66,6 +70,12 @@ public class CourseLicenseService : ICourseLicenseService
 
         var pricePerSeat = course.Price.Value;
         var total = pricePerSeat * request.Seats;
+
+        // Instant completion is only valid in demo mode (Payments:DemoMode). With a real
+        // gateway this flow must go through Lahza init + verification before activating seats.
+        var demoMode = bool.TryParse(_configuration["Payments:DemoMode"], out var dm) && dm;
+        if (!demoMode)
+            return Result<CourseLicenseDto>.Failure(_localizer["LicensePaymentRequiresGateway"]);
 
         // Create payment (demo: marks complete immediately. Production: Lahza init + webhook).
         var payment = new Payment
@@ -166,7 +176,11 @@ public class CourseLicenseService : ICourseLicenseService
             return Result<IReadOnlyList<LicenseAssignmentDto>>.Failure(_localizer["SeatsAvailableShort", available, request.MemberUserIds.Count]);
 
         var memberIdsInOrg = await _context.OrganizationMembers
-            .Where(m => m.OrganizationId == license.OrganizationId && request.MemberUserIds.Contains(m.UserId) && m.IsActive && !m.IsDeleted)
+            .Where(m => m.OrganizationId == license.OrganizationId &&
+                        request.MemberUserIds.Contains(m.UserId) &&
+                        m.IsActive &&
+                        m.InviteAcceptedAt != null &&
+                        !m.IsDeleted)
             .Select(m => m.UserId)
             .ToListAsync(cancellationToken);
 

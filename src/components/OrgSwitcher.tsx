@@ -33,7 +33,7 @@ export function OrgSwitcher() {
     return (
       <Link
         to={`/org/${m.slug}/dashboard`}
-        className="hidden sm:inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-1.5 text-sm font-medium hover:bg-muted"
+        className="hidden lg:inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-1.5 text-sm font-medium hover:bg-muted"
         title={t('org:switchToOrg')}
       >
         <Building2 className="h-4 w-4" />
@@ -44,7 +44,7 @@ export function OrgSwitcher() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="hidden sm:inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-1.5 text-sm font-medium hover:bg-muted">
+      <DropdownMenuTrigger className="hidden lg:inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-1.5 text-sm font-medium hover:bg-muted">
         <Building2 className="h-4 w-4" />
         {t('org:portal')}
         <ChevronDown className="h-3 w-3 opacity-60" />

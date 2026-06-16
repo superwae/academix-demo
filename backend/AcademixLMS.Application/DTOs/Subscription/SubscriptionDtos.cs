@@ -82,4 +82,8 @@ public class SubscriptionStatusDto
     public int CurrentCourseCount { get; set; }
     public bool CanCreateCourse { get; set; }
     public int? RemainingCourses { get; set; }
+    public int? MaxSeatsPerCourse { get; set; }
+    public int? MaxTotalSeats { get; set; }
+    public int CurrentTotalSeats { get; set; }
+    public int? RemainingTotalSeats { get; set; }
 }

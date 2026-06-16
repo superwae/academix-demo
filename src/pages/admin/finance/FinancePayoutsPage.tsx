@@ -30,6 +30,7 @@ import {
   type FilterConfig,
 } from "../../../components/admin/finance";
 import { toast } from "sonner";
+import { DemoDataBadge } from "../../../components/admin/finance/DemoDataBadge";
 
 // =====================
 // TYPES
@@ -595,7 +596,7 @@ export function FinancePayoutsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">{t('admin:finance.payouts.title')}</h1>
+          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">{t('admin:finance.payouts.title')} <DemoDataBadge /></h1>
           <p className="text-sm text-muted-foreground">
             {t('admin:finance.payouts.subtitle')}
           </p>

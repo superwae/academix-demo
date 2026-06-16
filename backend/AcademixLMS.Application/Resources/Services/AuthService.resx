@@ -92,4 +92,7 @@
   <data name="CurrentPasswordIncorrect" xml:space="preserve">
     <value>Current password is incorrect.</value>
   </data>
+  <data name="TooManyLoginAttempts" xml:space="preserve">
+    <value>Too many failed login attempts. Please try again in a few minutes.</value>
+  </data>
 </root>

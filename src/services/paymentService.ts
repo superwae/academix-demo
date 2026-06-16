@@ -20,6 +20,8 @@ export interface PaymentDto {
 
 export interface InitializeCoursePaymentRequest {
   courseId: string;
+  /** Section the student chose at checkout; the backend enrolls into it after payment. */
+  sectionId?: string;
   discountCode?: string;
 }
 
@@ -33,6 +35,13 @@ export interface InitializeCoursePaymentResponse {
   reference: string;
   amount: number;
   currency: string;
+  /**
+   * Demo gateway mode: when true the payment was completed server-side and
+   * (for courses) the student is already enrolled / (for subscriptions) the
+   * subscription is already active. No Lahza redirect should happen —
+   * authorizationUrl will be empty.
+   */
+  demoCompleted?: boolean;
 }
 
 export interface PaymentVerifyResponse {
@@ -41,12 +50,17 @@ export interface PaymentVerifyResponse {
   enrollmentId?: string;
 }
 
+/** Mirrors backend PaymentSummaryDto. Amounts are in the smallest currency unit (agorot). */
 export interface PaymentSummaryDto {
   totalRevenue: number;
-  totalTransactions: number;
-  pendingPayouts: number;
-  refunds: number;
-  revenueByMonth: { month: string; amount: number }[];
+  currency: string;
+  totalPayments: number;
+  completedPayments: number;
+  pendingPayments: number;
+  failedPayments: number;
+  refundedPayments: number;
+  revenueThisMonth: number;
+  revenueLastMonth: number;
 }
 
 class PaymentService {
@@ -74,8 +88,15 @@ class PaymentService {
 
   async verifyPayment(reference: string): Promise<PaymentVerifyResponse> {
     try {
-      const response = await apiClient.get<PaymentVerifyResponse>(`/payments/verify/${reference}`);
-      return response;
+      const response = await apiClient.get<PaymentVerifyResponse | PaymentDto>(`/payments/verify/${reference}`);
+      if ('payment' in response) {
+        return response;
+      }
+
+      return {
+        success: response.status === 'Completed',
+        payment: response,
+      };
     } catch (error) {
       const apiError = error as ApiError;
       throw new Error(apiError.error || 'Failed to verify payment');

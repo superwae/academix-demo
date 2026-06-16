@@ -25,6 +25,7 @@ import {
   DropdownMenuSeparator,
 } from "../../components/ui/dropdown-menu";
 import { ResponsiveTable, type ResponsiveTableColumn } from "../../components/ui/responsive-table";
+import { DemoDataBadge } from "../../components/admin/finance/DemoDataBadge";
 
 // Audit log shape
 interface AuditLogRow {
@@ -207,7 +208,7 @@ export function AdminAuditLogsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">{t('admin:auditLogs.title')}</h1>
+          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">{t('admin:auditLogs.title')} <DemoDataBadge /></h1>
           <p className="text-sm text-muted-foreground">
             {t('admin:auditLogs.subtitle')}
           </p>

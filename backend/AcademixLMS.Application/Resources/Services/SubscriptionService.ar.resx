@@ -62,4 +62,7 @@
   <data name="PaymentNotFound" xml:space="preserve">
     <value>لم يتم العثور على دفعة بهذا المرجع.</value>
   </data>
+  <data name="SubscriptionRequiresPayment" xml:space="preserve">
+    <value>يجب شراء الخطط المدفوعة عبر صفحة الدفع.</value>
+  </data>
 </root>

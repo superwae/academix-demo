@@ -1,0 +1,32 @@
+# Render Blueprint for the AcademiX LMS free demo.
+# One Docker web service (frontend + .NET API in a single image) plus a free
+# PostgreSQL database. Demo data is seeded automatically on first boot.
+services:
+  - type: web
+    name: academix-demo
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      # Seed the demo accounts / faculty / courses / orgs on startup.
+      - key: Seed__DemoData
+        value: "true"
+      # Fresh random JWT signing key for the deployment.
+      - key: JWT__SECRETKEY
+        generateValue: true
+      # Postgres connection (URI form); the app converts it to Npgsql format.
+      - key: DATABASE_URL
+        fromDatabase:
+          name: academix-db
+          property: connectionString
+
+databases:
+  - name: academix-db
+    plan: free
+    databaseName: academixlms
+    user: academix

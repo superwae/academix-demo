@@ -7,7 +7,8 @@ public class ConversationDto
     public Guid? CourseId { get; set; }
     public string? CourseTitle { get; set; }
     public string? Title { get; set; }
-    public DateTime LastMessageAt { get; set; }
+    /// <summary>Null when the conversation has no messages yet (e.g. thread opened but never used).</summary>
+    public DateTime? LastMessageAt { get; set; }
     public int UnreadCount { get; set; }
     public ConversationMessageDto? LastMessage { get; set; }
     public List<ConversationParticipantDto> Participants { get; set; } = new();

@@ -18,22 +18,40 @@ export function apiDayToDayName(day: number): string {
 }
 
 /**
- * End time of the most recent occurrence of this slot that is already over (local time).
+ * Start/end time of the most recent occurrence of this slot that is already over (local time).
  */
-export function getLastPastSessionEnd(meta: MeetingMeta, now: Date = new Date()): Date | null {
+export function getLastPastSessionWindow(
+  meta: MeetingMeta,
+  now: Date = new Date(),
+): { start: Date; end: Date } | null {
   const targetDow = meta.day.trim();
   for (let i = 0; i < 21; i++) {
     const check = new Date(now);
     check.setDate(check.getDate() - i);
     const name = WEEKDAYS[check.getDay()];
     if (name !== targetDow) continue;
+    const start = new Date(check);
+    const startHour = Math.floor(meta.startMinutes / 60);
+    const startMinute = meta.startMinutes % 60;
+    start.setHours(startHour, startMinute, 0, 0);
+
     const end = new Date(check);
     const h = Math.floor(meta.endMinutes / 60);
     const m = meta.endMinutes % 60;
     end.setHours(h, m, 59, 999);
-    if (end <= now) return end;
+    if (end <= start) {
+      end.setDate(end.getDate() + 1);
+    }
+    if (end <= now) return { start, end };
   }
   return null;
+}
+
+/**
+ * End time of the most recent occurrence of this slot that is already over (local time).
+ */
+export function getLastPastSessionEnd(meta: MeetingMeta, now: Date = new Date()): Date | null {
+  return getLastPastSessionWindow(meta, now)?.end ?? null;
 }
 
 export function meetingDismissKey(meetingTimeId: string, lastEndMs: number): string {

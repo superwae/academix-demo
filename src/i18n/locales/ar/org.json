@@ -9,7 +9,8 @@
     "OrgAdmin": "مسؤول",
     "OrgManager": "مدير",
     "OrgTeacher": "مدرّس",
-    "OrgEmployee": "موظف"
+    "OrgEmployee": "موظف",
+    "OrgStudent": "طالب"
   },
   "types": {
     "TeachingInstitution": "مؤسسة تعليمية",
@@ -131,7 +132,8 @@
       "pickMembers": "تم اختيار {{picked}} من {{available}}",
       "noEligible": "جميع الأعضاء النشطين لديهم مقعد في هذه الدورة.",
       "submit": "تعيين {{count}}"
-    }
+    },
+    "perSeat": "{{price}} / مقعد"
   },
   "compliance": {
     "title": "امتثال التدريب",

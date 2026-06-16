@@ -436,7 +436,7 @@ public class AssignmentService : IAssignmentService
         return Result<AssignmentSubmissionDto>.Success(submissionDto2);
     }
 
-    public async Task<Result<AssignmentSubmissionDto>> GradeSubmissionAsync(Guid submissionId, GradeSubmissionRequest request, Guid gradedBy, CancellationToken cancellationToken = default)
+    public async Task<Result<AssignmentSubmissionDto>> GradeSubmissionAsync(Guid submissionId, GradeSubmissionRequest request, Guid gradedBy, bool isAdmin = false, CancellationToken cancellationToken = default)
     {
         var submission = await _context.AssignmentSubmissions
             .Include(s => s.Assignment)
@@ -448,6 +448,11 @@ public class AssignmentService : IAssignmentService
         if (submission == null)
         {
             return Result<AssignmentSubmissionDto>.Failure("Submission not found.");
+        }
+
+        if (!isAdmin && submission.Assignment.Course.InstructorId != gradedBy)
+        {
+            return Result<AssignmentSubmissionDto>.Failure("Only the course instructor or an admin can grade this submission.");
         }
 
         // Validate score
@@ -680,7 +685,6 @@ public class AssignmentService : IAssignmentService
         return submission.Score.Value / factor;
     }
 }
-
 
 
 

@@ -69,5 +69,6 @@
     "columnPriority": "Priority",
     "columnUpdated": "Updated",
     "noTickets": "No tickets in this view."
-  }
+  },
+  "replyCount": "{{count}} replies"
 }

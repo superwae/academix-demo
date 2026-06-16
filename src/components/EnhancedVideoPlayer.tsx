@@ -20,13 +20,15 @@ export interface VideoPlayerHandle {
   seekTo: (seconds: number) => void;
 }
 
+export type CompletionReason = 'watched' | 'manual';
+
 interface EnhancedVideoPlayerProps {
   src: string;
   lessonId: string;
   courseId: string;
   totalDuration?: number; // in seconds
   onProgressUpdate?: (progress: number) => void;
-  onComplete?: () => void;
+  onComplete?: (reason: CompletionReason) => void;
   className?: string;
 }
 
@@ -40,6 +42,14 @@ interface DetectedSource {
 
 // Video source type detection
 type VideoSourceType = 'youtube' | 'vimeo' | 'zoom' | 'google-drive' | 'loom' | 'wistia' | 'direct' | 'embed';
+
+function useLatestRef<T>(value: T) {
+  const ref = useRef(value);
+  useEffect(() => {
+    ref.current = value;
+  }, [value]);
+  return ref;
+}
 
 function detectVideoSource(url: string): DetectedSource {
   const originalUrl = url;
@@ -151,7 +161,7 @@ const EmbeddedVideoPlayer = forwardRef<VideoPlayerHandle, {
   courseId: string;
   totalDuration?: number;
   onProgressUpdate?: (t: number) => void;
-  onComplete?: () => void;
+  onComplete?: (reason: CompletionReason) => void;
   className?: string;
   youtubeId?: string;
   vimeoId?: string;
@@ -172,13 +182,14 @@ const EmbeddedVideoPlayer = forwardRef<VideoPlayerHandle, {
   ref,
 ) {
   const { t } = useTranslation(['student', 'common']);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const youtubeHostId = useMemo(() => `yt-host-${lessonId.replace(/[^a-zA-Z0-9-]/g, '')}`, [lessonId]);
+  const youtubeContainerRef = useRef<HTMLDivElement>(null);
   const vimeoIframeRef = useRef<HTMLIFrameElement>(null);
   const ytPlayerRef = useRef<YTPlayer | null>(null);
   const ytTickRef = useRef<number | undefined>(undefined);
   const vimeoPlayerRef = useRef<VimeoPlayer | null>(null);
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const onProgressUpdateRef = useLatestRef(onProgressUpdate);
+  const onCompleteRef = useLatestRef(onComplete);
+  const lastSavedProgressSecondRef = useRef(-1);
   const completeOnceRef = useRef(false);
 
   useImperativeHandle(
@@ -189,12 +200,12 @@ const EmbeddedVideoPlayer = forwardRef<VideoPlayerHandle, {
         try {
           if (sourceType === 'youtube' && ytPlayerRef.current) {
             ytPlayerRef.current.seekTo(seekTime, true);
-            onProgressUpdate?.(seekTime);
+            onProgressUpdateRef.current?.(seekTime);
             return;
           }
           if (sourceType === 'vimeo' && vimeoPlayerRef.current) {
             void vimeoPlayerRef.current.setCurrentTime(seekTime);
-            onProgressUpdate?.(seekTime);
+            onProgressUpdateRef.current?.(seekTime);
             return;
           }
         } catch {
@@ -203,59 +214,17 @@ const EmbeddedVideoPlayer = forwardRef<VideoPlayerHandle, {
         const video = document.querySelector('video');
         if (video) {
           video.currentTime = seekTime;
-          onProgressUpdate?.(seekTime);
+          onProgressUpdateRef.current?.(seekTime);
         }
       },
     }),
-    [sourceType, onProgressUpdate],
+    [sourceType, onProgressUpdateRef],
   );
 
   useEffect(() => {
     completeOnceRef.current = false;
+    lastSavedProgressSecondRef.current = -1;
   }, [lessonId]);
-
-  useEffect(() => {
-    if (totalDuration) {
-      progressService.updateLessonProgress(lessonId, courseId, 0, totalDuration, false).catch(err => {
-        console.error('Failed to save initial progress:', err);
-      });
-    }
-  }, [lessonId, courseId, totalDuration]);
-
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
-
-  const toggleFullscreen = useCallback(() => {
-    if (!containerRef.current) return;
-
-    if (!isFullscreen) {
-      if (containerRef.current.requestFullscreen) {
-        containerRef.current.requestFullscreen();
-      }
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      }
-    }
-  }, [isFullscreen]);
-
-  const handleMarkComplete = useCallback(() => {
-    if (totalDuration) {
-      progressService.markLessonCompleted(lessonId, courseId, totalDuration).catch(err => {
-        console.error('Failed to mark lesson as completed:', err);
-      });
-    }
-    if (onComplete && !completeOnceRef.current) {
-      completeOnceRef.current = true;
-      onComplete();
-    }
-  }, [lessonId, courseId, totalDuration, onComplete]);
 
   // YouTube: IFrame API → current time for notes & progress
   useEffect(() => {
@@ -267,8 +236,15 @@ const EmbeddedVideoPlayer = forwardRef<VideoPlayerHandle, {
       try {
         await loadYouTubeIframeApi();
         if (cancelled) return;
-        const w = window as unknown as { YT: { Player: new (id: string, opts: Record<string, unknown>) => YTPlayer } };
-        const player = new w.YT.Player(youtubeHostId, {
+        const youtubeContainer = youtubeContainerRef.current;
+        if (!youtubeContainer) return;
+        youtubeContainer.replaceChildren();
+        const host = document.createElement('div');
+        host.className = 'h-full w-full';
+        youtubeContainer.appendChild(host);
+
+        const w = window as unknown as { YT: { Player: new (el: HTMLElement, opts: Record<string, unknown>) => YTPlayer } };
+        const player = new w.YT.Player(host, {
           height: '100%',
           width: '100%',
           videoId: youtubeId,
@@ -287,12 +263,33 @@ const EmbeddedVideoPlayer = forwardRef<VideoPlayerHandle, {
                 try {
                   const cur = player.getCurrentTime?.();
                   if (typeof cur === 'number' && !Number.isNaN(cur)) {
-                    onProgressUpdate?.(cur);
+                    onProgressUpdateRef.current?.(cur);
+                    const currentSecond = Math.floor(cur);
+                    const duration = totalDuration || player.getDuration?.() || 0;
+                    const canPersist = duration > 0 && currentSecond > 0 && currentSecond % 5 === 0;
+                    if (canPersist && currentSecond !== lastSavedProgressSecondRef.current) {
+                      lastSavedProgressSecondRef.current = currentSecond;
+                      const isCompleted = cur >= duration * 0.95;
+                      progressService.updateLessonProgress(
+                        lessonId,
+                        courseId,
+                        currentSecond,
+                        Math.floor(duration),
+                        isCompleted,
+                      ).catch(err => {
+                        console.error('Failed to update progress:', err);
+                      });
+
+                      if (isCompleted && onCompleteRef.current && !completeOnceRef.current) {
+                        completeOnceRef.current = true;
+                        onCompleteRef.current('watched');
+                      }
+                    }
                   }
                 } catch {
                   /* ignore */
                 }
-              }, 400);
+              }, 1000);
             },
           },
         });
@@ -315,8 +312,9 @@ const EmbeddedVideoPlayer = forwardRef<VideoPlayerHandle, {
         /* ignore */
       }
       ytPlayerRef.current = null;
+      youtubeContainerRef.current?.replaceChildren();
     };
-  }, [sourceType, youtubeId, youtubeHostId, lessonId, onProgressUpdate]);
+  }, [sourceType, youtubeId, lessonId, courseId, totalDuration, onProgressUpdateRef, onCompleteRef]);
 
   // Vimeo: Player API → timeupdate
   useEffect(() => {
@@ -336,7 +334,7 @@ const EmbeddedVideoPlayer = forwardRef<VideoPlayerHandle, {
         const player = new w.Vimeo.Player(iframe);
         vimeoPlayerRef.current = player;
         player.on('timeupdate', (data: { seconds: number }) => {
-          onProgressUpdate?.(data.seconds);
+          onProgressUpdateRef.current?.(data.seconds);
         });
       } catch (e) {
         console.error('Vimeo player init failed:', e);
@@ -354,7 +352,7 @@ const EmbeddedVideoPlayer = forwardRef<VideoPlayerHandle, {
       }
       vimeoPlayerRef.current = null;
     };
-  }, [sourceType, vimeoId, embedUrl, onProgressUpdate]);
+  }, [sourceType, vimeoId, embedUrl, onProgressUpdateRef]);
 
   // For Zoom recordings, show a link instead of trying to embed
   if (sourceType === 'zoom') {
@@ -378,38 +376,17 @@ const EmbeddedVideoPlayer = forwardRef<VideoPlayerHandle, {
               <ExternalLink className="h-4 w-4 me-2" />
               {t('student:components.videoPlayer.openZoomRecording')}
             </Button>
-            <Button
-              variant="outline"
-              onClick={handleMarkComplete}
-              className="border-white/30 text-white hover:bg-white/10"
-            >
-              {t('student:components.videoPlayer.markAsCompleted')}
-            </Button>
           </div>
         </div>
       </div>
     );
   }
 
-  const sourceLabels: Record<VideoSourceType, string> = {
-    youtube: t('student:components.videoPlayer.sourceYoutube'),
-    vimeo: t('student:components.videoPlayer.sourceVimeo'),
-    zoom: t('student:components.videoPlayer.sourceZoom'),
-    'google-drive': t('student:components.videoPlayer.sourceGoogleDrive'),
-    loom: t('student:components.videoPlayer.sourceLoom'),
-    wistia: t('student:components.videoPlayer.sourceWistia'),
-    direct: t('student:components.videoPlayer.sourceDirect'),
-    embed: t('student:components.videoPlayer.sourceEmbed'),
-  };
-
   return (
-    <div
-      ref={containerRef}
-      className={cn('relative bg-black rounded-lg overflow-hidden group', className)}
-    >
-      <div className="aspect-video">
+    <div className={cn('relative bg-black rounded-lg overflow-hidden aspect-video min-h-[200px]', className)}>
+      <div className="h-full w-full">
         {sourceType === 'youtube' && youtubeId ? (
-          <div id={youtubeHostId} className="w-full h-full min-h-[200px]" />
+          <div ref={youtubeContainerRef} className="w-full h-full min-h-[200px]" />
         ) : sourceType === 'vimeo' && vimeoId ? (
           <iframe
             ref={vimeoIframeRef}
@@ -418,6 +395,7 @@ const EmbeddedVideoPlayer = forwardRef<VideoPlayerHandle, {
             allow="autoplay; fullscreen; picture-in-picture"
             allowFullScreen
             frameBorder="0"
+            loading="lazy"
             title={t('student:components.videoPlayer.lessonVideoTitle')}
           />
         ) : (
@@ -427,51 +405,11 @@ const EmbeddedVideoPlayer = forwardRef<VideoPlayerHandle, {
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
             allowFullScreen
             frameBorder="0"
+            loading="lazy"
+            referrerPolicy="strict-origin-when-cross-origin"
             title={t('student:components.videoPlayer.lessonVideoTitle')}
           />
         )}
-      </div>
-
-      {/* Controls Overlay */}
-      <div className="absolute bottom-0 start-0 end-0 bg-gradient-to-t from-black/60 to-transparent p-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-white/80 text-xs px-2 py-1 bg-white/10 rounded">
-              {sourceLabels[sourceType]}
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleMarkComplete}
-              className="text-white hover:bg-white/20 text-xs"
-            >
-              {t('student:components.videoPlayer.markComplete')}
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 text-white hover:bg-white/20"
-              onClick={() => window.open(originalUrl, '_blank')}
-              title={t('student:components.videoPlayer.openInNewTab')}
-            >
-              <ExternalLink className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 text-white hover:bg-white/20"
-              onClick={toggleFullscreen}
-            >
-              {isFullscreen ? (
-                <Minimize className="h-4 w-4" />
-              ) : (
-                <Maximize className="h-4 w-4" />
-              )}
-            </Button>
-          </div>
-        </div>
       </div>
     </div>
   );
@@ -483,7 +421,7 @@ const NativeVideoPlayer = forwardRef<VideoPlayerHandle, {
   courseId: string;
   totalDuration?: number;
   onProgressUpdate?: (progress: number) => void;
-  onComplete?: () => void;
+  onComplete?: (reason: CompletionReason) => void;
   className?: string;
 }>(function NativeVideoPlayer(
   { src, lessonId, courseId, totalDuration, onProgressUpdate, onComplete, className },
@@ -493,6 +431,8 @@ const NativeVideoPlayer = forwardRef<VideoPlayerHandle, {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const completeOnceRef = useRef(false);
+  const onProgressUpdateRef = useLatestRef(onProgressUpdate);
+  const onCompleteRef = useLatestRef(onComplete);
 
   useImperativeHandle(
     ref,
@@ -501,10 +441,10 @@ const NativeVideoPlayer = forwardRef<VideoPlayerHandle, {
         if (!videoRef.current) return;
         const seekTime = Math.max(0, seconds);
         videoRef.current.currentTime = seekTime;
-        onProgressUpdate?.(seekTime);
+        onProgressUpdateRef.current?.(seekTime);
       },
     }),
-    [onProgressUpdate],
+    [onProgressUpdateRef],
   );
 
   useEffect(() => {
@@ -585,17 +525,15 @@ const NativeVideoPlayer = forwardRef<VideoPlayerHandle, {
           console.error('Failed to update progress:', err);
         });
         
-        if (isCompleted && onComplete && !completeOnceRef.current) {
+        if (isCompleted && onCompleteRef.current && !completeOnceRef.current) {
           completeOnceRef.current = true;
-          onComplete();
+          onCompleteRef.current('watched');
         }
       }
 
-      if (onProgressUpdate) {
-        onProgressUpdate(time);
-      }
+      onProgressUpdateRef.current?.(time);
     }
-  }, [lessonId, courseId, duration, totalDuration, onProgressUpdate, onComplete]);
+  }, [lessonId, courseId, duration, totalDuration, onProgressUpdateRef, onCompleteRef]);
 
   const togglePlay = useCallback(() => {
     if (videoRef.current) {
@@ -803,9 +741,9 @@ const NativeVideoPlayer = forwardRef<VideoPlayerHandle, {
               console.error('Failed to mark lesson as completed:', err);
             });
           }
-          if (onComplete && !completeOnceRef.current) {
+          if (onCompleteRef.current && !completeOnceRef.current) {
             completeOnceRef.current = true;
-            onComplete();
+            onCompleteRef.current('watched');
           }
         }}
         onClick={togglePlay}
@@ -972,4 +910,3 @@ export const EnhancedVideoPlayer = forwardRef<VideoPlayerHandle, EnhancedVideoPl
     );
   },
 );
-

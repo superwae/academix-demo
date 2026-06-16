@@ -42,6 +42,32 @@ public class CourseService : ICourseService
         return Result<CourseDto>.Success(courseDto);
     }
 
+    public async Task<Result<CourseDto>> GetByIdForUserAsync(Guid id, Guid? userId, bool isAdmin, CancellationToken cancellationToken = default)
+    {
+        var course = await _context.Courses
+            .Include(c => c.Instructor)
+            .Include(c => c.Sections)
+                .ThenInclude(s => s.MeetingTimes)
+            .Include(c => c.CourseTags)
+                .ThenInclude(ct => ct.Tag)
+            .FirstOrDefaultAsync(c => c.Id == id && !c.IsDeleted, cancellationToken);
+
+        if (course == null)
+        {
+            return Result<CourseDto>.Failure("Course not found.");
+        }
+
+        if (course.IsOrgExclusive && !await CanViewOrgExclusiveCourseAsync(course, userId, isAdmin, cancellationToken))
+        {
+            return Result<CourseDto>.Failure("Course not found.");
+        }
+
+        var sectionIds = course.Sections.Where(s => !s.IsDeleted).Select(s => s.Id).ToList();
+        var enrollmentCounts = await GetEnrollmentCountsBySectionAsync(sectionIds, cancellationToken);
+        var courseDto = MapToCourseDto(course, enrollmentCounts);
+        return Result<CourseDto>.Success(courseDto);
+    }
+
     public async Task<Result<PagedResult<CourseDto>>> GetPagedAsync(PagedRequest request, CancellationToken cancellationToken = default)
     {
         var query = _context.Courses
@@ -290,6 +316,19 @@ public class CourseService : ICourseService
             if (membership is null)
                 return Result<CourseDto>.Failure("Instructor is not an authorized member of that organization.");
             orgId = request.OrganizationId.Value;
+        }
+
+        if (request.Sections.Any(s => s.MaxSeats < 1))
+        {
+            return Result<CourseDto>.Failure("Section capacity must be at least 1 seat.");
+        }
+
+        var capacityPlan = await GetCapacityPlanAsync(request.InstructorId, orgId, cancellationToken);
+        var requestedSeats = SumRequestedSeats(request.Sections);
+        var capacityError = ValidateNewCourseCapacity(capacityPlan, requestedSeats);
+        if (capacityError is not null)
+        {
+            return Result<CourseDto>.Failure(capacityError);
         }
 
         // Create course (always starts as Draft)
@@ -559,7 +598,7 @@ public class CourseService : ICourseService
         return Result<CourseDto>.Success(courseDto);
     }
 
-    public async Task<Result> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<Result> DeleteAsync(Guid id, Guid? requestingUserId = null, bool isAdmin = true, CancellationToken cancellationToken = default)
     {
         var course = await _context.Courses
             .FirstOrDefaultAsync(c => c.Id == id && !c.IsDeleted, cancellationToken);
@@ -567,6 +606,11 @@ public class CourseService : ICourseService
         if (course == null)
         {
             return Result.Failure("Course not found.");
+        }
+
+        if (!isAdmin && requestingUserId.HasValue && course.InstructorId != requestingUserId.Value)
+        {
+            return Result.Failure("You can only delete your own courses.");
         }
 
         // Check if course has active enrollments
@@ -587,7 +631,7 @@ public class CourseService : ICourseService
         return Result.Success();
     }
 
-    public async Task<Result> PublishAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<Result> PublishAsync(Guid id, Guid? requestingUserId = null, bool isAdmin = true, CancellationToken cancellationToken = default)
     {
         var course = await _context.Courses
             .Include(c => c.Sections)
@@ -596,6 +640,11 @@ public class CourseService : ICourseService
         if (course == null)
         {
             return Result.Failure("Course not found.");
+        }
+
+        if (!isAdmin && requestingUserId.HasValue && course.InstructorId != requestingUserId.Value)
+        {
+            return Result.Failure("You can only publish your own courses.");
         }
 
         // Validate state transition
@@ -638,7 +687,7 @@ public class CourseService : ICourseService
         return Result.Success();
     }
 
-    public async Task<Result> ArchiveAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<Result> ArchiveAsync(Guid id, Guid? requestingUserId = null, bool isAdmin = true, CancellationToken cancellationToken = default)
     {
         var course = await _context.Courses
             .FirstOrDefaultAsync(c => c.Id == id && !c.IsDeleted, cancellationToken);
@@ -646,6 +695,11 @@ public class CourseService : ICourseService
         if (course == null)
         {
             return Result.Failure("Course not found.");
+        }
+
+        if (!isAdmin && requestingUserId.HasValue && course.InstructorId != requestingUserId.Value)
+        {
+            return Result.Failure("You can only archive your own courses.");
         }
 
         if (course.Status == CourseStatus.Archived)
@@ -676,6 +730,19 @@ public class CourseService : ICourseService
         if (!isAdmin && currentUserId.HasValue && course.InstructorId != currentUserId.Value)
         {
             return Result<CourseSectionDto>.Failure("You can only manage sections of courses you own.");
+        }
+
+        if (request.MaxSeats < 1)
+        {
+            return Result<CourseSectionDto>.Failure("Section capacity must be at least 1 seat.");
+        }
+
+        var capacityPlan = await GetCapacityPlanAsync(course.InstructorId, course.OrganizationId, cancellationToken);
+        var existingCourseSeats = await GetCourseSeatTotalAsync(courseId, cancellationToken);
+        var capacityError = ValidateSeatCapacity(capacityPlan, existingCourseSeats + request.MaxSeats, request.MaxSeats);
+        if (capacityError is not null)
+        {
+            return Result<CourseSectionDto>.Failure(capacityError);
         }
 
         var proposedSlots = ParseMeetingSlots(request.MeetingTimes);
@@ -753,6 +820,27 @@ public class CourseService : ICourseService
             return Result.Failure("Section not found.");
         }
 
+        if (request.MaxSeats < 1)
+        {
+            return Result.Failure("Section capacity must be at least 1 seat.");
+        }
+
+        var enrollmentCounts = await GetEnrollmentCountsBySectionAsync(new[] { sectionId }, cancellationToken);
+        var currentEnrollments = enrollmentCounts.GetValueOrDefault(sectionId, 0);
+        if (request.MaxSeats < currentEnrollments)
+        {
+            return Result.Failure($"Section capacity cannot be lower than the {currentEnrollments} active enrollments already in this section.");
+        }
+
+        var capacityPlan = await GetCapacityPlanAsync(course.InstructorId, course.OrganizationId, cancellationToken);
+        var existingCourseSeats = await GetCourseSeatTotalAsync(courseId, cancellationToken);
+        var seatDelta = request.MaxSeats - section.MaxSeats;
+        var capacityError = ValidateSeatCapacity(capacityPlan, existingCourseSeats + seatDelta, seatDelta);
+        if (capacityError is not null)
+        {
+            return Result.Failure(capacityError);
+        }
+
         var proposedSlots = ParseMeetingSlots(request.MeetingTimes);
         var scheduleError = await ValidateInstructorScheduleNoOverlapAsync(
             course.InstructorId, proposedSlots, excludeSectionId: sectionId, cancellationToken);
@@ -763,6 +851,7 @@ public class CourseService : ICourseService
         section.LocationLabel = request.LocationLabel;
         section.JoinUrl = request.JoinUrl;
         section.MaxSeats = request.MaxSeats;
+        section.SeatsRemaining = Math.Max(0, request.MaxSeats - currentEnrollments);
 
         // Update meeting times (remove old, add new)
         foreach (var meetingTime in section.MeetingTimes.Where(mt => !mt.IsDeleted))
@@ -863,6 +952,33 @@ public class CourseService : ICourseService
             return Result<CourseDto>.Failure("Course end date must be on or after start date.");
         }
 
+        var targetOrgId = original.OrganizationId;
+        if (targetOrgId.HasValue)
+        {
+            var hasOrgAuthorAccess = await _context.OrganizationMembers
+                .AnyAsync(m =>
+                    m.OrganizationId == targetOrgId.Value &&
+                    m.UserId == instructorId &&
+                    m.IsActive && !m.IsDeleted &&
+                    (m.Role == OrgMemberRole.OrgTeacher || m.Role == OrgMemberRole.OrgAdmin),
+                    cancellationToken);
+
+            if (!hasOrgAuthorAccess)
+            {
+                return Result<CourseDto>.Failure("Instructor is not an authorized member of the course organization.");
+            }
+        }
+
+        var clonedSeats = request.CopySections
+            ? original.Sections.Where(s => !s.IsDeleted).Sum(s => s.MaxSeats)
+            : 0;
+        var capacityPlan = await GetCapacityPlanAsync(instructorId, targetOrgId, cancellationToken);
+        var capacityError = ValidateNewCourseCapacity(capacityPlan, clonedSeats);
+        if (capacityError is not null)
+        {
+            return Result<CourseDto>.Failure(capacityError);
+        }
+
         // Create the new course entity
         var newCourse = new Course
         {
@@ -874,6 +990,8 @@ public class CourseService : ICourseService
             ProviderType = original.ProviderType,
             ProviderName = original.ProviderName,
             InstructorId = instructorId,
+            OrganizationId = targetOrgId,
+            IsOrgExclusive = targetOrgId.HasValue && original.IsOrgExclusive,
             Price = original.Price,
             ThumbnailUrl = original.ThumbnailUrl,
             ExpectedDurationHours = original.ExpectedDurationHours,
@@ -1148,6 +1266,121 @@ public class CourseService : ICourseService
 
     private sealed record MeetingSlot(Domain.Common.DayOfWeek Day, int StartMinutes, int EndMinutes);
 
+    private sealed record CapacityPlan(
+        string PlanName,
+        int? MaxCourses,
+        int? MaxSeatsPerCourse,
+        int? MaxTotalSeats,
+        int CurrentCourseCount,
+        int CurrentTotalSeats);
+
+    private async Task<CapacityPlan?> GetCapacityPlanAsync(
+        Guid instructorId,
+        Guid? organizationId,
+        CancellationToken cancellationToken)
+    {
+        if (organizationId.HasValue)
+        {
+            var organization = await _context.Organizations
+                .FirstOrDefaultAsync(o => o.Id == organizationId.Value && !o.IsDeleted, cancellationToken);
+
+            if (organization?.SubscriptionId is not { } orgSubscriptionId)
+                return null;
+
+            var orgSubscription = await _context.Subscriptions
+                .Include(s => s.Plan)
+                .FirstOrDefaultAsync(s =>
+                    s.Id == orgSubscriptionId &&
+                    s.Status == SubscriptionStatus.Active &&
+                    !s.IsDeleted,
+                    cancellationToken);
+
+            if (orgSubscription is null)
+                return null;
+
+            var orgCourseCount = await _context.Courses
+                .CountAsync(c => c.OrganizationId == organizationId.Value && !c.IsDeleted, cancellationToken);
+            var orgTotalSeats = await _context.CourseSections
+                .Where(s => !s.IsDeleted && !s.Course.IsDeleted && s.Course.OrganizationId == organizationId.Value)
+                .SumAsync(s => (int?)s.MaxSeats, cancellationToken) ?? 0;
+
+            return new CapacityPlan(
+                $"{orgSubscription.Plan.Name} (org-pooled)",
+                orgSubscription.Plan.MaxCourses,
+                orgSubscription.Plan.MaxSeatsPerCourse,
+                orgSubscription.Plan.MaxTotalSeats,
+                orgCourseCount,
+                orgTotalSeats);
+        }
+
+        var subscription = await _context.Subscriptions
+            .Include(s => s.Plan)
+            .Where(s => s.UserId == instructorId && !s.IsDeleted && s.Status == SubscriptionStatus.Active)
+            .OrderByDescending(s => s.CurrentPeriodEnd)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (subscription is null)
+            return null;
+
+        var courseCount = await _context.Courses
+            .CountAsync(c => c.InstructorId == instructorId && c.OrganizationId == null && !c.IsDeleted, cancellationToken);
+        var totalSeats = await _context.CourseSections
+            .Where(s => !s.IsDeleted && !s.Course.IsDeleted && s.Course.InstructorId == instructorId && s.Course.OrganizationId == null)
+            .SumAsync(s => (int?)s.MaxSeats, cancellationToken) ?? 0;
+
+        return new CapacityPlan(
+            subscription.Plan.Name,
+            subscription.Plan.MaxCourses,
+            subscription.Plan.MaxSeatsPerCourse,
+            subscription.Plan.MaxTotalSeats,
+            courseCount,
+            totalSeats);
+    }
+
+    private static int SumRequestedSeats(IEnumerable<CreateSectionRequest> sections)
+    {
+        return sections.Sum(s => Math.Max(0, s.MaxSeats));
+    }
+
+    private async Task<int> GetCourseSeatTotalAsync(Guid courseId, CancellationToken cancellationToken)
+    {
+        return await _context.CourseSections
+            .Where(s => s.CourseId == courseId && !s.IsDeleted)
+            .SumAsync(s => (int?)s.MaxSeats, cancellationToken) ?? 0;
+    }
+
+    private static string? ValidateNewCourseCapacity(CapacityPlan? plan, int requestedSeats)
+    {
+        if (plan is null)
+            return "An active subscription plan is required before creating or cloning courses.";
+
+        if (plan.MaxCourses.HasValue && plan.CurrentCourseCount >= plan.MaxCourses.Value)
+        {
+            return $"Your {plan.PlanName} plan allows {plan.MaxCourses.Value} courses. Upgrade the plan or archive a course before creating another.";
+        }
+
+        return ValidateSeatCapacity(plan, requestedSeats, requestedSeats);
+    }
+
+    private static string? ValidateSeatCapacity(CapacityPlan? plan, int courseSeatTotalAfterChange, int totalSeatDelta)
+    {
+        if (plan is null)
+            return "An active subscription plan is required before changing course capacity.";
+
+        if (plan.MaxSeatsPerCourse.HasValue && courseSeatTotalAfterChange > plan.MaxSeatsPerCourse.Value)
+        {
+            return $"Your {plan.PlanName} plan allows {plan.MaxSeatsPerCourse.Value} seats per course. Lower the section capacity or upgrade the plan.";
+        }
+
+        if (plan.MaxTotalSeats.HasValue && plan.CurrentTotalSeats + totalSeatDelta > plan.MaxTotalSeats.Value)
+        {
+            var remaining = Math.Max(0, plan.MaxTotalSeats.Value - plan.CurrentTotalSeats);
+            return $"Your {plan.PlanName} plan has {remaining} seats remaining across all courses. Lower the requested seats or upgrade the plan.";
+        }
+
+        return null;
+    }
+
     private async Task<Dictionary<Guid, int>> GetEnrollmentCountsBySectionAsync(IEnumerable<Guid> sectionIds, CancellationToken cancellationToken)
     {
         var ids = sectionIds?.ToList() ?? new List<Guid>();
@@ -1159,6 +1392,26 @@ public class CourseService : ICourseService
             .GroupBy(e => e.SectionId)
             .Select(g => new { SectionId = g.Key, Count = g.Count() })
             .ToDictionaryAsync(x => x.SectionId, x => x.Count, cancellationToken);
+    }
+
+    private async Task<bool> CanViewOrgExclusiveCourseAsync(Course course, Guid? userId, bool isAdmin, CancellationToken cancellationToken)
+    {
+        if (isAdmin)
+            return true;
+        if (!userId.HasValue)
+            return false;
+        if (course.InstructorId == userId.Value)
+            return true;
+        if (!course.OrganizationId.HasValue)
+            return false;
+
+        return await _context.OrganizationMembers.AnyAsync(
+            m => m.OrganizationId == course.OrganizationId.Value &&
+                 m.UserId == userId.Value &&
+                 m.IsActive &&
+                 m.InviteAcceptedAt != null &&
+                 !m.IsDeleted,
+            cancellationToken);
     }
 
     private static CourseDto MapToCourseDto(Course course, IReadOnlyDictionary<Guid, int> enrollmentCountsBySection)
@@ -1186,6 +1439,8 @@ public class CourseService : ICourseService
             ProviderName = course.ProviderName,
             InstructorId = course.InstructorId,
             InstructorName = course.Instructor?.FullName ?? string.Empty,
+            OrganizationId = course.OrganizationId,
+            IsOrgExclusive = course.IsOrgExclusive,
             Rating = course.Rating,
             RatingCount = course.RatingCount,
             IsFeatured = course.IsFeatured,
@@ -1251,4 +1506,3 @@ public class CourseService : ICourseService
         return $"{displayHours}:{mins:D2} {period}";
     }
 }
-
