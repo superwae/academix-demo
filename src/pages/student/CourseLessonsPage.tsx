@@ -13,6 +13,8 @@ import {
   type CourseSectionDto as ScheduledCourseSection,
 } from '../../services/courseService';
 import { progressService } from '../../services/progressService';
+import { fileService } from '../../services/fileService';
+import { localizeLevel, localizeWeekday } from '../../lib/enumLocalization';
 import {
   ArrowLeft,
   Play,
@@ -59,7 +61,7 @@ function formatBytes(n?: number | null): string {
 
 function formatMeetingRow(mt: MeetingTimeDto): string {
   if (mt.startTime && mt.endTime) {
-    return `${mt.day} · ${mt.startTime} – ${mt.endTime}`;
+    return `${localizeWeekday(mt.day)} · ${mt.startTime} – ${mt.endTime}`;
   }
   const fmt = (m: number) => {
     const h = Math.floor(m / 60);
@@ -67,7 +69,7 @@ function formatMeetingRow(mt: MeetingTimeDto): string {
     if (h <= 0) return `${min}m`;
     return min > 0 ? `${h}h ${min}m` : `${h}h`;
   };
-  return `${mt.day} · ${fmt(mt.startMinutes)} – ${fmt(mt.endMinutes)}`;
+  return `${localizeWeekday(mt.day)} · ${fmt(mt.startMinutes)} – ${fmt(mt.endMinutes)}`;
 }
 
 function buildLectureLessonsForScheduledSection(
@@ -809,7 +811,7 @@ export function CourseLessonsPage() {
               </div>
               <div>
                 <div className="text-muted-foreground">{t('student:courseLessons.level')}</div>
-                <div className="font-medium">{course.level}</div>
+                <div className="font-medium">{localizeLevel(course.level)}</div>
               </div>
               {course.rating > 0 && (
                 <div>

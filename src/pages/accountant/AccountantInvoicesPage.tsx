@@ -5,13 +5,14 @@ import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
 import { Badge } from "../../components/ui/badge";
 import { DemoDataBadge } from "../../components/admin/finance/DemoDataBadge";
+import { formatMoney } from "../../lib/money";
 
 type InvoiceStatus = "open" | "paid";
 
-const INVOICES: { no: string; client: string; total: string; due: string; status: InvoiceStatus }[] = [
-  { no: "INV-2026-0142", client: "Bright Minds Academy", total: "$4,200", due: "Apr 02", status: "open" },
-  { no: "INV-2026-0141", client: "TechSkills NGO", total: "$890", due: "Mar 28", status: "open" },
-  { no: "INV-2026-0138", client: "Northwind Tutors", total: "$12,450", due: "Mar 15", status: "paid" },
+const INVOICES: { no: string; client: string; total: number; due: string; status: InvoiceStatus }[] = [
+  { no: "INV-2026-0142", client: "Bright Minds Academy", total: 4200, due: "Apr 02", status: "open" },
+  { no: "INV-2026-0141", client: "TechSkills NGO", total: 890, due: "Mar 28", status: "open" },
+  { no: "INV-2026-0138", client: "Northwind Tutors", total: 12450, due: "Mar 15", status: "paid" },
 ];
 
 export function AccountantInvoicesPage() {
@@ -49,7 +50,7 @@ export function AccountantInvoicesPage() {
             </div>
             <div>
               <p className="text-sm font-medium text-muted-foreground">{t("admin:accountant.invoices.outstanding")}</p>
-              <p className="text-3xl font-bold tracking-tight">{t("admin:accountant.invoices.outstandingAmount")}</p>
+              <p className="text-3xl font-bold tracking-tight">{formatMoney(5090)}</p>
             </div>
           </div>
         </motion.div>
@@ -60,7 +61,7 @@ export function AccountantInvoicesPage() {
           className="rounded-2xl border border-border/60 bg-muted/30 p-6"
         >
           <p className="text-sm font-medium text-muted-foreground">{t("admin:accountant.invoices.collected30d")}</p>
-          <p className="text-3xl font-bold tracking-tight mt-1">{t("admin:accountant.invoices.collectedAmount")}</p>
+          <p className="text-3xl font-bold tracking-tight mt-1">{formatMoney(38120)}</p>
           <p className="text-xs text-muted-foreground mt-2">{t("admin:accountant.invoices.demoNote")}</p>
         </motion.div>
       </div>
@@ -81,7 +82,7 @@ export function AccountantInvoicesPage() {
                 <p className="text-sm text-muted-foreground">{inv.client}</p>
               </div>
               <div className="flex items-center gap-4">
-                <span className="font-semibold tabular-nums">{inv.total}</span>
+                <span className="font-semibold tabular-nums">{formatMoney(inv.total)}</span>
                 <span className="text-xs text-muted-foreground w-24">
                   {t("admin:accountant.invoices.dueLabel", { date: inv.due })}
                 </span>

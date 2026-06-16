@@ -628,7 +628,7 @@
       "codePlaceholder": "e.g., SUMMER20",
       "typeRequired": "Type *",
       "valuePercent": "Value (%) *",
-      "valueDollar": "Value ($) *",
+      "valueDollar": "Value (₪) *",
       "startDate": "Start Date",
       "endDate": "End Date",
       "maxUses": "Max Uses (optional)"

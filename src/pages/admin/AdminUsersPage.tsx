@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { localizeRole } from "../../lib/enumLocalization";
 import {
   Plus,
   Download,
@@ -280,7 +281,7 @@ export function AdminUsersPage() {
                         getRoleBadgeColor(role)
                       )}
                     >
-                      {role}
+                      {localizeRole(role)}
                     </span>
                   ))}
                 </div>

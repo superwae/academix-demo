@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { localizeLevel } from "../../lib/enumLocalization";
 import {
   BookOpen,
   Search,
@@ -320,7 +321,7 @@ export function AdminCoursesPage() {
                 )}
                 <div className="text-start">
                   <span className="font-medium line-clamp-1">{course.title}</span>
-                  <span className="text-xs text-muted-foreground block">{course.level}</span>
+                  <span className="text-xs text-muted-foreground block">{localizeLevel(course.level)}</span>
                 </div>
               </div>
             ),

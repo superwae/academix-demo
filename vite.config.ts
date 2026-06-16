@@ -5,9 +5,11 @@ import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [react()],
   appType: 'spa', // Serve index.html for direct URLs like /reset-password?token=...
+  // Strip console.* and debugger from production bundles (keeps them in dev).
+  esbuild: mode === 'production' ? { drop: ['console', 'debugger'] } : {},
   resolve: {
     alias: {
       // Replace framer-motion with a no-op shim that renders plain DOM
@@ -80,7 +82,7 @@ export default defineConfig({
       },
     },
   },
-})
+}))
 
 
 

@@ -267,6 +267,7 @@ class AuthService {
   logout() {
     apiClient.setAccessToken(null);
     if (typeof window !== 'undefined') {
+      localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
     }

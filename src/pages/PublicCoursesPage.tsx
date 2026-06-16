@@ -5,6 +5,7 @@ import { Button } from '../components/ui/button';
 import { Select } from '../components/ui/select';
 import { courseService, type CourseDto } from '../services/courseService';
 import { formatMoney } from '../lib/money';
+import { localizeLevel } from '../lib/enumLocalization';
 import { cn } from '../lib/cn';
 import { toast } from 'sonner';
 import { Search, Star, X, ArrowRight, Sparkles, BookOpen } from 'lucide-react';
@@ -71,7 +72,7 @@ function CourseCard({ course, index }: { course: CourseDto; index: number }) {
         </span>
         <div className="min-w-0">
           <p className="truncate text-sm font-medium">{course.instructorName}</p>
-          <p className="text-xs text-muted-foreground">{course.level}</p>
+          <p className="text-xs text-muted-foreground">{localizeLevel(course.level)}</p>
         </div>
       </div>
 

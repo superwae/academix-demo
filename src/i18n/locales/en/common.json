@@ -1,5 +1,9 @@
 {
   "appName": "AcademiX",
+  "lms": "Learning Management System",
+  "footerTagline": "Learn skills that matter. Courses for students, instructors, and organizations.",
+  "product": "Product",
+  "allRightsReserved": "All rights reserved.",
   "loading": "Loading…",
   "save": "Save",
   "saving": "Saving…",

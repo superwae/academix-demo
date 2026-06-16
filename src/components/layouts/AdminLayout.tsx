@@ -199,11 +199,13 @@ export function AdminLayout() {
               </div>
             </NavLink>
 
-            {/* Environment Badge */}
-            <div className="hidden sm:flex items-center gap-1.5 rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-600 dark:text-amber-400 border border-amber-500/20">
-              <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-              DEV
-            </div>
+            {/* Environment Badge — only in non-production builds */}
+            {import.meta.env.DEV && (
+              <div className="hidden sm:flex items-center gap-1.5 rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                DEV
+              </div>
+            )}
           </div>
 
           {/* Center: Global Search */}

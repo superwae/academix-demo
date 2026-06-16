@@ -14,6 +14,7 @@ import { ResponsiveTable, type ResponsiveTableColumn } from '../../components/ui
 import { ArrowLeft, CalendarClock, ClipboardList, ExternalLink, Eye, FileText, Loader2, Pencil } from 'lucide-react'
 import { format } from 'date-fns'
 import { toast } from 'sonner'
+import { fileService } from '../../services/fileService'
 import { motion } from 'framer-motion'
 import {
   assignmentService,

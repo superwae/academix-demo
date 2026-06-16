@@ -1,4 +1,4 @@
-# AcademiX build verification — run from the repo root (double-click verify-build.bat)
+# AcademiX build verification - run from the repo root (double-click verify-build.bat)
 # Output is written to verify-output.log so Claude can read the results.
 $ErrorActionPreference = "Continue"
 Set-Location $PSScriptRoot
@@ -23,8 +23,8 @@ $dotnetExit = $LASTEXITCODE
 "`n===== SUMMARY =====" | Tee-Object -FilePath $log -Append
 "tsc: $tscExit | vite: $viteExit | dotnet: $dotnetExit" | Tee-Object -FilePath $log -Append
 if (($tscExit -eq 0) -and ($viteExit -eq 0) -and ($dotnetExit -eq 0)) {
-  "ALL GREEN ✔" | Tee-Object -FilePath $log -Append
+  "ALL GREEN - OK" | Tee-Object -FilePath $log -Append
 } else {
-  "FAILURES PRESENT ✘ — see sections above" | Tee-Object -FilePath $log -Append
+  "FAILURES PRESENT - see sections above" | Tee-Object -FilePath $log -Append
 }
-Write-Host "`nDone. Results saved to verify-output.log — you can close this window."
+Write-Host "`nDone. Results saved to verify-output.log - you can close this window."

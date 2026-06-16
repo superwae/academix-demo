@@ -628,7 +628,7 @@
       "codePlaceholder": "مثال: SUMMER20",
       "typeRequired": "النوع *",
       "valuePercent": "القيمة (%) *",
-      "valueDollar": "القيمة ($) *",
+      "valueDollar": "القيمة (₪) *",
       "startDate": "تاريخ البدء",
       "endDate": "تاريخ الانتهاء",
       "maxUses": "الحد الأقصى للاستخدامات (اختياري)"

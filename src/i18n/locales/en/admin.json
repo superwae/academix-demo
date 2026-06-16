@@ -685,8 +685,8 @@
     "namePlaceholder": "e.g., Starter, Professional, Enterprise",
     "descriptionLabel": "Description",
     "descriptionPlaceholder": "Brief description of the plan",
-    "monthlyPriceLabel": "Monthly Price ($) *",
-    "yearlyPriceLabel": "Yearly Price ($) *",
+    "monthlyPriceLabel": "Monthly Price (₪) *",
+    "yearlyPriceLabel": "Yearly Price (₪) *",
     "maxCoursesLabel": "Max Courses *",
     "maxSeatsPerCourseLabel": "Seats/Course *",
     "maxTotalSeatsLabel": "Total Seats *",
@@ -968,10 +968,10 @@
         "title": "Revenue Split Policy",
         "bodyPrefix": "The platform operates on an ",
         "bodyHighlight": "80/20 revenue split",
-        "bodySuffix": ". Instructors receive 80% of course sales revenue, while the platform retains 20% to cover payment processing, hosting, marketing, and operational costs. Payouts are processed bi-weekly for all earnings above $50.",
+        "bodySuffix": ". Instructors receive 80% of course sales revenue, while the platform retains 20% to cover payment processing, hosting, marketing, and operational costs. Payouts are processed bi-weekly for all earnings above ₪50.",
         "instructorShare": "Instructor: 80%",
         "platformShare": "Platform: 20%",
-        "minPayout": "Minimum Payout: $50",
+        "minPayout": "Minimum Payout: ₪50",
         "payoutCycle": "Payout Cycle: Bi-weekly"
       }
     },

@@ -5,13 +5,14 @@ import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
 import { Badge } from "../../components/ui/badge";
 import { DemoDataBadge } from "../../components/admin/finance/DemoDataBadge";
+import { formatMoney } from "../../lib/money";
 
 type BatchStatus = "scheduled" | "sent";
 
-const BATCHES: { id: string; instructors: number; amount: string; status: BatchStatus; date: string }[] = [
-  { id: "PAY-2026-03-A", instructors: 14, amount: "$18,240", status: "scheduled", date: "Mar 25" },
-  { id: "PAY-2026-02-B", instructors: 22, amount: "$31,880", status: "sent", date: "Feb 28" },
-  { id: "PAY-2026-02-A", instructors: 19, amount: "$28,102", status: "sent", date: "Feb 14" },
+const BATCHES: { id: string; instructors: number; amount: number; status: BatchStatus; date: string }[] = [
+  { id: "PAY-2026-03-A", instructors: 14, amount: 18240, status: "scheduled", date: "Mar 25" },
+  { id: "PAY-2026-02-B", instructors: 22, amount: 31880, status: "sent", date: "Feb 28" },
+  { id: "PAY-2026-02-A", instructors: 19, amount: 28102, status: "sent", date: "Feb 14" },
 ];
 
 export function AccountantPayoutsPage() {
@@ -25,7 +26,7 @@ export function AccountantPayoutsPage() {
     },
     {
       label: t("admin:accountant.payouts.stats.onHold"),
-      value: t("admin:accountant.payouts.stats.onHoldValue"),
+      value: formatMoney(0),
       sub: t("admin:accountant.payouts.stats.onHoldSub"),
     },
     {
@@ -94,7 +95,7 @@ export function AccountantPayoutsPage() {
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-lg font-semibold tabular-nums">{b.amount}</span>
+                <span className="text-lg font-semibold tabular-nums">{formatMoney(b.amount)}</span>
                 <Badge
                   variant={b.status === "sent" ? "secondary" : "default"}
                   className="gap-1"

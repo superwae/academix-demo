@@ -11,6 +11,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
 import { cn } from "../../lib/cn";
+import { formatMoney } from "../../lib/money";
 
 export function AccountantDashboardPage() {
   const { t } = useTranslation(["admin"]);
@@ -18,14 +19,14 @@ export function AccountantDashboardPage() {
   const KPI = [
     {
       label: t("admin:accountant.dashboard.kpi.netRevenue"),
-      value: "$48,290",
+      value: formatMoney(48290),
       delta: t("admin:accountant.dashboard.kpi.netRevenueDelta"),
       up: true as boolean | null,
       icon: TrendingUp,
     },
     {
       label: t("admin:accountant.dashboard.kpi.pendingPayouts"),
-      value: "$6,420",
+      value: formatMoney(6420),
       delta: t("admin:accountant.dashboard.kpi.pendingPayoutsDelta"),
       up: null as boolean | null,
       icon: Banknote,
@@ -47,9 +48,9 @@ export function AccountantDashboardPage() {
   ];
 
   const PIPELINE = [
-    { stage: t("admin:accountant.dashboard.pipeline.authorized"), amount: "$12,400", count: 18 },
-    { stage: t("admin:accountant.dashboard.pipeline.settled"), amount: "$28,910", count: 42 },
-    { stage: t("admin:accountant.dashboard.pipeline.awaitingReview"), amount: "$6,980", count: 9 },
+    { stage: t("admin:accountant.dashboard.pipeline.authorized"), amount: formatMoney(12400), count: 18 },
+    { stage: t("admin:accountant.dashboard.pipeline.settled"), amount: formatMoney(28910), count: 42 },
+    { stage: t("admin:accountant.dashboard.pipeline.awaitingReview"), amount: formatMoney(6980), count: 9 },
   ];
 
   const COMPLIANCE_ITEMS = [

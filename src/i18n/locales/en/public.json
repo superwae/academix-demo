@@ -184,7 +184,7 @@
     "priceFree": "Free",
     "enrollFree": "Enroll for Free",
     "enrollNow": "Enroll Now",
-    "enrollForAmount": "Enroll for ${{amount}}",
+    "enrollForAmount": "Enroll for {{amount}}",
     "selectSectionFirst": "Select a section first",
     "goToMyClasses": "Go to My Classes",
     "signInToEnroll": "Sign in to enroll",

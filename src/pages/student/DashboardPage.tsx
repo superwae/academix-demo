@@ -15,6 +15,7 @@ import { recommendationService } from '../../services/recommendationService'
 import { Clock, BookOpen, Mail, Calendar, FileText, GraduationCap, Sparkles, TrendingUp, Award, PlayCircle, ArrowRight, Star, Video } from 'lucide-react'
 import { progressService } from '../../services/progressService'
 import { Progress } from '../../components/ui/progress'
+import { localizeLevel, localizeModality } from '../../lib/enumLocalization'
 
 // Helper function to safely parse dates
 function safeDate(dateValue: string | null | undefined): Date | null {
@@ -394,7 +395,9 @@ export function DashboardPage() {
                     </div>
                   </div>
                   <Button asChild className="shrink-0">
-                    <Link to={`/student/my-classes/${learningStats.continueWatching.courseId}/lessons/${learningStats.continueWatching.lessonId}`}>
+                    <Link to={learningStats.continueWatching.lessonId
+                      ? `/student/my-classes/${learningStats.continueWatching.courseId}/lessons/${learningStats.continueWatching.lessonId}`
+                      : `/student/my-classes/${learningStats.continueWatching.courseId}/lessons`}>
                       <PlayCircle className="h-4 w-4 me-2" />
                       {t('student:dashboard.continueWatching')}
                     </Link>
@@ -546,7 +549,7 @@ export function DashboardPage() {
                           <p className="mt-0.5 text-xs text-muted-foreground">{c.providerName}</p>
                           <div className="mt-2 flex flex-wrap gap-1">
                             <Badge variant="secondary" className="text-xs font-normal">{c.category}</Badge>
-                            <Badge variant="outline" className="text-xs font-normal">{c.modality}</Badge>
+                            <Badge variant="outline" className="text-xs font-normal">{localizeModality(c.modality)}</Badge>
                           </div>
                         </div>
                         <Button size="sm" variant="default" className="shrink-0" asChild>
@@ -897,7 +900,7 @@ function RecommendationCard({ course, delay }: { course: CourseDto; delay: numbe
                 <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400 shrink-0" />
                 <span className="text-xs font-medium tabular-nums">{course.rating?.toFixed(1) || 'N/A'}</span>
               </div>
-              <Badge variant="secondary" className="text-xs font-normal">{course.level}</Badge>
+              <Badge variant="secondary" className="text-xs font-normal">{localizeLevel(course.level)}</Badge>
             </div>
           </CardContent>
         </Card>

@@ -15,6 +15,7 @@ import { courseService, type CourseDto } from "../../services/courseService";
 import { paymentService } from "../../services/paymentService";
 import { discountService } from "../../services/discountService";
 import { formatMoney } from "../../lib/money";
+import { localizeLevel } from "../../lib/enumLocalization";
 
 export function CheckoutPage() {
   const { t } = useTranslation(['student', 'common', 'errors']);
@@ -176,7 +177,7 @@ export function CheckoutPage() {
             <div className="flex-1">
               <h3 className="font-semibold text-lg">{course.title}</h3>
               <p className="text-sm text-muted-foreground mt-1">{course.category}</p>
-              <p className="text-sm text-muted-foreground">{course.level}</p>
+              <p className="text-sm text-muted-foreground">{localizeLevel(course.level)}</p>
               {chosenSection && (
                 <p className="text-sm mt-1">
                   <span className="text-muted-foreground">{t('student:checkout.sectionLabel')}: </span>

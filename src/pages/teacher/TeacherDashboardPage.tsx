@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../..
 import { Button } from '../../components/ui/button'
 import { Badge } from '../../components/ui/badge'
 import { Progress } from '../../components/ui/progress'
+import { localizeModality } from '../../lib/enumLocalization'
 import {
   GraduationCap,
   Users,
@@ -236,7 +237,7 @@ export function TeacherDashboardPage() {
                               {classItem.startTime} - {classItem.endTime}
                             </span>
                             <Badge variant="subtle" className="text-xs">
-                              {classItem.modality}
+                              {localizeModality(classItem.modality)}
                             </Badge>
                           </div>
                         </div>

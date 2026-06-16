@@ -184,7 +184,7 @@
     "priceFree": "مجّاني",
     "enrollFree": "سجّل مجاناً",
     "enrollNow": "سجّل الآن",
-    "enrollForAmount": "سجّل بمبلغ ${{amount}}",
+    "enrollForAmount": "سجّل بمبلغ {{amount}}",
     "selectSectionFirst": "اختر شعبة أولاً",
     "goToMyClasses": "الانتقال إلى صفوفي",
     "signInToEnroll": "سجّل الدخول للتسجيل",

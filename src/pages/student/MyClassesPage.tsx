@@ -10,6 +10,7 @@ import { GraduationCap, BookOpen, Clock, MapPin, Calendar, TrendingUp, Award, Bo
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
+import { localizeModality, localizeEnrollmentStatus } from '../../lib/enumLocalization'
 
 interface EnrollmentWithCourse extends EnrollmentDto {
   course?: CourseDto
@@ -73,11 +74,11 @@ function EnrollmentCard({ enrollment }: { enrollment: EnrollmentWithCourse }) {
             {course && (
               <>
                 <Badge variant="subtle">{course.category}</Badge>
-                <Badge variant="subtle">{course.modality}</Badge>
+                <Badge variant="subtle">{localizeModality(course.modality)}</Badge>
               </>
             )}
             <Badge variant="outline">{enrollment.sectionName}</Badge>
-            <Badge variant={enrollment.status === 'Active' ? 'default' : 'secondary'}>{enrollment.status}</Badge>
+            <Badge variant={enrollment.status === 'Active' ? 'default' : 'secondary'}>{localizeEnrollmentStatus(enrollment.status)}</Badge>
             {enrollment.assignedByOrgName && (
               <Badge variant="subtle" className="gap-1">
                 <Building2 className="h-3 w-3" />

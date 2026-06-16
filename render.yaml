@@ -13,6 +13,9 @@ services:
     envVars:
       - key: ASPNETCORE_ENVIRONMENT
         value: Production
+      # The app's Kestrel listens on 8080; tell Render to route/health-check there.
+      - key: PORT
+        value: "8080"
       # Seed the demo accounts / faculty / courses / orgs on startup.
       - key: Seed__DemoData
         value: "true"

@@ -6,6 +6,7 @@ import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { cn } from '../lib/cn';
 import { onboardingService, type OnboardingCategoryDto, type UserInterestDto } from '../services/onboardingService';
+import i18nInstance from '../i18n';
 import { toast } from 'sonner';
 import {
   Sparkles,
@@ -33,6 +34,26 @@ interface OnboardingModalProps {
   open: boolean;
   onComplete: () => void;
   userId?: string;
+}
+
+// The interest categories come from the backend in English. Until the API is
+// localized, map the known names to Arabic so the onboarding modal isn't a
+// block of English under an Arabic UI.
+const ONBOARDING_CATEGORY_AR: Record<string, { name: string; description: string }> = {
+  'Business & Management': { name: 'الأعمال والإدارة', description: 'استراتيجية الأعمال والقيادة ومهارات الإدارة' },
+  'Data Science & Analytics': { name: 'علم البيانات والتحليلات', description: 'تحليل البيانات والتمثيل المرئي والتعلّم الآلي' },
+  'Technology & Programming': { name: 'التقنية والبرمجة', description: 'تطوير البرمجيات وتطوير الويب ومهارات تقنية المعلومات' },
+  'Science & Mathematics': { name: 'العلوم والرياضيات', description: 'المفاهيم العلمية والأسس الرياضية' },
+  'Personal Development': { name: 'التطوير الشخصي', description: 'المهارات الناعمة والإنتاجية والنمو الشخصي' },
+  'Design & Creative': { name: 'التصميم والإبداع', description: 'تصميم واجهات المستخدم والتصميم الجرافيكي والمهارات الإبداعية' },
+};
+
+function localizeOnboardingCategories(cats: OnboardingCategoryDto[]): OnboardingCategoryDto[] {
+  if (!(i18nInstance.language || '').toLowerCase().startsWith('ar')) return cats;
+  return cats.map((c) => {
+    const tr = ONBOARDING_CATEGORY_AR[(c.name || '').trim()];
+    return tr ? { ...c, name: tr.name, description: tr.description } : c;
+  });
 }
 
 const categoryIcons: Record<string, React.ReactNode> = {
@@ -88,7 +109,7 @@ export function OnboardingModal({ open, onComplete, userId }: OnboardingModalPro
     try {
       setLoading(true);
       const response = await onboardingService.getCategories();
-      setCategories(response.categories || []);
+      setCategories(localizeOnboardingCategories(response.categories || []));
       setLearningGoalOptions(response.learningGoalOptions || [
         t('student:components.onboarding.goals.career'),
         t('student:components.onboarding.goals.newSkills'),

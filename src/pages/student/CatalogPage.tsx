@@ -15,6 +15,7 @@ import { enrollmentService } from '../../services/enrollmentService'
 import { toast } from 'sonner'
 import { X, Search, Filter, Calendar, MapPin, Video, BookOpen, Globe, AlertCircle } from 'lucide-react'
 import { cn } from '../../lib/cn'
+import { localizeLevel, localizeModality } from '../../lib/enumLocalization'
 
 type Filters = {
   category: string | 'All'
@@ -522,8 +523,8 @@ export function CatalogPage() {
                 <CardContent className="space-y-3">
                   <div className="flex flex-wrap gap-1">
                     <Badge variant="subtle">{c.category}</Badge>
-                    <Badge variant="subtle">{c.level}</Badge>
-                    <Badge variant="subtle">{c.modality}</Badge>
+                    <Badge variant="subtle">{localizeLevel(c.level)}</Badge>
+                    <Badge variant="subtle">{localizeModality(c.modality)}</Badge>
                     {c.tags.slice(0, 2).map((t) => (
                       <Badge key={t} variant="outline">
                         {t}
@@ -603,8 +604,8 @@ export function CatalogPage() {
                   <div className="text-sm text-muted-foreground">{openCourse.description}</div>
                   <div className="mt-3 flex flex-wrap gap-1">
                     <Badge variant="subtle">{openCourse.category}</Badge>
-                    <Badge variant="subtle">{openCourse.level}</Badge>
-                    <Badge variant="subtle">{openCourse.modality}</Badge>
+                    <Badge variant="subtle">{localizeLevel(openCourse.level)}</Badge>
+                    <Badge variant="subtle">{localizeModality(openCourse.modality)}</Badge>
                   </div>
                 </div>
 

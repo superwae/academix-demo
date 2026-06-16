@@ -6,6 +6,7 @@ import { Button } from '../../components/ui/button'
 import { Progress } from '../../components/ui/progress'
 import { courseService, type CourseDto, type CloneCourseRequest } from '../../services/courseService'
 import { teacherService } from '../../services/teacherService'
+import { localizeLevel, localizeWeekday } from '../../lib/enumLocalization'
 import {
   BookOpen,
   Users,
@@ -489,7 +490,7 @@ export function TeacherMyCoursesPage() {
                       <div className="flex-1 min-w-0">
                         <CardTitle className="text-lg line-clamp-2">{course.title}</CardTitle>
                         <CardDescription className="text-xs mt-0.5 line-clamp-1">
-                          {course.category} • {course.level}
+                          {course.category} • {localizeLevel(course.level)}
                         </CardDescription>
                       </div>
                       <DropdownMenu>
@@ -790,7 +791,7 @@ export function TeacherMyCoursesPage() {
                               {section.meetingTimes.map((mt, index) => (
                                 <div key={index} className="flex items-center gap-2 text-xs text-muted-foreground">
                                   <Calendar className="h-3 w-3" />
-                                  {mt.day} {minutesToTime(mt.startMinutes)} - {minutesToTime(mt.endMinutes)}
+                                  {localizeWeekday(mt.day)} {minutesToTime(mt.startMinutes)} - {minutesToTime(mt.endMinutes)}
                                 </div>
                               ))}
                             </div>

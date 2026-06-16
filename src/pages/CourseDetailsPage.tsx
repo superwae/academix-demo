@@ -14,6 +14,7 @@ import { useAuthStore } from '../store/useAuthStore';
 import { useAppStore } from '../store/useAppStore';
 import { hasElevatedRole } from '../lib/userRoles';
 import { formatMoney } from '../lib/money';
+import { localizeLevel, localizeModality, localizeWeekday } from '../lib/enumLocalization';
 
 
 export function CourseDetailsPage() {
@@ -225,8 +226,8 @@ export function CourseDetailsPage() {
                     {t('public:courseDetails.reviewsCount', { count: course.ratingCount })}
                   </span>
                 </div>
-                <Badge variant="secondary">{course.level}</Badge>
-                <Badge variant="outline">{course.modality}</Badge>
+                <Badge variant="secondary">{localizeLevel(course.level)}</Badge>
+                <Badge variant="outline">{localizeModality(course.modality)}</Badge>
                 <Badge variant="default" className={course.price ? "text-lg" : "text-lg bg-emerald-500/15 text-emerald-600 border-emerald-500/30"}>
                   {course.price ? formatMoney(course.price) : t('public:courseDetails.free')}
                 </Badge>
@@ -325,7 +326,7 @@ export function CourseDetailsPage() {
                             className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground"
                           >
                             <Calendar className="h-4 w-4" />
-                            <span className="font-medium">{mt.day}</span>
+                            <span className="font-medium">{localizeWeekday(mt.day)}</span>
                             <Clock className="h-4 w-4 ms-2" />
                             <span>
                               {mt.startTime} - {mt.endTime}
@@ -406,11 +407,11 @@ export function CourseDetailsPage() {
               </div>
               <div className="space-y-2">
                 <div className="text-sm font-medium text-muted-foreground">{t('public:courseDetails.level')}</div>
-                <Badge>{course.level}</Badge>
+                <Badge>{localizeLevel(course.level)}</Badge>
               </div>
               <div className="space-y-2">
                 <div className="text-sm font-medium text-muted-foreground">{t('public:courseDetails.modality')}</div>
-                <Badge variant="outline">{course.modality}</Badge>
+                <Badge variant="outline">{localizeModality(course.modality)}</Badge>
               </div>
               <div className="space-y-2">
                 <div className="text-sm font-medium text-muted-foreground">{t('public:courseDetails.price')}</div>

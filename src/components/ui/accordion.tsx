@@ -14,22 +14,37 @@ interface AccordionProps {
   children: React.ReactNode;
   className?: string;
   defaultOpen?: string[];
+  /** 'single' keeps at most one item open; 'multiple' (default) allows many. */
+  type?: 'single' | 'multiple';
+  /** In 'single' mode, allow closing the open item by clicking it again. */
+  collapsible?: boolean;
 }
 
-export function Accordion({ children, className, defaultOpen = [] }: AccordionProps) {
+export function Accordion({
+  children,
+  className,
+  defaultOpen = [],
+  type = 'multiple',
+  collapsible = true,
+}: AccordionProps) {
   const [openItems, setOpenItems] = React.useState<Set<string>>(new Set(defaultOpen));
 
-  const toggleItem = React.useCallback((id: string) => {
-    setOpenItems((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-  }, []);
+  const toggleItem = React.useCallback(
+    (id: string) => {
+      setOpenItems((prev) => {
+        const isOpen = prev.has(id);
+        if (type === 'single') {
+          if (isOpen) return collapsible ? new Set() : prev;
+          return new Set([id]);
+        }
+        const next = new Set(prev);
+        if (isOpen) next.delete(id);
+        else next.add(id);
+        return next;
+      });
+    },
+    [type, collapsible]
+  );
 
   return (
     <AccordionContext.Provider value={{ openItems, toggleItem }}>
@@ -45,14 +60,17 @@ interface AccordionItemContextValue {
 const AccordionItemContext = React.createContext<AccordionItemContextValue | null>(null);
 
 interface AccordionItemProps {
-  id: string;
+  /** Unique id for the item. `value` is accepted as an alias (Radix-style API). */
+  id?: string;
+  value?: string;
   children: React.ReactNode;
   className?: string;
 }
 
-export function AccordionItem({ id, children, className }: AccordionItemProps) {
+export function AccordionItem({ id, value, children, className }: AccordionItemProps) {
+  const itemId = id ?? value ?? '';
   return (
-    <AccordionItemContext.Provider value={{ itemId: id }}>
+    <AccordionItemContext.Provider value={{ itemId }}>
       <div className={cn('border rounded-lg overflow-hidden', className)}>
         {children}
       </div>
