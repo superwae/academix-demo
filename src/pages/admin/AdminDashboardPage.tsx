@@ -56,19 +56,10 @@ import { adminService } from "../../services/adminService";
 import type { AnalyticsDashboardDto } from "../../services/adminService";
 import { toast } from "sonner";
 
-// System Health (mock - no backend)
-const systemHealth = {
-  status: "healthy",
-  uptime: "99.98%",
-  services: [
-    { name: "API Server", status: "operational" },
-    { name: "Database", status: "operational" },
-    { name: "Cache", status: "operational" },
-    { name: "Storage", status: "operational" },
-    { name: "Email Service", status: "operational" },
-    { name: "Payment Gateway", status: "operational" },
-  ],
-};
+const systemServices = [
+  { nameKey: "admin:dashboard.services.apiServer", icon: "api", status: "operational" },
+  { nameKey: "admin:dashboard.services.database", icon: "database", status: "operational" },
+];
 
 // Time Range Options
 type TimeRange = "7d" | "30d" | "90d" | "12m";
@@ -128,7 +119,7 @@ function StatCard({
   title: string;
   value: string | number;
   icon: React.ElementType;
-  change?: { value: number; label: string };
+  change?: { value: string | number; label: string; suffix?: string };
   trend?: "up" | "down" | "neutral";
   iconColor?: string;
   href?: string;
@@ -195,7 +186,8 @@ function StatCard({
               ) : null}
               <span className="font-medium">
                 {trend === "up" ? "+" : ""}
-                {change.value}%
+                {change.value}
+                {change.suffix ?? ""}
               </span>
               <span className="text-muted-foreground">{change.label}</span>
             </div>
@@ -313,19 +305,12 @@ export function AdminDashboardPage() {
     }
   };
 
-  const getServiceIcon = (name: string) => {
-    switch (name) {
-      case "API Server":
+  const getServiceIcon = (icon: string) => {
+    switch (icon) {
+      case "api":
         return <Server className="h-4 w-4" />;
-      case "Database":
+      case "database":
         return <Database className="h-4 w-4" />;
-      case "Cache":
-      case "Storage":
-        return <HardDrive className="h-4 w-4" />;
-      case "Email Service":
-        return <Mail className="h-4 w-4" />;
-      case "Payment Gateway":
-        return <CreditCard className="h-4 w-4" />;
       default:
         return <Wifi className="h-4 w-4" />;
     }
@@ -399,8 +384,6 @@ export function AdminDashboardPage() {
             title={t('admin:dashboard.totalStudents')}
             value={analytics?.totalStudents?.toLocaleString() || "0"}
             icon={Users}
-            change={{ value: 12.5, label: t('admin:dashboard.vsLastMonth') }}
-            trend="up"
             iconColor="text-blue-500"
             href="/admin/users"
             loading={loading}
@@ -409,8 +392,6 @@ export function AdminDashboardPage() {
             title={t('admin:dashboard.totalCourses')}
             value={analytics?.totalCourses?.toLocaleString() || "0"}
             icon={BookOpen}
-            change={{ value: 8.2, label: t('admin:dashboard.vsLastMonth') }}
-            trend="up"
             iconColor="text-emerald-500"
             href="/admin/courses"
             loading={loading}
@@ -419,8 +400,6 @@ export function AdminDashboardPage() {
             title={t('admin:dashboard.totalEnrollments')}
             value={analytics?.totalEnrollments?.toLocaleString() || "0"}
             icon={GraduationCap}
-            change={{ value: 15.3, label: t('admin:dashboard.vsLastMonth') }}
-            trend="up"
             iconColor="text-purple-500"
             loading={loading}
           />
@@ -436,12 +415,11 @@ export function AdminDashboardPage() {
           />
           <StatCard
             title={t('admin:dashboard.systemHealth')}
-            value={systemHealth.uptime}
+            value={t('admin:dashboard.services.statusOperational')}
             icon={Activity}
-            change={{ value: 0, label: systemHealth.status }}
-            trend="up"
             iconColor="text-emerald-500"
             href="/admin/settings"
+            loading={loading}
           />
         </div>
       </section>
@@ -850,9 +828,9 @@ export function AdminDashboardPage() {
         />
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {systemHealth.services.map((service) => (
+          {systemServices.map((service) => (
             <div
-              key={service.name}
+              key={service.nameKey}
               className="flex items-center gap-3 rounded-xl border border-border bg-card p-4 transition-colors hover:bg-muted/30"
             >
               <div
@@ -865,10 +843,10 @@ export function AdminDashboardPage() {
                     : "bg-red-500/10 text-red-500"
                 )}
               >
-                {getServiceIcon(service.name)}
+                {getServiceIcon(service.icon)}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm">{service.name}</p>
+                <p className="font-medium text-sm">{t(service.nameKey)}</p>
                 <p
                   className={cn(
                     "text-xs",
@@ -879,7 +857,7 @@ export function AdminDashboardPage() {
                       : "text-red-500"
                   )}
                 >
-                  {service.status.charAt(0).toUpperCase() + service.status.slice(1)}
+                  {t('admin:dashboard.services.statusOperational')}
                 </p>
               </div>
               <span
@@ -899,8 +877,8 @@ export function AdminDashboardPage() {
         {/* Quick Stats Row */}
         <div className="mt-4 grid gap-4 sm:grid-cols-4">
           <div className="rounded-xl border border-border bg-card p-4">
-            <p className="text-xs text-muted-foreground">{t('admin:dashboard.services.serverUptime')}</p>
-            <p className="text-xl font-bold text-emerald-500">{systemHealth.uptime}</p>
+            <p className="text-xs text-muted-foreground">{t('admin:dashboard.services.apiServer')}</p>
+            <p className="text-xl font-bold text-emerald-500">{t('admin:dashboard.services.statusOperational')}</p>
           </div>
           <div className="rounded-xl border border-border bg-card p-4">
             <p className="text-xs text-muted-foreground">{t('admin:dashboard.totalInstructors')}</p>

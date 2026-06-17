@@ -24,6 +24,23 @@ public class EnrollmentsController : ControllerBase
     }
 
     /// <summary>
+    /// Get all enrollments for secretary/admin read-only operations.
+    /// </summary>
+    [HttpGet]
+    [Authorize(Policy = "RequireSecretaryRead")]
+    [ProducesResponseType(typeof(PagedResult<EnrollmentDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetEnrollments([FromQuery] PagedRequest request, CancellationToken cancellationToken)
+    {
+        var result = await _enrollmentService.GetPagedAsync(request, cancellationToken);
+
+        if (!result.IsSuccess)
+            return BadRequest(result.Error);
+
+        return Ok(result.Value);
+    }
+
+    /// <summary>
     /// Get my enrollments (Admin and Student can view their own enrollments)
     /// </summary>
     [HttpGet("me")]
@@ -140,6 +157,31 @@ public class EnrollmentsController : ControllerBase
     }
 
     /// <summary>
+    /// Switch the section of an active enrollment (Student can switch their own; Admin can switch anyone's).
+    /// </summary>
+    [HttpPost("{id}/switch-section")]
+    [Authorize(Policy = "RequireStudent")]
+    [ProducesResponseType(typeof(EnrollmentDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> SwitchSection(Guid id, [FromBody] SwitchSectionRequest request, CancellationToken cancellationToken)
+    {
+        var userId = User.GetRequiredUserId();
+        var isAdmin = User.HasRole("Admin") || User.HasRole("SuperAdmin");
+
+        var result = await _enrollmentService.SwitchSectionAsync(id, request.SectionId, userId, isAdmin, cancellationToken);
+
+        if (!result.IsSuccess || result.Value == null)
+        {
+            if (result.Error?.Contains("not found") == true)
+                return NotFound(result.Error);
+            return BadRequest(result.Error);
+        }
+
+        return Ok(result.Value);
+    }
+
+    /// <summary>
     /// Update enrollment (Admin only)
     /// </summary>
     [HttpPut("{id}")]
@@ -205,5 +247,4 @@ public class EnrollmentsController : ControllerBase
         return Ok();
     }
 }
-
 

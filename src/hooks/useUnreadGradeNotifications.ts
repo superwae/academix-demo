@@ -16,7 +16,7 @@ export function useUnreadGradeNotifications() {
 
   const fetchCount = useCallback(async () => {
     const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
-    if (!token || token.startsWith('mock-')) {
+    if (!token) {
       setUnreadCount(0);
       setLoading(false);
       return;

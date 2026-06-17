@@ -129,6 +129,8 @@ public static class ServiceCollectionExtensions
             options.AddPolicy("RequireStudent", policy => policy.RequireRole("Student", "Instructor", "Admin", "SuperAdmin"));
             // Read-only finance views: accountants can see payment data but not mutate anything.
             options.AddPolicy("RequireFinance", policy => policy.RequireRole("Accountant", "Admin", "SuperAdmin"));
+            // Read-only front-office views for secretary users.
+            options.AddPolicy("RequireSecretaryRead", policy => policy.RequireRole("Secretary", "Admin", "SuperAdmin"));
         });
 
         return services;

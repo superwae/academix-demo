@@ -14,14 +14,15 @@ import { ConfirmDialog } from '../../components/ui/confirm-dialog'
 export function SettingsPage() {
   const { t } = useTranslation(['student', 'common', 'errors'])
   const navigate = useNavigate()
-  const { user: authUser, logout } = useAuthStore()
+  const { user: authUser, logout, updateUser } = useAuthStore()
   const theme = useAppStore((s) => s.data.theme)
-  const profile = useAppStore((s) => s.data.profile)
-  const updateProfile = useAppStore((s) => s.updateProfile)
-  const resetDemoData = useAppStore((s) => s.resetDemoData)
+  const customThemeColor = useAppStore((s) => s.data.customThemeColor)
+  const mixTheme = useAppStore((s) => s.data.mixTheme)
 
   const [user, setUser] = useState<UserDto | null>(null)
   const [loadingUser, setLoadingUser] = useState(true)
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true)
+  const [savingNotifications, setSavingNotifications] = useState(false)
   const [name, setName] = useState('')
   const [currentPassword, setCurrentPassword] = useState('')
   const [password, setPassword] = useState('')
@@ -41,6 +42,7 @@ export function SettingsPage() {
         const data = await userService.getCurrentUser()
         setUser(data)
         setName(data.fullName || `${data.firstName} ${data.lastName}`.trim())
+        setNotificationsEnabled(data.uiPreferences?.notificationsEnabled ?? true)
       } catch {
         toast.error(t('student:settings.errors.loadAccountFailed'))
       } finally {
@@ -69,12 +71,12 @@ export function SettingsPage() {
       const lastName = nameParts.slice(1).join(' ') || ''
       const updated = await userService.updateCurrentUser({ firstName, lastName })
       setUser(updated)
-      const { useAuthStore } = await import('../../store/useAuthStore')
-      useAuthStore.getState().user = {
-        ...useAuthStore.getState().user!,
+      updateUser({
         firstName: updated.firstName,
         lastName: updated.lastName,
-      }
+        fullName: updated.fullName,
+        uiPreferences: updated.uiPreferences,
+      })
       if (password) {
         if (!currentPassword) {
           toast.error(t('student:settings.errors.enterCurrentPassword'))
@@ -113,6 +115,30 @@ export function SettingsPage() {
       toast.error(t('student:settings.errors.deleteAccountFailed'))
     } finally {
       setDeleting(false)
+    }
+  }
+
+  const handleToggleNotifications = async () => {
+    if (!user) return
+    const next = !notificationsEnabled
+    try {
+      setSavingNotifications(true)
+      const updated = await userService.updateUiPreferences({
+        theme,
+        customThemeColor: customThemeColor ?? null,
+        mixTheme: mixTheme ?? null,
+        notificationsEnabled: next,
+      })
+      setUser(updated)
+      setNotificationsEnabled(updated.uiPreferences?.notificationsEnabled ?? next)
+      updateUser({ uiPreferences: updated.uiPreferences })
+      toast.success(t('student:settings.preferenceUpdated'))
+    } catch (error) {
+      toast.error(t('student:settings.errors.updateProfileFailed'), {
+        description: error instanceof Error ? error.message : undefined,
+      })
+    } finally {
+      setSavingNotifications(false)
     }
   }
 
@@ -209,36 +235,14 @@ export function SettingsPage() {
             </div>
             <Button
               variant="outline"
-              onClick={() => {
-                updateProfile({ notificationsEnabled: !profile.notificationsEnabled })
-                toast.success(t('student:settings.preferenceUpdated'))
-              }}
+              onClick={handleToggleNotifications}
+              disabled={!user || savingNotifications}
             >
-              {profile.notificationsEnabled ? t('student:settings.enabled') : t('student:settings.disabled')}
+              {notificationsEnabled ? t('student:settings.enabled') : t('student:settings.disabled')}
             </Button>
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>{t('student:settings.resetDemo')}</CardTitle>
-            <CardDescription>{t('student:settings.resetDemoSubtitle')}</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-wrap items-center justify-between gap-3">
-            <div className="text-sm text-muted-foreground">
-              {t('student:settings.resetDemoBody')}
-            </div>
-            <Button
-              variant="destructive"
-              onClick={() => {
-                resetDemoData()
-                toast.success(t('student:settings.demoReset'), { description: t('student:settings.demoResetDesc') })
-              }}
-            >
-              {t('student:settings.resetDemo')}
-            </Button>
-          </CardContent>
-        </Card>
       </div>
 
       <ConfirmDialog

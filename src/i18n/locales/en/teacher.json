@@ -26,6 +26,7 @@
     "lectureDetails": "Lecture details",
     "location": "Location",
     "section": "Section",
+    "openLiveSession": "Open live session",
     "editCourse": "Edit Course",
     "errors": {
       "loadFailed": "Failed to load calendar"
@@ -239,6 +240,8 @@
     "addedSectionsHint": "Added sections ({{count}}) — click to set seats and meeting times",
     "timesCount_one": "{{count}} time",
     "timesCount_other": "{{count}} times",
+    "joinUrlLabel": "Online meeting link (Zoom, Meet...)",
+    "joinUrlHint": "Shown to enrolled students in their live sessions and calendar.",
     "removeSection": "Remove {{name}}",
     "meetingTimesWeekly": "Meeting times (weekly)",
     "noTimesYet": "No meeting times yet — click \"Add time\" above",
@@ -397,7 +400,7 @@
     "noRatings": "No ratings yet.",
     "lessonsLabel": "Lessons",
     "sessionsLabel": "Sessions",
-    "section": "Section",
+    "section": "Lesson section",
     "lessons": "Lessons",
     "lessonCountInSection_one": "{{count}} lesson in this section",
     "lessonCountInSection_other": "{{count}} lessons in this section",
@@ -682,7 +685,7 @@
     "toasts": {
       "cancelled": "Subscription cancelled",
       "demoActivated": "Subscription activated!",
-      "demoActivatedDescription": "Demo payment recorded — your plan is now active."
+      "demoActivatedDescription": "Payment recorded — your plan is now active."
     },
     "errors": {
       "loadFailed": "Failed to load subscription data",

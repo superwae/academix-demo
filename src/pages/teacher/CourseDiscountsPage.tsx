@@ -30,6 +30,7 @@ import { cn } from "../../lib/cn";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { discountService, type DiscountDto } from "../../services/discountService";
+import { formatMoney } from "../../lib/money";
 
 const emptyForm = {
   code: "",
@@ -40,6 +41,8 @@ const emptyForm = {
   maxUses: "",
   isActive: true,
 };
+
+const toUtcDateTime = (date: string) => (date ? `${date}T00:00:00.000Z` : undefined);
 
 export function CourseDiscountsPage() {
   const { t } = useTranslation(['teacher', 'common', 'errors']);
@@ -103,8 +106,8 @@ export function CourseDiscountsPage() {
       code: formData.code,
       type: formData.type,
       value: parseFloat(formData.value) || 0,
-      startsAt: formData.startsAt || undefined,
-      expiresAt: formData.expiresAt || undefined,
+      startsAt: toUtcDateTime(formData.startsAt),
+      expiresAt: toUtcDateTime(formData.expiresAt),
       maxUses: formData.maxUses ? parseInt(formData.maxUses) : undefined,
       isActive: formData.isActive,
     };
@@ -200,7 +203,7 @@ export function CourseDiscountsPage() {
                     <td className="px-4 py-3 text-sm font-medium">
                       {discount.type === "Percentage"
                         ? `${discount.value}%`
-                        : `$${discount.value.toFixed(2)}`}
+                        : formatMoney(discount.value)}
                     </td>
                     <td className="px-4 py-3 text-sm text-muted-foreground">
                       {discount.startsAt

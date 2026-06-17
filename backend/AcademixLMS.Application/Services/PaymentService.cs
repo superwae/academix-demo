@@ -116,7 +116,7 @@ public class PaymentService : IPaymentService
                 }
 
                 // Note: UsedCount is incremented only when the payment actually completes
-                // (demo completion below, or gateway verification) so abandoned checkouts
+                // (instant local completion below, or gateway verification) so abandoned checkouts
                 // can't exhaust a discount's MaxUses.
             }
         }
@@ -138,13 +138,13 @@ public class PaymentService : IPaymentService
         _context.Payments.Add(payment);
         await _context.SaveChangesAsync(cancellationToken);
 
-        // 3b. Demo mode: complete the payment instantly and enroll — no gateway round-trip.
+        // 3b. Local instant mode: complete the payment instantly and enroll — no gateway round-trip.
         if (IsDemoMode)
         {
             payment.Status = PaymentStatus.Completed;
             payment.PaidAt = DateTime.UtcNow;
-            payment.LahzaReference = $"demo_{payment.Id:N}";
-            payment.LahzaChannel = "demo";
+            payment.LahzaReference = $"local_{payment.Id:N}";
+            payment.LahzaChannel = "local";
 
             await ApplyRevenueSplitAsync(payment, cancellationToken);
             await ConsumeDiscountAsync(payment.DiscountId, cancellationToken);
@@ -155,10 +155,10 @@ public class PaymentService : IPaymentService
             var enrollResult = await _enrollmentService.EnrollAfterPaymentAsync(userId, courseId, payment.Id, sectionId, cancellationToken);
             if (!enrollResult.IsSuccess)
             {
-                _logger.LogWarning("Demo payment {PaymentId} completed but auto-enrollment failed: {Error}", payment.Id, enrollResult.Error);
+                _logger.LogWarning("Instant course payment {PaymentId} completed but auto-enrollment failed: {Error}", payment.Id, enrollResult.Error);
             }
 
-            _logger.LogInformation("Demo-mode course payment {PaymentId} completed for user {UserId}, course {CourseId}, amount {Amount}.", payment.Id, userId, courseId, finalAmount);
+            _logger.LogInformation("Instant course payment {PaymentId} completed for user {UserId}, course {CourseId}, amount {Amount}.", payment.Id, userId, courseId, finalAmount);
 
             return Result<InitializePaymentResponse>.Success(new InitializePaymentResponse
             {
@@ -272,7 +272,7 @@ public class PaymentService : IPaymentService
         _context.Payments.Add(payment);
         await _context.SaveChangesAsync(cancellationToken);
 
-        // Demo mode: activate the subscription instantly — no gateway round-trip.
+        // Local instant mode: activate the subscription instantly — no gateway round-trip.
         if (IsDemoMode)
         {
             var now = DateTime.UtcNow;
@@ -291,13 +291,13 @@ public class PaymentService : IPaymentService
 
             payment.Status = PaymentStatus.Completed;
             payment.PaidAt = now;
-            payment.LahzaReference = $"demo_{payment.Id:N}";
-            payment.LahzaChannel = "demo";
+            payment.LahzaReference = $"local_{payment.Id:N}";
+            payment.LahzaChannel = "local";
             payment.SubscriptionId = subscription.Id;
             payment.UpdatedAt = now;
             await _context.SaveChangesAsync(cancellationToken);
 
-            _logger.LogInformation("Demo-mode subscription payment {PaymentId} completed for user {UserId}, plan {PlanId}; subscription {SubscriptionId} active.", payment.Id, userId, planId, subscription.Id);
+            _logger.LogInformation("Instant subscription payment {PaymentId} completed for user {UserId}, plan {PlanId}; subscription {SubscriptionId} active.", payment.Id, userId, planId, subscription.Id);
 
             return Result<InitializePaymentResponse>.Success(new InitializePaymentResponse
             {

@@ -1,7 +1,7 @@
 {
   "notFound": {
     "code": "404",
-    "message": "هذه الصفحة غير موجودة في هذا العرض التجريبي.",
+    "message": "هذه الصفحة غير موجودة.",
     "goToDashboard": "الانتقال إلى لوحة التحكم"
   },
   "landing": {
@@ -247,7 +247,33 @@
       "unableEnroll": "تعذّر إتمام التسجيل. يرجى المحاولة مجدداً.",
       "tryLater": "يرجى المحاولة لاحقاً"
     },
-    "alreadyEnrolledLabel": "مسجّل بالفعل"
+    "alreadyEnrolledLabel": "مسجّل بالفعل",
+    "linkCopied": "تم نسخ رابط الدورة",
+    "linkCopiedBody": "يمكن لأي شخص لديه هذا الرابط عرض الدورة والتسجيل فيها.",
+    "linkCopyFailed": "تعذّر نسخ الرابط",
+    "switchedTitle": "تم تغيير الشعبة",
+    "switchedBody": "انتقلت إلى {{section}}.",
+    "newCourse": "دورة جديدة",
+    "seatsOpen": "{{open}} من أصل {{total}} مقاعد متاحة",
+    "share": "مشاركة",
+    "manageCourse": "إدارة",
+    "youreEnrolled": "أنت مسجّل",
+    "currentSectionHint": "الشعبة الحالية: {{section}}. اختر شعبة أخرى أدناه للتبديل.",
+    "sectionsSwitchHint": "بدّل إلى شعبة تناسب جدولك.",
+    "yourSection": "شعبتك",
+    "joinSession": "الانضمام إلى الجلسة الإلكترونية",
+    "enrolledHere": "مسجّل هنا",
+    "switchingDots": "جارٍ التبديل...",
+    "switchToSection": "التبديل إلى هذه الشعبة",
+    "enrollForPrice": "التسجيل - {{price}}",
+    "hoursValue": "{{count}} ساعة",
+    "certificateIncluded": "عند الإكمال",
+    "ownerShareTitle": "شارك هذه الدورة",
+    "ownerShareBody": "أرسل هذا الرابط للطلاب - يفتح مباشرة على التسجيل.",
+    "copyShareLink": "نسخ رابط المشاركة",
+    "switchDialogTitle": "تبديل الشعبة؟",
+    "switchDialogDescription": "هل تريد الانتقال من {{from}} إلى {{to}}؟ سيبقى تقدمك محفوظاً.",
+    "switchConfirmLabel": "تبديل الشعبة"
   },
   "home": {
     "metaDescription": "اكتشف آلاف الدورات من مدرّسين خبراء. تعلّم بوتيرتك مع الواجبات والاختبارات والشهادات على أكاديميكس.",

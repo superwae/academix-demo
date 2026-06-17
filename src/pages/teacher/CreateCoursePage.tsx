@@ -52,6 +52,7 @@ export function CreateCoursePage() {
     sections: [] as {
       name: string
       locationLabel: string
+      joinUrl: string
       maxSeats: number
       meetingTimes: { day: string; startTime: string; endTime: string }[]
     }[],
@@ -155,9 +156,16 @@ export function CreateCoursePage() {
     if (formData.sections.some((s) => s.name === preset.name)) return
     setFormData({
       ...formData,
-      sections: [...formData.sections, { ...preset, maxSeats: getDefaultSectionSeats(), meetingTimes: [] }],
+      sections: [...formData.sections, { ...preset, joinUrl: '', maxSeats: getDefaultSectionSeats(), meetingTimes: [] }],
     })
     setExpandedSection(preset.name)
+  }
+
+  const updateSectionJoinUrl = (name: string, joinUrl: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      sections: prev.sections.map((s) => (s.name === name ? { ...s, joinUrl } : s)),
+    }))
   }
 
   const removeSection = (name: string) => {
@@ -310,6 +318,7 @@ export function CreateCoursePage() {
           ? formData.sections.map((s) => ({
               name: s.name,
               locationLabel: s.locationLabel,
+              joinUrl: s.joinUrl?.trim() || undefined,
               maxSeats: Math.max(1, Math.floor(s.maxSeats || 1)),
               meetingTimes: s.meetingTimes
                 .filter(
@@ -754,6 +763,23 @@ export function CreateCoursePage() {
                                         })}
                                       </p>
                                     )}
+                                  </div>
+                                  <div className="space-y-1">
+                                    <Label htmlFor={`join-url-${s.name}`} className="text-xs">
+                                      {t('teacher:createCoursePage.joinUrlLabel', { defaultValue: 'Online meeting link (Zoom, Meet…)' })}
+                                    </Label>
+                                    <Input
+                                      id={`join-url-${s.name}`}
+                                      type="url"
+                                      inputMode="url"
+                                      placeholder="https://zoom.us/j/…"
+                                      value={s.joinUrl}
+                                      onChange={(e) => updateSectionJoinUrl(s.name, e.target.value)}
+                                      className="h-8"
+                                    />
+                                    <p className="text-[11px] text-muted-foreground">
+                                      {t('teacher:createCoursePage.joinUrlHint', { defaultValue: 'Shown to enrolled students in their live sessions and calendar.' })}
+                                    </p>
                                   </div>
                                 </div>
 

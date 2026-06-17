@@ -114,9 +114,7 @@ public class LessonsController : ControllerBase
         
         if (!result.IsSuccess)
         {
-            if (result.Error.Contains("not found"))
-                return NotFound(result.Error);
-            return BadRequest(result.Error);
+            return LessonMutationFailure(result.Error);
         }
 
         return Ok(result.Value);
@@ -139,9 +137,7 @@ public class LessonsController : ControllerBase
         
         if (!result.IsSuccess)
         {
-            if (result.Error.Contains("not found"))
-                return NotFound(result.Error);
-            return BadRequest(result.Error);
+            return LessonMutationFailure(result.Error);
         }
 
         return NoContent();
@@ -221,9 +217,7 @@ public class LessonsController : ControllerBase
         
         if (!result.IsSuccess)
         {
-            if (result.Error.Contains("not found"))
-                return NotFound(result.Error);
-            return BadRequest(result.Error);
+            return LessonMutationFailure(result.Error);
         }
 
         return Ok(result.Value);
@@ -246,12 +240,20 @@ public class LessonsController : ControllerBase
         
         if (!result.IsSuccess)
         {
-            if (result.Error.Contains("not found"))
-                return NotFound(result.Error);
-            return BadRequest(result.Error);
+            return LessonMutationFailure(result.Error);
         }
 
         return NoContent();
+    }
+
+    private IActionResult LessonMutationFailure(string? error)
+    {
+        var message = string.IsNullOrWhiteSpace(error) ? "The lesson operation could not be completed." : error;
+
+        if (message.Contains("not found", StringComparison.OrdinalIgnoreCase))
+            return NotFound(message);
+
+        return BadRequest(message);
     }
 }
 

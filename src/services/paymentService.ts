@@ -36,7 +36,7 @@ export interface InitializeCoursePaymentResponse {
   amount: number;
   currency: string;
   /**
-   * Demo gateway mode: when true the payment was completed server-side and
+   * Local instant-gateway mode: when true the payment was completed server-side and
    * (for courses) the student is already enrolled / (for subscriptions) the
    * subscription is already active. No Lahza redirect should happen —
    * authorizationUrl will be empty.

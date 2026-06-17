@@ -21,6 +21,7 @@ export interface CreateDiscountRequest {
   startsAt?: string;
   expiresAt?: string;
   maxUses?: number;
+  isActive?: boolean;
 }
 
 export interface UpdateDiscountRequest extends Partial<CreateDiscountRequest> {

@@ -455,15 +455,17 @@ export function EditCoursePage() {
         },
       })
 
-      // Only publish when the publish toggle is on (and not explicitly saving a draft)
-      const published = !saveAsDraft && formData.publish
-      if (published) {
+      // Publish only when transitioning Draft → Published (the endpoint rejects
+      // re-publishing an already-published course). Editing a live course just saves.
+      const wantsPublished = !saveAsDraft && formData.publish
+      const justPublished = wantsPublished && course?.status !== 'Published'
+      if (justPublished) {
         await courseService.publishCourse(id)
       }
 
-      // Toast must reflect what actually happened (published vs just updated)
-      toast.success(published ? t('teacher:createCoursePage.toasts.published') : t('teacher:editCoursePage.toasts.updated'), {
-        description: published
+      // Toast must reflect what actually happened (newly published vs just updated)
+      toast.success(justPublished ? t('teacher:createCoursePage.toasts.published') : t('teacher:editCoursePage.toasts.updated'), {
+        description: justPublished
           ? t('teacher:createCoursePage.toasts.publishedDescription')
           : t('teacher:editCoursePage.toasts.updatedDescription'),
       })

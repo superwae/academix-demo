@@ -64,7 +64,7 @@ const SETTINGS_TABS: { id: SettingsTab; labelKey: string; icon: React.ElementTyp
   { id: "advanced", labelKey: "admin:settings.tabs.advanced", icon: Server, descKey: "admin:settings.tabs.advancedDesc" },
 ];
 
-// Mock Feature Flags
+// Feature flags currently configured in the admin UI.
 const initialFeatureFlags = [
   { id: "ff1", nameKey: "admin:settings.advanced.flags.newDashboard", descKey: "admin:settings.advanced.flags.newDashboardDesc", enabled: true, category: "general" },
   { id: "ff2", nameKey: "admin:settings.advanced.flags.aiRecommendations", descKey: "admin:settings.advanced.flags.aiRecommendationsDesc", enabled: false, category: "experimental" },
@@ -76,7 +76,7 @@ const initialFeatureFlags = [
   { id: "ff8", nameKey: "admin:settings.advanced.flags.socialLogin", descKey: "admin:settings.advanced.flags.socialLoginDesc", enabled: false, category: "beta" },
 ];
 
-// Mock Integrations
+// Integration connection states shown in the admin UI.
 const INTEGRATIONS = [
   { id: "stripe", nameKey: "admin:settings.integrations.services.stripe", descKey: "admin:settings.integrations.services.stripeDesc", connected: true, icon: CreditCard },
   { id: "google", nameKey: "admin:settings.integrations.services.google", descKey: "admin:settings.integrations.services.googleDesc", connected: true, icon: Globe },

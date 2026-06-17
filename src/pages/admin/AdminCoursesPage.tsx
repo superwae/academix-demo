@@ -21,6 +21,7 @@ import {
   FileText,
 } from "lucide-react";
 import { cn } from "../../lib/cn";
+import { formatMoney } from "../../lib/money";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import {
@@ -345,7 +346,7 @@ export function AdminCoursesPage() {
             id: 'price',
             header: t('admin:courses.table.price'),
             cell: (course) => (
-              <span>{course.price != null ? `$${course.price.toFixed(2)}` : t('admin:courses.free')}</span>
+              <span>{course.price != null ? formatMoney(course.price) : t('admin:courses.free')}</span>
             ),
           },
           {

@@ -86,7 +86,7 @@ public class DiscountService : IDiscountService
             StartsAt = request.StartsAt,
             ExpiresAt = request.ExpiresAt,
             MaxUses = request.MaxUses,
-            IsActive = true,
+            IsActive = request.IsActive ?? true,
             CreatedBy = instructorId
         };
 

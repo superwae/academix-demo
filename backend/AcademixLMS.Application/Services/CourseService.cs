@@ -551,6 +551,12 @@ public class CourseService : ICourseService
         // Update tags
         if (request.Tags != null)
         {
+            var requestedTagNames = request.Tags
+                .Where(tagName => !string.IsNullOrWhiteSpace(tagName))
+                .Select(tagName => tagName.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
             // Remove existing tags
             var existingCourseTags = course.CourseTags.Where(ct => !ct.IsDeleted).ToList();
             foreach (var courseTag in existingCourseTags)
@@ -559,8 +565,13 @@ public class CourseService : ICourseService
                 courseTag.DeletedAt = DateTime.UtcNow;
             }
 
-            // Add new tags
-            foreach (var tagName in request.Tags.Distinct())
+            var allCourseTags = await _context.CourseTags
+                .IgnoreQueryFilters()
+                .Where(ct => ct.CourseId == course.Id)
+                .ToListAsync(cancellationToken);
+
+            // Add or restore requested tags
+            foreach (var tagName in requestedTagNames)
             {
                 var tag = await _context.Tags
                     .FirstOrDefaultAsync(t => t.Name == tagName && !t.IsDeleted, cancellationToken);
@@ -572,12 +583,24 @@ public class CourseService : ICourseService
                     await _context.SaveChangesAsync(cancellationToken);
                 }
 
-                var courseTag = new CourseTag
+                var existingLink = allCourseTags.FirstOrDefault(ct => ct.TagId == tag.Id);
+                if (existingLink != null)
                 {
-                    CourseId = course.Id,
-                    TagId = tag.Id
-                };
-                _context.CourseTags.Add(courseTag);
+                    existingLink.IsDeleted = false;
+                    existingLink.DeletedAt = null;
+                    existingLink.DeletedBy = null;
+                    existingLink.UpdatedAt = DateTime.UtcNow;
+                }
+                else
+                {
+                    var courseTag = new CourseTag
+                    {
+                        CourseId = course.Id,
+                        TagId = tag.Id
+                    };
+                    _context.CourseTags.Add(courseTag);
+                    allCourseTags.Add(courseTag);
+                }
             }
         }
 
@@ -832,13 +855,16 @@ public class CourseService : ICourseService
             return Result.Failure($"Section capacity cannot be lower than the {currentEnrollments} active enrollments already in this section.");
         }
 
-        var capacityPlan = await GetCapacityPlanAsync(course.InstructorId, course.OrganizationId, cancellationToken);
-        var existingCourseSeats = await GetCourseSeatTotalAsync(courseId, cancellationToken);
         var seatDelta = request.MaxSeats - section.MaxSeats;
-        var capacityError = ValidateSeatCapacity(capacityPlan, existingCourseSeats + seatDelta, seatDelta);
-        if (capacityError is not null)
+        if (seatDelta > 0)
         {
-            return Result.Failure(capacityError);
+            var capacityPlan = await GetCapacityPlanAsync(course.InstructorId, course.OrganizationId, cancellationToken);
+            var existingCourseSeats = await GetCourseSeatTotalAsync(courseId, cancellationToken);
+            var capacityError = ValidateSeatCapacity(capacityPlan, existingCourseSeats + seatDelta, seatDelta);
+            if (capacityError is not null)
+            {
+                return Result.Failure(capacityError);
+            }
         }
 
         var proposedSlots = ParseMeetingSlots(request.MeetingTimes);

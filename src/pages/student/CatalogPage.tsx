@@ -2,7 +2,6 @@ import { useMemo, useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
-import { useAppStore } from '../../store/useAppStore'
 import { useAuthStore } from '../../store/useAuthStore'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../../components/ui/card'
 import { Input } from '../../components/ui/input'
@@ -16,6 +15,7 @@ import { toast } from 'sonner'
 import { X, Search, Filter, Calendar, MapPin, Video, BookOpen, Globe, AlertCircle } from 'lucide-react'
 import { cn } from '../../lib/cn'
 import { localizeLevel, localizeModality } from '../../lib/enumLocalization'
+import { formatMoney } from '../../lib/money'
 
 type Filters = {
   category: string | 'All'
@@ -27,10 +27,8 @@ type Filters = {
 export function CatalogPage() {
   const { t } = useTranslation(['student', 'common', 'errors'])
   const navigate = useNavigate()
-  const { enrolled } = useAppStore((s) => s.data)
   const { isAuthenticated } = useAuthStore()
   const [myEnrollments, setMyEnrollments] = useState<{ courseId: string; sectionId: string }[]>([])
-  const [loadingEnrollments, setLoadingEnrollments] = useState(false)
   const searchInputRef = useRef<HTMLInputElement>(null)
 
   const [courses, setCourses] = useState<CourseDto[]>([])
@@ -75,7 +73,6 @@ export function CatalogPage() {
     }
 
     try {
-      setLoadingEnrollments(true)
       const result = await enrollmentService.getMyEnrollments({ pageSize: 100 })
       // Only include Active or Completed enrollments
       const activeEnrollments = result.items
@@ -86,8 +83,6 @@ export function CatalogPage() {
       console.error('Failed to load enrollments:', error)
       // Don't show error toast - just use empty array
       setMyEnrollments([])
-    } finally {
-      setLoadingEnrollments(false)
     }
   }
 
@@ -271,10 +266,6 @@ export function CatalogPage() {
       toast.success(t('student:catalog.enrolledSuccess'), {
         description: `${openCourse.title} • ${selectedSection.name}`,
       })
-      
-      // Update local enrolled state (for UI consistency)
-      const enroll = useAppStore.getState().enroll
-      enroll(openCourse.id, selectedSectionId)
       
       // Update my enrollments from API response
       setMyEnrollments(prev => [...prev, { courseId: openCourse.id, sectionId: selectedSectionId }])
@@ -537,7 +528,7 @@ export function CatalogPage() {
                   <div className="flex items-center justify-between w-full">
                     <div className="text-xs text-muted-foreground">⭐ {c.rating.toFixed(1)}</div>
                     <div className="text-sm font-semibold">
-                      {c.price ? `$${c.price.toFixed(2)}` : <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-500/30">{t('student:catalog.free')}</Badge>}
+                      {c.price ? formatMoney(c.price) : <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-500/30">{t('student:catalog.free')}</Badge>}
                     </div>
                   </div>
                   <div className="flex gap-2 w-full">
@@ -748,17 +739,6 @@ const DAY_FULL: Record<string, string> = {
   Thu: 'Thursday', Fri: 'Friday', Sat: 'Saturday',
   Sunday: 'Sunday', Monday: 'Monday', Tuesday: 'Tuesday', Wednesday: 'Wednesday',
   Thursday: 'Thursday', Friday: 'Friday', Saturday: 'Saturday',
-}
-
-function formatMeetingTimes(times: any[]) {
-  if (!times || times.length === 0) return 'No scheduled meetings'
-  return times
-    .map((t) => {
-      const startMin = t.startMinutes ?? t.startMin ?? 0
-      const endMin = t.endMinutes ?? t.endMin ?? 0
-      return `${t.day} ${minToTime(startMin)}–${minToTime(endMin)}`
-    })
-    .join(', ')
 }
 
 function formatMeetingTimesForDisplay(times: any[]) {

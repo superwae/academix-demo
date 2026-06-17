@@ -37,6 +37,19 @@ export const useAuthStore = create<AuthState>()(
           const isAuthenticated = !!user && (!!accessToken || !!refreshToken);
 
           set({ user, isAuthenticated, isLoading: false });
+          if (isAuthenticated) {
+            void import('../services/userService')
+              .then(({ userService }) => userService.getMe())
+              .then((freshUser) => {
+                get().updateUser(freshUser);
+                void import('../theme/syncUserUiPreferences').then((m) =>
+                  m.applyServerUiPreferencesToStore(freshUser.uiPreferences ?? null)
+                );
+              })
+              .catch(() => {
+                // Keep the cached session; token refresh/logout flow handles invalid credentials.
+              });
+          }
         } catch (error) {
           console.error('Error initializing auth:', error);
           set({ user: null, isAuthenticated: false, isLoading: false });

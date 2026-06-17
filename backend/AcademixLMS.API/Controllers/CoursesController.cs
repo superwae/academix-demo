@@ -187,9 +187,7 @@ public class CoursesController : ControllerBase
         
         if (!result.IsSuccess || result.Value == null)
         {
-            if (result.Error.Contains("own"))
-                return Forbid(result.Error);
-            return NotFound(result.Error);
+            return CourseMutationFailure(result.Error);
         }
 
         return Ok(result.Value);
@@ -212,11 +210,7 @@ public class CoursesController : ControllerBase
 
         if (!result.IsSuccess)
         {
-            if (result.Error.Contains("not found"))
-                return NotFound(result.Error);
-            if (result.Error.Contains("own"))
-                return Forbid();
-            return BadRequest(result.Error);
+            return CourseMutationFailure(result.Error);
         }
 
         return Ok(new { message = "Course published successfully." });
@@ -239,11 +233,7 @@ public class CoursesController : ControllerBase
 
         if (!result.IsSuccess)
         {
-            if (result.Error.Contains("not found"))
-                return NotFound(result.Error);
-            if (result.Error.Contains("own"))
-                return Forbid();
-            return BadRequest(result.Error);
+            return CourseMutationFailure(result.Error);
         }
 
         return Ok(new { message = "Course archived successfully." });
@@ -266,11 +256,7 @@ public class CoursesController : ControllerBase
 
         if (!result.IsSuccess)
         {
-            if (result.Error.Contains("not found"))
-                return NotFound(result.Error);
-            if (result.Error.Contains("own"))
-                return Forbid();
-            return BadRequest(result.Error);
+            return CourseMutationFailure(result.Error);
         }
 
         return NoContent();
@@ -304,9 +290,7 @@ public class CoursesController : ControllerBase
 
         if (!result.IsSuccess || result.Value == null)
         {
-            if (result.Error.Contains("not found"))
-                return NotFound(result.Error);
-            return BadRequest(result.Error);
+            return CourseMutationFailure(result.Error);
         }
 
         return CreatedAtAction(nameof(GetCourse), new { id = result.Value.Id }, result.Value);
@@ -318,6 +302,7 @@ public class CoursesController : ControllerBase
     [HttpPost("{id}/sections")]
     [Authorize(Policy = "RequireInstructor")]
     [ProducesResponseType(typeof(CourseSectionDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> AddSection(Guid id, [FromBody] CreateSectionRequest request, CancellationToken cancellationToken)
@@ -329,9 +314,7 @@ public class CoursesController : ControllerBase
         
         if (!result.IsSuccess || result.Value == null)
         {
-            if (result.Error.Contains("own"))
-                return Forbid(result.Error);
-            return NotFound(result.Error);
+            return CourseMutationFailure(result.Error);
         }
 
         return CreatedAtAction(nameof(GetCourse), new { id }, result.Value);
@@ -343,6 +326,7 @@ public class CoursesController : ControllerBase
     [HttpPut("{id}/sections/{sectionId}")]
     [Authorize(Policy = "RequireInstructor")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateSection(Guid id, Guid sectionId, [FromBody] CreateSectionRequest request, CancellationToken cancellationToken)
@@ -354,9 +338,7 @@ public class CoursesController : ControllerBase
         
         if (!result.IsSuccess)
         {
-            if (result.Error.Contains("own"))
-                return Forbid(result.Error);
-            return NotFound(result.Error);
+            return CourseMutationFailure(result.Error);
         }
 
         return Ok(new { message = "Section updated successfully." });
@@ -379,11 +361,22 @@ public class CoursesController : ControllerBase
         
         if (!result.IsSuccess)
         {
-            if (result.Error.Contains("own"))
-                return Forbid(result.Error);
-            return NotFound(result.Error);
+            return CourseMutationFailure(result.Error);
         }
 
         return NoContent();
+    }
+
+    private IActionResult CourseMutationFailure(string? error)
+    {
+        var message = string.IsNullOrWhiteSpace(error) ? "The course operation could not be completed." : error;
+
+        if (message.Contains("own", StringComparison.OrdinalIgnoreCase))
+            return Forbid(message);
+
+        if (message.Contains("not found", StringComparison.OrdinalIgnoreCase))
+            return NotFound(message);
+
+        return BadRequest(message);
     }
 }

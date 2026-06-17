@@ -24,6 +24,7 @@ import {
   FileText,
   Upload,
   Star,
+  FolderPlus,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
@@ -34,8 +35,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../components/ui/select'
-import { courseService, type CourseDto, type CourseSectionDto } from '../../services/courseService'
-import { lessonService, type LessonDto } from '../../services/lessonService'
+import { courseService, type CourseDto } from '../../services/courseService'
+import { lessonService, type CourseSectionDto, type LessonDto } from '../../services/lessonService'
 import { courseExtrasService, type CourseMaterialDto, type LessonRatingSummaryDto, type MeetingTimeRatingSummaryDto } from '../../services/courseExtrasService'
 import { fileService } from '../../services/fileService'
 import { formatMeetingSlot } from '../../lib/meetingTimeFormat'
@@ -51,7 +52,8 @@ export function CourseLessonsManagementPage() {
   const [lessons, setLessons] = useState<LessonDto[]>([])
   const [selectedSection, setSelectedSection] = useState<string>('')
   const [editingLesson, setEditingLesson] = useState<LessonDto | null>(null)
-  const [showAddForm, setShowAddForm] = useState(false)
+  const [showAddSectionDialog, setShowAddSectionDialog] = useState(false)
+  const [newSectionName, setNewSectionName] = useState('')
   const [loading, setLoading] = useState(false)
   const [loadingCourse, setLoadingCourse] = useState(true)
   const [materials, setMaterials] = useState<CourseMaterialDto[]>([])
@@ -77,35 +79,22 @@ export function CourseLessonsManagementPage() {
         setLoadingCourse(true)
         const courseData = await courseService.getCourseById(id)
         setCourse(courseData)
-        setSections(courseData.sections || [])
 
-        const [courseLessonsFlat, mats, lr, mr] = await Promise.all([
+        const [lessonSections, courseLessonsFlat, mats, lr, mr] = await Promise.all([
+          lessonService.getCourseSections(id).catch(() => [] as CourseSectionDto[]),
           lessonService.getCourseLessons(id).catch(() => [] as LessonDto[]),
           courseExtrasService.getMaterials(id).catch(() => [] as CourseMaterialDto[]),
           courseExtrasService.getLessonRatingSummaries(id).catch(() => [] as LessonRatingSummaryDto[]),
           courseExtrasService.getMeetingTimeRatingSummaries(id).catch(() => [] as MeetingTimeRatingSummaryDto[]),
         ])
+        const sortedSections = [...lessonSections].sort((a, b) => a.order - b.order)
+        setSections(sortedSections)
         setAllCourseLessons([...courseLessonsFlat].sort((a, b) => a.order - b.order))
         setMaterials(mats)
         setLessonRatingSummaries(lr)
         setMeetingRatingSummaries(mr)
-        
-        // Load lessons for all sections
-        if (courseData.sections && courseData.sections.length > 0) {
-          const allLessons: LessonDto[] = []
-          for (const section of courseData.sections) {
-            try {
-              const sectionLessons = await lessonService.getSectionLessons(section.id)
-              allLessons.push(...sectionLessons)
-            } catch (error) {
-              console.error(`Failed to load lessons for section ${section.id}:`, error)
-            }
-          }
-          setLessons(allLessons)
-          if (courseData.sections.length > 0) {
-            setSelectedSection(courseData.sections[0].id)
-          }
-        }
+        setLessons([])
+        setSelectedSection(sortedSections[0]?.id ?? '')
       } catch (error) {
         toast.error(t('teacher:courseLessonsManagement.errors.loadFailed'), {
           description: error instanceof Error ? error.message : t('teacher:shared.tryAgainLater'),
@@ -218,8 +207,8 @@ export function CourseLessonsManagementPage() {
       })
       toast.success(t('teacher:courseLessonsManagement.toasts.lessonCreated'))
       await loadLessons(selectedSection)
+      setAllCourseLessons((prev) => [...prev, newLesson].sort((a, b) => a.order - b.order))
       setEditingLesson(newLesson)
-      setShowAddForm(false)
     } catch (error) {
       toast.error(t('teacher:courseLessonsManagement.errors.createFailed'), {
         description: error instanceof Error ? error.message : t('teacher:shared.tryAgainLater'),
@@ -243,6 +232,11 @@ export function CourseLessonsManagementPage() {
         isPreview: editingLesson.isPreview,
       })
       toast.success(t('teacher:courseLessonsManagement.toasts.lessonUpdated'))
+      setAllCourseLessons((prev) =>
+        prev
+          .map((lesson) => lesson.id === editingLesson.id ? { ...lesson, ...editingLesson } : lesson)
+          .sort((a, b) => a.order - b.order)
+      )
       setEditingLesson(null)
       await loadLessons(selectedSection)
     } catch (error) {
@@ -259,9 +253,41 @@ export function CourseLessonsManagementPage() {
       setLoading(true)
       await lessonService.deleteLesson(lessonId)
       toast.success(t('teacher:courseLessonsManagement.toasts.lessonDeleted'))
+      setAllCourseLessons((prev) => prev.filter((lesson) => lesson.id !== lessonId))
       await loadLessons(selectedSection)
     } catch (error) {
       toast.error(t('teacher:courseLessonsManagement.errors.deleteLessonFailed'), {
+        description: error instanceof Error ? error.message : t('teacher:shared.tryAgainLater'),
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleCreateSection = async () => {
+    if (!id) return
+
+    if (!newSectionName.trim()) {
+      toast.error(t('teacher:lessonsContent.errors.enterSectionName'))
+      return
+    }
+
+    try {
+      setLoading(true)
+      const newSection = await lessonService.createSection({
+        courseId: id,
+        title: newSectionName.trim(),
+        order: sections.length + 1,
+      })
+      const nextSections = [...sections, newSection].sort((a, b) => a.order - b.order)
+      setSections(nextSections)
+      setSelectedSection(newSection.id)
+      setLessons([])
+      setShowAddSectionDialog(false)
+      setNewSectionName('')
+      toast.success(t('teacher:teacherMyCourses.toasts.sectionCreated'))
+    } catch (error) {
+      toast.error(t('teacher:lessonsContent.errors.sectionCreateFailed'), {
         description: error instanceof Error ? error.message : t('teacher:shared.tryAgainLater'),
       })
     } finally {
@@ -311,7 +337,7 @@ export function CourseLessonsManagementPage() {
     )
   }
 
-  const filteredLessons = lessons.filter(l => l.sectionId === selectedSection)
+  const filteredLessons = lessons.filter(l => !selectedSection || l.sectionId === selectedSection)
 
   return (
     <motion.div
@@ -330,10 +356,24 @@ export function CourseLessonsManagementPage() {
             <p className="mt-1 truncate text-sm text-muted-foreground">{course.title}</p>
           </div>
         </div>
-        <Button className="w-full sm:w-auto" onClick={handleAddLesson} disabled={!selectedSection || loading}>
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+          <Button
+            variant="outline"
+            className="w-full sm:w-auto"
+            onClick={() => {
+              setNewSectionName('')
+              setShowAddSectionDialog(true)
+            }}
+            disabled={loading}
+          >
+            <FolderPlus className="h-4 w-4 me-2" />
+            {t('teacher:teacherMyCourses.addSection')}
+          </Button>
+          <Button className="w-full sm:w-auto" onClick={handleAddLesson} disabled={!selectedSection || loading}>
           <PlusCircle className="h-4 w-4 me-2" />
           {t('teacher:courseLessonsManagement.addLesson')}
-        </Button>
+          </Button>
+        </div>
       </div>
 
       <Card>
@@ -477,39 +517,65 @@ export function CourseLessonsManagementPage() {
       </Card>
 
       {/* Section Selector */}
-      {sections.length > 0 && (
-        <Card>
-          <CardContent className="pt-4">
-            <div className="space-y-1.5">
+      <Card>
+        <CardContent className="pt-4">
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between gap-3">
               <label className="text-sm font-medium">{t('teacher:courseLessonsManagement.section')}</label>
-              <SelectRoot value={selectedSection} onValueChange={setSelectedSection}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {sections.map((section) => (
-                    <SelectItem key={section.id} value={section.id}>
-                      {section.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </SelectRoot>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setNewSectionName('')
+                  setShowAddSectionDialog(true)
+                }}
+                disabled={loading}
+                className="h-7 px-2 text-xs"
+              >
+                <FolderPlus className="h-3 w-3 me-1" />
+                {t('teacher:teacherMyCourses.addSection')}
+              </Button>
             </div>
-          </CardContent>
-        </Card>
-      )}
+            <SelectRoot value={selectedSection} onValueChange={setSelectedSection} disabled={sections.length === 0}>
+              <SelectTrigger>
+                <SelectValue placeholder={t('teacher:lessonsContent.selectSection')} />
+              </SelectTrigger>
+              <SelectContent>
+                {sections.map((section) => (
+                  <SelectItem key={section.id} value={section.id}>
+                    {section.title}
+                  </SelectItem>
+                ))}
+                {sections.length === 0 && (
+                  <div className="px-3 py-2 text-sm text-muted-foreground">
+                    {t('teacher:lessonsContent.noSectionsYet')}
+                  </div>
+                )}
+              </SelectContent>
+            </SelectRoot>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Lessons List */}
       <Card>
         <CardHeader className="pb-2 pt-4">
           <CardTitle className="text-lg">{t('teacher:courseLessonsManagement.lessons')}</CardTitle>
           <CardDescription className="text-xs mt-0.5">
-            {t('teacher:courseLessonsManagement.lessonCountInSection', { count: filteredLessons.length })}
+            {selectedSection
+              ? t('teacher:courseLessonsManagement.lessonCountInSection', { count: filteredLessons.length })
+              : t('teacher:lessonsContent.selectSection')}
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-2">
           {loading ? (
             <div className="text-center py-8 text-muted-foreground">{t('teacher:courseLessonsManagement.loadingLessons')}</div>
+          ) : !selectedSection ? (
+            <div className="text-center py-8 text-muted-foreground">
+              {sections.length === 0
+                ? t('teacher:lessonsContent.noSectionsYet')
+                : t('teacher:lessonsContent.selectSection')}
+            </div>
           ) : filteredLessons.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               {t('teacher:courseLessonsManagement.noLessonsInSection')}
@@ -686,6 +752,41 @@ export function CourseLessonsManagementPage() {
           if (deleteLessonId) return handleDeleteLesson(deleteLessonId)
         }}
       />
+
+      <Dialog open={showAddSectionDialog} onOpenChange={setShowAddSectionDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('teacher:lessonsContent.addNewSection')}</DialogTitle>
+            <DialogDescription>
+              {t('teacher:lessonsContent.addNewSectionDescription')}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium">{t('teacher:lessonsContent.sectionName')}</label>
+              <Input
+                value={newSectionName}
+                onChange={(e) => setNewSectionName(e.target.value)}
+                placeholder={t('teacher:lessonsContent.enterSectionName')}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault()
+                    handleCreateSection()
+                  }
+                }}
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowAddSectionDialog(false)}>
+                {t('common:cancel')}
+              </Button>
+              <Button onClick={handleCreateSection} disabled={loading}>
+                {loading ? t('common:creating') : t('teacher:teacherMyCourses.createSection')}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   )
 }

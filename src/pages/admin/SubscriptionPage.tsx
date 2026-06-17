@@ -61,7 +61,7 @@ export function SubscriptionPage() {
         billingInterval,
       });
       if (result.demoCompleted) {
-        // Demo gateway: subscription already activated server-side, no redirect
+        // Local instant gateway: subscription already activated server-side, no redirect.
         toast.success(t('admin:subscription.toasts.demoActivated'), {
           description: t('admin:subscription.toasts.demoActivatedDescription'),
         });

@@ -100,6 +100,17 @@ class EnrollmentService {
       throw new Error(errorMessage);
     }
   }
+
+  /** Move an active enrollment to a different section of the same course. */
+  async switchSection(enrollmentId: string, sectionId: string): Promise<EnrollmentDto> {
+    try {
+      return await apiClient.post<EnrollmentDto>(`/enrollments/${enrollmentId}/switch-section`, { sectionId });
+    } catch (error) {
+      const apiError = error as ApiError;
+      const errorMessage = apiError.error || apiError.detail || apiError.title || 'Failed to switch section';
+      throw new Error(errorMessage);
+    }
+  }
 }
 
 export const enrollmentService = new EnrollmentService();

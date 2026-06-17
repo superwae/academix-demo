@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 namespace AcademixLMS.Infrastructure.Data;
 
 /// <summary>
-/// Ensures core roles and optional local demo logins (Development only). Idempotent.
+/// Ensures core roles and optional local development logins (Development only). Idempotent.
 /// </summary>
 public static class DevAccountsSeeder
 {
@@ -13,14 +13,14 @@ public static class DevAccountsSeeder
 
     private static readonly (string Email, string FirstName, string LastName, string RoleName)[] Accounts =
     [
-        ("student@academix.com", "Student", "Demo", "Student"),
-        ("student01@academix.com", "Student01", "Demo", "Student"),
-        ("student02@academix.com", "Student02", "Demo", "Student"),
-        ("student03@academix.com", "Student03", "Demo", "Student"),
-        ("teacher@academix.com", "Teacher", "Demo", "Instructor"),
-        ("admin@academix.com", "Admin", "Demo", "Admin"),
-        ("accountant@academix.com", "Accountant", "Demo", "Accountant"),
-        ("secretary@academix.com", "Secretary", "Demo", "Secretary")
+        ("student@academix.com", "Amina", "Hassan", "Student"),
+        ("student01@academix.com", "Noor", "Khaled", "Student"),
+        ("student02@academix.com", "Yara", "Mansour", "Student"),
+        ("student03@academix.com", "Adam", "Saleh", "Student"),
+        ("teacher@academix.com", "Leila", "Nasser", "Instructor"),
+        ("admin@academix.com", "Maya", "Rahman", "Admin"),
+        ("accountant@academix.com", "Omar", "Farid", "Accountant"),
+        ("secretary@academix.com", "Rana", "Khalil", "Secretary")
     ];
 
     public static async Task EnsureDefaultAccountsAsync(
@@ -54,8 +54,18 @@ public static class DevAccountsSeeder
         foreach (var (email, firstName, lastName, roleName) in Accounts)
         {
             var normalized = email.Trim().ToLowerInvariant();
-            if (await context.Users.AnyAsync(u => u.Email.ToLower() == normalized && !u.IsDeleted, cancellationToken))
+            var existingUser = await context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == normalized && !u.IsDeleted, cancellationToken);
+            if (existingUser is not null)
+            {
+                if (existingUser.FirstName != firstName || existingUser.LastName != lastName)
+                {
+                    existingUser.FirstName = firstName;
+                    existingUser.LastName = lastName;
+                    existingUser.UpdatedAt = DateTime.UtcNow;
+                    await context.SaveChangesAsync(cancellationToken);
+                }
                 continue;
+            }
 
             if (!rolesByName.TryGetValue(roleName, out var role))
             {

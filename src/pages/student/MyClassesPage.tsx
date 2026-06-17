@@ -6,7 +6,7 @@ import { Badge } from '../../components/ui/badge'
 import { Button } from '../../components/ui/button'
 import { enrollmentService, type EnrollmentDto } from '../../services/enrollmentService'
 import { courseService, type CourseDto } from '../../services/courseService'
-import { GraduationCap, BookOpen, Clock, MapPin, Calendar, TrendingUp, Award, BookMarked, Building2 } from 'lucide-react'
+import { GraduationCap, BookOpen, Clock, MapPin, Calendar, TrendingUp, Award, BookMarked, Building2, Video } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
@@ -118,6 +118,14 @@ function EnrollmentCard({ enrollment }: { enrollment: EnrollmentWithCourse }) {
           </div>
 
           <div className="flex flex-col gap-2 pt-2">
+            {section?.joinUrl && (
+              <Button variant="secondary" size="sm" asChild className="w-full">
+                <a href={section.joinUrl} target="_blank" rel="noopener noreferrer">
+                  <Video className="me-2 h-4 w-4" />
+                  {t('student:myClasses.joinOnlineSession')}
+                </a>
+              </Button>
+            )}
             {course && (
               <Button variant="outline" size="sm" asChild className="w-full">
                 <Link to={`/courses/${course.id}`}>{t('student:shared.viewCourse')}</Link>

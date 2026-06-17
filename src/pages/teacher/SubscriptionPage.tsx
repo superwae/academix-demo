@@ -61,7 +61,7 @@ export function TeacherSubscriptionPage() {
         billingInterval,
       });
       if (result.demoCompleted) {
-        // Demo gateway: subscription already activated server-side, no redirect
+        // Local instant gateway: subscription already activated server-side, no redirect.
         toast.success(t('teacher:subscription.toasts.demoActivated'), {
           description: t('teacher:subscription.toasts.demoActivatedDescription'),
         });

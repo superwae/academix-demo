@@ -7,41 +7,103 @@ import {
   Users,
   CheckCircle2,
   AlertCircle,
+  Loader2,
 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
 import { cn } from "../../lib/cn";
+import { secretaryService } from "../../services/secretaryService";
+import { conversationService } from "../../services/conversationService";
+import type { EnrollmentDto } from "../../services/enrollmentService";
+
+type DashboardData = {
+  enrollments: EnrollmentDto[];
+  totalEnrollments: number;
+  directoryCount: number;
+  unreadMessages: number;
+};
 
 export function SecretaryDashboardPage() {
   const { t } = useTranslation(["admin"]);
+  const [data, setData] = useState<DashboardData>({
+    enrollments: [],
+    totalEnrollments: 0,
+    directoryCount: 0,
+    unreadMessages: 0,
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const QUEUE = [
-    { title: t("admin:secretary.dashboard.queue.enrollmentRequests"), count: 6, tone: "default" as const },
-    { title: t("admin:secretary.dashboard.queue.documentFollowUps"), count: 3, tone: "amber" as const },
-    { title: t("admin:secretary.dashboard.queue.messagesAwaitingReply"), count: 2, tone: "default" as const },
-  ];
+  useEffect(() => {
+    let cancelled = false;
+    async function loadDashboard() {
+      try {
+        setLoading(true);
+        setError(null);
+        const [enrollments, directory, conversations] = await Promise.all([
+          secretaryService.getEnrollments({ pageSize: 100, sortBy: "enrolledAt", sortDescending: true }),
+          secretaryService.getDirectory({ pageSize: 1 }),
+          conversationService.getConversations().catch(() => []),
+        ]);
+        if (cancelled) return;
+        setData({
+          enrollments: enrollments.items || [],
+          totalEnrollments: enrollments.totalCount ?? enrollments.items?.length ?? 0,
+          directoryCount: directory.totalCount ?? directory.items?.length ?? 0,
+          unreadMessages: conversations.reduce((sum, c) => sum + (c.unreadCount || 0), 0),
+        });
+      } catch (err) {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : t("admin:secretary.dashboard.errors.loadFailed"));
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    void loadDashboard();
+    return () => {
+      cancelled = true;
+    };
+  }, [t]);
 
-  const TODAY = [
-    { time: "09:30", label: t("admin:secretary.dashboard.today.items.registrarSync") },
-    { time: "11:00", label: t("admin:secretary.dashboard.today.items.walkIn") },
-    { time: "14:15", label: t("admin:secretary.dashboard.today.items.certificateDispatch") },
+  const activeEnrollments = useMemo(
+    () => data.enrollments.filter((e) => e.status === "Active").length,
+    [data.enrollments]
+  );
+  const completedEnrollments = useMemo(
+    () => data.enrollments.filter((e) => e.status === "Completed").length,
+    [data.enrollments]
+  );
+  const latestActivity = useMemo(
+    () =>
+      [...data.enrollments]
+        .sort((a, b) => new Date(b.enrolledAt).getTime() - new Date(a.enrolledAt).getTime())
+        .slice(0, 5),
+    [data.enrollments]
+  );
+
+  const queue = [
+    { title: t("admin:secretary.dashboard.queue.enrollmentRequests"), count: data.totalEnrollments, tone: "default" as const },
+    { title: t("admin:secretary.dashboard.queue.directoryRecords"), count: data.directoryCount, tone: "amber" as const },
+    { title: t("admin:secretary.dashboard.queue.messagesAwaitingReply"), count: data.unreadMessages, tone: "default" as const },
   ];
 
   const serviceLevel = [
     {
-      label: t("admin:secretary.dashboard.serviceLevel.firstResponse"),
-      value: t("admin:secretary.dashboard.serviceLevel.firstResponseValue"),
+      label: t("admin:secretary.dashboard.serviceLevel.totalEnrollments"),
+      value: data.totalEnrollments.toLocaleString(),
       ok: true,
     },
     {
-      label: t("admin:secretary.dashboard.serviceLevel.slaBreaches"),
-      value: t("admin:secretary.dashboard.serviceLevel.slaBreachesValue"),
+      label: t("admin:secretary.dashboard.serviceLevel.activeEnrollments"),
+      value: activeEnrollments.toLocaleString(),
       ok: true,
     },
     {
-      label: t("admin:secretary.dashboard.serviceLevel.openTickets"),
-      value: t("admin:secretary.dashboard.serviceLevel.openTicketsValue"),
-      ok: false,
+      label: t("admin:secretary.dashboard.serviceLevel.completedEnrollments"),
+      value: completedEnrollments.toLocaleString(),
+      ok: completedEnrollments > 0,
     },
   ];
 
@@ -61,7 +123,7 @@ export function SecretaryDashboardPage() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        {QUEUE.map((q, i) => (
+        {queue.map((q, i) => (
           <motion.div
             key={q.title}
             initial={{ opacity: 0, y: 12 }}
@@ -76,18 +138,26 @@ export function SecretaryDashboardPage() {
             >
               <CardHeader className="pb-2">
                 <CardDescription>{q.title}</CardDescription>
-                <CardTitle className="text-4xl font-bold tabular-nums">{q.count}</CardTitle>
+                <CardTitle className="text-4xl font-bold tabular-nums">
+                  {loading ? <Loader2 className="h-8 w-8 animate-spin text-primary" /> : q.count.toLocaleString()}
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <Inbox className="h-3.5 w-3.5" />
-                  {t("admin:secretary.dashboard.queue.needsAttention")}
+                  {t("admin:secretary.dashboard.queue.liveData")}
                 </div>
               </CardContent>
             </Card>
           </motion.div>
         ))}
       </div>
+
+      {error && (
+        <Card className="border-destructive/40 bg-destructive/5">
+          <CardContent className="py-4 text-sm text-destructive">{error}</CardContent>
+        </Card>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card className="border-border/60">
@@ -99,15 +169,25 @@ export function SecretaryDashboardPage() {
             <CardDescription>{t("admin:secretary.dashboard.today.subtitle")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {TODAY.map((row) => (
+            {latestActivity.length === 0 && !loading ? (
+              <div className="rounded-xl border border-dashed border-border/60 px-4 py-6 text-center text-sm text-muted-foreground">
+                {t("admin:secretary.dashboard.today.empty")}
+              </div>
+            ) : latestActivity.map((row) => (
               <div
-                key={row.time + row.label}
+                key={row.id}
                 className="flex gap-4 rounded-xl border border-border/50 bg-muted/20 px-4 py-3"
               >
                 <span className="w-14 shrink-0 text-sm font-mono font-semibold text-primary">
-                  {row.time}
+                  {formatShortDate(row.enrolledAt)}
                 </span>
-                <p className="text-sm leading-snug">{row.label}</p>
+                <p className="text-sm leading-snug">
+                  {t("admin:secretary.dashboard.today.enrollmentLine", {
+                    learner: row.userName,
+                    course: row.courseTitle,
+                    section: row.sectionName,
+                  })}
+                </p>
               </div>
             ))}
           </CardContent>
@@ -177,4 +257,10 @@ export function SecretaryDashboardPage() {
       </div>
     </div>
   );
+}
+
+function formatShortDate(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }

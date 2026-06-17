@@ -4,6 +4,7 @@ export interface UserUiPreferences {
   theme: string;
   customThemeColor?: string | null;
   mixTheme?: string | null;
+  notificationsEnabled?: boolean | null;
 }
 
 export interface UserDto {
@@ -143,4 +144,3 @@ class UserService {
 }
 
 export const userService = new UserService();
-

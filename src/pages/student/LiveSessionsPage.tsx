@@ -39,6 +39,16 @@ const BADGE_STYLES: Record<string, string> = {
 
 type EnrolledPair = { courseId: string; sectionId: string }
 
+type AvailableJoinLink = {
+  courseId: string
+  courseTitle: string
+  sectionId: string
+  sectionName: string
+  locationLabel?: string
+  joinUrl: string
+  hasScheduledMeetings: boolean
+}
+
 export function LiveSessionsPage() {
   const { t } = useTranslation(['student', 'common', 'errors'])
   const [courses, setCourses] = useState<CourseDto[]>([])
@@ -103,6 +113,26 @@ export function LiveSessionsPage() {
   const liveNow = events.filter((e) => e.badge === 'live')
   const startingSoon = events.filter((e) => e.badge === 'soon')
   const totalThisWeek = events.length
+
+  const availableJoinLinks = useMemo<AvailableJoinLink[]>(() => {
+    const enrolledSet = new Set(enrollmentPairs.map((p) => `${p.courseId}::${p.sectionId}`))
+    return courses.flatMap((course) =>
+      course.sections
+        .filter((section) => enrolledSet.has(`${course.id}::${section.id}`))
+        .map((section) => ({
+          courseId: course.id,
+          courseTitle: course.title,
+          sectionId: section.id,
+          sectionName: section.name,
+          locationLabel: section.locationLabel,
+          joinUrl: section.joinUrl?.trim() ?? '',
+          hasScheduledMeetings: (section.meetingTimes?.length ?? 0) > 0,
+        }))
+        .filter((link) => link.joinUrl.length > 0),
+    )
+  }, [courses, enrollmentPairs])
+
+  const unscheduledJoinLinks = availableJoinLinks.filter((link) => !link.hasScheduledMeetings)
 
   return (
     <motion.div
@@ -203,6 +233,55 @@ export function LiveSessionsPage() {
         </Card>
       </div>
 
+      {unscheduledJoinLinks.length > 0 && (
+        <Card className="border-primary/20 bg-primary/[0.03]">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Video className="h-4 w-4 text-primary" />
+              {t('student:liveClasses.availableLinksTitle')}
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              {t('student:liveClasses.availableLinksSubtitle')}
+            </p>
+          </CardHeader>
+          <CardContent className="grid gap-2 md:grid-cols-2">
+            {unscheduledJoinLinks.map((link) => (
+              <div
+                key={`${link.courseId}:${link.sectionId}`}
+                className="flex flex-col gap-3 rounded-lg border border-border/70 bg-background p-3 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div className="min-w-0">
+                  <Link
+                    to={`/courses/${link.courseId}`}
+                    className="font-semibold text-sm hover:text-primary hover:underline"
+                  >
+                    {link.courseTitle}
+                  </Link>
+                  <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <GraduationCap className="h-3 w-3" />
+                      {link.sectionName}
+                    </span>
+                    {link.locationLabel && (
+                      <span className="flex items-center gap-1">
+                        <MapPin className="h-3 w-3" />
+                        {link.locationLabel}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <Button size="sm" asChild>
+                  <a href={link.joinUrl} target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="me-1.5 h-3.5 w-3.5" />
+                    {t('student:shared.viewLink')}
+                  </a>
+                </Button>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Week range */}
       <div className="flex items-center justify-between text-sm">
         <span className="font-medium">
@@ -222,10 +301,16 @@ export function LiveSessionsPage() {
         <Card>
           <CardContent className="py-16 text-center">
             <Video className="mx-auto h-12 w-12 text-muted-foreground/50" />
-            <h2 className="mt-4 text-lg font-semibold">{t('student:liveClasses.noClassesThisWeek')}</h2>
+            <h2 className="mt-4 text-lg font-semibold">
+              {unscheduledJoinLinks.length > 0
+                ? t('student:liveClasses.noScheduledClassesThisWeek')
+                : t('student:liveClasses.noClassesThisWeek')}
+            </h2>
             <p className="mt-1 text-sm text-muted-foreground">
               {enrollmentPairs.length === 0
                 ? t('student:liveClasses.notEnrolled')
+                : unscheduledJoinLinks.length > 0
+                ? t('student:liveClasses.useAvailableLinks')
                 : t('student:liveClasses.noSessionsThisWeek')}
             </p>
             <Button asChild className="mt-4">

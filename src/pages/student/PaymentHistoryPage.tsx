@@ -10,6 +10,7 @@ import { cn } from "../../lib/cn";
 import { toast } from "sonner";
 import { paymentService, type PaymentDto } from "../../services/paymentService";
 import { ResponsiveTable, type ResponsiveTableColumn } from "../../components/ui/responsive-table";
+import { formatMoney } from "../../lib/money";
 
 export function PaymentHistoryPage() {
   const { t } = useTranslation(['student', 'common', 'errors']);
@@ -92,7 +93,7 @@ export function PaymentHistoryPage() {
               header: t('student:payments.columnAmount'),
               cell: (payment) => (
                 <span className="text-sm font-medium">
-                  {payment.currency} {payment.amount.toFixed(2)}
+                  {formatMoney(payment.amount / 100, payment.currency || 'ILS')}
                 </span>
               ),
             },

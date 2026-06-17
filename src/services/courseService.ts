@@ -230,15 +230,24 @@ class CourseService {
     }
   }
 
-  async publishCourse(courseId: string): Promise<CourseDto> {
+  async publishCourse(courseId: string): Promise<void> {
     try {
-      const response = await apiClient.put<CourseDto>(`/courses/${courseId}`, {
-        status: 'Published',
-      });
-      return response;
+      // Must go through the dedicated publish endpoint — it runs publish validation
+      // and is the only path allowed to change status (PUT strips status for non-admins).
+      await apiClient.post(`/courses/${courseId}/publish`);
     } catch (error) {
       const apiError = error as ApiError;
       const errorMessage = apiError.error || apiError.detail || apiError.title || 'Failed to publish course';
+      throw new Error(errorMessage);
+    }
+  }
+
+  async archiveCourse(courseId: string): Promise<void> {
+    try {
+      await apiClient.post(`/courses/${courseId}/archive`);
+    } catch (error) {
+      const apiError = error as ApiError;
+      const errorMessage = apiError.error || apiError.detail || apiError.title || 'Failed to archive course';
       throw new Error(errorMessage);
     }
   }

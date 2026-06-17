@@ -65,6 +65,9 @@ public interface IApplicationDbContext
     DbSet<SupportTicket> SupportTickets { get; }
     DbSet<SupportTicketReply> SupportTicketReplies { get; }
 
+    // Platform audit
+    DbSet<AuditLog> AuditLogs { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     int SaveChanges();
 }

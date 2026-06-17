@@ -312,10 +312,10 @@
       "usersExported": "Users exported",
       "atRiskExported": "At-risk students exported",
       "csvDownloaded": "CSV file downloaded.",
-      "comingSoon": "Export coming soon",
-      "comingSoonDesc": "CSV export for {{report}} will be available shortly.",
+      "comingSoon": "Export requested",
+      "comingSoonDesc": "CSV export for {{report}} is being prepared.",
       "exportAs": "Export as {{format}}",
-      "exportAsDesc": "Coming soon.",
+      "exportAsDesc": "The file is generated from the current report data.",
       "exportFailed": "Export failed",
       "exportFailedDesc": "Please try again."
     },
@@ -663,7 +663,7 @@
     "toasts": {
       "cancelled": "Subscription cancelled",
       "demoActivated": "Subscription activated!",
-      "demoActivatedDescription": "Demo payment recorded — the plan is now active."
+      "demoActivatedDescription": "Payment recorded — the plan is now active."
     },
     "errors": {
       "loadFailed": "Failed to load subscription data",
@@ -1104,15 +1104,20 @@
     "dashboard": {
       "title": "Finance workspace",
       "subtitle": "High-level cash position, settlement health, and what needs your attention today.",
+      "loading": "Loading...",
       "kpi": {
         "netRevenue": "Net revenue (MTD)",
-        "netRevenueDelta": "+12.4%",
+        "netRevenueDelta": "No prior-month revenue yet",
+        "netRevenueDeltaLive": "{{amount}} last month",
         "pendingPayouts": "Pending payouts",
-        "pendingPayoutsDelta": "4 batches",
+        "pendingPayoutsDelta": "No pending batches",
+        "pendingPayoutsDeltaLive": "{{count}} batches",
         "invoicesDue": "Invoices due",
-        "invoicesDueDelta": "This week",
+        "invoicesDueDelta": "No open invoices",
+        "invoicesDueDeltaLive": "{{count}} open",
         "reconciliation": "Reconciliation",
-        "reconciliationDelta": "Matched"
+        "reconciliationDelta": "No payment records yet",
+        "reconciliationDeltaLive": "{{completed}} completed / {{total}} total"
       },
       "pipeline": {
         "title": "Settlement pipeline",
@@ -1126,10 +1131,10 @@
         "title": "Compliance checklist",
         "subtitle": "Recurring controls for this period",
         "items": {
-          "vatExport": "VAT export locked for Q1",
-          "payoutRates": "Instructor payout rates verified",
-          "refundQueue": "Refund queue reconciled",
-          "chargebackWindow": "Chargeback window monitored"
+          "paymentLedger": "Payment ledger loaded: {{count}} records",
+          "payoutLiability": "Payout liability: {{amount}} across {{count}} instructors",
+          "invoiceStatus": "Invoices: {{paid}} paid / {{open}} open",
+          "reconciliationRate": "Reconciliation rate: {{rate}}%"
         }
       }
     },
@@ -1138,10 +1143,10 @@
       "subtitle": "B2B and institutional billing — track what is outstanding and what is closed.",
       "draftInvoice": "Draft invoice",
       "outstanding": "Outstanding",
-      "outstandingAmount": "$5,090",
+      "outstandingAmount": "0.00 ILS",
       "collected30d": "Collected (30d)",
-      "collectedAmount": "$38,120",
-      "demoNote": "Demo figures for layout preview.",
+      "collectedAmount": "0.00 ILS",
+      "liveNote": "Calculated from payment records.",
       "latestTitle": "Latest invoices",
       "latestSubtitle": "Status and key dates at a glance.",
       "dueLabel": "Due {{date}}",
@@ -1158,14 +1163,14 @@
         "nextRunValue": "Mar 25",
         "nextRunSub": "Auto-scheduled",
         "onHold": "On hold",
-        "onHoldValue": "$0",
+        "onHoldValue": "0.00 ILS",
         "onHoldSub": "No blocks",
         "avgProcessing": "Avg. processing",
         "avgProcessingValue": "1.2d",
         "avgProcessingSub": "From submission"
       },
       "batchesTitle": "Payout batches",
-      "batchesSubtitle": "Operational view — not wired to live payroll yet.",
+      "batchesSubtitle": "Operational view of payable instructors from completed course sales.",
       "newBatch": "New batch",
       "instructorsMeta": "{{count}} instructors · {{date}}",
       "statuses": {
@@ -1175,22 +1180,22 @@
     },
     "reports": {
       "title": "Reports & exports",
-      "subtitle": "Packaged views for auditors and regulators. Wire these to your reporting engine when ready.",
+      "subtitle": "Packaged live views for auditors, reconciliation, and regulatory review.",
       "items": {
         "monthlyRevenueTitle": "Monthly revenue summary",
         "monthlyRevenueDesc": "Platform fees, gross sales, refunds.",
-        "monthlyRevenuePeriod": "March 2026",
+        "monthlyRevenuePeriod": "Live ledger",
         "instructorLiabilityTitle": "Instructor liability",
-        "instructorLiabilityDesc": "Accrued vs paid — by region.",
-        "instructorLiabilityPeriod": "Q1 2026",
+        "instructorLiabilityDesc": "Accrued vs paid by instructor.",
+        "instructorLiabilityPeriod": "Current payouts",
         "taxExportTitle": "Tax export (VAT)",
         "taxExportDesc": "Line-level transactions for filing.",
-        "taxExportPeriod": "Feb 2026"
+        "taxExportPeriod": "Current invoices"
       },
       "pdf": "PDF",
       "builderTitle": "Custom report builder",
-      "builderDesc": "Coming soon — drag dimensions, filters, and saved schedules for recurring exports.",
-      "builderPlaceholder": "Placeholder for advanced reporting builder."
+      "builderDesc": "Use the packaged exports above for the current live ledger, payout, and invoice records.",
+      "builderPlaceholder": "Select a report card above to download the current dataset."
     },
     "transactions": {
       "title": "Transactions",
@@ -1198,7 +1203,7 @@
       "filters": "Filters",
       "exportCsv": "Export CSV",
       "recentActivity": "Recent activity",
-      "recentActivityDesc": "Demo data — connect to your finance API when ready.",
+      "recentActivityDesc": "Live payments from the finance API.",
       "columns": {
         "reference": "Reference",
         "counterparty": "Counterparty",
@@ -1231,28 +1236,23 @@
       "subtitle": "Front-office snapshot: queues, touchpoints, and today's rhythm.",
       "queue": {
         "enrollmentRequests": "Enrollment requests",
-        "documentFollowUps": "Document follow-ups",
+        "directoryRecords": "Directory records",
         "messagesAwaitingReply": "Messages awaiting reply",
-        "needsAttention": "Needs attention"
+        "needsAttention": "Needs attention",
+        "liveData": "Live platform data"
       },
       "today": {
-        "title": "Today",
-        "subtitle": "Structured day — demo schedule.",
-        "items": {
-          "registrarSync": "Registrar sync — cohort A",
-          "walkIn": "Walk-in office hours",
-          "certificateDispatch": "Certificate batch dispatch"
-        }
+        "title": "Recent enrollment activity",
+        "subtitle": "Latest enrollments from the platform database.",
+        "enrollmentLine": "{{learner}} enrolled in {{course}} — {{section}}",
+        "empty": "No enrollment activity found."
       },
       "serviceLevel": {
-        "title": "Service level",
-        "subtitle": "How the desk is performing (sample KPIs).",
-        "firstResponse": "First response (median)",
-        "firstResponseValue": "2h 10m",
-        "slaBreaches": "SLA breaches (7d)",
-        "slaBreachesValue": "0",
-        "openTickets": "Open enrollment tickets",
-        "openTicketsValue": "6"
+        "title": "Operational coverage",
+        "subtitle": "Live enrollment counts from the current records.",
+        "totalEnrollments": "Total enrollment records",
+        "activeEnrollments": "Active enrollments",
+        "completedEnrollments": "Completed enrollments"
       },
       "quickEnrollment": {
         "title": "Quick: new enrollment",
@@ -1267,14 +1267,24 @@
     },
     "enrollments": {
       "title": "Enrollments",
-      "subtitle": "Intake queue for new registrations — triage, verify, and route to academic teams.",
-      "activeQueueTitle": "Active queue",
-      "activeQueueSubtitle": "Demo records for UI preview.",
+      "subtitle": "Read-only operational view of real learner enrollments across courses.",
+      "activeQueueTitle": "Enrollment records",
+      "activeQueueSubtitle": "Live enrollments from the platform database.",
       "export": "Export",
       "emailOnFile": "email on file",
       "phoneOptional": "optional",
       "open": "Open",
+      "searchPlaceholder": "Search learner, email, course, or section...",
+      "progress": "{{value}}% progress",
+      "noEnrollments": "No enrollments found",
+      "noEnrollmentsBody": "Try a different search or status filter.",
       "statuses": {
+        "all": "All statuses",
+        "active": "Active",
+        "completed": "Completed",
+        "cancelled": "Cancelled",
+        "dropped": "Dropped",
+        "suspended": "Suspended",
         "pending": "pending",
         "review": "review",
         "approved": "approved"
@@ -1286,9 +1296,21 @@
     },
     "calendar": {
       "title": "Calendar",
-      "subtitle": "Week-at-a-glance for front-office commitments — integrate with a real calendar later.",
-      "headerTitle": "March 2026 — week 12",
-      "headerDesc": "Visual grid (read-only demo).",
+      "subtitle": "Week-at-a-glance built from published course sections and meeting times.",
+      "headerTitle": "Course sessions",
+      "headerDesc": "Read-only schedule derived from real course section meeting times.",
+      "sessionsThisWeek": "Sessions this week",
+      "coursesScheduled": "Courses scheduled",
+      "onlineLinks": "Online links",
+      "previousWeek": "Previous week",
+      "nextWeek": "Next week",
+      "thisWeek": "This week",
+      "weekOf": "Week of {{start}} - {{end}}",
+      "noSessions": "No scheduled sessions",
+      "noSessionsBody": "Published courses do not have section meeting times in this week.",
+      "noDaySessions": "No sessions",
+      "openJoinLink": "Open join link",
+      "noLink": "No link",
       "weekdays": {
         "mon": "Mon",
         "tue": "Tue",
@@ -1306,9 +1328,12 @@
     },
     "directory": {
       "title": "Directory",
-      "subtitle": "Lightweight CRM for callbacks — connect to your users API when ready.",
-      "searchPlaceholder": "Search by name, email, or cohort…",
+      "subtitle": "Search real users for front-office follow-up and routing.",
+      "searchPlaceholder": "Search by name or email...",
       "profile": "Profile",
+      "totalPeople": "People",
+      "noPeople": "No people found",
+      "noPeopleBody": "Try a different search term.",
       "roles": {
         "student": "Student",
         "guardian": "Guardian",
@@ -1325,7 +1350,7 @@
   "staff": {
     "settings": {
       "title": "Settings",
-      "subtitle": "{{portal}} portal preferences — extend with profile and security when wired to API.",
+      "subtitle": "{{portal}} portal preferences for notifications and workspace behavior.",
       "portalFinance": "Finance",
       "portalOperations": "Operations",
       "notificationsTitle": "Notifications",
@@ -1335,8 +1360,8 @@
       "slaBreachAlerts": "SLA breach alerts",
       "slaBreachAlertsDesc": "In-app and email",
       "sessionTitle": "Session",
-      "sessionDesc": "Managed by your organization's SSO policy.",
-      "sessionBody": "Password changes and device trust will appear here once connected to auth services."
+      "sessionDesc": "Session access follows your current account role and permissions.",
+      "sessionBody": "For password, device, or access changes, contact an administrator from the support inbox."
     }
   },
   "staffLayout": {

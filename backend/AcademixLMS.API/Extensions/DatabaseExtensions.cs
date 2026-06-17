@@ -134,17 +134,19 @@ public static class DatabaseExtensions
                 logger.LogWarning("Users table truncated.");
             }
 
-            // Seed demo data in Development, or in any environment when Seed:DemoData
-            // is enabled (used by the free hosted demo deployment).
-            var seedDemoData = app.Environment.IsDevelopment()
+            // Seed local data in Development, or in any environment when Seed:DemoData
+            // is enabled for hosted preview deployments.
+            var seedLocalData = app.Environment.IsDevelopment()
                 || configuration.GetValue<bool>("Seed:DemoData", false);
-            if (seedDemoData)
+            if (seedLocalData)
             {
                 await DevAccountsSeeder.EnsureDefaultAccountsAsync(context, logger, cancellationToken: default);
                 await DemoFacultyBulkSeeder.EnsureAsync(context, logger, cancellationToken: default);
+                await DemoFacultyBulkSeeder.NormalizeVisibleSeedContentAsync(context, logger, cancellationToken: default);
                 await DemoFacultyBulkSeeder.BackfillDemoCourseThumbnailsAsync(context, logger, cancellationToken: default);
                 await SubscriptionPlanSeeder.EnsureAsync(context, logger, cancellationToken: default);
                 await DemoOrganizationSeeder.EnsureAsync(context, logger, cancellationToken: default);
+                await LocalDataSanitizer.RemoveVisibleQaArtifactsAsync(context, logger, configuration, cancellationToken: default);
             }
 
             logger.LogInformation("Database migration completed.");

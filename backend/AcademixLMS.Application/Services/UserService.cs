@@ -366,11 +366,13 @@ public class UserService : IUserService
         if (user == null)
             return Result<UserDto>.Failure("User not found.");
 
+        var existing = UserUiPreferencesJson.Deserialize(user.UiPreferencesJson);
         var dto = new UserUiPreferencesDto
         {
             Theme = string.IsNullOrWhiteSpace(request.Theme) ? "light" : request.Theme.Trim(),
             CustomThemeColor = string.IsNullOrWhiteSpace(request.CustomThemeColor) ? null : request.CustomThemeColor.Trim(),
-            MixTheme = string.IsNullOrWhiteSpace(request.MixTheme) ? null : request.MixTheme.Trim()
+            MixTheme = string.IsNullOrWhiteSpace(request.MixTheme) ? null : request.MixTheme.Trim(),
+            NotificationsEnabled = request.NotificationsEnabled ?? existing?.NotificationsEnabled ?? true
         };
 
         user.UiPreferencesJson = UserUiPreferencesJson.Serialize(dto);
@@ -407,4 +409,3 @@ public class UserService : IUserService
         };
     }
 }
-

@@ -34,7 +34,18 @@
     "seatsTotal": "of {{total}} total seats",
     "completionRate": "Completion rate",
     "overdue": "Overdue learners",
-    "empty": "No data yet. Invite members to get started."
+    "empty": "No active licenses yet. License a course to start assigning seats.",
+    "manageMembers": "Manage members",
+    "findCourses": "Find courses",
+    "licenseHealth": "License health",
+    "licenseHealthSubtitle": "Seat usage, spend, and assignment volume from live license data.",
+    "totalSpend": "Licensed spend",
+    "assignments": "Assignments",
+    "nextActions": "Next actions",
+    "assignSeatsAction": "Assign seats from active licenses",
+    "reviewComplianceAction": "Review training compliance",
+    "recentLicenses": "Recent licenses",
+    "recentLicensesSubtitle": "Active course seats available to this organization."
   },
   "members": {
     "title": "Members",
@@ -82,7 +93,13 @@
   "catalog": {
     "title": "Browse courses",
     "subtitle": "License seats for courses on the public catalog, or create your own internal courses.",
-    "comingSoon": "License checkout is being finalized. You can already browse the public catalog from the student portal."
+    "comingSoon": "License checkout is being finalized. You can already browse the public catalog from the student portal.",
+    "viewLicenses": "View licenses",
+    "orgCourses": "Your organization's courses",
+    "publicCourses": "Public catalog",
+    "manageLicense": "Manage license",
+    "openCourse": "Open course",
+    "empty": "No published courses are available right now."
   },
   "licenses": {
     "title": "Course licenses",

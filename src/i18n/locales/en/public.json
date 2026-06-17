@@ -1,7 +1,7 @@
 {
   "notFound": {
     "code": "404",
-    "message": "That page doesn't exist in this demo.",
+    "message": "That page doesn't exist.",
     "goToDashboard": "Go to Dashboard"
   },
   "landing": {
@@ -247,7 +247,33 @@
       "unableEnroll": "Unable to complete enrollment. Please try again.",
       "tryLater": "Please try again later"
     },
-    "alreadyEnrolledLabel": "Already Enrolled"
+    "alreadyEnrolledLabel": "Already Enrolled",
+    "linkCopied": "Course link copied",
+    "linkCopiedBody": "Anyone with this link can view and enroll.",
+    "linkCopyFailed": "Could not copy the link",
+    "switchedTitle": "Section changed",
+    "switchedBody": "You moved to {{section}}.",
+    "newCourse": "New course",
+    "seatsOpen": "{{open}} of {{total}} seats open",
+    "share": "Share",
+    "manageCourse": "Manage",
+    "youreEnrolled": "You're enrolled",
+    "currentSectionHint": "Current section: {{section}}. Pick another below to switch.",
+    "sectionsSwitchHint": "Switch to a section that fits your schedule.",
+    "yourSection": "Your section",
+    "joinSession": "Join online session",
+    "enrolledHere": "Enrolled here",
+    "switchingDots": "Switching...",
+    "switchToSection": "Switch to this section",
+    "enrollForPrice": "Enroll - {{price}}",
+    "hoursValue": "{{count}} hours",
+    "certificateIncluded": "On completion",
+    "ownerShareTitle": "Share this course",
+    "ownerShareBody": "Send this link to students - it opens straight to enrollment.",
+    "copyShareLink": "Copy share link",
+    "switchDialogTitle": "Switch section?",
+    "switchDialogDescription": "Move from {{from}} to {{to}}? Your progress stays with you.",
+    "switchConfirmLabel": "Switch section"
   },
   "home": {
     "metaDescription": "Discover thousands of courses from expert instructors. Learn at your pace with assignments, exams, and certificates on AcademiX.",

@@ -1,5 +1,5 @@
 // Notifications service
-// Uses API when authenticated, falls back to localStorage for offline/legacy
+// Uses API when authenticated, falls back to localStorage for offline-created client notifications.
 
 import { notificationApiService, type ApiNotification } from './notificationApiService';
 
@@ -176,7 +176,7 @@ class NotificationService {
   // Load from API (call when user is authenticated)
   async loadFromApi(): Promise<void> {
     const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
-    if (!token || token.startsWith('mock-')) {
+    if (!token) {
       this.useApi = false;
       return;
     }
@@ -375,4 +375,3 @@ class NotificationService {
 }
 
 export const notificationService = new NotificationService();
-

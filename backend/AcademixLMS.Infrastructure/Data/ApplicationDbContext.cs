@@ -72,6 +72,9 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<SupportTicket> SupportTickets { get; set; }
     public DbSet<SupportTicketReply> SupportTicketReplies { get; set; }
 
+    // Platform audit
+    public DbSet<AuditLog> AuditLogs { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

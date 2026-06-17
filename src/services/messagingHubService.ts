@@ -6,6 +6,7 @@ import type { ApiNotification } from './notificationApiService';
 const HUB_URL = '/hubs/messaging';
 
 let connection: signalR.HubConnection | null = null;
+let startPromise: Promise<signalR.HubConnection | null> | null = null;
 
 function getAccessToken(): string | null {
   if (typeof window === 'undefined') return null;
@@ -50,9 +51,25 @@ export function onNotificationReceived(handler: NotificationReceivedHandler): ()
 
 export async function connectMessagingHub(): Promise<signalR.HubConnection | null> {
   const token = getAccessToken();
-  if (!token || token.startsWith('mock-')) return null;
+  if (!token) return null;
 
   if (connection?.state === signalR.HubConnectionState.Connected) {
+    return connection;
+  }
+
+  if (
+    connection &&
+    (connection.state === signalR.HubConnectionState.Connecting ||
+      connection.state === signalR.HubConnectionState.Reconnecting)
+  ) {
+    return startPromise ?? connection;
+  }
+
+  if (startPromise) {
+    return startPromise;
+  }
+
+  if (connection && connection.state !== signalR.HubConnectionState.Disconnected) {
     return connection;
   }
 
@@ -96,21 +113,28 @@ export async function connectMessagingHub(): Promise<signalR.HubConnection | nul
     console.log('[MessagingHub] Reconnected');
   });
 
-  try {
-    await connection.start();
-    console.log('[MessagingHub] Connected');
-    return connection;
-  } catch (err) {
-    // "Connection stopped during negotiation" / AbortError often means backend down or proxy - avoid console spam
-    const msg = err instanceof Error ? err.message : String(err);
-    const isExpected = /AbortError|negotiation|ECONNREFUSED|Failed to fetch/i.test(msg);
-    if (!isExpected) console.warn('[MessagingHub] Connection failed:', msg);
-    connection = null;
-    return null;
-  }
+  startPromise = (async () => {
+    try {
+      await connection.start();
+      console.log('[MessagingHub] Connected');
+      return connection;
+    } catch (err) {
+      // "Connection stopped during negotiation" / AbortError often means backend down or proxy - avoid console spam
+      const msg = err instanceof Error ? err.message : String(err);
+      const isExpected = /AbortError|negotiation|ECONNREFUSED|Failed to fetch/i.test(msg);
+      if (!isExpected) console.warn('[MessagingHub] Connection failed:', msg);
+      connection = null;
+      return null;
+    } finally {
+      startPromise = null;
+    }
+  })();
+
+  return startPromise;
 }
 
 export async function disconnectMessagingHub(): Promise<void> {
+  startPromise = null;
   if (connection) {
     await connection.stop();
     connection = null;

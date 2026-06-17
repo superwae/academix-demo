@@ -80,7 +80,8 @@ export class ApiClient {
   private async request<T>(
     endpoint: string,
     options: RequestInit = {},
-    retryOn401: boolean = true
+    retryOn401: boolean = true,
+    silentStatuses: number[] = []
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
 
@@ -127,7 +128,7 @@ export class ApiClient {
           
           if (!retryResponse.ok) {
             // If retry still fails, handle as error
-            return this.handleErrorResponse<T>(retryResponse, url);
+            return this.handleErrorResponse<T>(retryResponse, url, silentStatuses);
           }
           
           return this.handleSuccessResponse<T>(retryResponse, url);
@@ -154,32 +155,16 @@ export class ApiClient {
       }
       
       if (!response.ok) {
-        // DEV ONLY: when using mock auth and backend is unavailable (5xx), return an
-        // empty mock response so the UI degrades gracefully for demos.
-        if (import.meta.env.DEV && response.status >= 500 && this.accessToken?.startsWith('mock-')) {
-          console.warn(`[API] Backend unavailable (${response.status}), returning empty mock for: ${endpoint}`);
-          // Return an array with PagedResult properties so it works for both
-          // array endpoints (response.map()) and paginated endpoints (response.items).
-          const empty: any = [];
-          empty.items = [];
-          empty.totalCount = 0;
-          empty.pageNumber = 1;
-          empty.pageSize = 20;
-          empty.totalPages = 0;
-          empty.hasNextPage = false;
-          empty.hasPreviousPage = false;
-          return empty as T;
-        }
-        return this.handleErrorResponse<T>(response, url);
+        return this.handleErrorResponse<T>(response, url, silentStatuses);
           }
 
       return this.handleSuccessResponse<T>(response, url);
     } catch (error) {
-      console.error(`[API] Fetch error:`, error instanceof Error ? error.message : String(error));
       // If it's already an ApiError, re-throw it
       if (error && typeof error === 'object' && 'error' in error) {
         throw error;
       }
+      console.error(`[API] Fetch error:`, error instanceof Error ? error.message : String(error));
       // Provide more helpful error message
       const errorMessage = error instanceof Error 
         ? error.message 
@@ -211,7 +196,7 @@ export class ApiClient {
       return {} as T;
   }
 
-  private async handleErrorResponse<T>(response: Response, _url: string): Promise<T> {
+  private async handleErrorResponse<T>(response: Response, _url: string, silentStatuses: number[] = []): Promise<T> {
     let error: ApiError;
     try {
       const errorText = await response.text();
@@ -254,18 +239,20 @@ export class ApiClient {
       error = { error: response.statusText || 'An error occurred', status: response.status };
     }
     
-    // Handle 403 Forbidden
-    if (response.status === 403) {
-      console.error(`[API] 403 Forbidden: ${error.error}`);
-      // Don't logout on 403, just throw the error
+    if (!silentStatuses.includes(response.status)) {
+      // Handle 403 Forbidden
+      if (response.status === 403) {
+        console.error(`[API] 403 Forbidden: ${error.error}`);
+        // Don't logout on 403, just throw the error
+      }
+      
+      console.error(`[API] Error response (${response.status}):`, error);
     }
-    
-    console.error(`[API] Error response (${response.status}):`, error);
     throw error;
   }
 
-  async get<T>(endpoint: string): Promise<T> {
-    return this.request<T>(endpoint, { method: 'GET' });
+  async get<T>(endpoint: string, options?: { silentStatuses?: number[] }): Promise<T> {
+    return this.request<T>(endpoint, { method: 'GET' }, true, options?.silentStatuses ?? []);
   }
 
   async post<T>(endpoint: string, data?: unknown): Promise<T> {

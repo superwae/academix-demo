@@ -16,6 +16,7 @@ public static class DemoFacultyBulkSeeder
 {
     public const string DemoPassword = DevAccountsSeeder.DefaultPassword;
     private const string MarkerEmail = "prof01@academix.com";
+    private const string LegacyProviderName = "AcademiX Demo";
 
     private static readonly (string First, string Last)[] Professors =
     [
@@ -52,34 +53,12 @@ public static class DemoFacultyBulkSeeder
         "Physics", "Languages", "Design", "Management", "Computer Science"
     ];
 
-    /// <summary>Unsplash cover images (education, STEM, business). Cycled per course.</summary>
+    /// <summary>
+    /// Optional cover images for seeded courses. Keep empty in local/dev data so pages do not
+    /// depend on third-party image hosts; the UI renders deterministic course-icon fallbacks.
+    /// </summary>
     private static readonly string[] CourseThumbnailUrls =
     [
-        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1532619675605-1ede6c778ed1?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1555949963-aa79dcee981c?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1504384764586-bb4cdc1707b0?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1488190211105-8b0e65b80b4e?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1523240778108-9dcb8eaf79c2?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1529390079861-591de354faf5?auto=format&fit=crop&w=800&q=80"
     ];
 
     /// <summary>Recorded public YouTube lectures (watch URLs). Rotated so courses get varied links.</summary>
@@ -119,10 +98,10 @@ public static class DemoFacultyBulkSeeder
         ("Section C — Evening", "Lab C / online")
     ];
 
-    private const string DemoProviderName = "AcademiX Demo";
+    private const string SeedProviderName = "AcademiX Faculty";
 
     /// <summary>
-    /// Idempotent: sets <see cref="Course.ThumbnailUrl"/> for published demo courses that were created before thumbnails were added.
+    /// Idempotent: sets <see cref="Course.ThumbnailUrl"/> for published seeded courses that were created before thumbnails were added.
     /// Runs every Development startup so existing databases pick up images without wiping data.
     /// </summary>
     public static async Task BackfillDemoCourseThumbnailsAsync(
@@ -130,31 +109,109 @@ public static class DemoFacultyBulkSeeder
         ILogger logger,
         CancellationToken cancellationToken = default)
     {
-        var demoCourses = await context.Courses
+        var seededCourses = await context.Courses
             .Where(c =>
                 !c.IsDeleted &&
                 c.Status == CourseStatus.Published &&
-                c.ProviderName == DemoProviderName &&
+                c.ProviderName == SeedProviderName &&
                 (c.ThumbnailUrl == null || c.ThumbnailUrl == string.Empty))
             .OrderBy(c => c.InstructorId)
             .ThenBy(c => c.Title)
             .ToListAsync(cancellationToken);
 
-        if (demoCourses.Count == 0)
+        if (seededCourses.Count == 0)
         {
             return;
         }
 
         var n = CourseThumbnailUrls.Length;
-        for (var i = 0; i < demoCourses.Count; i++)
+        if (n == 0)
         {
-            demoCourses[i].ThumbnailUrl = CourseThumbnailUrls[i % n];
+            return;
+        }
+
+        for (var i = 0; i < seededCourses.Count; i++)
+        {
+            seededCourses[i].ThumbnailUrl = CourseThumbnailUrls[i % n];
         }
 
         await context.SaveChangesAsync(cancellationToken);
         logger.LogInformation(
-            "DemoFacultyBulkSeeder: backfilled ThumbnailUrl for {Count} AcademiX Demo course(s).",
-            demoCourses.Count);
+            "DemoFacultyBulkSeeder: backfilled ThumbnailUrl for {Count} seeded AcademiX course(s).",
+            seededCourses.Count);
+    }
+
+    public static async Task NormalizeVisibleSeedContentAsync(
+        ApplicationDbContext context,
+        ILogger logger,
+        CancellationToken cancellationToken = default)
+    {
+        var changed = 0;
+
+        var legacyCourses = await context.Courses
+            .Where(c => !c.IsDeleted && c.ProviderName == LegacyProviderName)
+            .ToListAsync(cancellationToken);
+        foreach (var course in legacyCourses)
+        {
+            course.ProviderName = SeedProviderName;
+            course.UpdatedAt = DateTime.UtcNow;
+            changed++;
+        }
+
+        var assignmentPrompt = "ideas from weeks 1-4. Include references. Use examples from the course materials.";
+        var assignments = await context.Assignments
+            .Where(a => !a.IsDeleted && a.Prompt.Contains("This is a demo assignment."))
+            .ToListAsync(cancellationToken);
+        foreach (var assignment in assignments)
+        {
+            assignment.Prompt = "Submit a written report (800-1200 words) or a short presentation deck summarizing the main " + assignmentPrompt;
+            assignment.UpdatedAt = DateTime.UtcNow;
+            changed++;
+        }
+
+        var exams = await context.Exams
+            .Where(e => !e.IsDeleted && e.Description != null && e.Description.Contains("Demonstration exam"))
+            .ToListAsync(cancellationToken);
+        foreach (var exam in exams)
+        {
+            exam.Description = "Assessment covering core outcomes. Includes auto-graded and short-answer items.";
+            exam.UpdatedAt = DateTime.UtcNow;
+            changed++;
+        }
+
+        var projectManagement = await context.Courses
+            .Include(c => c.Sections)
+            .FirstOrDefaultAsync(c =>
+                !c.IsDeleted &&
+                c.ProviderName == SeedProviderName &&
+                c.Title == "Project Management",
+                cancellationToken);
+        if (projectManagement != null)
+        {
+            if (projectManagement.Price != 0)
+            {
+                projectManagement.Price = 0;
+                projectManagement.UpdatedAt = DateTime.UtcNow;
+                changed++;
+            }
+
+            var liveSection = projectManagement.Sections
+                .Where(section => !section.IsDeleted)
+                .OrderBy(section => section.Name.Contains("Afternoon") ? 0 : 1)
+                .FirstOrDefault();
+            if (liveSection != null && string.IsNullOrWhiteSpace(liveSection.JoinUrl))
+            {
+                liveSection.JoinUrl = "https://meet.google.com/project-live-qa";
+                liveSection.UpdatedAt = DateTime.UtcNow;
+                changed++;
+            }
+        }
+
+        if (changed > 0)
+        {
+            await context.SaveChangesAsync(cancellationToken);
+            logger.LogInformation("DemoFacultyBulkSeeder: normalized visible seed content in {Count} row(s).", changed);
+        }
     }
 
     public static async Task EnsureAsync(
@@ -236,7 +293,7 @@ public static class DemoFacultyBulkSeeder
                     Level = CourseLevel.Intermediate,
                     Modality = Modality.Hybrid,
                     ProviderType = ProviderType.University,
-                    ProviderName = DemoProviderName,
+                    ProviderName = SeedProviderName,
                     InstructorId = instructor.Id,
                     Status = CourseStatus.Published,
                     IsFeatured = ci == 0,
@@ -316,7 +373,7 @@ public static class DemoFacultyBulkSeeder
                     Title = $"{title} — Course project",
                     Prompt =
                         "Submit a written report (800–1200 words) or a short presentation deck summarizing the main " +
-                        "ideas from weeks 1–4. Include references. This is a demo assignment.",
+                        "ideas from weeks 1-4. Include references. Use examples from the course materials.",
                     DueAt = now.AddDays(7 + ci),
                     Status = AssignmentStatus.Published,
                     MaxScore = 100,
@@ -331,7 +388,7 @@ public static class DemoFacultyBulkSeeder
                 {
                     CourseId = course.Id,
                     Title = $"{title} — Course exam",
-                    Description = "Demonstration exam covering core outcomes. Includes auto-graded and short-answer items.",
+                    Description = "Assessment covering core outcomes. Includes auto-graded and short-answer items.",
                     StartsAt = now.AddDays(10),
                     DurationMinutes = 90,
                     IsActive = true,
@@ -353,9 +410,14 @@ public static class DemoFacultyBulkSeeder
             professors.Count);
     }
 
-    private static string GetCourseThumbnailUrl(int professorIndex, int courseIndex)
+    private static string? GetCourseThumbnailUrl(int professorIndex, int courseIndex)
     {
         var n = CourseThumbnailUrls.Length;
+        if (n == 0)
+        {
+            return null;
+        }
+
         var idx = (professorIndex * 5 + courseIndex) % n;
         return CourseThumbnailUrls[idx];
     }

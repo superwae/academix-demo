@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
-import { Ticket, ShoppingCart, ArrowRight } from 'lucide-react'
+import { Ticket, ShoppingCart, ArrowRight, BookOpen } from 'lucide-react'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
@@ -172,14 +172,28 @@ export function OrgLicensesListPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {paidCatalog.slice(0, 9).map((c) => (
               <div key={c.id} className="rounded-xl border border-border bg-card overflow-hidden">
-                {c.thumbnailUrl && (
-                  <img
-                    src={c.thumbnailUrl}
-                    alt=""
-                    className="h-32 w-full object-cover"
-                    loading="lazy"
-                  />
-                )}
+                <div className="relative h-32 w-full overflow-hidden bg-muted">
+                  {c.thumbnailUrl ? (
+                    <img
+                      src={c.thumbnailUrl}
+                      alt=""
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                      onError={(event) => {
+                        const image = event.currentTarget
+                        image.style.display = 'none'
+                        const fallback = image.nextElementSibling as HTMLElement | null
+                        if (fallback) fallback.style.display = 'flex'
+                      }}
+                    />
+                  ) : null}
+                  <div
+                    className="absolute inset-0 flex items-center justify-center bg-muted text-muted-foreground"
+                    style={{ display: c.thumbnailUrl ? 'none' : 'flex' }}
+                  >
+                    <BookOpen className="h-8 w-8" />
+                  </div>
+                </div>
                 <div className="p-4 space-y-2">
                   <h3 className="font-semibold text-base line-clamp-1">{c.title}</h3>
                   <p className="text-xs text-muted-foreground line-clamp-2">{c.description}</p>

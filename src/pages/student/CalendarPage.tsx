@@ -10,7 +10,7 @@ import { Button } from '../../components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../../components/ui/dialog'
 import { enrollmentService, type EnrollmentDto } from '../../services/enrollmentService'
 import { courseService, type CourseDto } from '../../services/courseService'
-import { Calendar, Clock, MapPin, User, ChevronLeft, ChevronRight, Video } from 'lucide-react'
+import { Calendar, Clock, MapPin, User, ChevronLeft, ChevronRight, Video, ExternalLink, GraduationCap } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -170,6 +170,16 @@ function buildStudentCalendarEvents(
   return list
 }
 
+type CalendarJoinLink = {
+  courseId: string
+  courseTitle: string
+  sectionId: string
+  sectionName: string
+  locationLabel?: string
+  joinUrl: string
+  hasScheduledMeetings: boolean
+}
+
 export function CalendarPage() {
   const { t } = useTranslation(['student', 'common', 'errors'])
   const calendarRef = useRef<FullCalendar | null>(null)
@@ -272,6 +282,26 @@ export function CalendarPage() {
     [enrollments, courses]
   )
 
+  const calendarJoinLinks = useMemo<CalendarJoinLink[]>(() => {
+    return enrollments.flatMap(e => {
+      const course = courses.get(e.courseId)
+      const section = course?.sections.find(s => s.id === e.sectionId)
+      const joinUrl = section?.joinUrl?.trim()
+      if (!course || !section || !joinUrl) return []
+      return [{
+        courseId: course.id,
+        courseTitle: course.title,
+        sectionId: section.id,
+        sectionName: section.name,
+        locationLabel: section.locationLabel,
+        joinUrl,
+        hasScheduledMeetings: (section.meetingTimes?.length ?? 0) > 0,
+      }]
+    })
+  }, [enrollments, courses])
+
+  const unscheduledJoinLinks = calendarJoinLinks.filter(link => !link.hasScheduledMeetings)
+
   const events = useMemo(() => {
     return buildStudentCalendarEvents(
       enrollments,
@@ -356,6 +386,53 @@ export function CalendarPage() {
         </div>
       </div>
 
+      {unscheduledJoinLinks.length > 0 && (
+        <Card className="border-primary/20 bg-primary/[0.03]">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Video className="h-4 w-4 text-primary" />
+              {t('student:calendar.onlineLinksTitle')}
+            </CardTitle>
+            <CardDescription>{t('student:calendar.onlineLinksDescription')}</CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-2 md:grid-cols-2">
+            {unscheduledJoinLinks.map(link => (
+              <div
+                key={`${link.courseId}:${link.sectionId}`}
+                className="flex flex-col gap-3 rounded-lg border border-border/70 bg-background p-3 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div className="min-w-0">
+                  <Link
+                    to={`/courses/${link.courseId}`}
+                    className="text-sm font-semibold hover:text-primary hover:underline"
+                  >
+                    {link.courseTitle}
+                  </Link>
+                  <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <GraduationCap className="h-3 w-3" />
+                      {link.sectionName}
+                    </span>
+                    {link.locationLabel && (
+                      <span className="flex items-center gap-1">
+                        <MapPin className="h-3 w-3" />
+                        {link.locationLabel}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <Button size="sm" asChild>
+                  <a href={link.joinUrl} target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="me-1.5 h-3.5 w-3.5" />
+                    {t('student:shared.viewLink')}
+                  </a>
+                </Button>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle>{calendarView === 'week' ? t('student:calendar.weekView') : t('student:calendar.monthView')}</CardTitle>
@@ -395,7 +472,9 @@ export function CalendarPage() {
                 </motion.div>
                 <CardTitle className="text-xl mb-2">{t('student:calendar.noMeetingTimes')}</CardTitle>
                 <CardDescription className="max-w-md mb-4">
-                  {t('student:calendar.noMeetingTimesBody')}
+                  {unscheduledJoinLinks.length > 0
+                    ? t('student:calendar.noMeetingTimesButLinksBody')
+                    : t('student:calendar.noMeetingTimesBody')}
                 </CardDescription>
                 <Button variant="outline" size="sm" asChild>
                   <Link to="/student/catalog">{t('student:calendar.catalog')}</Link>

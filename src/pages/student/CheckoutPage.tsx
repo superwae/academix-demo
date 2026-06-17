@@ -105,7 +105,7 @@ export function CheckoutPage() {
         discountCode: discountApplied?.code,
       });
 
-      // Demo gateway: payment already completed and enrollment created server-side
+      // Local instant gateway: payment already completed and enrollment created server-side.
       if (result.demoCompleted) {
         toast.success(t('student:checkout.demoEnrolledTitle'), {
           description: t('student:checkout.demoEnrolledBody'),

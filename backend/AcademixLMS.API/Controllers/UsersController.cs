@@ -51,6 +51,22 @@ public class UsersController : ControllerBase
         return Ok(result.Value);
     }
 
+    /// <summary>
+    /// Read-only user directory for secretary operations.
+    /// </summary>
+    [HttpGet("directory")]
+    [Authorize(Policy = "RequireSecretaryRead")]
+    [ProducesResponseType(typeof(PagedResult<UserDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetDirectory([FromQuery] PagedRequest request, CancellationToken cancellationToken)
+    {
+        var result = await _userService.GetPagedAsync(request, cancellationToken);
+
+        if (!result.IsSuccess)
+            return BadRequest(result.Error);
+
+        return Ok(result.Value);
+    }
+
     /// <summary>Current user profile (includes saved UI theme preferences).</summary>
     [HttpGet("me")]
     [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
@@ -296,5 +312,4 @@ public record UpdateLanguageRequest(string Language);
 
 /// <summary>Payload for admin platform-fee override on a teacher.</summary>
 public record UpdatePlatformFeeRequest(decimal? PlatformFeePercentOverride);
-
 

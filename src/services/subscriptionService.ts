@@ -42,14 +42,10 @@ export interface SubscribeRequest {
 class SubscriptionService {
   async getMySubscription(): Promise<SubscriptionDto | null> {
     try {
-      const response = await apiClient.get<SubscriptionDto>('/subscriptions/me');
+      const response = await apiClient.get<SubscriptionDto | null>('/subscriptions/me');
       return response;
     } catch (error) {
       const apiError = error as ApiError;
-      // 404 means no active subscription
-      if (apiError.status === 404) {
-        return null;
-      }
       throw new Error(apiError.error || 'Failed to fetch subscription');
     }
   }

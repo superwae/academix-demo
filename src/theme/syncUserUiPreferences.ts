@@ -12,7 +12,7 @@ let syncTimer: ReturnType<typeof setTimeout> | null = null;
 function hasRealApiToken(): boolean {
   if (typeof window === 'undefined') return false;
   const t = localStorage.getItem('accessToken');
-  return !!t && !t.startsWith('mock-');
+  return !!t;
 }
 
 /** Apply preferences from server (login response or GET /users/me) to Zustand + DOM. */
@@ -61,10 +61,12 @@ export function scheduleSyncUiPreferencesToServer(): void {
     void (async () => {
       try {
         const { theme, customThemeColor, mixTheme } = useAppStore.getState().data;
+        const currentPreferences = useAuthStore.getState().user?.uiPreferences;
         const body: UserUiPreferences = {
           theme,
           customThemeColor: customThemeColor ?? null,
           mixTheme: mixTheme ?? null,
+          notificationsEnabled: currentPreferences?.notificationsEnabled ?? null,
         };
         const updated = await userService.updateUiPreferences(body);
         const u = useAuthStore.getState().user;

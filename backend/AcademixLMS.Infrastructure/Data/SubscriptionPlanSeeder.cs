@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 namespace AcademixLMS.Infrastructure.Data;
 
 /// <summary>
-/// Seeds default subscription plans and adds prices to some demo courses.
+/// Seeds default subscription plans and adds prices to seeded courses.
 /// Idempotent: skips if plans already exist.
 /// </summary>
 public static class SubscriptionPlanSeeder
@@ -66,14 +66,23 @@ public static class SubscriptionPlanSeeder
             logger.LogInformation("Seeded {Count} subscription plans.", plans.Length);
         }
 
-        // Add prices to some demo courses (first 10 get prices, rest stay free)
+        var legacyDiscount = await context.Discounts
+            .FirstOrDefaultAsync(d => d.Code == "DEMO20" && !d.IsDeleted, cancellationToken);
+        if (legacyDiscount is not null)
+        {
+            legacyDiscount.Code = "ACADEMIX20";
+            legacyDiscount.UpdatedAt = DateTime.UtcNow;
+            await context.SaveChangesAsync(cancellationToken);
+        }
+
+        // Add prices only when missing. A zero price is a valid free course and must survive restarts.
         var coursesWithoutPrice = await context.Courses
-            .Where(c => c.Price == null || c.Price == 0)
+            .Where(c => c.Price == null)
             .OrderBy(c => c.CreatedAt)
             .Take(20)
             .ToListAsync(cancellationToken);
 
-        if (coursesWithoutPrice.Any(c => c.Price == null || c.Price == 0))
+        if (coursesWithoutPrice.Any())
         {
             var prices = new[] { 49.99m, 79.99m, 99.99m, 149.99m, 29.99m, 59.99m, 0m, 39.99m, 119.99m, 0m };
             for (int i = 0; i < coursesWithoutPrice.Count; i++)
@@ -81,7 +90,7 @@ public static class SubscriptionPlanSeeder
                 coursesWithoutPrice[i].Price = prices[i % prices.Length];
             }
             await context.SaveChangesAsync(cancellationToken);
-            logger.LogInformation("Added prices to {Count} demo courses.", coursesWithoutPrice.Count);
+            logger.LogInformation("Added prices to {Count} seeded courses.", coursesWithoutPrice.Count);
         }
 
         // Add a discount to the first paid course
@@ -99,7 +108,7 @@ public static class SubscriptionPlanSeeder
                     new Discount
                     {
                         CourseId = paidCourse.Id,
-                        Code = "DEMO20",
+                        Code = "ACADEMIX20",
                         Type = DiscountType.Percentage,
                         Value = 20,
                         IsActive = true,
@@ -115,7 +124,7 @@ public static class SubscriptionPlanSeeder
                 };
                 context.Discounts.AddRange(discounts);
                 await context.SaveChangesAsync(cancellationToken);
-                logger.LogInformation("Seeded {Count} demo discounts for course '{Title}'.", discounts.Length, paidCourse.Title);
+                logger.LogInformation("Seeded {Count} discounts for course '{Title}'.", discounts.Length, paidCourse.Title);
             }
         }
     }

@@ -28,14 +28,13 @@ public class SubscriptionsController : ControllerBase
     /// </summary>
     [HttpGet("me")]
     [ProducesResponseType(typeof(SubscriptionDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetMySubscription(CancellationToken cancellationToken)
     {
         var userId = User.GetRequiredUserId();
         var result = await _subscriptionService.GetSubscriptionByUserIdAsync(userId, cancellationToken);
 
         if (!result.IsSuccess || result.Value == null)
-            return NotFound(result.Error);
+            return Ok(null);
 
         return Ok(result.Value);
     }

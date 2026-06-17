@@ -312,10 +312,10 @@
       "usersExported": "تمّ تصدير المستخدمين",
       "atRiskExported": "تمّ تصدير الطلاب المعرّضين للخطر",
       "csvDownloaded": "تمّ تنزيل ملف CSV.",
-      "comingSoon": "التصدير قريباً",
-      "comingSoonDesc": "سيتوفّر تصدير CSV لتقرير {{report}} قريباً.",
+      "comingSoon": "تم طلب التصدير",
+      "comingSoonDesc": "يجري تجهيز تصدير CSV لتقرير {{report}}.",
       "exportAs": "تصدير بصيغة {{format}}",
-      "exportAsDesc": "قريباً.",
+      "exportAsDesc": "يتم إنشاء الملف من بيانات التقرير الحالية.",
       "exportFailed": "فشل التصدير",
       "exportFailedDesc": "يرجى المحاولة مرّة أخرى."
     },
@@ -663,7 +663,7 @@
     "toasts": {
       "cancelled": "تمّ إلغاء الاشتراك",
       "demoActivated": "تم تفعيل الاشتراك!",
-      "demoActivatedDescription": "تم تسجيل دفعة تجريبية — الخطة مفعّلة الآن."
+      "demoActivatedDescription": "تم تسجيل الدفعة — الخطة مفعّلة الآن."
     },
     "errors": {
       "loadFailed": "تعذّر تحميل بيانات الاشتراك",
@@ -1104,15 +1104,20 @@
     "dashboard": {
       "title": "مساحة العمل المالية",
       "subtitle": "نظرة عامة على الوضع النقدي وسلامة التسويات وما يستدعي اهتمامك اليوم.",
+      "loading": "جارٍ التحميل...",
       "kpi": {
         "netRevenue": "صافي الإيرادات (منذ بداية الشهر)",
-        "netRevenueDelta": "+12.4%",
+        "netRevenueDelta": "لا توجد إيرادات للشهر السابق بعد",
+        "netRevenueDeltaLive": "{{amount}} في الشهر السابق",
         "pendingPayouts": "المدفوعات المعلّقة",
-        "pendingPayoutsDelta": "4 دفعات",
+        "pendingPayoutsDelta": "لا توجد دفعات معلّقة",
+        "pendingPayoutsDeltaLive": "{{count}} دفعات",
         "invoicesDue": "فواتير مستحقّة",
-        "invoicesDueDelta": "هذا الأسبوع",
+        "invoicesDueDelta": "لا توجد فواتير مفتوحة",
+        "invoicesDueDeltaLive": "{{count}} مفتوحة",
         "reconciliation": "التسوية",
-        "reconciliationDelta": "مطابقة"
+        "reconciliationDelta": "لا توجد سجلات دفع بعد",
+        "reconciliationDeltaLive": "{{completed}} مكتملة / {{total}} إجمالي"
       },
       "pipeline": {
         "title": "خط أنابيب التسوية",
@@ -1126,10 +1131,10 @@
         "title": "قائمة الامتثال",
         "subtitle": "الضوابط المتكرّرة لهذه الفترة",
         "items": {
-          "vatExport": "تصدير ضريبة القيمة المضافة مُقفل للربع الأول",
-          "payoutRates": "التحقّق من معدّلات مدفوعات المدرّسين",
-          "refundQueue": "تمّت تسوية قائمة الاستردادات",
-          "chargebackWindow": "مراقبة نافذة ردّ المدين"
+          "paymentLedger": "تم تحميل سجل الدفع: {{count}} سجل",
+          "payoutLiability": "التزام المدفوعات: {{amount}} عبر {{count}} مدرّسين",
+          "invoiceStatus": "الفواتير: {{paid}} مدفوعة / {{open}} مفتوحة",
+          "reconciliationRate": "معدل التسوية: {{rate}}%"
         }
       }
     },
@@ -1138,10 +1143,10 @@
       "subtitle": "فوترة الأعمال والمؤسسات — تابع ما هو مستحقّ وما تمّ إغلاقه.",
       "draftInvoice": "مسودّة فاتورة",
       "outstanding": "المستحقّ",
-      "outstandingAmount": "$5,090",
+      "outstandingAmount": "0.00 ILS",
       "collected30d": "المحصّل (30 يوماً)",
-      "collectedAmount": "$38,120",
-      "demoNote": "أرقام تجريبية لمعاينة التصميم.",
+      "collectedAmount": "0.00 ILS",
+      "liveNote": "محسوبة من سجلات الدفع.",
       "latestTitle": "أحدث الفواتير",
       "latestSubtitle": "الحالة والتواريخ الرئيسية في لمحة.",
       "dueLabel": "مستحقّة {{date}}",
@@ -1158,14 +1163,14 @@
         "nextRunValue": "25 مارس",
         "nextRunSub": "مجدول تلقائياً",
         "onHold": "مُعلّق",
-        "onHoldValue": "$0",
+        "onHoldValue": "0.00 ILS",
         "onHoldSub": "لا توجد عوائق",
         "avgProcessing": "متوسّط المعالجة",
         "avgProcessingValue": "1.2 يوم",
         "avgProcessingSub": "من وقت الإرسال"
       },
       "batchesTitle": "دفعات المدفوعات",
-      "batchesSubtitle": "عرض تشغيلي — لم يُربط بعد بنظام الرواتب الفعلي.",
+      "batchesSubtitle": "عرض تشغيلي للمدربين المستحقين من مبيعات الدورات المكتملة.",
       "newBatch": "دفعة جديدة",
       "instructorsMeta": "{{count}} مدرّسين · {{date}}",
       "statuses": {
@@ -1175,7 +1180,7 @@
     },
     "reports": {
       "title": "التقارير والتصديرات",
-      "subtitle": "عروض جاهزة للمدقّقين والجهات التنظيمية. اربطها بمحرّك إعداد التقارير لديك عند الجاهزية.",
+      "subtitle": "عروض مباشرة للمدقّقين والتسوية والمراجعة التنظيمية.",
       "items": {
         "monthlyRevenueTitle": "ملخّص الإيرادات الشهرية",
         "monthlyRevenueDesc": "رسوم المنصّة وإجمالي المبيعات والاستردادات.",
@@ -1189,8 +1194,8 @@
       },
       "pdf": "PDF",
       "builderTitle": "أداة إنشاء التقارير المخصّصة",
-      "builderDesc": "قريباً — اسحب الأبعاد وعوامل التصفية وجداول التصدير المتكرّرة المحفوظة.",
-      "builderPlaceholder": "مكان مخصّص لأداة التقارير المتقدّمة."
+      "builderDesc": "استخدم التصديرات الجاهزة أعلاه لسجلات الدفعات والمدفوعات والفواتير الحالية.",
+      "builderPlaceholder": "اختر تقريراً من البطاقات أعلاه لتنزيل مجموعة البيانات الحالية."
     },
     "transactions": {
       "title": "المعاملات",
@@ -1198,7 +1203,7 @@
       "filters": "عوامل التصفية",
       "exportCsv": "تصدير CSV",
       "recentActivity": "النشاط الأخير",
-      "recentActivityDesc": "بيانات تجريبية — اربطها بواجهة برمجة التطبيقات المالية عند الجاهزية.",
+      "recentActivityDesc": "مدفوعات مباشرة من واجهة البرمجة المالية.",
       "columns": {
         "reference": "المرجع",
         "counterparty": "الطرف الآخر",
@@ -1231,28 +1236,23 @@
       "subtitle": "لقطة سريعة عن المكتب الأمامي: الطوابير ونقاط التواصل وإيقاع اليوم.",
       "queue": {
         "enrollmentRequests": "طلبات التسجيل",
-        "documentFollowUps": "متابعات الوثائق",
+        "directoryRecords": "سجلات الدليل",
         "messagesAwaitingReply": "رسائل بانتظار الردّ",
-        "needsAttention": "بحاجة إلى اهتمام"
+        "needsAttention": "بحاجة إلى اهتمام",
+        "liveData": "بيانات مباشرة من المنصة"
       },
       "today": {
-        "title": "اليوم",
-        "subtitle": "يوم منظّم — جدول تجريبي.",
-        "items": {
-          "registrarSync": "مزامنة المسجّل — الفوج أ",
-          "walkIn": "ساعات استقبال المراجعين",
-          "certificateDispatch": "إرسال دفعة الشهادات"
-        }
+        "title": "آخر نشاطات التسجيل",
+        "subtitle": "أحدث التسجيلات من قاعدة بيانات المنصة.",
+        "enrollmentLine": "{{learner}} مسجّل في {{course}} — {{section}}",
+        "empty": "لا يوجد نشاط تسجيل."
       },
       "serviceLevel": {
-        "title": "مستوى الخدمة",
-        "subtitle": "أداء المكتب (مؤشرات تجريبية).",
-        "firstResponse": "وقت الردّ الأوّل (الوسيط)",
-        "firstResponseValue": "2س 10د",
-        "slaBreaches": "مخالفات اتفاقية مستوى الخدمة (7 أيام)",
-        "slaBreachesValue": "0",
-        "openTickets": "تذاكر تسجيل مفتوحة",
-        "openTicketsValue": "6"
+        "title": "التغطية التشغيلية",
+        "subtitle": "أعداد التسجيل المباشرة من السجلات الحالية.",
+        "totalEnrollments": "إجمالي سجلات التسجيل",
+        "activeEnrollments": "التسجيلات النشطة",
+        "completedEnrollments": "التسجيلات المكتملة"
       },
       "quickEnrollment": {
         "title": "اختصار: تسجيل جديد",
@@ -1267,14 +1267,24 @@
     },
     "enrollments": {
       "title": "التسجيلات",
-      "subtitle": "قائمة استقبال التسجيلات الجديدة — قم بالفرز والتحقّق والتحويل إلى الفرق الأكاديمية.",
-      "activeQueueTitle": "الطابور النشط",
-      "activeQueueSubtitle": "سجلّات تجريبية لمعاينة الواجهة.",
+      "subtitle": "عرض تشغيلي للقراءة فقط للتسجيلات الحقيقية عبر الدورات.",
+      "activeQueueTitle": "سجلات التسجيل",
+      "activeQueueSubtitle": "تسجيلات مباشرة من قاعدة بيانات المنصة.",
       "export": "تصدير",
       "emailOnFile": "بريد إلكتروني مسجّل",
       "phoneOptional": "اختياري",
       "open": "فتح",
+      "searchPlaceholder": "ابحث عن متعلم أو بريد أو دورة أو شعبة...",
+      "progress": "تقدم {{value}}%",
+      "noEnrollments": "لا توجد تسجيلات",
+      "noEnrollmentsBody": "جرّب بحثاً أو مرشح حالة مختلفاً.",
       "statuses": {
+        "all": "جميع الحالات",
+        "active": "نشط",
+        "completed": "مكتمل",
+        "cancelled": "ملغى",
+        "dropped": "منسحب",
+        "suspended": "معلّق",
         "pending": "معلّقة",
         "review": "قيد المراجعة",
         "approved": "موافق عليها"
@@ -1286,9 +1296,21 @@
     },
     "calendar": {
       "title": "التقويم",
-      "subtitle": "نظرة أسبوعية على مواعيد المكتب الأمامي — يُربط بتقويم حقيقي لاحقًا.",
-      "headerTitle": "مارس 2026 — الأسبوع 12",
-      "headerDesc": "شبكة مرئية (عرض تجريبي للقراءة فقط).",
+      "subtitle": "نظرة أسبوعية مبنية من شعب الدورات المنشورة ومواعيدها.",
+      "headerTitle": "جلسات الدورات",
+      "headerDesc": "جدول للقراءة فقط مشتق من مواعيد شعب الدورات الحقيقية.",
+      "sessionsThisWeek": "جلسات هذا الأسبوع",
+      "coursesScheduled": "دورات مجدولة",
+      "onlineLinks": "روابط إلكترونية",
+      "previousWeek": "الأسبوع السابق",
+      "nextWeek": "الأسبوع التالي",
+      "thisWeek": "هذا الأسبوع",
+      "weekOf": "أسبوع {{start}} - {{end}}",
+      "noSessions": "لا توجد جلسات مجدولة",
+      "noSessionsBody": "لا تحتوي الدورات المنشورة على مواعيد شعب في هذا الأسبوع.",
+      "noDaySessions": "لا توجد جلسات",
+      "openJoinLink": "فتح رابط الانضمام",
+      "noLink": "لا يوجد رابط",
       "weekdays": {
         "mon": "الإثنين",
         "tue": "الثلاثاء",
@@ -1306,9 +1328,12 @@
     },
     "directory": {
       "title": "الدليل",
-      "subtitle": "نظام علاقات عملاء مبسّط للاتصالات المرتدّة — يُربط بواجهة المستخدمين عند الجاهزية.",
-      "searchPlaceholder": "ابحث بالاسم أو البريد الإلكتروني أو الدفعة…",
+      "subtitle": "ابحث في المستخدمين الحقيقيين لمتابعة المكتب الأمامي والتوجيه.",
+      "searchPlaceholder": "ابحث بالاسم أو البريد الإلكتروني...",
       "profile": "الملف الشخصي",
+      "totalPeople": "الأشخاص",
+      "noPeople": "لا يوجد أشخاص",
+      "noPeopleBody": "جرّب عبارة بحث مختلفة.",
       "roles": {
         "student": "طالب",
         "guardian": "وليّ أمر",

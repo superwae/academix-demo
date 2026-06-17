@@ -45,6 +45,66 @@ public class EnrollmentService : IEnrollmentService
         return Result<EnrollmentDto>.Success(enrollmentDto);
     }
 
+    public async Task<Result<PagedResult<EnrollmentDto>>> GetPagedAsync(PagedRequest request, CancellationToken cancellationToken = default)
+    {
+        var query = _context.Enrollments
+            .Include(e => e.User)
+            .Include(e => e.Course)
+            .Include(e => e.Section)
+            .Include(e => e.AssignedByOrg)
+            .Where(e => !e.IsDeleted)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(request.SearchTerm))
+        {
+            var searchTerm = request.SearchTerm.ToLower();
+            var statusMatch = Enum.TryParse<EnrollmentStatus>(request.SearchTerm, true, out var parsedStatus);
+
+            query = query.Where(e =>
+                e.User.FirstName.ToLower().Contains(searchTerm) ||
+                e.User.LastName.ToLower().Contains(searchTerm) ||
+                e.User.Email.ToLower().Contains(searchTerm) ||
+                e.Course.Title.ToLower().Contains(searchTerm) ||
+                e.Section.Name.ToLower().Contains(searchTerm) ||
+                (statusMatch && e.Status == parsedStatus));
+        }
+
+        query = request.SortBy?.ToLower() switch
+        {
+            "user" => request.SortDescending
+                ? query.OrderByDescending(e => e.User.LastName).ThenByDescending(e => e.User.FirstName)
+                : query.OrderBy(e => e.User.LastName).ThenBy(e => e.User.FirstName),
+            "course" => request.SortDescending
+                ? query.OrderByDescending(e => e.Course.Title)
+                : query.OrderBy(e => e.Course.Title),
+            "section" => request.SortDescending
+                ? query.OrderByDescending(e => e.Section.Name)
+                : query.OrderBy(e => e.Section.Name),
+            "status" => request.SortDescending
+                ? query.OrderByDescending(e => e.Status)
+                : query.OrderBy(e => e.Status),
+            "enrolled" => request.SortDescending
+                ? query.OrderByDescending(e => e.EnrolledAt)
+                : query.OrderBy(e => e.EnrolledAt),
+            _ => query.OrderByDescending(e => e.EnrolledAt)
+        };
+
+        var totalCount = await query.CountAsync(cancellationToken);
+        var skip = (request.PageNumber - 1) * request.PageSize;
+        var enrollments = await query
+            .Skip(skip)
+            .Take(request.PageSize)
+            .ToListAsync(cancellationToken);
+
+        return Result<PagedResult<EnrollmentDto>>.Success(new PagedResult<EnrollmentDto>
+        {
+            Items = enrollments.Select(MapToEnrollmentDto).ToList(),
+            PageNumber = request.PageNumber,
+            PageSize = request.PageSize,
+            TotalCount = totalCount
+        });
+    }
+
     public async Task<Result<PagedResult<EnrollmentDto>>> GetByUserAsync(Guid userId, PagedRequest request, CancellationToken cancellationToken = default)
     {
         var query = _context.Enrollments
@@ -427,6 +487,88 @@ public class EnrollmentService : IEnrollmentService
             await transaction.RollbackAsync(cancellationToken);
             _logger.LogError(ex, "Error unenrolling user {UserId} from enrollment {EnrollmentId}", userId, enrollmentId);
             return Result.Failure($"An error occurred while unenrolling: {ex.Message}");
+        }
+    }
+
+    public async Task<Result<EnrollmentDto>> SwitchSectionAsync(Guid enrollmentId, Guid newSectionId, Guid userId, bool isAdmin = false, CancellationToken cancellationToken = default)
+    {
+        var dbContext = _context as DbContext ?? throw new InvalidOperationException("Context must be a DbContext");
+        using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+        try
+        {
+            var enrollment = await _context.Enrollments
+                .Include(e => e.Section)
+                .FirstOrDefaultAsync(e => e.Id == enrollmentId && !e.IsDeleted, cancellationToken);
+
+            if (enrollment == null)
+                return Result<EnrollmentDto>.Failure(_localizer["EnrollmentNotFound"]);
+
+            // Ownership: students can only move their own enrollment.
+            if (!isAdmin && enrollment.UserId != userId)
+                return Result<EnrollmentDto>.Failure(_localizer["UnenrollOnlyOwn"]);
+
+            // Only an active enrollment can switch sections.
+            if (enrollment.Status != EnrollmentStatus.Active)
+                return Result<EnrollmentDto>.Failure(_localizer["UnenrollInvalidStatus", enrollment.Status]);
+
+            if (enrollment.SectionId == newSectionId)
+                return Result<EnrollmentDto>.Failure(_localizer["AlreadyEnrolledSection"]);
+
+            // Target section must belong to the same course, be active, and have a free seat.
+            var newSection = await _context.CourseSections
+                .FirstOrDefaultAsync(s => s.Id == newSectionId && s.CourseId == enrollment.CourseId && !s.IsDeleted, cancellationToken);
+
+            if (newSection == null)
+                return Result<EnrollmentDto>.Failure(_localizer["SectionNotFound"]);
+            if (!newSection.IsActive)
+                return Result<EnrollmentDto>.Failure(_localizer["SectionInactive"]);
+
+            if (newSection.MaxSeats > 0)
+            {
+                var takenSeats = await _context.Enrollments
+                    .CountAsync(e =>
+                        e.SectionId == newSection.Id &&
+                        !e.IsDeleted &&
+                        (e.Status == EnrollmentStatus.Active || e.Status == EnrollmentStatus.Completed),
+                        cancellationToken);
+                if (takenSeats >= newSection.MaxSeats)
+                    return Result<EnrollmentDto>.Failure(_localizer["SectionFull"]);
+            }
+
+            var oldSection = enrollment.Section;
+            enrollment.SectionId = newSection.Id;
+            enrollment.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync(cancellationToken);
+
+            // Re-sync seat counts on both the old and the new section.
+            foreach (var section in new[] { oldSection, newSection })
+            {
+                if (section == null || section.MaxSeats <= 0) continue;
+                var active = await _context.Enrollments
+                    .CountAsync(e =>
+                        e.SectionId == section.Id &&
+                        !e.IsDeleted &&
+                        (e.Status == EnrollmentStatus.Active || e.Status == EnrollmentStatus.Completed),
+                        cancellationToken);
+                section.SeatsRemaining = Math.Max(0, section.MaxSeats - active);
+            }
+            await _context.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+
+            _logger.LogInformation("User {UserId} switched enrollment {EnrollmentId} to section {SectionId}", userId, enrollmentId, newSectionId);
+
+            var reloaded = await _context.Enrollments
+                .Include(e => e.User)
+                .Include(e => e.Course)
+                .Include(e => e.Section)
+                .FirstAsync(e => e.Id == enrollment.Id, cancellationToken);
+            return Result<EnrollmentDto>.Success(MapToEnrollmentDto(reloaded));
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync(cancellationToken);
+            _logger.LogError(ex, "Error switching section for enrollment {EnrollmentId}", enrollmentId);
+            return Result<EnrollmentDto>.Failure($"An error occurred while switching section: {ex.Message}");
         }
     }
 

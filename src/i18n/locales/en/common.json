@@ -112,6 +112,6 @@
     "noResults": "No results found."
   },
   "refresh": "Refresh",
-  "demoData": "Demo data",
-  "demoDataTooltip": "This section shows sample data for demonstration purposes"
+  "demoData": "Preview data",
+  "demoDataTooltip": "This section shows preview data."
 }

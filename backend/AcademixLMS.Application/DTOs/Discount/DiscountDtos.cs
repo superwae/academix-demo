@@ -31,6 +31,7 @@ public class CreateDiscountRequest
     public DateTime? StartsAt { get; set; }
     public DateTime? ExpiresAt { get; set; }
     public int? MaxUses { get; set; }
+    public bool? IsActive { get; set; }
 }
 
 /// <summary>

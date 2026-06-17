@@ -24,16 +24,6 @@ function safeDate(dateValue: string | null | undefined): Date | null {
   return isValid(date) ? date : null
 }
 
-function useFakeLoad() {
-  const [loading, setLoading] = useState(true)
-  useEffect(() => {
-    const ms = 600 + Math.floor(Math.random() * 300)
-    const t = window.setTimeout(() => setLoading(false), ms)
-    return () => window.clearTimeout(t)
-  }, [])
-  return loading
-}
-
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -908,4 +898,3 @@ function RecommendationCard({ course, delay }: { course: CourseDto; delay: numbe
     </motion.div>
   )
 }
-

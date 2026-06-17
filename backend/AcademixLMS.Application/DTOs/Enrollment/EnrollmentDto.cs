@@ -33,6 +33,11 @@ public class UpdateEnrollmentRequest
     public decimal? ProgressPercentage { get; set; }
 }
 
+public class SwitchSectionRequest
+{
+    public Guid SectionId { get; set; }
+}
+
 public class MyEnrollmentsDto
 {
     public Guid Id { get; set; }

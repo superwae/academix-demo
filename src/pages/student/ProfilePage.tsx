@@ -1,173 +1,77 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type ChangeEvent, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
+import {
+  Award,
+  BookOpen,
+  Calendar,
+  Camera,
+  CheckCircle2,
+  ImagePlus,
+  Lock,
+  Mail,
+  Sparkles,
+  User,
+} from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Textarea } from '../../components/ui/textarea'
 import { Badge } from '../../components/ui/badge'
-import { userService, type UserDto } from '../../services/userService'
-import { toast } from 'sonner'
-import { useAuthStore } from '../../store/useAuthStore'
-import {
-  User,
-  Camera,
-  Award,
-  GraduationCap,
-  Mail,
-  BookOpen,
-  Calendar,
-  CheckCircle2,
-  Sparkles,
-  Medal,
-  Star,
-  Zap,
-  Trophy,
-  Target,
-  ImagePlus,
-  Lock,
-} from 'lucide-react'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
-import { cn } from '../../lib/cn'
+import { userService, type UserDto } from '../../services/userService'
+import { enrollmentService, type EnrollmentDto } from '../../services/enrollmentService'
+import { courseExtrasService, type CertificateDto } from '../../services/courseExtrasService'
 import { fileService } from '../../services/fileService'
+import { useAuthStore } from '../../store/useAuthStore'
+import { cn } from '../../lib/cn'
 
-const MOCK_BIO =
-  'Passionate learner exploring technology and science. Currently focusing on programming, data analysis, and building real-world projects.'
-const MOCK_CERTIFICATES = [
-  {
-    id: '1',
-    name: 'Introduction to Python',
-    issuer: 'AcademiX',
-    date: 'Sep 2024',
-    credentialId: 'AX-PY101-7821',
-  },
-  {
-    id: '2',
-    name: 'Data Analysis Fundamentals',
-    issuer: 'AcademiX',
-    date: 'Jan 2025',
-    credentialId: 'AX-DA200-3345',
-  },
-  {
-    id: '3',
-    name: 'Web Development Basics',
-    issuer: 'AcademiX',
-    date: 'Mar 2025',
-    credentialId: 'AX-WD100-5510',
-  },
-]
-const MOCK_MAJORS = [
-  { name: 'Programming', years: '2 years' },
-  { name: 'Data Science', years: '1 year' },
-  { name: 'Web Development', years: '1 year' },
-]
-const MOCK_STATS = { courses: 5, certifications: 3, memberSince: '2024' }
-// Demo images: cover PNG (place your image at public/demo/profile-cover.png); fallback is SVG
-const DEMO_COVER_IMAGE = '/demo/profile-cover.png'
-const DEMO_COVER_IMAGE_FALLBACK = '/demo/profile-cover.svg'
-const DEMO_AVATAR_IMAGE = '/demo/profile-avatar.svg'
-const DEMO_REAL_PERSON_AVATAR = 'https://i.pravatar.cc/400?img=33'
+type CertificateSummary = CertificateDto & {
+  courseId: string
+  enrollmentId: string
+}
 
-const MOCK_BADGES = [
-  { id: '1', name: 'First Course', description: 'Completed first course', icon: Star, color: 'text-amber-500', bg: 'bg-amber-500/10', earnedAt: 'Oct 2024' },
-  { id: '2', name: 'Quick Learner', description: 'Finished 3 lessons in a day', icon: Zap, color: 'text-emerald-600', bg: 'bg-emerald-500/10', earnedAt: 'Nov 2024' },
-  { id: '3', name: 'Perfect Score', description: '100% on an exam', icon: Trophy, color: 'text-primary', bg: 'bg-primary/10', earnedAt: 'Dec 2024' },
-  { id: '4', name: 'Bookworm', description: 'Read all course materials', icon: Medal, color: 'text-violet-600', bg: 'bg-violet-500/10', earnedAt: 'Jan 2025' },
-  { id: '5', name: 'Streak Master', description: '7-day login streak', icon: Target, color: 'text-sky-600', bg: 'bg-sky-500/10', earnedAt: 'Feb 2025' },
-]
+function isCompletedEnrollment(enrollment: EnrollmentDto): boolean {
+  return enrollment.status === 'Completed' || enrollment.progressPercentage >= 100
+}
+
+function initialsFor(user: UserDto): string {
+  const first = user.firstName?.trim()?.[0] ?? ''
+  const last = user.lastName?.trim()?.[0] ?? ''
+  return `${first}${last}`.toUpperCase() || user.email.slice(0, 2).toUpperCase()
+}
+
+function formatDate(date?: string | null): string {
+  if (!date) return ''
+  const d = new Date(date)
+  if (Number.isNaN(d.getTime())) return ''
+  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+}
 
 export function ProfilePage() {
   const { t } = useTranslation(['student', 'common', 'errors'])
   const { user: authUser, updateUser: updateAuthUser } = useAuthStore()
   const [user, setUser] = useState<UserDto | null>(null)
+  const [enrollments, setEnrollments] = useState<EnrollmentDto[]>([])
+  const [certificates, setCertificates] = useState<CertificateSummary[]>([])
   const [loading, setLoading] = useState(true)
 
   const [bio, setBio] = useState('')
   const [bioSaving, setBioSaving] = useState(false)
   const [photoUrl, setPhotoUrl] = useState<string | null>(null)
-  const [coverImageUrl, setCoverImageUrl] = useState<string | null>(DEMO_COVER_IMAGE)
+  const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null)
+  const [uploadingPhoto, setUploadingPhoto] = useState(false)
   const [uploadingCover, setUploadingCover] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const coverInputRef = useRef<HTMLInputElement>(null)
-  const [avatarImageError, setAvatarImageError] = useState<'none' | 'real' | 'both'>('none')
 
+  const [passwordFormOpen, setPasswordFormOpen] = useState(false)
+  const [changingPassword, setChangingPassword] = useState(false)
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: '',
     newPassword: '',
     confirmPassword: '',
   })
-  const [passwordFormOpen, setPasswordFormOpen] = useState(false)
-  const [changingPassword, setChangingPassword] = useState(false)
-  const [uploadingPhoto, setUploadingPhoto] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-
-  const handlePhotoUpload = () => {
-    fileInputRef.current?.click()
-  }
-
-  const handleFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error(t('student:profile.errors.imageTooLarge'))
-      return
-    }
-    try {
-      setUploadingPhoto(true)
-      const result = await fileService.uploadFile(file, 'profile-photos')
-      await userService.updateCurrentUser({ profilePictureUrl: result.fileUrl })
-      setPhotoUrl(result.fileUrl)
-      setAvatarImageError('none')
-      // Update auth store so the header avatar + any other consumers reflect the change
-      updateAuthUser({ profilePictureUrl: result.fileUrl })
-      toast.success(t('student:profile.photoUpdated'))
-    } catch (error) {
-      toast.error(t('student:profile.errors.uploadPhotoFailed'), {
-        description: error instanceof Error ? error.message : undefined,
-      })
-    } finally {
-      setUploadingPhoto(false)
-      // Reset so the same file can be selected again
-      if (fileInputRef.current) fileInputRef.current.value = ''
-    }
-  }
-
-  const handleSaveBio = async () => {
-    try {
-      setBioSaving(true)
-      await userService.updateCurrentUser({ bio })
-      updateAuthUser({ bio })
-      toast.success(t('student:profile.bioUpdated'))
-    } catch (error) {
-      toast.error(t('student:profile.errors.saveBioFailed'), { description: error instanceof Error ? error.message : undefined })
-    } finally {
-      setBioSaving(false)
-    }
-  }
-
-  const handleCoverUpload = () => {
-    coverInputRef.current?.click()
-  }
-
-  const handleCoverSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error(t('student:profile.errors.imageTooLarge'))
-      return
-    }
-    try {
-      setUploadingCover(true)
-      const result = await fileService.uploadFile(file, 'cover-images')
-      await userService.updateCurrentUser({ coverImageUrl: result.fileUrl })
-      setCoverImageUrl(result.fileUrl)
-      updateAuthUser({ coverImageUrl: result.fileUrl })
-      toast.success(t('student:profile.coverUpdated'))
-    } catch (error) {
-      toast.error(t('student:profile.errors.uploadCoverFailed'), { description: error instanceof Error ? error.message : undefined })
-    } finally {
-      setUploadingCover(false)
-      if (coverInputRef.current) coverInputRef.current.value = ''
-    }
-  }
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -175,21 +79,40 @@ export function ProfilePage() {
         setLoading(false)
         return
       }
+
       try {
         setLoading(true)
-        const userData = await userService.getCurrentUser()
+        const [userData, enrollmentResult] = await Promise.all([
+          userService.getCurrentUser(),
+          enrollmentService.getMyEnrollments({ pageSize: 500 }),
+        ])
+
         setUser(userData)
         setPhotoUrl(userData.profilePictureUrl || null)
-        setBio(userData.bio || MOCK_BIO)
-        if (userData.coverImageUrl) setCoverImageUrl(userData.coverImageUrl)
-        setAvatarImageError('none')
-        // Sync the auth store so sidebar card + header avatar reflect the latest
-        // server state even if a different session updated the user's photo.
+        setCoverImageUrl(userData.coverImageUrl || null)
+        setBio(userData.bio || '')
+        setEnrollments(enrollmentResult.items)
+
         updateAuthUser({
           profilePictureUrl: userData.profilePictureUrl,
           bio: userData.bio,
           coverImageUrl: userData.coverImageUrl,
         })
+
+        const completed = enrollmentResult.items.filter(isCompletedEnrollment)
+        const certificateResults = await Promise.allSettled(
+          completed.map(async (enrollment) => {
+            const certificate = await courseExtrasService.getCertificate(enrollment.courseId)
+            return { ...certificate, courseId: enrollment.courseId, enrollmentId: enrollment.id }
+          }),
+        )
+
+        setCertificates(
+          certificateResults
+            .filter((result): result is PromiseFulfilledResult<CertificateSummary> => result.status === 'fulfilled')
+            .map((result) => result.value)
+            .filter((certificate) => certificate.eligible),
+        )
       } catch (error) {
         toast.error(t('student:profile.errors.loadProfileFailed'), {
           description: error instanceof Error ? error.message : t('student:calendar.errors.tryLater'),
@@ -198,12 +121,92 @@ export function ProfilePage() {
         setLoading(false)
       }
     }
+
     loadProfile()
-    // Only re-run when the logged-in user ID changes (login/logout), NOT
-    // whenever fields on the user object mutate — otherwise updateAuthUser
-    // inside this effect would trigger an infinite reload loop.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authUser?.id])
+
+  const stats = useMemo(() => {
+    const active = enrollments.filter((e) => e.status === 'Active').length
+    const completed = enrollments.filter(isCompletedEnrollment).length
+    return {
+      courses: enrollments.length,
+      active,
+      completed,
+      certifications: certificates.length,
+    }
+  }, [enrollments, certificates])
+
+  const handlePhotoUpload = () => fileInputRef.current?.click()
+  const handleCoverUpload = () => coverInputRef.current?.click()
+
+  const uploadImage = async (file: File, folder: 'profile-photos' | 'cover-images') => {
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error(t('student:profile.errors.imageTooLarge'))
+      return null
+    }
+    return fileService.uploadFile(file, folder)
+  }
+
+  const handleFileSelected = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    try {
+      setUploadingPhoto(true)
+      const result = await uploadImage(file, 'profile-photos')
+      if (!result) return
+      const updated = await userService.updateCurrentUser({ profilePictureUrl: result.fileUrl })
+      setUser(updated)
+      setPhotoUrl(result.fileUrl)
+      updateAuthUser({ profilePictureUrl: result.fileUrl })
+      toast.success(t('student:profile.photoUpdated'))
+    } catch (error) {
+      toast.error(t('student:profile.errors.uploadPhotoFailed'), {
+        description: error instanceof Error ? error.message : undefined,
+      })
+    } finally {
+      setUploadingPhoto(false)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+  }
+
+  const handleCoverSelected = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    try {
+      setUploadingCover(true)
+      const result = await uploadImage(file, 'cover-images')
+      if (!result) return
+      const updated = await userService.updateCurrentUser({ coverImageUrl: result.fileUrl })
+      setUser(updated)
+      setCoverImageUrl(result.fileUrl)
+      updateAuthUser({ coverImageUrl: result.fileUrl })
+      toast.success(t('student:profile.coverUpdated'))
+    } catch (error) {
+      toast.error(t('student:profile.errors.uploadCoverFailed'), {
+        description: error instanceof Error ? error.message : undefined,
+      })
+    } finally {
+      setUploadingCover(false)
+      if (coverInputRef.current) coverInputRef.current.value = ''
+    }
+  }
+
+  const handleSaveBio = async () => {
+    try {
+      setBioSaving(true)
+      const updated = await userService.updateCurrentUser({ bio })
+      setUser(updated)
+      updateAuthUser({ bio })
+      toast.success(t('student:profile.bioUpdated'))
+    } catch (error) {
+      toast.error(t('student:profile.errors.saveBioFailed'), {
+        description: error instanceof Error ? error.message : undefined,
+      })
+    } finally {
+      setBioSaving(false)
+    }
+  }
 
   const handleChangePassword = async () => {
     if (!passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
@@ -218,6 +221,7 @@ export function ProfilePage() {
       toast.error(t('student:profile.errors.newPasswordsMismatch'))
       return
     }
+
     try {
       setChangingPassword(true)
       await userService.changePassword(passwordForm.currentPassword, passwordForm.newPassword)
@@ -236,7 +240,7 @@ export function ProfilePage() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="h-32 rounded-2xl bg-muted/50 animate-pulse" />
+        <div className="h-40 rounded-2xl bg-muted/50 animate-pulse" />
         <Card className="max-w-4xl">
           <CardContent className="flex items-center justify-center py-16">
             <div className="flex flex-col items-center gap-3">
@@ -263,44 +267,32 @@ export function ProfilePage() {
     )
   }
 
-  const displayPhotoUrl =
-    photoUrl ||
-    user?.profilePictureUrl ||
-    (avatarImageError === 'both' ? null : avatarImageError === 'real' ? DEMO_AVATAR_IMAGE : DEMO_REAL_PERSON_AVATAR)
-  const memberYear = user.createdAt ? new Date(user.createdAt).getFullYear() : MOCK_STATS.memberSince
+  const memberYear = new Date(user.createdAt).getFullYear()
+  const displayPhotoUrl = photoUrl || user.profilePictureUrl || null
 
   return (
     <div className="space-y-8 pb-20">
-      {/* Hidden file inputs for uploads */}
       <input ref={fileInputRef} type="file" accept="image/png,image/jpeg,image/gif" className="hidden" onChange={handleFileSelected} />
       <input ref={coverInputRef} type="file" accept="image/png,image/jpeg,image/gif" className="hidden" onChange={handleCoverSelected} />
+
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">{t('student:profile.title')}</h1>
         <p className="text-sm text-muted-foreground mt-0.5">{t('student:profile.subtitle')}</p>
       </div>
 
-      {/* Cover image + personal image (avatar) */}
       <div className="relative overflow-hidden rounded-2xl group/cover">
-        {/* Cover image */}
-        <div className="relative h-36 sm:h-40 w-full rounded-2xl overflow-hidden bg-muted">
+        <div className="relative h-36 sm:h-44 w-full rounded-2xl overflow-hidden bg-muted">
           {coverImageUrl ? (
             <img
               src={coverImageUrl}
               alt=""
               className="h-full w-full object-cover"
-              onError={() =>
-                setCoverImageUrl((prev) =>
-                  prev === DEMO_COVER_IMAGE ? DEMO_COVER_IMAGE_FALLBACK : null
-                )
-              }
+              onError={() => setCoverImageUrl(null)}
             />
           ) : (
-            <div
-              className="h-full w-full bg-gradient-to-br from-primary/90 via-primary to-primary/70"
-              aria-hidden
-            />
+            <div className="h-full w-full bg-gradient-to-br from-primary/85 via-sky-500/70 to-emerald-500/60" aria-hidden />
           )}
-          <div className="absolute inset-0 rounded-2xl bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(255,255,255,0.2),transparent)]" />
+          <div className="absolute inset-0 rounded-2xl bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(255,255,255,0.28),transparent)]" />
           <div className="absolute bottom-0 start-0 end-0 h-24 bg-gradient-to-t from-background to-transparent rounded-b-2xl" />
           <button
             type="button"
@@ -316,7 +308,6 @@ export function ProfilePage() {
 
         <div className="relative px-4 sm:px-6 lg:px-8 -mt-16 sm:-mt-20">
           <div className="flex flex-col sm:flex-row sm:items-end gap-4 sm:gap-6">
-            {/* Personal image (avatar) */}
             <div className="relative shrink-0">
               <div
                 className={cn(
@@ -327,14 +318,12 @@ export function ProfilePage() {
                 {displayPhotoUrl ? (
                   <img
                     src={displayPhotoUrl}
-                    alt="Profile"
+                    alt=""
                     className="h-full w-full object-cover"
-                    onError={() =>
-                      setAvatarImageError((prev) => (prev === 'none' ? 'real' : 'both'))
-                    }
+                    onError={() => setPhotoUrl(null)}
                   />
                 ) : (
-                  <User className="h-14 w-14 sm:h-16 sm:w-16 text-muted-foreground" aria-hidden />
+                  <span className="text-3xl font-bold text-muted-foreground">{initialsFor(user)}</span>
                 )}
               </div>
               <button
@@ -347,6 +336,7 @@ export function ProfilePage() {
                 <Camera className="h-4 w-4" />
               </button>
             </div>
+
             <div className="flex-1 min-w-0 pb-1">
               <h2 className="text-2xl sm:text-3xl font-bold tracking-tight truncate">
                 {user.fullName || `${user.firstName} ${user.lastName}`.trim() || t('student:profile.title')}
@@ -364,11 +354,11 @@ export function ProfilePage() {
               <div className="flex flex-wrap gap-2 mt-3">
                 <Badge variant="secondary" className="font-medium">
                   <BookOpen className="h-3.5 w-3.5 me-1" />
-                  {t('student:profile.coursesCount', { count: MOCK_STATS.courses })}
+                  {t('student:profile.coursesCount', { count: stats.courses })}
                 </Badge>
                 <Badge variant="secondary" className="font-medium">
                   <Award className="h-3.5 w-3.5 me-1" />
-                  {t('student:profile.certificationsCount', { count: MOCK_STATS.certifications })}
+                  {t('student:profile.certificationsCount', { count: stats.certifications })}
                 </Badge>
               </div>
             </div>
@@ -376,10 +366,14 @@ export function ProfilePage() {
         </div>
       </div>
 
-      {/* Main content: two columns on large screens */}
-      <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+      <div className="grid gap-4 md:grid-cols-3">
+        <StatCard icon={<BookOpen className="h-5 w-5 text-primary" />} label={t('student:profile.coursesCount', { count: stats.courses })} value={stats.courses} />
+        <StatCard icon={<CheckCircle2 className="h-5 w-5 text-emerald-600" />} label={t('student:profile.completedCourses')} value={stats.completed} />
+        <StatCard icon={<Award className="h-5 w-5 text-amber-600" />} label={t('student:profile.certifications')} value={stats.certifications} />
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
         <div className="space-y-6 min-w-0">
-          {/* About */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
@@ -404,7 +398,6 @@ export function ProfilePage() {
             </CardContent>
           </Card>
 
-          {/* Certificates */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
@@ -414,32 +407,58 @@ export function ProfilePage() {
               <CardDescription>{t('student:profile.certificationsSubtitle')}</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-4 sm:grid-cols-2">
-                {MOCK_CERTIFICATES.map((cert) => (
-                  <div
-                    key={cert.id}
-                    className="group relative rounded-xl border border-border/60 bg-muted/20 p-4 transition-colors hover:border-primary/30 hover:bg-muted/40"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0 flex-1">
-                        <div className="font-semibold text-sm leading-snug">{cert.name}</div>
-                        <div className="text-xs text-muted-foreground mt-1">{cert.issuer}</div>
-                        <div className="text-xs text-muted-foreground/80 mt-0.5">{cert.date}</div>
-                        {cert.credentialId && (
-                          <div className="text-[11px] text-muted-foreground/70 font-mono mt-1">{t('student:profile.credentialId', { id: cert.credentialId })}</div>
-                        )}
-                      </div>
-                      <div className="shrink-0 rounded-full bg-primary/10 p-1.5" title={t('student:profile.verified')}>
-                        <CheckCircle2 className="h-5 w-5 text-primary" />
+              {certificates.length === 0 ? (
+                <div className="rounded-xl border border-dashed border-border p-6 text-center">
+                  <Award className="mx-auto h-10 w-10 text-muted-foreground/50" />
+                  <p className="mt-3 text-sm font-medium">{t('student:profile.noCertifications')}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">{t('student:profile.noCertificationsBody')}</p>
+                </div>
+              ) : (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {certificates.map((cert) => (
+                    <div
+                      key={cert.certificateId || cert.enrollmentId}
+                      className="group relative rounded-xl border border-border/60 bg-muted/20 p-4 transition-colors hover:border-primary/30 hover:bg-muted/40"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                          <div className="font-semibold text-sm leading-snug">{cert.courseTitle}</div>
+                          <div className="text-xs text-muted-foreground mt-1">{cert.instructorName}</div>
+                          <div className="text-xs text-muted-foreground/80 mt-0.5">{formatDate(cert.issuedAt)}</div>
+                          {cert.certificateId && (
+                            <div className="text-[11px] text-muted-foreground/70 font-mono mt-1">
+                              {t('student:profile.credentialId', { id: cert.certificateId })}
+                            </div>
+                          )}
+                        </div>
+                        <div className="shrink-0 rounded-full bg-primary/10 p-1.5" title={t('student:profile.verified')}>
+                          <CheckCircle2 className="h-5 w-5 text-primary" />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <User className="h-5 w-5 text-primary" />
+                {t('student:profile.learningSnapshot')}
+              </CardTitle>
+              <CardDescription>{t('student:profile.learningSnapshotSubtitle')}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm">
+              <SnapshotRow label={t('student:profile.activeCourses')} value={stats.active} />
+              <SnapshotRow label={t('student:profile.completedCourses')} value={stats.completed} />
+              <SnapshotRow label={t('student:profile.certifications')} value={stats.certifications} />
             </CardContent>
           </Card>
 
-          {/* Change password */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
@@ -500,71 +519,31 @@ export function ProfilePage() {
               )}
             </CardContent>
           </Card>
-
-          {/* Focus areas */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <GraduationCap className="h-5 w-5 text-primary" />
-                {t('student:profile.focusAreas')}
-              </CardTitle>
-              <CardDescription>{t('student:profile.focusAreasSubtitle')}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-3 sm:grid-cols-2">
-                {MOCK_MAJORS.map((m) => (
-                  <div
-                    key={m.name}
-                    className="flex items-center justify-between rounded-xl border border-border/60 bg-muted/20 px-4 py-3 transition-colors hover:border-primary/30 hover:bg-muted/40"
-                  >
-                    <span className="font-medium text-sm">{m.name}</span>
-                    <span className="text-xs text-muted-foreground">{m.years}</span>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-        </div>
-
-        {/* Sidebar: Badges */}
-        <div className="lg:order-none">
-          <Card className="sticky top-4">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Medal className="h-5 w-5 text-primary" />
-                {t('student:profile.badges')}
-              </CardTitle>
-              <CardDescription>{t('student:profile.badgesSubtitle')}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {MOCK_BADGES.map((b) => {
-                  const Icon = b.icon
-                  return (
-                    <div
-                      key={b.id}
-                      className={cn(
-                        'flex items-start gap-3 rounded-xl border border-border/60 p-3 transition-colors hover:border-primary/30',
-                        b.bg,
-                      )}
-                    >
-                      <div className={cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-lg', b.bg, b.color)}>
-                        <Icon className="h-5 w-5" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="font-semibold text-sm">{b.name}</div>
-                        <div className="text-xs text-muted-foreground mt-0.5">{b.description}</div>
-                        <div className="text-[11px] text-muted-foreground/80 mt-1">{b.earnedAt}</div>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </div>
+    </div>
+  )
+}
+
+function StatCard({ icon, label, value }: { icon: ReactNode; label: string; value: number }) {
+  return (
+    <Card>
+      <CardContent className="flex items-center gap-3 p-4">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">{icon}</div>
+        <div>
+          <p className="text-xs text-muted-foreground">{label}</p>
+          <p className="text-2xl font-bold">{value}</p>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+function SnapshotRow({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="flex items-center justify-between rounded-lg bg-muted/40 px-3 py-2">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-semibold tabular-nums">{value}</span>
     </div>
   )
 }

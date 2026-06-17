@@ -239,6 +239,8 @@
     "addedSectionsHint": "الشُّعب المُضافة ({{count}}) — انقر لتحديد المقاعد وأوقات اللقاءات",
     "timesCount_one": "وقت واحد",
     "timesCount_other": "{{count}} أوقات",
+    "joinUrlLabel": "رابط الاجتماع الإلكتروني (Zoom أو Meet...)",
+    "joinUrlHint": "يظهر للطلاب المسجلين في الجلسات المباشرة والتقويم.",
     "removeSection": "إزالة {{name}}",
     "meetingTimesWeekly": "أوقات اللقاءات (أسبوعياً)",
     "noTimesYet": "لا توجد أوقات لقاءات بعد — انقر على \"إضافة وقت\" أعلاه",
@@ -682,7 +684,7 @@
     "toasts": {
       "cancelled": "تم إلغاء الاشتراك",
       "demoActivated": "تم تفعيل الاشتراك!",
-      "demoActivatedDescription": "تم تسجيل دفعة تجريبية — خطتك مفعّلة الآن."
+      "demoActivatedDescription": "تم تسجيل الدفعة — خطتك مفعّلة الآن."
     },
     "errors": {
       "loadFailed": "تعذّر تحميل بيانات الاشتراك",

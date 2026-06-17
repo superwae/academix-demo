@@ -9,7 +9,7 @@ import { Button } from '../../components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../../components/ui/dialog'
 import { teacherService } from '../../services/teacherService'
 import type { CourseDto } from '../../services/courseService'
-import { Calendar, Clock, MapPin, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Calendar, Clock, MapPin, ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -129,6 +129,7 @@ function buildCalendarEvents(
       sectionId: string
       sectionName: string
       location: string
+      joinUrl?: string
     }
   }[] = []
 
@@ -159,6 +160,7 @@ function buildCalendarEvents(
               sectionId: section.id,
               sectionName: section.name,
               location: section.locationLabel,
+              joinUrl: section.joinUrl,
             },
           })
         }
@@ -180,6 +182,7 @@ export function TeacherCalendarPage() {
     courseId: string
     sectionId: string
     sectionName: string
+    joinUrl?: string
   } | null>(null)
   const [calendarView, setCalendarView] = useState<'week' | 'month'>('week')
   const [visibleRange, setVisibleRange] = useState<{ start: Date; end: Date }>(() => {
@@ -383,6 +386,7 @@ export function TeacherCalendarPage() {
                     sectionId: string
                     sectionName: string
                     location: string
+                    joinUrl?: string
                   }
                   setEventInfo({
                     title: arg.event.title,
@@ -390,6 +394,7 @@ export function TeacherCalendarPage() {
                     courseId: ext.courseId,
                     sectionId: ext.sectionId,
                     sectionName: ext.sectionName,
+                    joinUrl: ext.joinUrl,
                   })
                   setEventOpen(true)
                 }}
@@ -431,7 +436,15 @@ export function TeacherCalendarPage() {
                   </div>
                 </div>
               </div>
-              <div className="pt-2 border-t border-border">
+              <div className="flex flex-wrap gap-2 pt-2 border-t border-border">
+                {eventInfo.joinUrl && (
+                  <Button size="sm" asChild>
+                    <a href={eventInfo.joinUrl} target="_blank" rel="noreferrer">
+                      <ExternalLink className="me-1.5 h-3.5 w-3.5" />
+                      {t('teacher:calendar.openLiveSession', { defaultValue: 'Open live session' })}
+                    </a>
+                  </Button>
+                )}
                 <Button variant="outline" size="sm" asChild>
                   <Link to={`/teacher/courses/${eventInfo.courseId}/edit`}>{t('teacher:calendar.editCourse')}</Link>
                 </Button>
