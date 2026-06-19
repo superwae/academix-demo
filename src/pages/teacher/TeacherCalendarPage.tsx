@@ -240,6 +240,16 @@ export function TeacherCalendarPage() {
     [courses]
   )
 
+  const scheduledSectionCount = useMemo(
+    () =>
+      courses.reduce(
+        (count, course) =>
+          count + (course.sections?.filter((section) => (section.meetingTimes?.length ?? 0) > 0).length ?? 0),
+        0,
+      ),
+    [courses],
+  )
+
   const events = useMemo(() => {
     return buildCalendarEvents(courses, courseColors, visibleRange.start, visibleRange.end)
   }, [courses, courseColors, visibleRange])
@@ -327,7 +337,9 @@ export function TeacherCalendarPage() {
         <CardHeader>
           <CardTitle>{calendarView === 'week' ? t('teacher:calendar.weekViewTitle') : t('teacher:calendar.monthViewTitle')}</CardTitle>
           <CardDescription>
-            {t('teacher:calendar.viewDescription')}
+            {t('teacher:calendar.viewDescription', {
+              defaultValue: 'All 24 hours are available. Meeting times repeat every week in the visible range, and course start/end dates limit occurrences.',
+            })}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -351,54 +363,77 @@ export function TeacherCalendarPage() {
               </CardContent>
             </Card>
           ) : (
-            <div className="rounded-lg border border-border bg-background p-2">
-              <FullCalendar
-                ref={(r) => {
-                  calendarRef.current = (r as unknown as FullCalendar | null) ?? null
-                }}
-                plugins={[timeGridPlugin, dayGridPlugin, interactionPlugin]}
-                initialView="timeGridWeek"
-                headerToolbar={false}
-                allDaySlot={false}
-                nowIndicator
-                height="auto"
-                slotMinTime="07:00:00"
-                slotMaxTime="21:00:00"
-                slotEventOverlap={false}
-                events={events}
-                datesSet={onDatesSet}
-                eventMaxStack={3}
-                eventContent={(arg) => {
-                  const title = arg.event.title || ''
-                  const escapedTitle = title
-                    .replace(/&/g, '&amp;')
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;')
-                    .replace(/"/g, '&quot;')
-                    .replace(/'/g, '&#39;')
-                  return {
-                    html: `<span class="fc-event-title" title="${escapedTitle}">${escapedTitle}</span>`,
-                  }
-                }}
-                eventClick={(arg: EventClickArg) => {
-                  const ext = arg.event.extendedProps as unknown as {
-                    courseId: string
-                    sectionId: string
-                    sectionName: string
-                    location: string
-                    joinUrl?: string
-                  }
-                  setEventInfo({
-                    title: arg.event.title,
-                    location: ext.location,
-                    courseId: ext.courseId,
-                    sectionId: ext.sectionId,
-                    sectionName: ext.sectionName,
-                    joinUrl: ext.joinUrl,
-                  })
-                  setEventOpen(true)
-                }}
-              />
+            <div className="space-y-3">
+              {events.length === 0 && (
+                <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-sm">
+                  <div className="font-medium">
+                    {t('teacher:calendar.noVisibleEventsTitle', {
+                      defaultValue: 'No classes in this visible range',
+                    })}
+                  </div>
+                  <p className="mt-1 text-muted-foreground">
+                    {t('teacher:calendar.noVisibleEventsBody', {
+                      count: scheduledSectionCount,
+                      defaultValue:
+                        'You have scheduled sections, but their course dates do not fall in the current week/month. Use the arrows or Today, or adjust the course start/end dates.',
+                    })}
+                  </p>
+                </div>
+              )}
+              <div className="rounded-lg border border-border bg-background p-2">
+                <FullCalendar
+                  ref={(r) => {
+                    calendarRef.current = (r as unknown as FullCalendar | null) ?? null
+                  }}
+                  plugins={[timeGridPlugin, dayGridPlugin, interactionPlugin]}
+                  initialView="timeGridWeek"
+                  headerToolbar={false}
+                  allDaySlot={false}
+                  nowIndicator
+                  height="75vh"
+                  slotMinTime="00:00:00"
+                  slotMaxTime="24:00:00"
+                  scrollTime="00:00:00"
+                  slotDuration="00:30:00"
+                  slotLabelInterval="01:00:00"
+                  slotEventOverlap={false}
+                  events={events}
+                  datesSet={onDatesSet}
+                  eventMaxStack={3}
+                  eventTimeFormat={{ hour: '2-digit', minute: '2-digit', hour12: false }}
+                  slotLabelFormat={{ hour: '2-digit', minute: '2-digit', hour12: false }}
+                  eventContent={(arg) => {
+                    const title = arg.event.title || ''
+                    const escapedTitle = title
+                      .replace(/&/g, '&amp;')
+                      .replace(/</g, '&lt;')
+                      .replace(/>/g, '&gt;')
+                      .replace(/"/g, '&quot;')
+                      .replace(/'/g, '&#39;')
+                    return {
+                      html: `<span class="fc-event-title" title="${escapedTitle}">${escapedTitle}</span>`,
+                    }
+                  }}
+                  eventClick={(arg: EventClickArg) => {
+                    const ext = arg.event.extendedProps as unknown as {
+                      courseId: string
+                      sectionId: string
+                      sectionName: string
+                      location: string
+                      joinUrl?: string
+                    }
+                    setEventInfo({
+                      title: arg.event.title,
+                      location: ext.location,
+                      courseId: ext.courseId,
+                      sectionId: ext.sectionId,
+                      sectionName: ext.sectionName,
+                      joinUrl: ext.joinUrl,
+                    })
+                    setEventOpen(true)
+                  }}
+                />
+              </div>
             </div>
           )}
         </CardContent>

@@ -32,6 +32,12 @@ import { ConfirmDialog } from '../../components/ui/confirm-dialog'
 import { useTranslation } from 'react-i18next'
 import { subscriptionService, type CanCreateCourseResponse } from '../../services/subscriptionService'
 
+const SECTION_LOCATION_OPTIONS = [
+  { value: 'Online', labelKey: 'teacher:createCoursePage.sectionPresets.online' },
+  { value: 'On campus', labelKey: 'teacher:createCoursePage.sectionPresets.inSite' },
+  { value: 'Hybrid (online + in-person)', labelKey: 'teacher:createCoursePage.sectionPresets.hybrid' },
+]
+
 export function EditCoursePage() {
   const { t } = useTranslation(['teacher', 'common', 'errors'])
   const { id } = useParams<{ id: string }>()
@@ -232,7 +238,7 @@ export function EditCoursePage() {
   const handleAddSectionForm = () => {
     setEditingSection({
       name: '',
-      locationLabel: '',
+      locationLabel: SECTION_LOCATION_OPTIONS[0].value,
       joinUrl: '',
       maxSeats: clampSeatCount(30),
       meetingTimes: [],
@@ -265,7 +271,7 @@ export function EditCoursePage() {
     setEditingSection({
       id: section.id,
       name: section.name,
-      locationLabel: section.locationLabel,
+      locationLabel: section.locationLabel || SECTION_LOCATION_OPTIONS[0].value,
       joinUrl: section.joinUrl || '',
       maxSeats: section.maxSeats,
       meetingTimes:
@@ -376,6 +382,11 @@ export function EditCoursePage() {
       setSectionsSaving(false)
     }
   }
+
+  const sectionLocationOptions = SECTION_LOCATION_OPTIONS.map((option) => ({
+    ...option,
+    label: t(option.labelKey),
+  }))
 
   const handleDeleteSection = async (sectionId: string) => {
     if (!id) return
@@ -1022,11 +1033,27 @@ export function EditCoursePage() {
                 <div className="grid gap-3 md:grid-cols-2">
                   <div className="space-y-1.5">
                     <Label>{t('teacher:teacherMyCourses.locationModality')}</Label>
-                    <Input
+                    <SelectRoot
                       value={editingSection.locationLabel}
-                      onChange={(e) => setEditingSection({ ...editingSection, locationLabel: e.target.value })}
-                      placeholder={t('teacher:teacherMyCourses.locationPlaceholder')}
-                    />
+                      onValueChange={(value) => setEditingSection({ ...editingSection, locationLabel: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('teacher:teacherMyCourses.locationPlaceholder')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {sectionLocationOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                        {editingSection.locationLabel &&
+                          !sectionLocationOptions.some((option) => option.value === editingSection.locationLabel) && (
+                            <SelectItem value={editingSection.locationLabel}>
+                              {editingSection.locationLabel}
+                            </SelectItem>
+                          )}
+                      </SelectContent>
+                    </SelectRoot>
                   </div>
 
                   <div className="space-y-1.5">

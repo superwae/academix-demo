@@ -63,6 +63,12 @@ import { useTranslation } from 'react-i18next'
 /** Active + completed enrollments only — used for class size and average progress. */
 const COUNTABLE_ENROLLMENT_STATUSES = new Set(['Active', 'Completed'])
 
+const SECTION_LOCATION_OPTIONS = [
+  { value: 'Online', labelKey: 'teacher:createCoursePage.sectionPresets.online' },
+  { value: 'On campus', labelKey: 'teacher:createCoursePage.sectionPresets.inSite' },
+  { value: 'Hybrid (online + in-person)', labelKey: 'teacher:createCoursePage.sectionPresets.hybrid' },
+]
+
 function computeCourseEnrollmentStats(items: { status: string; progressPercentage: number }[]) {
   const relevant = items.filter((e) => COUNTABLE_ENROLLMENT_STATUSES.has(e.status))
   if (relevant.length === 0) {
@@ -195,7 +201,7 @@ export function TeacherMyCoursesPage() {
   const handleAddSection = () => {
     setEditingSection({
       name: '',
-      locationLabel: '',
+      locationLabel: SECTION_LOCATION_OPTIONS[0].value,
       joinUrl: '',
       maxSeats: 30,
       meetingTimes: [],
@@ -206,7 +212,7 @@ export function TeacherMyCoursesPage() {
     setEditingSection({
       id: section.id,
       name: section.name,
-      locationLabel: section.locationLabel,
+      locationLabel: section.locationLabel || SECTION_LOCATION_OPTIONS[0].value,
       joinUrl: section.joinUrl || '',
       maxSeats: section.maxSeats,
       meetingTimes: section.meetingTimes.map((mt) => ({
@@ -354,6 +360,11 @@ export function TeacherMyCoursesPage() {
     newMeetingTimes[index] = { ...newMeetingTimes[index], ...updates }
     setEditingSection({ ...editingSection, meetingTimes: newMeetingTimes })
   }
+
+  const sectionLocationOptions = SECTION_LOCATION_OPTIONS.map((option) => ({
+    ...option,
+    label: t(option.labelKey),
+  }))
 
   const openCloneDialog = (course: CourseDto) => {
     setCloneCourse(course)
@@ -620,13 +631,29 @@ export function TeacherMyCoursesPage() {
                 <div className="grid gap-3 md:grid-cols-2">
                   <div className="space-y-1.5">
                     <Label>{t('teacher:teacherMyCourses.locationModality')}</Label>
-                    <Input
+                    <SelectRoot
                       value={editingSection.locationLabel}
-                      onChange={(e) =>
-                        setEditingSection({ ...editingSection, locationLabel: e.target.value })
+                      onValueChange={(value) =>
+                        setEditingSection({ ...editingSection, locationLabel: value })
                       }
-                      placeholder={t('teacher:teacherMyCourses.locationPlaceholder')}
-                    />
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('teacher:teacherMyCourses.locationPlaceholder')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {sectionLocationOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                        {editingSection.locationLabel &&
+                          !sectionLocationOptions.some((option) => option.value === editingSection.locationLabel) && (
+                            <SelectItem value={editingSection.locationLabel}>
+                              {editingSection.locationLabel}
+                            </SelectItem>
+                          )}
+                      </SelectContent>
+                    </SelectRoot>
                   </div>
 
                   <div className="space-y-1.5">
