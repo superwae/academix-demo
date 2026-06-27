@@ -2,6 +2,7 @@ import { apiClient, type ApiError } from '../lib/api';
 
 export interface UserUiPreferences {
   theme: string;
+  colorMode?: 'light' | 'dark' | null;
   customThemeColor?: string | null;
   mixTheme?: string | null;
   notificationsEnabled?: boolean | null;

@@ -38,6 +38,7 @@
   <data name="SubjectRequired" xml:space="preserve"><value>Subject is required.</value></data>
   <data name="MessageRequired" xml:space="preserve"><value>Message is required.</value></data>
   <data name="UserNotFound" xml:space="preserve"><value>User not found.</value></data>
+  <data name="AssigneeMustBeStaff" xml:space="preserve"><value>Assignee must be a support team member.</value></data>
   <data name="NewTicketTitle" xml:space="preserve"><value>New support ticket</value></data>
   <data name="NewTicketMessage" xml:space="preserve"><value>{0} opened a ticket: "{1}"</value></data>
   <data name="StaffRepliedTitle" xml:space="preserve"><value>Support replied to your ticket</value></data>

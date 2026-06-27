@@ -38,6 +38,7 @@
   <data name="SubjectRequired" xml:space="preserve"><value>الموضوع مطلوب.</value></data>
   <data name="MessageRequired" xml:space="preserve"><value>الرسالة مطلوبة.</value></data>
   <data name="UserNotFound" xml:space="preserve"><value>المستخدم غير موجود.</value></data>
+  <data name="AssigneeMustBeStaff" xml:space="preserve"><value>يجب أن يكون المُعيَّن من فريق الدعم.</value></data>
   <data name="NewTicketTitle" xml:space="preserve"><value>تذكرة دعم جديدة</value></data>
   <data name="NewTicketMessage" xml:space="preserve"><value>فتح {0} تذكرة: «{1}»</value></data>
   <data name="StaffRepliedTitle" xml:space="preserve"><value>رد الدعم على تذكرتك</value></data>

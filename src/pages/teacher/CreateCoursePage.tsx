@@ -21,6 +21,10 @@ import { Eye, Upload, X, Plus, MapPin, Clock, ChevronDown, ChevronUp } from 'luc
 import { Badge } from '../../components/ui/badge'
 import { countWords, MAX_CERTIFICATE_WORDS } from '../../lib/certificateText'
 import { useTranslation } from 'react-i18next'
+import {
+  getMeetingUrlValidationToast,
+  validateMeetingUrlForSave,
+} from '../../lib/trustedMeetingUrl'
 import { subscriptionService, type CanCreateCourseResponse } from '../../services/subscriptionService'
 
 export function CreateCoursePage() {
@@ -312,13 +316,25 @@ export function CreateCoursePage() {
         return new Date(Date.UTC(y, m - 1, d)).toISOString()
       }
 
+      for (const section of formData.sections) {
+        const joinUrlResult = validateMeetingUrlForSave(section.joinUrl ?? '')
+        if (!joinUrlResult.ok) {
+          const toastCopy = getMeetingUrlValidationToast(joinUrlResult, t)
+          if (toastCopy) toast.error(toastCopy.title, { description: toastCopy.description })
+          setLoading(false)
+          return
+        }
+      }
+
       const defaultSectionSeats = getDefaultSectionSeats()
       const sectionPayload =
         formData.sections.length > 0
-          ? formData.sections.map((s) => ({
+          ? formData.sections.map((s) => {
+              const joinUrlResult = validateMeetingUrlForSave(s.joinUrl ?? '')
+              return {
               name: s.name,
               locationLabel: s.locationLabel,
-              joinUrl: s.joinUrl?.trim() || undefined,
+              joinUrl: joinUrlResult.ok ? joinUrlResult.url : undefined,
               maxSeats: Math.max(1, Math.floor(s.maxSeats || 1)),
               meetingTimes: s.meetingTimes
                 .filter(
@@ -332,7 +348,7 @@ export function CreateCoursePage() {
                   startMinutes: timeToMinutes(mt.startTime),
                   endMinutes: timeToMinutes(mt.endTime),
                 })),
-            }))
+            }})
           : [{
               name: 'Default',
               locationLabel: t('teacher:createCoursePage.sectionPresets.online'),

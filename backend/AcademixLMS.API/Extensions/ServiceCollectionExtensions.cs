@@ -125,6 +125,7 @@ public static class ServiceCollectionExtensions
         services.AddAuthorization(options =>
         {
             options.AddPolicy("RequireAdmin", policy => policy.RequireRole("Admin", "SuperAdmin"));
+            options.AddPolicy("RequireSupportStaff", policy => policy.RequireRole("Admin", "SuperAdmin", "Support"));
             options.AddPolicy("RequireInstructor", policy => policy.RequireRole("Instructor", "Admin", "SuperAdmin"));
             options.AddPolicy("RequireStudent", policy => policy.RequireRole("Student", "Instructor", "Admin", "SuperAdmin"));
             // Read-only finance views: accountants can see payment data but not mutate anything.

@@ -1,5 +1,7 @@
 import type { CourseDto, CourseSectionDto, MeetingTimeDto } from '../services/courseService'
 import { dayStringToJsWeekday, getLiveSessionBadge, type LiveSessionBadge } from './liveSession'
+import { isSessionDayInCourseBounds } from './courseScheduleDates'
+import { getSafeMeetingJoinUrl } from './trustedMeetingUrl'
 
 /** One concrete live-session occurrence within a specific week. */
 export interface WeeklySessionEvent {
@@ -57,12 +59,10 @@ export function expandCoursesToWeekEvents(
   const events: WeeklySessionEvent[] = []
   const now = new Date()
 
-  for (const course of courses) {
+    for (const course of courses) {
     if (opts.onlyPublished && (course as CourseDto & { status?: string }).status && (course as CourseDto & { status?: string }).status !== 'Published') {
       // allow it through — instructors may want to see draft schedules too
     }
-    const courseStart = course.courseStartDate ? new Date(course.courseStartDate) : null
-    const courseEnd = course.courseEndDate ? new Date(course.courseEndDate) : null
 
     for (const section of course.sections ?? []) {
       if (!section.isActive) continue
@@ -76,16 +76,14 @@ export function expandCoursesToWeekEvents(
         sessionDay.setDate(weekStart.getDate() + dow)
         sessionDay.setHours(0, 0, 0, 0)
 
-        // Skip sessions outside the course's run window
-        if (courseStart && sessionDay < stripTime(courseStart)) continue
-        if (courseEnd && sessionDay > stripTime(courseEnd)) continue
+        if (!isSessionDayInCourseBounds(sessionDay, course.courseStartDate, course.courseEndDate)) continue
 
         const start = new Date(sessionDay)
         start.setMinutes(mt.startMinutes)
         const end = new Date(sessionDay)
         end.setMinutes(mt.endMinutes)
 
-        const isSameWeekAsNow = isSameWeek(sessionDay, now)
+        const isSameWeekAsNow = startOfWeek(sessionDay).getTime() === startOfWeek(now).getTime()
         const badge = isSameWeekAsNow
           ? getLiveSessionBadge(
               { day: mt.day, startMinutes: mt.startMinutes, endMinutes: mt.endMinutes },
@@ -101,7 +99,7 @@ export function expandCoursesToWeekEvents(
           sectionName: section.name,
           locationLabel: section.locationLabel,
           modality: course.modality,
-          joinUrl: section.joinUrl ?? undefined,
+          joinUrl: getSafeMeetingJoinUrl(section.joinUrl) ?? undefined,
           dayIndex: dow,
           startMinutes: mt.startMinutes,
           endMinutes: mt.endMinutes,
@@ -119,16 +117,6 @@ export function expandCoursesToWeekEvents(
   })
 
   return events
-}
-
-function stripTime(d: Date): Date {
-  const x = new Date(d)
-  x.setHours(0, 0, 0, 0)
-  return x
-}
-
-function isSameWeek(a: Date, b: Date): boolean {
-  return startOfWeek(a).getTime() === startOfWeek(b).getTime()
 }
 
 /** Group events by day index (0-6) returning an ordered array of 7 buckets. */

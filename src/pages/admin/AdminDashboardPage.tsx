@@ -45,6 +45,7 @@ import {
   Area,
 } from "recharts";
 import { cn } from "../../lib/cn";
+import { iconStatus } from "../../lib/semanticColors";
 import { Button } from "../../components/ui/button";
 import {
   DropdownMenu,
@@ -295,11 +296,11 @@ export function AdminDashboardPage() {
   const getActivityColor = (type: string) => {
     switch (type) {
       case "registration":
-        return "bg-blue-500/10 text-blue-500";
+        return `bg-blue-500/10 ${iconStatus.info}`;
       case "payment":
-        return "bg-emerald-500/10 text-emerald-500";
+        return `bg-emerald-500/10 ${iconStatus.success}`;
       case "course_approval":
-        return "bg-amber-500/10 text-amber-500";
+        return `bg-amber-500/10 ${iconStatus.warning}`;
       default:
         return "bg-muted text-muted-foreground";
     }

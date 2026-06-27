@@ -45,7 +45,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { THEMES, type ThemeId } from "../../theme/themes";
-import { applyTheme } from "../../theme/applyTheme";
+import { normalizeAccentTheme } from "../../theme/themePresets";
 import { useAppStore } from "../../store/useAppStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import { toast } from "sonner";
@@ -66,6 +66,7 @@ import {
   hasElevatedRole,
   isPlatformAdminAccount,
 } from "../../lib/userRoles";
+import { MeetingJoinGateProvider } from "../meeting/MeetingJoinGate";
 
 type NavItem = {
   to: string;
@@ -98,9 +99,10 @@ interface SearchResult {
 
 export function StudentLayout() {
   const { t } = useTranslation(['nav', 'common', 'auth', 'support']);
+  const colorMode = useAppStore((s) => s.data.colorMode);
+  const setColorMode = useAppStore((s) => s.setColorMode);
   const theme = useAppStore((s) => s.data.theme);
   const customThemeColor = useAppStore((s) => s.data.customThemeColor);
-  const mixTheme = useAppStore((s) => s.data.mixTheme);
   const setTheme = useAppStore((s) => s.setTheme);
   const setCustomThemeColor = useAppStore((s) => s.setCustomThemeColor);
   const { logout, user } = useAuthStore();
@@ -169,17 +171,13 @@ export function StudentLayout() {
     navigate("/");
   };
 
-  const isDarkMode = theme === 'dark';
+  const isDarkMode = colorMode === 'dark';
 
   const toggleDarkMode = () => {
-    const newTheme = isDarkMode ? 'light' : 'dark';
-    setTheme(newTheme);
-    toast.success(newTheme === 'dark' ? t('common:switchedToDarkMode') : t('common:switchedToLightMode'));
+    const next = isDarkMode ? 'light' : 'dark';
+    setColorMode(next);
+    toast.success(next === 'dark' ? t('common:switchedToDarkMode') : t('common:switchedToLightMode'));
   };
-
-  useEffect(() => {
-    applyTheme(theme, customThemeColor, mixTheme);
-  }, [theme, customThemeColor, mixTheme]);
 
   // Handle search input
   useEffect(() => {
@@ -646,7 +644,7 @@ export function StudentLayout() {
                 <DropdownMenuRadioGroup
                   value={theme}
                   onValueChange={(v) => {
-                    const next = v as ThemeId;
+                    const next = normalizeAccentTheme(v as ThemeId);
                       if (next === 'custom') {
                         if (!customThemeColor) {
                           const computed = getComputedStyle(document.documentElement)
@@ -676,7 +674,7 @@ export function StudentLayout() {
                       }
                   }}
                 >
-                    {THEMES.filter(th => th.id !== 'custom').map((th) => (
+                    {THEMES.filter(th => th.id !== 'custom' && th.id !== 'dark').map((th) => (
                     <DropdownMenuRadioItem
                       key={th.id}
                       value={th.id}
@@ -851,7 +849,9 @@ export function StudentLayout() {
             transition={{ duration: 0.4 }}
             className="glass-strong min-w-0 rounded-2xl border border-border/60 p-4 pb-24 shadow-xl sm:p-6 sm:pb-24 md:p-8 md:pb-28"
           >
-            <Outlet />
+            <MeetingJoinGateProvider>
+              <Outlet />
+            </MeetingJoinGateProvider>
           </motion.div>
         </main>
       </div>

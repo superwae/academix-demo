@@ -14,6 +14,13 @@ import { Calendar, Clock, MapPin, User, ChevronLeft, ChevronRight, Video, Extern
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
+import {
+  buildCourseToneMap,
+  calendarEventClassNames,
+  type CalendarEventTone,
+} from '../../lib/calendarColors'
+import { getSafeMeetingJoinUrl } from '../../lib/trustedMeetingUrl'
+import { MeetingJoinButton } from '../../components/meeting/MeetingJoinGate'
 
 const DOW_TO_INDEX: Record<string, number> = {
   Sun: 0,
@@ -106,7 +113,7 @@ function atMinutesOnDay(day: Date, minutes: number): Date {
 function buildStudentCalendarEvents(
   enrollments: EnrollmentDto[],
   courses: Map<string, CourseDto>,
-  colorMap: Map<string, string>,
+  toneMap: Map<string, CalendarEventTone>,
   rangeStart: Date,
   rangeEndExclusive: Date
 ) {
@@ -116,9 +123,6 @@ function buildStudentCalendarEvents(
     title: string
     start: Date
     end: Date
-    backgroundColor: string
-    borderColor: string
-    textColor: string
     classNames: string[]
     extendedProps: {
       courseId: string
@@ -136,7 +140,7 @@ function buildStudentCalendarEvents(
     if (!course) continue
     const section = course.sections.find((s) => s.id === e.sectionId)
     if (!section?.meetingTimes?.length) continue
-    const color = colorMap.get(e.courseId) || 'hsl(var(--primary))'
+    const tone = toneMap.get(e.courseId) || 'primary'
     for (const mt of section.meetingTimes) {
       const normalizedDay = normalizeDayName(mt.day)
       const dayIndex = DOW_TO_INDEX[normalizedDay] ?? DOW_TO_INDEX[mt.day] ?? 0
@@ -150,16 +154,13 @@ function buildStudentCalendarEvents(
           title: `${course.title} — ${section.name}`,
           start,
           end,
-          backgroundColor: color,
-          borderColor: color,
-          textColor: 'hsl(var(--primary-foreground))',
-          classNames: ['calendar-event'],
+          classNames: calendarEventClassNames(tone),
           extendedProps: {
             courseId: course.id,
             sectionId: section.id,
             instructor: course.instructorName,
             location: section.locationLabel,
-            joinUrl: section.joinUrl?.trim() || undefined,
+            joinUrl: getSafeMeetingJoinUrl(section.joinUrl) ?? undefined,
             sectionName: section.name,
             category: course.category,
           },
@@ -253,22 +254,9 @@ export function CalendarPage() {
     api.changeView(calendarView === 'week' ? 'timeGridWeek' : 'dayGridMonth')
   }, [calendarView])
 
-  const courseColors = useMemo(() => {
-    const colors = [
-      'hsl(var(--primary))',
-      'hsl(217 91% 60%)',
-      'hsl(270 85% 65%)',
-      'hsl(199 89% 55%)',
-      'hsl(142 76% 36%)',
-      'hsl(24 95% 53%)',
-    ]
-    const colorMap = new Map<string, string>()
-    enrollments.forEach((e, idx) => {
-      if (!colorMap.has(e.courseId)) {
-        colorMap.set(e.courseId, colors[idx % colors.length])
-      }
-    })
-    return colorMap
+  const courseTones = useMemo(() => {
+    const ids = enrollments.map((e) => e.courseId)
+    return buildCourseToneMap(ids)
   }, [enrollments])
 
   const hasAnyMeetingTimes = useMemo(
@@ -296,7 +284,7 @@ export function CalendarPage() {
     return enrollments.flatMap(e => {
       const course = courses.get(e.courseId)
       const section = course?.sections.find(s => s.id === e.sectionId)
-      const joinUrl = section?.joinUrl?.trim()
+      const joinUrl = getSafeMeetingJoinUrl(section?.joinUrl)
       if (!course || !section || !joinUrl) return []
       return [{
         courseId: course.id,
@@ -316,11 +304,11 @@ export function CalendarPage() {
     return buildStudentCalendarEvents(
       enrollments,
       courses,
-      courseColors,
+      courseTones,
       visibleRange.start,
       visibleRange.end
     )
-  }, [enrollments, courses, courseColors, visibleRange])
+  }, [enrollments, courses, courseTones, visibleRange])
 
   const onDatesSet = (info: DatesSetArg) => {
     setVisibleRange({ start: info.start, end: info.end })
@@ -431,12 +419,10 @@ export function CalendarPage() {
                     )}
                   </div>
                 </div>
-                <Button size="sm" asChild>
-                  <a href={link.joinUrl} target="_blank" rel="noopener noreferrer">
-                    <ExternalLink className="me-1.5 h-3.5 w-3.5" />
-                    {t('student:shared.viewLink')}
-                  </a>
-                </Button>
+                <MeetingJoinButton joinUrl={link.joinUrl} size="sm">
+                  <ExternalLink className="me-1.5 h-3.5 w-3.5" />
+                  {t('student:shared.viewLink')}
+                </MeetingJoinButton>
               </div>
             ))}
           </CardContent>
@@ -511,7 +497,7 @@ export function CalendarPage() {
                   </p>
                 </div>
               )}
-              <div className="rounded-lg border border-border bg-background p-2">
+              <div className="academix-calendar rounded-lg border border-border bg-background p-2">
                 <FullCalendar
                   ref={r => {
                     calendarRef.current = (r as unknown as FullCalendar | null) ?? null
@@ -612,12 +598,10 @@ export function CalendarPage() {
               </div>
               <div className="flex flex-wrap gap-2 pt-2 border-t border-border">
                 {eventInfo.joinUrl ? (
-                  <Button size="sm" className="gap-2" asChild>
-                    <a href={eventInfo.joinUrl} target="_blank" rel="noopener noreferrer">
-                      <Video className="h-4 w-4" />
-                      {t('student:calendar.enterLiveLesson')}
-                    </a>
-                  </Button>
+                  <MeetingJoinButton joinUrl={eventInfo.joinUrl} size="sm" className="gap-2">
+                    <Video className="h-4 w-4" />
+                    {t('student:calendar.enterLiveLesson')}
+                  </MeetingJoinButton>
                 ) : null}
                 <Button variant="outline" size="sm" asChild>
                   <Link to={`/courses/${eventInfo.courseId}`}>{t('student:calendar.viewCourse')}</Link>

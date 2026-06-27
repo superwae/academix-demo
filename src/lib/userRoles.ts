@@ -8,6 +8,7 @@ export function getAccountRoleLabel(roles: string[] | undefined): string {
   if (r.has('instructor') || r.has('teacher')) return 'Instructor';
   if (r.has('accountant')) return 'Accountant';
   if (r.has('secretary')) return 'Secretary';
+  if (r.has('support')) return 'Support';
   if (r.has('student')) return 'Student';
   return 'Member';
 }
@@ -21,6 +22,17 @@ export function hasElevatedRole(roles: string[] | undefined): boolean {
     r.has('instructor') ||
     r.has('teacher')
   );
+}
+
+/** Admin, SuperAdmin, or Support — support inbox / triage */
+export function isSupportStaffAccount(roles: string[] | undefined): boolean {
+  const r = new Set((roles ?? []).map((x) => x.toLowerCase()));
+  return r.has('superadmin') || r.has('admin') || r.has('support');
+}
+
+/** Support-only (no admin privileges) */
+export function isSupportOnlyAccount(roles: string[] | undefined): boolean {
+  return isSupportStaffAccount(roles) && !isPlatformAdminAccount(roles);
 }
 
 /** Admin / SuperAdmin — may browse teacher or student portals for support. */

@@ -12,9 +12,12 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 import { hasElevatedRole } from '../lib/userRoles';
-import { formatMoney } from '../lib/money';
+import { formatMoney, isPaidCourse } from '../lib/money';
+import { accentFeatured, accentFree, accentStar, textStatus } from '../lib/semanticColors';
 import { localizeLevel, localizeModality, localizeWeekday } from '../lib/enumLocalization';
 import { cn } from '../lib/cn';
+import { getSafeMeetingJoinUrl } from '../lib/trustedMeetingUrl';
+import { MeetingJoinButton, MeetingJoinGateProvider } from '../components/meeting/MeetingJoinGate';
 
 export function CourseDetailsPage() {
   const { t } = useTranslation(['public', 'common']);
@@ -110,7 +113,7 @@ export function CourseDetailsPage() {
     if (activeEnrollment) return;
 
     // Paid course → checkout (carries the chosen section).
-    if (typeof course.price === 'number' && course.price > 0 && !hasElevatedRole(user?.roles)) {
+    if (isPaidCourse(course.price) && !hasElevatedRole(user?.roles)) {
       navigate(`/student/checkout/${id}?sectionId=${section.id}`);
       return;
     }
@@ -188,6 +191,7 @@ export function CourseDetailsPage() {
   const openSeats = course.sections.reduce((s, x) => s + Math.max(0, x.seatsRemaining || 0), 0);
 
   return (
+    <MeetingJoinGateProvider>
     <div className="mx-auto max-w-6xl px-4 sm:px-6 pb-20 pt-6">
       <style>{`
         .cd-in { animation: cd-rise .5s cubic-bezier(.2,.7,.3,1) both; }
@@ -208,7 +212,7 @@ export function CourseDetailsPage() {
             <span className="rounded-full border border-border bg-background/60 px-3 py-1 text-xs font-medium">{localizeLevel(course.level)}</span>
             <span className="rounded-full border border-border bg-background/60 px-3 py-1 text-xs font-medium">{localizeModality(course.modality)}</span>
             {course.isFeatured && (
-              <span className="rounded-full bg-amber-500/15 px-3 py-1 text-xs font-semibold text-amber-600">{t('public:courseDetails.featured')}</span>
+              <span className={cn('rounded-full px-3 py-1 text-xs font-semibold', accentFeatured)}>{t('public:courseDetails.featured')}</span>
             )}
           </div>
 
@@ -223,12 +227,12 @@ export function CourseDetailsPage() {
             </span>
             {course.ratingCount > 0 ? (
               <span className="inline-flex items-center gap-1">
-                <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                <Star className={cn('h-4 w-4', accentStar)} />
                 <span className="font-semibold text-foreground">{course.rating.toFixed(1)}</span>
                 {t('public:courseDetails.reviewsCount', { count: course.ratingCount })}
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1 text-emerald-600 font-medium">
+              <span className={cn('inline-flex items-center gap-1 font-medium', textStatus.success)}>
                 <BadgeCheck className="h-4 w-4" />
                 {t('public:courseDetails.newCourse', { defaultValue: 'New course' })}
               </span>
@@ -239,12 +243,12 @@ export function CourseDetailsPage() {
           <div className="mt-6 flex flex-wrap items-center gap-3">
             <div className="text-3xl font-black">
               {course.price && course.price > 0 ? formatMoney(course.price) : (
-                <span className="rounded-full bg-emerald-500/15 px-4 py-1.5 text-xl font-bold text-emerald-600">{t('public:courseDetails.free')}</span>
+                <span className={cn('rounded-full px-4 py-1.5 text-xl font-bold', accentFree)}>{t('public:courseDetails.free')}</span>
               )}
             </div>
             <div className="flex-1" />
             <Button variant="outline" onClick={handleShare} className="gap-2">
-              {copied ? <Check className="h-4 w-4 text-emerald-600" /> : <Share2 className="h-4 w-4" />}
+              {copied ? <Check className={cn('h-4 w-4', textStatus.success)} /> : <Share2 className="h-4 w-4" />}
               {t('public:courseDetails.share', { defaultValue: 'Share' })}
             </Button>
             {isOwner && (
@@ -330,6 +334,7 @@ export function CourseDetailsPage() {
                   const isCurrent = activeEnrollment?.sectionId === section.id;
                   const full = section.seatsRemaining <= 0;
                   const busy = busySectionId === section.id;
+                  const safeJoinUrl = getSafeMeetingJoinUrl(section.joinUrl);
                   return (
                     <div
                       key={section.id}
@@ -371,16 +376,11 @@ export function CourseDetailsPage() {
                             {t('public:courseDetails.signInToEnrollCta')}
                           </Button>
                         ) : isCurrent ? (
-                          section.joinUrl ? (
-                            <a
-                              href={section.joinUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
-                            >
+                          safeJoinUrl ? (
+                            <MeetingJoinButton joinUrl={safeJoinUrl} className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90">
                               <Video className="h-4 w-4" />
                               {t('public:courseDetails.joinSession', { defaultValue: 'Join online session' })}
-                            </a>
+                            </MeetingJoinButton>
                           ) : (
                             <Button variant="outline" className="w-full" disabled>
                               <Check className="me-2 h-4 w-4" />
@@ -459,7 +459,7 @@ export function CourseDetailsPage() {
               <p className="text-sm font-semibold text-primary">{t('public:courseDetails.ownerShareTitle', { defaultValue: 'Share this course' })}</p>
               <p className="mt-1 text-xs text-muted-foreground">{t('public:courseDetails.ownerShareBody', { defaultValue: 'Send this link to students — it opens straight to enrollment.' })}</p>
               <Button variant="outline" size="sm" className="mt-3 w-full gap-2" onClick={handleShare}>
-                {copied ? <Check className="h-4 w-4 text-emerald-600" /> : <Share2 className="h-4 w-4" />}
+                {copied ? <Check className={cn('h-4 w-4', textStatus.success)} /> : <Share2 className="h-4 w-4" />}
                 {copied ? t('public:courseDetails.linkCopied', { defaultValue: 'Course link copied' }) : t('public:courseDetails.copyShareLink', { defaultValue: 'Copy share link' })}
               </Button>
             </div>
@@ -495,6 +495,7 @@ export function CourseDetailsPage() {
         }}
       />
     </div>
+    </MeetingJoinGateProvider>
   );
 }
 

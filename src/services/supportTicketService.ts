@@ -67,8 +67,16 @@ export interface CreateReplyRequest {
 export interface UpdateTicketRequest {
   status?: SupportTicketStatus
   priority?: SupportTicketPriority
-  assignedToUserId?: string
+  assignedToUserId?: string | null
 }
+
+export interface SupportStaffMember {
+  id: string
+  name: string
+  email: string
+}
+
+export type SupportInboxQueue = 'all' | 'mine' | 'unassigned'
 
 function rethrow(e: unknown, fallback: string): never {
   const err = e as ApiError
@@ -84,14 +92,28 @@ export const supportTicketService = {
     }
   },
 
-  async getAll(status?: SupportTicketStatus): Promise<SupportTicket[]> {
+  async getAll(options?: {
+    status?: SupportTicketStatus
+    queue?: SupportInboxQueue
+  }): Promise<SupportTicket[]> {
     try {
-      const url = status
-        ? `/support/tickets?status=${status}`
-        : '/support/tickets'
+      const params = new URLSearchParams()
+      if (options?.status) params.set('status', options.status)
+      if (options?.queue === 'mine') params.set('assignedToMe', 'true')
+      if (options?.queue === 'unassigned') params.set('unassigned', 'true')
+      const qs = params.toString()
+      const url = qs ? `/support/tickets?${qs}` : '/support/tickets'
       return await apiClient.get<SupportTicket[]>(url)
     } catch (e) {
       rethrow(e, 'Failed to load tickets.')
+    }
+  },
+
+  async getStaff(): Promise<SupportStaffMember[]> {
+    try {
+      return await apiClient.get<SupportStaffMember[]>('/support/tickets/staff')
+    } catch (e) {
+      rethrow(e, 'Failed to load support staff.')
     }
   },
 

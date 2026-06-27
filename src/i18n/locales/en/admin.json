@@ -1370,7 +1370,9 @@
       "financeSubtitle": "Finance & Accounting",
       "financeBadge": "Finance",
       "opsSubtitle": "Operations & Front Office",
-      "opsBadge": "Ops"
+      "opsBadge": "Ops",
+      "supportSubtitle": "Support team",
+      "supportBadge": "Support"
     },
     "nav": {
       "overview": "Overview",
@@ -1396,8 +1398,10 @@
     "search": {
       "placeholderAccountant": "Search transactions, invoices, payees…",
       "placeholderSecretary": "Search people, enrollments, messages…",
+      "placeholderSupport": "Search tickets by subject or user…",
       "descriptionAccountant": "Find transactions, invoices, or payees.",
-      "descriptionSecretary": "Find people, enrollments, or messages."
+      "descriptionSecretary": "Find people, enrollments, or messages.",
+      "descriptionSupport": "Jump to the support inbox to triage tickets."
     },
     "header": {
       "openNavigation": "Open navigation",

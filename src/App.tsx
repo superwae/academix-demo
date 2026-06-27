@@ -8,6 +8,8 @@ import { AdminLayout } from './components/layouts/AdminLayout'
 import { AccountantLayout, SecretaryLayout } from './components/layouts/StaffPortalLayout'
 import { PublicLayout } from './components/PublicLayout'
 import { RoleGuard } from './auth/RoleGuard'
+import { AdminPortalGuard, SupportStaffGuard } from './auth/SupportStaffGuard'
+import { SupportTeamRouteRedirect } from './auth/SupportTeamRouteRedirect'
 import { AuthGuard } from './auth/AuthGuard'
 import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
@@ -17,6 +19,8 @@ import { ResetPasswordPage } from './pages/ResetPasswordPage'
 import { VerifyEmailPage } from './pages/VerifyEmailPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { AcceptInvitePage } from './pages/AcceptInvitePage'
+import { AppThemeSync } from './theme/AppThemeSync'
+import { SupportPageShell } from './components/layouts/SupportPageShell'
 
 // Public pages (lazy)
 const PublicCoursesPage = lazy(() =>
@@ -297,6 +301,9 @@ const OrgComplianceDashboardPage = lazy(() =>
 const MyTicketsPage = lazy(() =>
   import('./pages/support/MyTicketsPage').then((m) => ({ default: m.MyTicketsPage }))
 )
+const SupportHelpCenterPage = lazy(() =>
+  import('./pages/support/SupportHelpCenterPage').then((m) => ({ default: m.SupportHelpCenterPage }))
+)
 const TicketDetailPage = lazy(() =>
   import('./pages/support/TicketDetailPage').then((m) => ({ default: m.TicketDetailPage }))
 )
@@ -331,6 +338,7 @@ function LegacyMyClassesRedirect() {
 export default function App() {
   return (
     <ErrorBoundary>
+      <AppThemeSync />
       <Suspense fallback={<MinimalLoader />}>
         <Routes>
             {/* Public Routes */}
@@ -426,9 +434,9 @@ export default function App() {
             <Route
               path="/admin/*"
               element={
-                <RoleGuard allowedRole="Admin">
+                <AdminPortalGuard>
                   <AdminLayout />
-                </RoleGuard>
+                </AdminPortalGuard>
               }
             >
               <Route index element={<Navigate to="/admin/dashboard" replace />} />
@@ -451,9 +459,19 @@ export default function App() {
               <Route path="payment/callback" element={<PaymentCallbackPage />} />
               <Route path="subscription" element={<AdminSubscriptionPage />} />
               <Route path="support-tickets" element={<AdminSupportInboxPage />} />
-              <Route path="support-tickets/:ticketId" element={<TicketDetailPage adminView />} />
+              <Route path="support-tickets/:ticketId" element={<TicketDetailPage staffView basePath="/admin/support-tickets" />} />
               <Route path="*" element={<NotFoundPage />} />
             </Route>
+
+            {/* Legacy /support-team/* → admin portal */}
+            <Route
+              path="/support-team/*"
+              element={
+                <SupportStaffGuard>
+                  <SupportTeamRouteRedirect />
+                </SupportStaffGuard>
+              }
+            />
 
             {/* Accountant portal */}
             <Route
@@ -553,18 +571,14 @@ export default function App() {
               path="/support"
               element={
                 <AuthGuard>
-                  <MyTicketsPage />
+                  <SupportPageShell />
                 </AuthGuard>
               }
-            />
-            <Route
-              path="/support/:ticketId"
-              element={
-                <AuthGuard>
-                  <TicketDetailPage />
-                </AuthGuard>
-              }
-            />
+            >
+              <Route index element={<MyTicketsPage />} />
+              <Route path="help" element={<SupportHelpCenterPage />} />
+              <Route path=":ticketId" element={<TicketDetailPage />} />
+            </Route>
 
             {/* Legacy route redirects - redirect old paths to new portal paths */}
             <Route path="/dashboard" element={<Navigate to="/student/dashboard" replace />} />

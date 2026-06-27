@@ -10,6 +10,7 @@ interface RoleGuardProps {
     | 'Admin'
     | 'Accountant'
     | 'Secretary'
+    | 'Support'
   children: React.ReactNode
 }
 
@@ -77,6 +78,7 @@ export function RoleGuard({ allowedRole, children }: RoleGuardProps) {
     }
     if (lower.some((r) => r === 'accountant')) return 'accountant'
     if (lower.some((r) => r === 'secretary')) return 'secretary'
+    if (lower.some((r) => r === 'support')) return 'support'
     if (lower.some((r) => r === 'student')) return 'student'
     return lower[0]
   })()
@@ -91,6 +93,7 @@ export function RoleGuard({ allowedRole, children }: RoleGuardProps) {
     (normalizedAllowedRole === 'admin' && isAdminUser) ||
     (normalizedAllowedRole === 'accountant' && normalizedUserRole === 'accountant') ||
     (normalizedAllowedRole === 'secretary' && normalizedUserRole === 'secretary') ||
+    (normalizedAllowedRole === 'support' && normalizedUserRole === 'support') ||
     isAdminUser
 
   if (!hasAccess) {
@@ -105,6 +108,8 @@ export function RoleGuard({ allowedRole, children }: RoleGuardProps) {
       redirectPath = '/accountant/dashboard'
     } else if (normalizedUserRole === 'secretary') {
       redirectPath = '/secretary/dashboard'
+    } else if (normalizedUserRole === 'support') {
+      redirectPath = '/support-team/dashboard'
     } else if (
       normalizedUserRole === 'admin' ||
       normalizedUserRole === 'superadmin' ||

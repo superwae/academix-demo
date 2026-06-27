@@ -16,6 +16,8 @@ import { Clock, BookOpen, Mail, Calendar, FileText, GraduationCap, Sparkles, Tre
 import { progressService } from '../../services/progressService'
 import { Progress } from '../../components/ui/progress'
 import { localizeLevel, localizeModality } from '../../lib/enumLocalization'
+import { getSafeMeetingJoinUrl } from '../../lib/trustedMeetingUrl'
+import { MeetingJoinButton } from '../../components/meeting/MeetingJoinGate'
 
 // Helper function to safely parse dates
 function safeDate(dateValue: string | null | undefined): Date | null {
@@ -109,7 +111,7 @@ export function DashboardPage() {
           courseTitle: e.courseTitle,
           sectionName: e.sectionName,
           timeLabel: fmtRange(mt.startMinutes, mt.endMinutes, mt.startTime, mt.endTime),
-          joinUrl: sec.joinUrl?.trim(),
+          joinUrl: getSafeMeetingJoinUrl(sec.joinUrl) ?? undefined,
           courseId: e.courseId,
           meta: { day: mt.day, startMinutes: mt.startMinutes, endMinutes: mt.endMinutes },
         })
@@ -481,12 +483,10 @@ export function DashboardPage() {
                             </div>
                           </div>
                           {slot.joinUrl ? (
-                            <Button size="sm" className="shrink-0 gap-1.5 w-full sm:w-auto" asChild>
-                              <a href={slot.joinUrl} target="_blank" rel="noopener noreferrer">
-                                <Video className="h-3.5 w-3.5" />
-                                {t('student:shared.join')}
-                              </a>
-                            </Button>
+                            <MeetingJoinButton size="sm" joinUrl={slot.joinUrl} className="shrink-0 gap-1.5 w-full sm:w-auto">
+                              <Video className="h-3.5 w-3.5" />
+                              {t('student:shared.join')}
+                            </MeetingJoinButton>
                           ) : null}
                         </div>
                       </div>

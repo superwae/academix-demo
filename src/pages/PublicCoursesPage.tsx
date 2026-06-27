@@ -5,6 +5,7 @@ import { Button } from '../components/ui/button';
 import { Select } from '../components/ui/select';
 import { courseService, type CourseDto } from '../services/courseService';
 import { formatMoney } from '../lib/money';
+import { accentFeatured, accentFree, accentStar } from '../lib/semanticColors';
 import { localizeLevel } from '../lib/enumLocalization';
 import { cn } from '../lib/cn';
 import { toast } from 'sonner';
@@ -39,18 +40,18 @@ function CourseCard({ course, index }: { course: CourseDto; index: number }) {
         </span>
         <span className="flex items-center gap-2">
           {course.isFeatured && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2.5 py-1 text-xs font-semibold text-amber-600">
+            <span className={cn('inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold', accentFeatured)}>
               <Sparkles className="h-3 w-3" />
               {t('public:courses.featured')}
             </span>
           )}
           {isNew ? (
-            <span className="rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs font-semibold text-emerald-600">
+            <span className={cn('rounded-full px-2.5 py-1 text-xs font-semibold', accentFree)}>
               {t('public:courses.newBadge', { defaultValue: 'New' })}
             </span>
           ) : (
             <span className="inline-flex items-center gap-1 text-sm font-medium">
-              <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+              <Star className={cn('h-4 w-4', accentStar)} />
               {course.rating.toFixed(1)}
               <span className="text-xs text-muted-foreground">({course.ratingCount})</span>
             </span>
@@ -81,7 +82,7 @@ function CourseCard({ course, index }: { course: CourseDto; index: number }) {
           {course.price && course.price > 0 ? (
             formatMoney(course.price)
           ) : (
-            <span className="rounded-full bg-emerald-500/15 px-3 py-1 text-sm font-semibold text-emerald-600">
+            <span className={cn('rounded-full px-3 py-1 text-sm font-semibold', accentFree)}>
               {t('public:courses.free')}
             </span>
           )}

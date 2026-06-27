@@ -38,6 +38,7 @@ export function LoginPage() {
     if (roles.includes('instructor') || roles.includes('teacher')) return <Navigate to="/teacher/dashboard" replace />;
     if (roles.includes('accountant')) return <Navigate to="/accountant/dashboard" replace />;
     if (roles.includes('secretary')) return <Navigate to="/secretary/dashboard" replace />;
+    if (roles.includes('support')) return <Navigate to="/admin/support-tickets" replace />;
     return <Navigate to="/student/dashboard" replace />;
   }
 
@@ -67,6 +68,7 @@ export function LoginPage() {
       );
       const isAccountant = userRoles.some((r) => r.toLowerCase() === 'accountant');
       const isSecretary = userRoles.some((r) => r.toLowerCase() === 'secretary');
+      const isSupport = userRoles.some((r) => r.toLowerCase() === 'support');
 
       // Redirect — no corner toast; success is the new page.
       // Honor the deep link preserved by the guards, otherwise route by role.
@@ -80,6 +82,8 @@ export function LoginPage() {
         navigate('/accountant/dashboard');
       } else if (isSecretary) {
         navigate('/secretary/dashboard');
+      } else if (isSupport) {
+        navigate('/admin/support-tickets');
       } else {
         navigate('/student/dashboard');
       }

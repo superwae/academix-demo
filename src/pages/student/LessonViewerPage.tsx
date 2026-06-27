@@ -21,6 +21,7 @@ import {
 } from '../../services/courseExtrasService';
 import { SessionRatingDialog } from '../../components/course/SessionRatingDialog';
 import { resolvePublicFileUrl } from '../../lib/meetingTimeFormat';
+import { ReportProblemButton } from '../../components/support/ReportProblemButton';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 
@@ -212,6 +213,14 @@ export function LessonViewerPage() {
             <Clock className="h-4 w-4" />
             <span>{formatDuration(lesson.durationMinutes)}</span>
           </div>
+        )}
+        {courseId && course && lessonId && lesson && (
+          <ReportProblemButton
+            courseId={courseId}
+            courseTitle={course.title}
+            lessonId={lessonId}
+            lessonTitle={lesson.title}
+          />
         )}
       </div>
 

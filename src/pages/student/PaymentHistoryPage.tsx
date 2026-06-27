@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { paymentService, type PaymentDto } from "../../services/paymentService";
 import { ResponsiveTable, type ResponsiveTableColumn } from "../../components/ui/responsive-table";
 import { formatMoney } from "../../lib/money";
+import { statusBadge } from "../../lib/semanticColors";
 
 export function PaymentHistoryPage() {
   const { t } = useTranslation(['student', 'common', 'errors']);
@@ -46,13 +47,13 @@ export function PaymentHistoryPage() {
     switch (status.toLowerCase()) {
       case "success":
       case "completed":
-        return "bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
+        return statusBadge.success;
       case "pending":
-        return "bg-amber-500/10 text-amber-500 border-amber-500/20";
+        return statusBadge.warning;
       case "failed":
-        return "bg-red-500/10 text-red-500 border-red-500/20";
+        return statusBadge.error;
       default:
-        return "bg-muted text-muted-foreground";
+        return statusBadge.neutral;
     }
   };
 

@@ -14,6 +14,11 @@ import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
+import {
+  buildCourseToneMap,
+  calendarEventClassNames,
+  type CalendarEventTone,
+} from '../../lib/calendarColors'
 
 const DOW_TO_INDEX: Record<string, number> = {
   Sun: 0,
@@ -110,7 +115,7 @@ function atMinutesOnDay(day: Date, minutes: number): Date {
 
 function buildCalendarEvents(
   courses: CourseDto[],
-  colorMap: Map<string, string>,
+  toneMap: Map<string, CalendarEventTone>,
   rangeStart: Date,
   rangeEndExclusive: Date
 ) {
@@ -120,9 +125,6 @@ function buildCalendarEvents(
     title: string
     start: Date
     end: Date
-    backgroundColor: string
-    borderColor: string
-    textColor: string
     classNames: string[]
     extendedProps: {
       courseId: string
@@ -135,7 +137,7 @@ function buildCalendarEvents(
 
   for (const course of courses) {
     if (!course.sections?.length) continue
-    const color = colorMap.get(course.id) || 'hsl(var(--primary))'
+    const tone = toneMap.get(course.id) || 'primary'
     for (const section of course.sections) {
       if (!section.meetingTimes?.length) continue
       for (const mt of section.meetingTimes) {
@@ -151,10 +153,7 @@ function buildCalendarEvents(
             title: `${course.title} — ${section.name}`,
             start,
             end,
-            backgroundColor: color,
-            borderColor: color,
-            textColor: 'hsl(var(--primary-foreground))',
-            classNames: ['calendar-event'],
+            classNames: calendarEventClassNames(tone),
             extendedProps: {
               courseId: course.id,
               sectionId: section.id,
@@ -214,22 +213,8 @@ export function TeacherCalendarPage() {
     api.changeView(calendarView === 'week' ? 'timeGridWeek' : 'dayGridMonth')
   }, [calendarView])
 
-  const courseColors = useMemo(() => {
-    const colors = [
-      'hsl(var(--primary))',
-      'hsl(217 91% 60%)',
-      'hsl(270 85% 65%)',
-      'hsl(199 89% 55%)',
-      'hsl(142 76% 36%)',
-      'hsl(24 95% 53%)',
-    ]
-    const colorMap = new Map<string, string>()
-    courses.forEach((c, idx) => {
-      if (!colorMap.has(c.id)) {
-        colorMap.set(c.id, colors[idx % colors.length])
-      }
-    })
-    return colorMap
+  const courseTones = useMemo(() => {
+    return buildCourseToneMap(courses.map((c) => c.id))
   }, [courses])
 
   const hasAnyMeetingTimes = useMemo(
@@ -251,8 +236,8 @@ export function TeacherCalendarPage() {
   )
 
   const events = useMemo(() => {
-    return buildCalendarEvents(courses, courseColors, visibleRange.start, visibleRange.end)
-  }, [courses, courseColors, visibleRange])
+    return buildCalendarEvents(courses, courseTones, visibleRange.start, visibleRange.end)
+  }, [courses, courseTones, visibleRange])
 
   const onDatesSet = (info: DatesSetArg) => {
     setVisibleRange({ start: info.start, end: info.end })
@@ -380,7 +365,7 @@ export function TeacherCalendarPage() {
                   </p>
                 </div>
               )}
-              <div className="rounded-lg border border-border bg-background p-2">
+              <div className="academix-calendar rounded-lg border border-border bg-background p-2">
                 <FullCalendar
                   ref={(r) => {
                     calendarRef.current = (r as unknown as FullCalendar | null) ?? null

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { HelpCircle, LifeBuoy, Inbox } from 'lucide-react'
+import { HelpCircle, LifeBuoy, Inbox, BookOpen } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import {
   DropdownMenu,
@@ -12,6 +12,7 @@ import {
 } from './ui/dropdown-menu'
 import { ContactSupportDialog } from './ContactSupportDialog'
 import { useAuthStore } from '../store/useAuthStore'
+import { isPlatformAdminAccount, isSupportStaffAccount } from '../lib/userRoles'
 
 /**
  * Universal "Help" button mounted in every portal header.
@@ -25,7 +26,8 @@ export function HelpButton() {
   const navigate = useNavigate()
   const [dialogOpen, setDialogOpen] = useState(false)
 
-  const isAdmin = (user?.roles ?? []).some((r) => /^(super)?admin$/i.test(r))
+  const isAdmin = isPlatformAdminAccount(user?.roles)
+  const isSupportStaff = isSupportStaffAccount(user?.roles)
 
   return (
     <>
@@ -42,12 +44,18 @@ export function HelpButton() {
             {t('support:helpMenu')}
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
+            <Link to="/support/help">
+              <BookOpen className="me-2 h-4 w-4" />
+              {t('support:kb.title')}
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
             <Link to="/support">
               <Inbox className="me-2 h-4 w-4" />
               {t('support:myTickets')}
             </Link>
           </DropdownMenuItem>
-          {isAdmin && (
+          {(isAdmin || isSupportStaff) && (
             <>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>

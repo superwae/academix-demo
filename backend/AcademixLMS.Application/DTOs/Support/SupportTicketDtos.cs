@@ -48,3 +48,8 @@ public record UpdateSupportTicketRequest(
     SupportTicketStatus? Status,
     SupportTicketPriority? Priority,
     Guid? AssignedToUserId);
+
+public record SupportStaffMemberDto(
+    Guid Id,
+    string Name,
+    string Email);

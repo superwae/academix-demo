@@ -4,6 +4,7 @@ namespace AcademixLMS.Application.DTOs.User;
 public class UserUiPreferencesDto
 {
     public string Theme { get; set; } = "light";
+    public string? ColorMode { get; set; }
     public string? CustomThemeColor { get; set; }
     public string? MixTheme { get; set; }
     public bool? NotificationsEnabled { get; set; }

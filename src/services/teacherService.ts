@@ -1,4 +1,5 @@
 import { apiClient, type ApiError } from '../lib/api';
+import { getSafeMeetingJoinUrl } from '../lib/trustedMeetingUrl';
 import type { CourseDto, PagedRequest, PagedResult } from './courseService';
 import type { EnrollmentDto } from './enrollmentService';
 import type { AssignmentSubmissionDto } from './assignmentService';
@@ -242,7 +243,7 @@ class TeacherService {
                 startTime,
                 endTime,
                 modality: course.modality,
-                joinUrl: section.joinUrl,
+                joinUrl: getSafeMeetingJoinUrl(section.joinUrl) ?? undefined,
               });
             }
           }

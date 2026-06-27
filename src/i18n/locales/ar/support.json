@@ -51,7 +51,29 @@
     "internalToggle": "اجعلها ملاحظة داخلية",
     "noReplies": "لا توجد ردود بعد — سنتواصل معك قريباً.",
     "statusUpdatedToast": "تم تحديث الحالة.",
-    "priorityUpdatedToast": "تم تحديث الأولوية."
+    "priorityUpdatedToast": "تم تحديث الأولوية.",
+    "assigneeUpdatedToast": "تم تحديث المسؤول."
+  },
+  "team": {
+    "inboxTitle": "صندوق الدعم",
+    "inboxSubtitle": "فرز التذاكر وتعيين الوكلاء والرد على العملاء.",
+    "inboxNav": "صندوق الدعم",
+    "portalHome": "بوابة الدعم",
+    "dashboardTitle": "لوحة الدعم",
+    "dashboardSubtitle": "نظرة عامة على التذاكر المفتوحة وقائمتك.",
+    "openInbox": "فتح الصندوق الكامل",
+    "openCount": "{{count}} مفتوحة في هذا العرض",
+    "queueAll": "كل التذاكر",
+    "queueMine": "المُسندة إليّ",
+    "queueUnassigned": "غير مُسندة",
+    "columnAssignee": "المسؤول",
+    "unassigned": "غير مُسند",
+    "stats": {
+      "open": "تذاكر مفتوحة",
+      "mine": "المُسندة إليّ",
+      "unassigned": "غير مُسندة",
+      "urgent": "أولوية عالية"
+    }
   },
   "admin": {
     "title": "صندوق الدعم",

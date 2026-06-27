@@ -537,18 +537,23 @@ function ScrollStory() {
           </div>
         </div>
 
-        {/* scenes */}
-        <div className="absolute inset-0 z-0 flex items-center justify-center lg:justify-end">
-          <div className="relative h-full w-full lg:w-[68%] max-w-5xl">
-            {CHAPTER_IDS.map((id, i) => {
+        {/* scenes — only mount the active chapter so layers don't stack in the DOM */}
+        <div
+          className={cn(
+            'absolute inset-0 z-0 flex items-center justify-center lg:justify-end overflow-hidden transition-opacity duration-300',
+            activeChapter < 0 && 'opacity-0 invisible pointer-events-none'
+          )}
+        >
+          <div className="relative h-full w-full lg:w-[68%] max-w-5xl overflow-hidden">
+            {activeChapter >= 0 && (() => {
+              const id = CHAPTER_IDS[activeChapter];
               const Scene = SCENES[id];
-              const active = activeChapter === i;
               return (
-                <div key={id} className={cn('lx-scene', active && 'lx-scene-active')} aria-hidden={!active}>
+                <div key={id} className="lx-scene lx-scene-active">
                   <Scene />
                 </div>
               );
-            })}
+            })()}
           </div>
         </div>
 
@@ -733,8 +738,9 @@ export function HomePage() {
 
       {/* component-scoped animation styles */}
       <style>{`
-        .lx-scene { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; opacity: 0; transform: translateY(36px) scale(0.96); transition: opacity .7s ease, transform .7s ease; pointer-events: none; }
-        .lx-scene-active { opacity: 1; transform: translateY(0) scale(1); }
+        .lx-scene { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+        .lx-scene-active { animation: lx-scene-in .45s cubic-bezier(.2,.7,.3,1) both; pointer-events: auto; }
+        @keyframes lx-scene-in { from { opacity: 0; transform: translateY(28px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
         .lx-scene-svg { width: min(92%, 860px); height: auto; }
         .lx-float { animation: lx-float 5.5s ease-in-out infinite; }
         @keyframes lx-float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
@@ -764,7 +770,8 @@ export function HomePage() {
         @media (prefers-reduced-motion: reduce) {
           .lx-float, .lx-beam, .lx-pulse, .lx-ring, .lx-orbits, .lx-scroll-dot, .lx-tile-filled path, .lx-hero-in { animation: none !important; }
           .lx-hero-in { opacity: 1 !important; transform: none !important; }
-          .lx-scene, .lx-reveal, .lx-chapter-body { transition: none !important; }
+          .lx-scene, .lx-scene-active { animation: none !important; opacity: 1 !important; transform: none !important; }
+          .lx-reveal, .lx-chapter-body { transition: none !important; }
         }
       `}</style>
 
