@@ -11,6 +11,8 @@ import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { localizeModality, localizeEnrollmentStatus } from '../../lib/enumLocalization'
+import { getSafeMeetingJoinUrl } from '../../lib/trustedMeetingUrl'
+import { MeetingJoinButton } from '../../components/meeting/MeetingJoinGate'
 
 interface EnrollmentWithCourse extends EnrollmentDto {
   course?: CourseDto
@@ -24,6 +26,7 @@ function EnrollmentCard({ enrollment }: { enrollment: EnrollmentWithCourse }) {
   const { t } = useTranslation(['student', 'common'])
   const course = enrollment.course
   const section = course?.sections.find((s) => s.id === enrollment.sectionId)
+  const safeJoinUrl = getSafeMeetingJoinUrl(section?.joinUrl)
   const completed = isEnrollmentCompleted(enrollment)
 
   return (
@@ -118,13 +121,11 @@ function EnrollmentCard({ enrollment }: { enrollment: EnrollmentWithCourse }) {
           </div>
 
           <div className="flex flex-col gap-2 pt-2">
-            {section?.joinUrl && (
-              <Button variant="secondary" size="sm" asChild className="w-full">
-                <a href={section.joinUrl} target="_blank" rel="noopener noreferrer">
-                  <Video className="me-2 h-4 w-4" />
-                  {t('student:myClasses.joinOnlineSession')}
-                </a>
-              </Button>
+            {safeJoinUrl && (
+              <MeetingJoinButton variant="secondary" size="sm" joinUrl={safeJoinUrl} className="w-full">
+                <Video className="me-2 h-4 w-4" />
+                {t('student:myClasses.joinOnlineSession')}
+              </MeetingJoinButton>
             )}
             {course && (
               <Button variant="outline" size="sm" asChild className="w-full">

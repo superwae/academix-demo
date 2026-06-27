@@ -12,13 +12,25 @@ import {
   type SupportTicketDetail,
   type SupportTicketPriority,
   type SupportTicketStatus,
+  type SupportStaffMember,
 } from '../../services/supportTicketService'
 import { useAuthStore } from '../../store/useAuthStore'
 import { cn } from '../../lib/cn'
+import { parseTicketMessage } from '../../lib/support/supportMeta'
+import {
+  TicketAttachmentList,
+  TicketContextBadges,
+  TicketContextLinks,
+} from '../../components/support/TicketContextBadges'
+import { TicketStaffPanel } from '../../components/support/TicketStaffPanel'
 
 interface TicketDetailPageProps {
-  /** When true, show admin controls (status/priority/internal notes) and use admin back link. */
+  /** Staff triage view (Admin or Support): status, priority, assignee, internal notes */
+  staffView?: boolean
+  /** @deprecated use staffView */
   adminView?: boolean
+  /** Back link base path, e.g. /support-team/tickets or /admin/support-tickets */
+  basePath?: string
 }
 
 const STATUS_VALUES: SupportTicketStatus[] = [
@@ -30,12 +42,14 @@ const STATUS_VALUES: SupportTicketStatus[] = [
 ]
 const PRIORITY_VALUES: SupportTicketPriority[] = ['Low', 'Normal', 'High', 'Urgent']
 
-export function TicketDetailPage({ adminView = false }: TicketDetailPageProps) {
+export function TicketDetailPage({ staffView = false, adminView = false, basePath }: TicketDetailPageProps) {
+  const isStaff = staffView || adminView
   const { t, i18n } = useTranslation(['support', 'common'])
   const { ticketId = '' } = useParams<{ ticketId: string }>()
   const { user } = useAuthStore()
 
   const [detail, setDetail] = useState<SupportTicketDetail | null>(null)
+  const [staffMembers, setStaffMembers] = useState<SupportStaffMember[]>([])
   const [loading, setLoading] = useState(false)
   const [reply, setReply] = useState('')
   const [isInternal, setIsInternal] = useState(false)
@@ -58,13 +72,23 @@ export function TicketDetailPage({ adminView = false }: TicketDetailPageProps) {
     void refresh()
   }, [refresh])
 
+  useEffect(() => {
+    if (!isStaff) return
+    supportTicketService
+      .getStaff()
+      .then(setStaffMembers)
+      .catch(() => {
+        /* assignee picker is optional */
+      })
+  }, [isStaff])
+
   const sendReply = async () => {
     if (!ticketId || !reply.trim()) return
     setSending(true)
     try {
       await supportTicketService.addReply(ticketId, {
         message: reply.trim(),
-        isInternal: adminView && isInternal,
+        isInternal: isStaff && isInternal,
       })
       toast.success(t('support:detail.replyAddedToast'))
       setReply('')
@@ -99,6 +123,17 @@ export function TicketDetailPage({ adminView = false }: TicketDetailPageProps) {
     }
   }
 
+  const changeAssignee = async (assigneeId: string) => {
+    if (!ticketId || !assigneeId) return
+    try {
+      await supportTicketService.update(ticketId, { assignedToUserId: assigneeId })
+      toast.success(t('support:detail.assigneeUpdatedToast'))
+      await refresh()
+    } catch (e) {
+      toast.error((e as Error).message)
+    }
+  }
+
   const formatDateTime = (iso: string) =>
     new Date(iso).toLocaleString(i18n.language, {
       month: 'short',
@@ -107,7 +142,11 @@ export function TicketDetailPage({ adminView = false }: TicketDetailPageProps) {
       minute: '2-digit',
     })
 
-  const backLink = adminView ? '/admin/support-tickets' : '/support'
+  const backLink =
+    basePath ??
+    (isStaff
+      ? '/admin/support-tickets'
+      : '/support')
 
   if (loading && !detail) {
     return (
@@ -119,9 +158,12 @@ export function TicketDetailPage({ adminView = false }: TicketDetailPageProps) {
   if (!detail) return null
 
   const { ticket, replies } = detail
+  const { body: ticketBody, meta } = parseTicketMessage(ticket.message)
 
   return (
-    <div className="max-w-3xl mx-auto p-4 md:p-8 space-y-6">
+    <div className={cn('mx-auto p-4 md:p-8 space-y-6', isStaff ? 'max-w-6xl' : 'max-w-3xl')}>
+      <div className={cn(isStaff && 'grid lg:grid-cols-[1fr_280px] gap-6 items-start')}>
+        <div className="space-y-6 min-w-0">
       <Link
         to={backLink}
         className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
@@ -139,7 +181,7 @@ export function TicketDetailPage({ adminView = false }: TicketDetailPageProps) {
               {t('support:detail.createdAt', { date: formatDateTime(ticket.createdAt) })}
             </p>
           </div>
-          {adminView ? (
+          {isStaff ? (
             <div className="flex flex-wrap gap-2">
               <Select
                 value={ticket.status}
@@ -159,6 +201,15 @@ export function TicketDetailPage({ adminView = false }: TicketDetailPageProps) {
                   label: t(`support:priorities.${p}`),
                 }))}
               />
+              {staffMembers.length > 0 && (
+                <Select
+                  value={ticket.assignedToUserId ?? ''}
+                  placeholder={t('support:team.unassigned')}
+                  onValueChange={changeAssignee}
+                  className="h-9 min-w-[10rem]"
+                  options={staffMembers.map((m) => ({ value: m.id, label: m.name }))}
+                />
+              )}
             </div>
           ) : (
             <div className="flex flex-col items-end gap-1">
@@ -172,9 +223,18 @@ export function TicketDetailPage({ adminView = false }: TicketDetailPageProps) {
           )}
         </div>
 
+        <TicketContextBadges meta={meta} category={ticket.category} className="pt-1" />
+
         <p className="whitespace-pre-wrap text-sm leading-relaxed pt-2 border-t border-border">
-          {ticket.message}
+          {ticketBody}
         </p>
+
+        <TicketAttachmentList meta={meta} />
+        {meta?.courseId && (
+          <div className="pt-1">
+            <TicketContextLinks meta={meta} />
+          </div>
+        )}
       </header>
 
       <section className="space-y-3">
@@ -187,7 +247,7 @@ export function TicketDetailPage({ adminView = false }: TicketDetailPageProps) {
               className={cn(
                 'rounded-xl border p-4',
                 r.isInternal
-                  ? 'border-amber-500/40 bg-amber-500/5'
+                  ? 'border-amber-500/40 bg-amber-500/5 dark:border-amber-500/30 dark:bg-amber-500/10'
                   : r.isStaff
                   ? 'border-primary/30 bg-primary/5'
                   : 'border-border bg-card'
@@ -202,7 +262,7 @@ export function TicketDetailPage({ adminView = false }: TicketDetailPageProps) {
                   </span>
                 )}
                 {r.isInternal && (
-                  <span className="text-xs text-amber-700 font-medium">
+                  <span className="text-xs text-amber-700 dark:text-amber-400 font-medium">
                     {t('support:detail.internalNote')}
                   </span>
                 )}
@@ -210,7 +270,9 @@ export function TicketDetailPage({ adminView = false }: TicketDetailPageProps) {
                   {formatDateTime(r.createdAt)}
                 </span>
               </div>
-              <p className="whitespace-pre-wrap text-sm leading-relaxed">{r.message}</p>
+              <p className="whitespace-pre-wrap text-sm leading-relaxed">
+                {parseTicketMessage(r.message).body}
+              </p>
             </div>
           ))
         )}
@@ -227,7 +289,7 @@ export function TicketDetailPage({ adminView = false }: TicketDetailPageProps) {
             rows={4}
             maxLength={4000}
           />
-          {adminView && (
+          {isStaff && (
             <label className="flex items-center gap-2 text-xs text-muted-foreground">
               <input
                 type="checkbox"
@@ -247,6 +309,10 @@ export function TicketDetailPage({ adminView = false }: TicketDetailPageProps) {
 
       {/* Avoid unused warning for user */}
       <div className="hidden">{user?.email}</div>
+        </div>
+
+        {isStaff && <TicketStaffPanel ticket={ticket} onUpdated={refresh} />}
+      </div>
     </div>
   )
 }

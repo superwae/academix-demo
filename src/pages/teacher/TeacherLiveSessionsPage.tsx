@@ -42,6 +42,10 @@ import {
   type WeeklySessionEvent,
 } from '../../lib/weeklySessions'
 import { useTranslation } from 'react-i18next'
+import {
+  getMeetingUrlValidationToast,
+  validateMeetingUrlForSave,
+} from '../../lib/trustedMeetingUrl'
 
 const BADGE_STYLES: Record<string, string> = {
   live: 'bg-red-500/10 text-red-700 dark:text-red-300 border-red-500/30 ring-2 ring-red-500/20',
@@ -97,13 +101,8 @@ export function TeacherLiveSessionsPage() {
 
   const daysWithEvents = useMemo(() => groupByDay(events, weekStart), [events, weekStart])
 
-  const upcomingToday = useMemo(() => {
-    const today = new Date()
-    return events.filter((e) => isSameDay(e.start, today))
-  }, [events])
-
-  const liveNow = upcomingToday.filter((e) => e.badge === 'live')
-  const startingSoon = upcomingToday.filter((e) => e.badge === 'soon')
+  const liveNow = events.filter((e) => e.badge === 'live')
+  const startingSoon = events.filter((e) => e.badge === 'soon')
 
   const openUrlEditor = (session: WeeklySessionEvent) => {
     setEditSession(session)
@@ -112,11 +111,13 @@ export function TeacherLiveSessionsPage() {
 
   const saveJoinUrl = async () => {
     if (!editSession) return
-    const url = newJoinUrl.trim()
-    if (url && !/^https?:\/\//i.test(url)) {
-      toast.error(t('teacher:teacherLiveSessions.invalidUrlTitle'), { description: t('teacher:teacherLiveSessions.invalidUrlBody') })
+    const urlResult = validateMeetingUrlForSave(newJoinUrl)
+    if (!urlResult.ok) {
+      const toastCopy = getMeetingUrlValidationToast(urlResult, t)
+      if (toastCopy) toast.error(toastCopy.title, { description: toastCopy.description })
       return
     }
+    const url = urlResult.url ?? ''
     try {
       setSavingUrl(true)
       const course = courses.find((c) => c.id === editSession.courseId)

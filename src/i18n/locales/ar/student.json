@@ -23,6 +23,13 @@
     "lessonNotFound": "لم يتم العثور على الدرس",
     "loadingCourseDetails": "جارٍ تحميل تفاصيل الدورة..."
   },
+  "meetingJoin": {
+    "leaveTitle": "أنت على وشك مغادرة AcademiX",
+    "leaveDescription": "سيتم فتح اجتماع فيديو خارجي في تبويب جديد. AcademiX لا تتحكم في ذلك الموقع.",
+    "destinationLabel": "رابط الاجتماع",
+    "stay": "البقاء في AcademiX",
+    "continue": "المتابعة إلى الاجتماع"
+  },
   "dashboard": {
     "welcome": "مرحباً بعودتك، {{name}}",
     "pageTitle": "لوحة التحكم",

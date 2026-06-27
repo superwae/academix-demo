@@ -15,7 +15,8 @@ import { toast } from 'sonner'
 import { X, Search, Filter, Calendar, MapPin, Video, BookOpen, Globe, AlertCircle } from 'lucide-react'
 import { cn } from '../../lib/cn'
 import { localizeLevel, localizeModality } from '../../lib/enumLocalization'
-import { formatMoney } from '../../lib/money'
+import { formatMoney, isPaidCourse } from '../../lib/money'
+import { accentFree } from '../../lib/semanticColors'
 
 type Filters = {
   category: string | 'All'
@@ -250,7 +251,7 @@ export function CatalogPage() {
 
     // Paid courses go through checkout first. The server also rejects enrolling without
     // a Completed payment, but redirecting here avoids the roundtrip error toast.
-    if (typeof openCourse.price === 'number' && openCourse.price > 0) {
+    if (isPaidCourse(openCourse.price)) {
       setOpenCourseId(null)
       setOpenCourseDetails(null)
       navigate(`/student/checkout/${openCourse.id}?sectionId=${selectedSectionId}`)
@@ -528,7 +529,7 @@ export function CatalogPage() {
                   <div className="flex items-center justify-between w-full">
                     <div className="text-xs text-muted-foreground">⭐ {c.rating.toFixed(1)}</div>
                     <div className="text-sm font-semibold">
-                      {c.price ? formatMoney(c.price) : <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-500/30">{t('student:catalog.free')}</Badge>}
+                      {isPaidCourse(c.price) ? formatMoney(c.price!) : <Badge className={accentFree}>{t('student:catalog.free')}</Badge>}
                     </div>
                   </div>
                   <div className="flex gap-2 w-full">

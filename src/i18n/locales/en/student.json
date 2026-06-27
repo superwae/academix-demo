@@ -23,6 +23,13 @@
     "lessonNotFound": "Lesson not found",
     "loadingCourseDetails": "Loading course details..."
   },
+  "meetingJoin": {
+    "leaveTitle": "You're leaving AcademiX",
+    "leaveDescription": "You'll open an external video meeting in a new tab. AcademiX does not control that website.",
+    "destinationLabel": "Meeting link",
+    "stay": "Stay on AcademiX",
+    "continue": "Continue to meeting"
+  },
   "dashboard": {
     "welcome": "Welcome back, {{name}}",
     "pageTitle": "Dashboard",

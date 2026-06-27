@@ -1,5 +1,6 @@
 import { X } from "lucide-react";
 import { cn } from "../../../lib/cn";
+import { statusBadge, iconStatus } from "../../../lib/semanticColors";
 import { Button } from "../../ui/button";
 import {
   Dialog,
@@ -33,11 +34,11 @@ export interface DetailModalProps {
 }
 
 const badgeVariants = {
-  success: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
-  warning: "bg-amber-500/10 text-amber-600 border-amber-500/20",
-  error: "bg-red-500/10 text-red-600 border-red-500/20",
-  info: "bg-blue-500/10 text-blue-600 border-blue-500/20",
-  default: "bg-muted text-muted-foreground border-border",
+  success: statusBadge.success,
+  warning: statusBadge.warning,
+  error: statusBadge.error,
+  info: statusBadge.info,
+  default: statusBadge.neutral,
 };
 
 const sizeClasses = {
@@ -138,8 +139,8 @@ export function DetailAmount({
       <span
         className={cn(
           "text-lg font-bold",
-          variant === "success" && "text-emerald-500",
-          variant === "error" && "text-red-500"
+          variant === "success" && iconStatus.success,
+          variant === "error" && iconStatus.error
         )}
       >
         {amount}

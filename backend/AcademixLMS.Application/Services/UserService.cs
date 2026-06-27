@@ -370,6 +370,7 @@ public class UserService : IUserService
         var dto = new UserUiPreferencesDto
         {
             Theme = string.IsNullOrWhiteSpace(request.Theme) ? "light" : request.Theme.Trim(),
+            ColorMode = string.IsNullOrWhiteSpace(request.ColorMode) ? existing?.ColorMode : request.ColorMode.Trim(),
             CustomThemeColor = string.IsNullOrWhiteSpace(request.CustomThemeColor) ? null : request.CustomThemeColor.Trim(),
             MixTheme = string.IsNullOrWhiteSpace(request.MixTheme) ? null : request.MixTheme.Trim(),
             NotificationsEnabled = request.NotificationsEnabled ?? existing?.NotificationsEnabled ?? true

@@ -8,8 +8,10 @@ on:
 
 env:
   DOTNET_VERSION: '8.0.x'
+  # The .sln is not committed; the API csproj transitively references the
+  # Application/Domain/Infrastructure projects, so build/test against it
+  # (same approach the Render Dockerfile uses).
   PROJECT_PATH: './backend/AcademixLMS.API/AcademixLMS.API.csproj'
-  SOLUTION_PATH: './backend/AcademixLMS.sln'
 
 jobs:
   build:
@@ -41,13 +43,13 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Restore dependencies
-      run: dotnet restore ${{ env.SOLUTION_PATH }}
+      run: dotnet restore ${{ env.PROJECT_PATH }}
 
     - name: Build solution
-      run: dotnet build ${{ env.SOLUTION_PATH }} --no-restore --configuration Release
+      run: dotnet build ${{ env.PROJECT_PATH }} --no-restore --configuration Release
 
     - name: Run tests
-      run: dotnet test ${{ env.SOLUTION_PATH }} --no-build --configuration Release --verbosity normal
+      run: dotnet test ${{ env.PROJECT_PATH }} --no-build --configuration Release --verbosity normal
       continue-on-error: true
 
     - name: Publish application
@@ -75,7 +77,7 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Run security audit
-      run: dotnet list ${{ env.SOLUTION_PATH }} package --vulnerable --include-transitive
+      run: dotnet list ${{ env.PROJECT_PATH }} package --vulnerable --include-transitive
       continue-on-error: true
 
   docker-build:

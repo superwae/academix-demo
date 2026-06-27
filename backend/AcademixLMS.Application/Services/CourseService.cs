@@ -323,6 +323,13 @@ public class CourseService : ICourseService
             return Result<CourseDto>.Failure("Section capacity must be at least 1 seat.");
         }
 
+        foreach (var sectionRequest in request.Sections)
+        {
+            var joinUrlError = TrustedMeetingUrlValidator.Validate(sectionRequest.JoinUrl);
+            if (joinUrlError != null)
+                return Result<CourseDto>.Failure(joinUrlError);
+        }
+
         var capacityPlan = await GetCapacityPlanAsync(request.InstructorId, orgId, cancellationToken);
         var requestedSeats = SumRequestedSeats(request.Sections);
         var capacityError = ValidateNewCourseCapacity(capacityPlan, requestedSeats);
@@ -774,6 +781,10 @@ public class CourseService : ICourseService
         if (scheduleError != null)
             return Result<CourseSectionDto>.Failure(scheduleError);
 
+        var joinUrlError = TrustedMeetingUrlValidator.Validate(request.JoinUrl);
+        if (joinUrlError != null)
+            return Result<CourseSectionDto>.Failure(joinUrlError);
+
         var section = new CourseSection
         {
             CourseId = courseId,
@@ -872,6 +883,10 @@ public class CourseService : ICourseService
             course.InstructorId, proposedSlots, excludeSectionId: sectionId, cancellationToken);
         if (scheduleError != null)
             return Result.Failure(scheduleError);
+
+        var joinUrlError = TrustedMeetingUrlValidator.Validate(request.JoinUrl);
+        if (joinUrlError != null)
+            return Result.Failure(joinUrlError);
 
         section.Name = request.Name;
         section.LocationLabel = request.LocationLabel;

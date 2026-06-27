@@ -49,7 +49,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { THEMES, type ThemeId } from "../../theme/themes";
-import { applyTheme } from "../../theme/applyTheme";
+import { normalizeAccentTheme } from "../../theme/themePresets";
 import { useAppStore } from "../../store/useAppStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import { toast } from "sonner";
@@ -98,9 +98,10 @@ interface SearchResult {
 
 export function TeacherLayout() {
   const { t } = useTranslation(['nav', 'common', 'auth']);
+  const colorMode = useAppStore((s) => s.data.colorMode);
+  const setColorMode = useAppStore((s) => s.setColorMode);
   const theme = useAppStore((s) => s.data.theme);
   const customThemeColor = useAppStore((s) => s.data.customThemeColor);
-  const mixTheme = useAppStore((s) => s.data.mixTheme);
   const setTheme = useAppStore((s) => s.setTheme);
   const setCustomThemeColor = useAppStore((s) => s.setCustomThemeColor);
   const { logout, user } = useAuthStore();
@@ -121,17 +122,13 @@ export function TeacherLayout() {
     navigate("/");
   };
 
-  const isDarkMode = theme === 'dark';
+  const isDarkMode = colorMode === 'dark';
 
   const toggleDarkMode = () => {
-    const newTheme = isDarkMode ? 'light' : 'dark';
-    setTheme(newTheme);
-    toast.success(newTheme === 'dark' ? t('common:switchedToDarkMode') : t('common:switchedToLightMode'));
+    const next = isDarkMode ? 'light' : 'dark';
+    setColorMode(next);
+    toast.success(next === 'dark' ? t('common:switchedToDarkMode') : t('common:switchedToLightMode'));
   };
-
-  useEffect(() => {
-    applyTheme(theme, customThemeColor, mixTheme);
-  }, [theme, customThemeColor, mixTheme]);
 
   // Handle search input
   useEffect(() => {
@@ -570,7 +567,7 @@ export function TeacherLayout() {
                 <DropdownMenuRadioGroup
                   value={theme}
                   onValueChange={(v) => {
-                    const next = v as ThemeId;
+                    const next = normalizeAccentTheme(v as ThemeId);
                       if (next === 'custom') {
                         if (!customThemeColor) {
                           const computed = getComputedStyle(document.documentElement)
@@ -600,7 +597,7 @@ export function TeacherLayout() {
                       }
                   }}
                 >
-                    {THEMES.filter(th => th.id !== 'custom').map((th) => (
+                    {THEMES.filter(th => th.id !== 'custom' && th.id !== 'dark').map((th) => (
                     <DropdownMenuRadioItem
                       key={th.id}
                       value={th.id}

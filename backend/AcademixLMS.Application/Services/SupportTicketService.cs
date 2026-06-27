@@ -70,7 +70,11 @@ public class SupportTicketService : ISupportTicketService
         return Result<IReadOnlyList<SupportTicketDto>>.Success(dtos);
     }
 
-    public async Task<Result<IReadOnlyList<SupportTicketDto>>> GetAllForAdminAsync(string? statusFilter, CancellationToken cancellationToken = default)
+    public async Task<Result<IReadOnlyList<SupportTicketDto>>> GetAllForStaffAsync(
+        string? statusFilter,
+        Guid? assignedToUserId,
+        bool unassignedOnly,
+        CancellationToken cancellationToken = default)
     {
         var q = _context.SupportTickets
             .Include(t => t.User)
@@ -81,6 +85,15 @@ public class SupportTicketService : ISupportTicketService
             Enum.TryParse<SupportTicketStatus>(statusFilter, true, out var status))
         {
             q = q.Where(t => t.Status == status);
+        }
+
+        if (unassignedOnly)
+        {
+            q = q.Where(t => t.AssignedToUserId == null);
+        }
+        else if (assignedToUserId.HasValue)
+        {
+            q = q.Where(t => t.AssignedToUserId == assignedToUserId.Value);
         }
 
         var tickets = await q.OrderByDescending(t => t.CreatedAt).ToListAsync(cancellationToken);
@@ -95,7 +108,26 @@ public class SupportTicketService : ISupportTicketService
         return Result<IReadOnlyList<SupportTicketDto>>.Success(dtos);
     }
 
-    public async Task<Result<SupportTicketDetailDto>> GetByIdAsync(Guid ticketId, Guid requestingUserId, bool isAdmin, CancellationToken cancellationToken = default)
+    public async Task<Result<IReadOnlyList<SupportStaffMemberDto>>> GetSupportStaffAsync(CancellationToken cancellationToken = default)
+    {
+        var staffRoleIds = await GetStaffRoleIdsAsync(cancellationToken);
+        var staffUserIds = await _context.UserRoles
+            .Where(ur => staffRoleIds.Contains(ur.RoleId) && !ur.IsDeleted)
+            .Select(ur => ur.UserId)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+
+        var staff = await _context.Users
+            .Where(u => staffUserIds.Contains(u.Id) && !u.IsDeleted && u.IsActive)
+            .OrderBy(u => u.FirstName)
+            .ThenBy(u => u.LastName)
+            .Select(u => new SupportStaffMemberDto(u.Id, u.FirstName + " " + u.LastName, u.Email))
+            .ToListAsync(cancellationToken);
+
+        return Result<IReadOnlyList<SupportStaffMemberDto>>.Success(staff);
+    }
+
+    public async Task<Result<SupportTicketDetailDto>> GetByIdAsync(Guid ticketId, Guid requestingUserId, bool isStaff, CancellationToken cancellationToken = default)
     {
         var ticket = await _context.SupportTickets
             .Include(t => t.User)
@@ -103,12 +135,12 @@ public class SupportTicketService : ISupportTicketService
             .FirstOrDefaultAsync(t => t.Id == ticketId && !t.IsDeleted, cancellationToken);
 
         if (ticket is null) return Result<SupportTicketDetailDto>.Failure(_localizer["TicketNotFound"]);
-        if (!isAdmin && ticket.UserId != requestingUserId)
+        if (!isStaff && ticket.UserId != requestingUserId)
             return Result<SupportTicketDetailDto>.Failure(_localizer["NotAuthorized"]);
 
         var replies = await _context.SupportTicketReplies
             .Include(r => r.Author)
-            .Where(r => r.TicketId == ticketId && !r.IsDeleted && (isAdmin || !r.IsInternal))
+            .Where(r => r.TicketId == ticketId && !r.IsDeleted && (isStaff || !r.IsInternal))
             .OrderBy(r => r.CreatedAt)
             .ToListAsync(cancellationToken);
 
@@ -323,6 +355,13 @@ public class SupportTicketService : ISupportTicketService
         {
             var assignee = await _context.Users.FirstOrDefaultAsync(u => u.Id == request.AssignedToUserId.Value && !u.IsDeleted, cancellationToken);
             if (assignee is null) return Result<SupportTicketDto>.Failure(_localizer["UserNotFound"]);
+
+            var staffRoleIds = await GetStaffRoleIdsAsync(cancellationToken);
+            var isSupportStaff = await _context.UserRoles
+                .AnyAsync(ur => ur.UserId == assignee.Id && staffRoleIds.Contains(ur.RoleId) && !ur.IsDeleted, cancellationToken);
+            if (!isSupportStaff)
+                return Result<SupportTicketDto>.Failure(_localizer["AssigneeMustBeStaff"]);
+
             ticket.AssignedToUserId = assignee.Id;
             ticket.AssignedTo = assignee;
         }
@@ -338,7 +377,7 @@ public class SupportTicketService : ISupportTicketService
 
     private async Task<List<Guid>> GetStaffRoleIdsAsync(CancellationToken cancellationToken) =>
         await _context.Roles
-            .Where(r => (r.Name == "Admin" || r.Name == "SuperAdmin") && !r.IsDeleted)
+            .Where(r => (r.Name == "Admin" || r.Name == "SuperAdmin" || r.Name == "Support") && !r.IsDeleted)
             .Select(r => r.Id)
             .ToListAsync(cancellationToken);
 

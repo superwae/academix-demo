@@ -41,6 +41,7 @@ import { Switch } from "../../components/ui/switch";
 import { cn } from "../../lib/cn";
 import { useAppStore } from "../../store/useAppStore";
 import { THEMES, type ThemeId } from "../../theme/themes";
+import { normalizeAccentTheme } from "../../theme/themePresets";
 import { toast } from "sonner";
 import { ColorPicker } from "../../components/ui/color-picker";
 import {
@@ -136,6 +137,8 @@ export function AdminSettingsPage() {
   const [showApiKey, setShowApiKey] = useState(false);
   
   // Theme settings
+  const colorMode = useAppStore((s) => s.data.colorMode);
+  const setColorMode = useAppStore((s) => s.setColorMode);
   const theme = useAppStore((s) => s.data.theme);
   const customThemeColor = useAppStore((s) => s.data.customThemeColor);
   const setTheme = useAppStore((s) => s.setTheme);
@@ -332,18 +335,18 @@ export function AdminSettingsPage() {
                   <span className="text-sm font-medium w-24">{t('admin:settings.appearance.mode')}</span>
                   <div className="flex gap-2">
                     <Button
-                      variant={theme === "light" ? "default" : "outline"}
+                      variant={colorMode === "light" ? "default" : "outline"}
                       size="sm"
-                      onClick={() => setTheme("light")}
+                      onClick={() => setColorMode("light")}
                       className="gap-2"
                     >
                       <Sun className="h-4 w-4" />
                       {t('admin:settings.appearance.light')}
                     </Button>
                     <Button
-                      variant={theme === "dark" ? "default" : "outline"}
+                      variant={colorMode === "dark" ? "default" : "outline"}
                       size="sm"
-                      onClick={() => setTheme("dark")}
+                      onClick={() => setColorMode("dark")}
                       className="gap-2"
                     >
                       <Moon className="h-4 w-4" />
@@ -359,7 +362,7 @@ export function AdminSettingsPage() {
                       <button
                         key={th.id}
                         onClick={() => {
-                          setTheme(th.id);
+                          setTheme(normalizeAccentTheme(th.id));
                           toast.success(t('admin:settings.appearance.themeChanged', { theme: th.label }));
                         }}
                         className={cn(

@@ -30,6 +30,10 @@ import {
 import { countWords, MAX_CERTIFICATE_WORDS } from '../../lib/certificateText'
 import { ConfirmDialog } from '../../components/ui/confirm-dialog'
 import { useTranslation } from 'react-i18next'
+import {
+  getMeetingUrlValidationToast,
+  validateMeetingUrlForSave,
+} from '../../lib/trustedMeetingUrl'
 import { subscriptionService, type CanCreateCourseResponse } from '../../services/subscriptionService'
 
 const SECTION_LOCATION_OPTIONS = [
@@ -346,6 +350,14 @@ export function EditCoursePage() {
       }))
       return
     }
+
+    const joinUrlResult = validateMeetingUrlForSave(editingSection.joinUrl ?? '')
+    if (!joinUrlResult.ok) {
+      const toastCopy = getMeetingUrlValidationToast(joinUrlResult, t)
+      if (toastCopy) toast.error(toastCopy.title, { description: toastCopy.description })
+      return
+    }
+
     setSectionsSaving(true)
     try {
       const meetingTimes = editingSection.meetingTimes
@@ -359,7 +371,7 @@ export function EditCoursePage() {
       const request = {
         name: editingSection.name.trim(),
         locationLabel: editingSection.locationLabel.trim(),
-        joinUrl: editingSection.joinUrl?.trim() || undefined,
+        joinUrl: joinUrlResult.url,
         maxSeats: editingSection.maxSeats,
         meetingTimes,
       }

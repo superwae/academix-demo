@@ -46,9 +46,19 @@ html[dir="rtl"] .rtl-flip { transform: scaleX(-1); }
     /* Gradient overlays */
     --gradient-primary: linear-gradient(135deg, hsl(222.2 84% 60%) 0%, hsl(217 91% 65%) 100%);
     --gradient-card: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.85) 100%);
+
+    /* Semantic status foregrounds (light theme) */
+    --status-success-fg: 142 76% 36%;
+    --status-warning-fg: 32 95% 44%;
+    --status-error-fg: 0 72% 51%;
+    --status-info-fg: 217 91% 45%;
+    --status-green-fg: 142 76% 36%;
+    --status-purple-fg: 271 81% 56%;
+    --status-orange-fg: 25 95% 53%;
+    --status-star-fg: 43 96% 56%;
   }
 
-  html[data-theme='dark'] {
+  html[data-color-mode='dark'], html[data-theme='dark'] {
     --background: 0 0% 0%;
     --foreground: 0 0% 98%;
     --card: 0 0% 8%;
@@ -66,12 +76,26 @@ html[dir="rtl"] .rtl-flip { transform: scaleX(-1); }
     --secondary-foreground: 0 0% 98%;
     --accent: 0 0% 15%;
     --accent-foreground: 0 0% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
     
     --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(222 84% 55%) 100%);
     --gradient-card: linear-gradient(135deg, rgba(20,20,20,0.95) 0%, rgba(30,30,30,0.85) 100%);
+
+    /* Semantic status foregrounds (dark theme) */
+    --status-success-fg: 158 64% 52%;
+    --status-warning-fg: 43 96% 56%;
+    --status-error-fg: 0 91% 71%;
+    --status-info-fg: 213 94% 68%;
+    --status-green-fg: 142 69% 58%;
+    --status-purple-fg: 270 95% 75%;
+    --status-orange-fg: 27 96% 61%;
+    --status-star-fg: 43 96% 65%;
+
+    color-scheme: dark;
   }
 
-  html[data-theme='purple'] {
+  html[data-color-mode='light'][data-theme='purple'] {
     /* Deep purple theme with lavender tints */
     --background: 270 50% 96%;
     --foreground: 258 45% 12%;
@@ -95,7 +119,7 @@ html[dir="rtl"] .rtl-flip { transform: scaleX(-1); }
     --gradient-card: linear-gradient(135deg, rgba(250,245,255,0.95) 0%, rgba(243,232,255,0.85) 100%);
   }
 
-  html[data-theme='sky'] {
+  html[data-color-mode='light'][data-theme='sky'] {
     /* Vibrant sky blue theme */
     --background: 195 70% 95%;
     --foreground: 210 55% 10%;
@@ -119,7 +143,7 @@ html[dir="rtl"] .rtl-flip { transform: scaleX(-1); }
     --gradient-card: linear-gradient(135deg, rgba(240,253,255,0.95) 0%, rgba(224,242,254,0.85) 100%);
   }
 
-  html[data-theme='sky-purple'] {
+  html[data-color-mode='light'][data-theme='sky-purple'] {
     /* Sky blue everywhere, purple for buttons / boxes / text */
     --background: 195 70% 95%;
     --foreground: 270 55% 14%;
@@ -143,7 +167,7 @@ html[dir="rtl"] .rtl-flip { transform: scaleX(-1); }
     --gradient-card: linear-gradient(135deg, rgba(245,240,255,0.98) 0%, rgba(235,228,252,0.95) 100%);
   }
 
-  html[data-theme='green'] {
+  html[data-color-mode='light'][data-theme='green'] {
     /* Fresh green theme */
     --background: 142 50% 96%;
     --foreground: 142 60% 8%;
@@ -167,7 +191,7 @@ html[dir="rtl"] .rtl-flip { transform: scaleX(-1); }
     --gradient-card: linear-gradient(135deg, rgba(240,253,244,0.95) 0%, rgba(220,252,231,0.85) 100%);
   }
 
-  html[data-theme='emerald'] {
+  html[data-color-mode='light'][data-theme='emerald'] {
     /* Rich emerald theme */
     --background: 160 50% 96%;
     --foreground: 160 55% 10%;
@@ -191,7 +215,7 @@ html[dir="rtl"] .rtl-flip { transform: scaleX(-1); }
     --gradient-card: linear-gradient(135deg, rgba(236,253,245,0.95) 0%, rgba(209,250,229,0.85) 100%);
   }
 
-  html[data-theme='orange'] {
+  html[data-color-mode='light'][data-theme='orange'] {
     /* Warm orange theme */
     --background: 25 70% 96%;
     --foreground: 25 60% 10%;
@@ -215,7 +239,7 @@ html[dir="rtl"] .rtl-flip { transform: scaleX(-1); }
     --gradient-card: linear-gradient(135deg, rgba(255,247,237,0.95) 0%, rgba(254,243,199,0.85) 100%);
   }
 
-  html[data-theme='amber'] {
+  html[data-color-mode='light'][data-theme='amber'] {
     /* Golden amber theme */
     --background: 43 70% 96%;
     --foreground: 43 60% 8%;
@@ -239,7 +263,7 @@ html[dir="rtl"] .rtl-flip { transform: scaleX(-1); }
     --gradient-card: linear-gradient(135deg, rgba(255,251,235,0.95) 0%, rgba(254,243,199,0.85) 100%);
   }
 
-  html[data-theme='red'] {
+  html[data-color-mode='light'][data-theme='red'] {
     /* Bold red theme */
     --background: 0 70% 96%;
     --foreground: 0 60% 10%;
@@ -263,7 +287,7 @@ html[dir="rtl"] .rtl-flip { transform: scaleX(-1); }
     --gradient-card: linear-gradient(135deg, rgba(254,242,242,0.95) 0%, rgba(254,226,226,0.85) 100%);
   }
 
-  html[data-theme='rose'] {
+  html[data-color-mode='light'][data-theme='rose'] {
     /* Soft rose theme */
     --background: 350 70% 96%;
     --foreground: 350 55% 10%;
@@ -287,7 +311,7 @@ html[dir="rtl"] .rtl-flip { transform: scaleX(-1); }
     --gradient-card: linear-gradient(135deg, rgba(255,241,242,0.95) 0%, rgba(255,228,230,0.85) 100%);
   }
 
-  html[data-theme='pink'] {
+  html[data-color-mode='light'][data-theme='pink'] {
     /* Vibrant pink theme */
     --background: 330 70% 96%;
     --foreground: 330 55% 10%;
@@ -311,7 +335,7 @@ html[dir="rtl"] .rtl-flip { transform: scaleX(-1); }
     --gradient-card: linear-gradient(135deg, rgba(253,244,255,0.95) 0%, rgba(250,232,255,0.85) 100%);
   }
 
-  html[data-theme='indigo'] {
+  html[data-color-mode='light'][data-theme='indigo'] {
     /* Deep indigo theme */
     --background: 262 50% 96%;
     --foreground: 262 55% 10%;
@@ -369,6 +393,25 @@ html[dir="rtl"] .rtl-flip { transform: scaleX(-1); }
   
   p {
     line-height: 1.65;
+  }
+}
+
+@layer components {
+  .tone-success {
+    @apply bg-emerald-500/10;
+    color: hsl(var(--status-success-fg));
+  }
+  .tone-warning {
+    @apply bg-amber-500/10;
+    color: hsl(var(--status-warning-fg));
+  }
+  .tone-error {
+    @apply bg-red-500/10;
+    color: hsl(var(--status-error-fg));
+  }
+  .tone-info {
+    @apply bg-blue-500/10;
+    color: hsl(var(--status-info-fg));
   }
 }
 
@@ -576,82 +619,146 @@ html[dir='rtl'] .org-shell-main {
   direction: rtl;
 }
 
-/* FullCalendar theme overrides */
-html[data-theme='dark'] .fc {
-  color: hsl(var(--foreground)) !important;
-  background-color: hsl(var(--background)) !important;
+/* FullCalendar — sync with AcademiX theme tokens (light + dark) */
+.academix-calendar .fc {
+  --fc-page-bg-color: hsl(var(--background));
+  --fc-neutral-bg-color: hsl(var(--muted) / 0.35);
+  --fc-neutral-text-color: hsl(var(--muted-foreground));
+  --fc-border-color: hsl(var(--border));
+  --fc-today-bg-color: hsl(var(--primary) / 0.1);
+  --fc-now-indicator-color: hsl(var(--primary));
+  --fc-highlight-color: hsl(var(--primary) / 0.12);
+  --fc-event-bg-color: hsl(var(--primary) / 0.22);
+  --fc-event-border-color: hsl(var(--primary) / 0.5);
+  --fc-event-text-color: hsl(var(--primary));
+  --fc-more-link-bg-color: hsl(var(--muted));
+  --fc-more-link-text-color: hsl(var(--foreground));
+  color: hsl(var(--foreground));
+  background-color: hsl(var(--background));
 }
 
-html[data-theme='dark'] .fc-scrollgrid {
+.academix-calendar .fc .fc-scrollgrid,
+.academix-calendar .fc .fc-timegrid-col,
+.academix-calendar .fc .fc-daygrid-day,
+.academix-calendar .fc .fc-timegrid-slot,
+.academix-calendar .fc .fc-timegrid-axis,
+.academix-calendar .fc .fc-col-header-cell {
   border-color: hsl(var(--border)) !important;
+}
+
+.academix-calendar .fc .fc-scrollgrid,
+.academix-calendar .fc .fc-timegrid-col,
+.academix-calendar .fc .fc-daygrid-day,
+.academix-calendar .fc .fc-timegrid-slot,
+.academix-calendar .fc .fc-timegrid-axis,
+.academix-calendar .fc .fc-col-header-cell,
+.academix-calendar .fc .fc-timegrid-slot-label,
+.academix-calendar .fc .fc-scrollgrid-section-header,
+.academix-calendar .fc .fc-scrollgrid-section-body {
   background-color: hsl(var(--card)) !important;
 }
 
-html[data-theme='dark'] .fc-col-header-cell {
-  background-color: hsl(var(--card)) !important;
-  border-color: hsl(var(--border)) !important;
+.academix-calendar .fc .fc-col-header-cell-cushion,
+.academix-calendar .fc .fc-daygrid-day-number,
+.academix-calendar .fc .fc-timegrid-slot-label-cushion,
+.academix-calendar .fc .fc-timegrid-axis-cushion {
   color: hsl(var(--card-foreground)) !important;
 }
 
-html[data-theme='dark'] .fc-col-header-cell-cushion {
-  color: hsl(var(--card-foreground)) !important;
-}
-
-html[data-theme='dark'] .fc-daygrid-day {
-  background-color: hsl(var(--card)) !important;
-  border-color: hsl(var(--border)) !important;
-}
-
-html[data-theme='dark'] .fc-daygrid-day-number {
-  color: hsl(var(--card-foreground)) !important;
-}
-
-html[data-theme='dark'] .fc-timegrid-col {
-  background-color: hsl(var(--card)) !important;
-  border-color: hsl(var(--border)) !important;
-}
-
-html[data-theme='dark'] .fc-timegrid-slot {
-  border-color: hsl(var(--border)) !important;
-  background-color: hsl(var(--card)) !important;
-}
-
-html[data-theme='dark'] .fc-timegrid-slot-label {
-  color: hsl(var(--muted-foreground)) !important;
-  background-color: hsl(var(--card)) !important;
-  border-color: hsl(var(--border)) !important;
-}
-
-html[data-theme='dark'] .fc-timegrid-slot-label-frame {
-  color: hsl(var(--muted-foreground)) !important;
-}
-
-html[data-theme='dark'] .fc-timegrid-axis {
-  border-color: hsl(var(--border)) !important;
-  background-color: hsl(var(--card)) !important;
-}
-
-html[data-theme='dark'] .fc-timegrid-axis-frame {
+.academix-calendar .fc .fc-timegrid-slot-label,
+.academix-calendar .fc .fc-timegrid-axis-frame {
   color: hsl(var(--muted-foreground)) !important;
 }
 
-html[data-theme='dark'] .fc-scrollgrid-section-header {
-  background-color: hsl(var(--card)) !important;
+.academix-calendar .fc .fc-day-today,
+.academix-calendar .fc .fc-timegrid-col.fc-day-today {
+  background-color: hsl(var(--primary) / 0.08) !important;
 }
 
-html[data-theme='dark'] .fc-scrollgrid-section-body {
-  background-color: hsl(var(--card)) !important;
+html[data-color-mode='dark'] .academix-calendar .fc {
+  --fc-today-bg-color: hsl(var(--primary) / 0.14);
+  --fc-neutral-bg-color: hsl(var(--muted) / 0.5);
 }
 
-html[data-theme='dark'] .fc-table {
-  background-color: hsl(var(--card)) !important;
+html[data-color-mode='dark'] .academix-calendar .fc .fc-day-today,
+html[data-color-mode='dark'] .academix-calendar .fc .fc-timegrid-col.fc-day-today {
+  background-color: hsl(var(--primary) / 0.12) !important;
 }
 
-html[data-theme='dark'] .fc-table td,
-html[data-theme='dark'] .fc-table th {
-  border-color: hsl(var(--border)) !important;
-  background-color: hsl(var(--card)) !important;
-  color: hsl(var(--card-foreground)) !important;
+/* Calendar event tones — match semantic status surfaces elsewhere in the app */
+.fc-event.calendar-event-tone-primary {
+  background-color: hsl(var(--primary) / 0.22) !important;
+  border-color: hsl(var(--primary) / 0.5) !important;
+}
+.fc-event.calendar-event-tone-info {
+  background-color: hsl(var(--status-info-fg) / 0.18) !important;
+  border-color: hsl(var(--status-info-fg) / 0.45) !important;
+}
+.fc-event.calendar-event-tone-purple {
+  background-color: hsl(var(--status-purple-fg) / 0.18) !important;
+  border-color: hsl(var(--status-purple-fg) / 0.45) !important;
+}
+.fc-event.calendar-event-tone-success {
+  background-color: hsl(var(--status-success-fg) / 0.18) !important;
+  border-color: hsl(var(--status-success-fg) / 0.45) !important;
+}
+.fc-event.calendar-event-tone-orange {
+  background-color: hsl(var(--status-orange-fg) / 0.18) !important;
+  border-color: hsl(var(--status-orange-fg) / 0.45) !important;
+}
+.fc-event.calendar-event-tone-warning {
+  background-color: hsl(var(--status-warning-fg) / 0.18) !important;
+  border-color: hsl(var(--status-warning-fg) / 0.45) !important;
+}
+
+.fc-event.calendar-event-tone-primary .fc-event-main,
+.fc-event.calendar-event-tone-primary .fc-event-title {
+  color: hsl(var(--primary)) !important;
+}
+.fc-event.calendar-event-tone-info .fc-event-main,
+.fc-event.calendar-event-tone-info .fc-event-title {
+  color: hsl(var(--status-info-fg)) !important;
+}
+.fc-event.calendar-event-tone-purple .fc-event-main,
+.fc-event.calendar-event-tone-purple .fc-event-title {
+  color: hsl(var(--status-purple-fg)) !important;
+}
+.fc-event.calendar-event-tone-success .fc-event-main,
+.fc-event.calendar-event-tone-success .fc-event-title {
+  color: hsl(var(--status-success-fg)) !important;
+}
+.fc-event.calendar-event-tone-orange .fc-event-main,
+.fc-event.calendar-event-tone-orange .fc-event-title {
+  color: hsl(var(--status-orange-fg)) !important;
+}
+.fc-event.calendar-event-tone-warning .fc-event-main,
+.fc-event.calendar-event-tone-warning .fc-event-title {
+  color: hsl(var(--status-warning-fg)) !important;
+}
+
+html[data-color-mode='dark'] .fc-event.calendar-event-tone-primary {
+  background-color: hsl(var(--primary) / 0.28) !important;
+  border-color: hsl(var(--primary) / 0.55) !important;
+}
+html[data-color-mode='dark'] .fc-event.calendar-event-tone-info {
+  background-color: hsl(var(--status-info-fg) / 0.22) !important;
+  border-color: hsl(var(--status-info-fg) / 0.5) !important;
+}
+html[data-color-mode='dark'] .fc-event.calendar-event-tone-purple {
+  background-color: hsl(var(--status-purple-fg) / 0.22) !important;
+  border-color: hsl(var(--status-purple-fg) / 0.5) !important;
+}
+html[data-color-mode='dark'] .fc-event.calendar-event-tone-success {
+  background-color: hsl(var(--status-success-fg) / 0.22) !important;
+  border-color: hsl(var(--status-success-fg) / 0.5) !important;
+}
+html[data-color-mode='dark'] .fc-event.calendar-event-tone-orange {
+  background-color: hsl(var(--status-orange-fg) / 0.22) !important;
+  border-color: hsl(var(--status-orange-fg) / 0.5) !important;
+}
+html[data-color-mode='dark'] .fc-event.calendar-event-tone-warning {
+  background-color: hsl(var(--status-warning-fg) / 0.22) !important;
+  border-color: hsl(var(--status-warning-fg) / 0.5) !important;
 }
 
 /* Calendar event hover enhancements */
@@ -668,7 +775,7 @@ html[data-theme='dark'] .fc-table th {
 
 .fc-event.calendar-event:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px hsl(var(--foreground) / 0.12);
   z-index: 10;
 }
 
@@ -739,4 +846,156 @@ html[data-theme='dark'] .fc-table th {
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
   }
+}
+
+/* Legacy hardcoded status text — remap when data-theme is dark */
+html[data-color-mode='dark'], html[data-theme='dark'] .text-emerald-600,
+html[data-color-mode='dark'], html[data-theme='dark'] .text-emerald-700,
+html[data-color-mode='dark'], html[data-theme='dark'] .text-emerald-500 {
+  color: hsl(var(--status-success-fg));
+}
+
+html[data-color-mode='dark'], html[data-theme='dark'] .text-amber-600,
+html[data-color-mode='dark'], html[data-theme='dark'] .text-amber-700,
+html[data-color-mode='dark'], html[data-theme='dark'] .text-amber-800,
+html[data-color-mode='dark'], html[data-theme='dark'] .text-amber-900 {
+  color: hsl(var(--status-warning-fg));
+}
+
+html[data-color-mode='dark'], html[data-theme='dark'] .text-red-600,
+html[data-color-mode='dark'], html[data-theme='dark'] .text-red-500 {
+  color: hsl(var(--status-error-fg));
+}
+
+html[data-color-mode='dark'], html[data-theme='dark'] .text-blue-600,
+html[data-color-mode='dark'], html[data-theme='dark'] .text-blue-500 {
+  color: hsl(var(--status-info-fg));
+}
+
+html[data-color-mode='dark'], html[data-theme='dark'] .text-green-600 {
+  color: hsl(var(--status-green-fg));
+}
+
+html[data-color-mode='dark'], html[data-theme='dark'] .text-purple-600 {
+  color: hsl(var(--status-purple-fg));
+}
+
+html[data-color-mode='dark'], html[data-theme='dark'] .text-orange-600 {
+  color: hsl(var(--status-orange-fg));
+}
+
+html[data-color-mode='dark'], html[data-theme='dark'] .fill-amber-400.text-amber-400,
+html[data-color-mode='dark'], html[data-theme='dark'] .text-amber-400 {
+  fill: hsl(var(--status-star-fg));
+  color: hsl(var(--status-star-fg));
+}
+
+/* Sonner toasts — override library hardcoded colors; use AcademiX theme tokens */
+.academix-toaster [data-sonner-toast] {
+  background: hsl(var(--card)) !important;
+  border-color: hsl(var(--border)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.academix-toaster [data-sonner-toast] [data-title] {
+  color: hsl(var(--foreground)) !important;
+  font-weight: 600 !important;
+}
+
+.academix-toaster [data-sonner-toast] [data-description] {
+  color: hsl(var(--foreground) / 0.88) !important;
+}
+
+.academix-toaster [data-sonner-toast] [data-close-button] {
+  background: hsl(var(--muted) / 0.5) !important;
+  border-color: hsl(var(--border)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.academix-toaster [data-sonner-toast][data-type='error'],
+.academix-toaster .academix-toast-error {
+  background: hsl(var(--destructive) / 0.14) !important;
+  border-color: hsl(var(--destructive) / 0.5) !important;
+  box-shadow: 0 0 0 2px hsl(var(--destructive) / 0.15) !important;
+}
+
+.academix-toaster [data-sonner-toast][data-type='error'] [data-title],
+.academix-toaster .academix-toast-error [data-title] {
+  color: hsl(var(--destructive)) !important;
+}
+
+.academix-toaster [data-sonner-toast][data-type='error'] [data-description],
+.academix-toaster .academix-toast-error [data-description] {
+  color: hsl(var(--foreground) / 0.92) !important;
+}
+
+.academix-toaster [data-sonner-toast][data-type='error'] [data-icon],
+.academix-toaster .academix-toast-error [data-icon] {
+  color: hsl(var(--destructive)) !important;
+}
+
+.academix-toaster [data-sonner-toast][data-type='success'],
+.academix-toaster .academix-toast-success {
+  background: hsl(var(--status-success-fg) / 0.12) !important;
+  border-color: hsl(var(--status-success-fg) / 0.45) !important;
+  box-shadow: 0 0 0 2px hsl(var(--status-success-fg) / 0.12) !important;
+}
+
+.academix-toaster [data-sonner-toast][data-type='success'] [data-title],
+.academix-toaster .academix-toast-success [data-title] {
+  color: hsl(var(--status-success-fg)) !important;
+}
+
+.academix-toaster [data-sonner-toast][data-type='success'] [data-description],
+.academix-toaster .academix-toast-success [data-description] {
+  color: hsl(var(--foreground) / 0.9) !important;
+}
+
+.academix-toaster [data-sonner-toast][data-type='success'] [data-icon],
+.academix-toaster .academix-toast-success [data-icon] {
+  color: hsl(var(--status-success-fg)) !important;
+}
+
+.academix-toaster [data-sonner-toast][data-type='warning'],
+.academix-toaster .academix-toast-warning {
+  background: hsl(var(--status-warning-fg) / 0.12) !important;
+  border-color: hsl(var(--status-warning-fg) / 0.45) !important;
+  box-shadow: 0 0 0 2px hsl(var(--status-warning-fg) / 0.12) !important;
+}
+
+.academix-toaster [data-sonner-toast][data-type='warning'] [data-title],
+.academix-toaster .academix-toast-warning [data-title] {
+  color: hsl(var(--status-warning-fg)) !important;
+}
+
+.academix-toaster [data-sonner-toast][data-type='warning'] [data-description],
+.academix-toaster .academix-toast-warning [data-description] {
+  color: hsl(var(--foreground) / 0.9) !important;
+}
+
+.academix-toaster [data-sonner-toast][data-type='warning'] [data-icon],
+.academix-toaster .academix-toast-warning [data-icon] {
+  color: hsl(var(--status-warning-fg)) !important;
+}
+
+.academix-toaster [data-sonner-toast][data-type='info'],
+.academix-toaster .academix-toast-info {
+  background: hsl(var(--status-info-fg) / 0.1) !important;
+  border-color: hsl(var(--status-info-fg) / 0.4) !important;
+  box-shadow: 0 0 0 1px hsl(var(--status-info-fg) / 0.1) !important;
+}
+
+.academix-toaster [data-sonner-toast][data-type='info'] [data-title],
+.academix-toaster .academix-toast-info [data-title] {
+  color: hsl(var(--status-info-fg)) !important;
+}
+
+.academix-toaster [data-sonner-toast][data-type='info'] [data-description],
+.academix-toaster .academix-toast-info [data-description] {
+  color: hsl(var(--foreground) / 0.9) !important;
+}
+
+.academix-toaster [data-sonner-toast][data-type='info'] [data-icon],
+.academix-toaster .academix-toast-info [data-icon] {
+  color: hsl(var(--status-info-fg)) !important;
 }

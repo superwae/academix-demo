@@ -26,6 +26,8 @@ import {
   Users,
   CalendarDays,
   GraduationCap,
+  Headphones,
+  Inbox,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
@@ -51,7 +53,7 @@ import {
 } from "../ui/dropdown-menu";
 import { Input } from "../ui/input";
 import { THEMES, type ThemeId } from "../../theme/themes";
-import { applyTheme } from "../../theme/applyTheme";
+import { normalizeAccentTheme } from "../../theme/themePresets";
 import { useAppStore } from "../../store/useAppStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import { toast } from "sonner";
@@ -70,7 +72,7 @@ type NavItem = {
 
 type NavSection = { titleKey: string; items: NavItem[] };
 
-export type StaffPortalVariant = "accountant" | "secretary";
+export type StaffPortalVariant = "accountant" | "secretary" | "support";
 
 const ACCOUNTANT_NAV: NavSection[] = [
   {
@@ -122,6 +124,24 @@ const SECRETARY_NAV: NavSection[] = [
   },
 ];
 
+const SUPPORT_NAV: NavSection[] = [
+  {
+    titleKey: "admin:staffLayout.nav.overview",
+    items: [{ to: "/support-team/dashboard", labelKey: "admin:staffLayout.nav.dashboard", icon: LayoutDashboard }],
+  },
+  {
+    titleKey: "admin:staffLayout.nav.workspace",
+    items: [
+      { to: "/support-team/inbox", labelKey: "support:team.inboxNav", icon: Inbox },
+      { to: "/support-team/messages", labelKey: "admin:staffLayout.nav.messages", icon: MessageSquare },
+    ],
+  },
+  {
+    titleKey: "admin:staffLayout.nav.account",
+    items: [{ to: "/support-team/settings", labelKey: "admin:staffLayout.nav.settings", icon: Settings }],
+  },
+];
+
 const PORTAL_META: Record<
   StaffPortalVariant,
   {
@@ -149,6 +169,14 @@ const PORTAL_META: Record<
     nav: SECRETARY_NAV,
     gradient: "from-sky-600 to-cyan-600",
   },
+  support: {
+    home: "/support-team/dashboard",
+    subtitleKey: "admin:staffLayout.portals.supportSubtitle",
+    badgeKey: "admin:staffLayout.portals.supportBadge",
+    BrandIcon: Headphones,
+    nav: SUPPORT_NAV,
+    gradient: "from-rose-600 to-orange-600",
+  },
 };
 
 function StaffNavList({
@@ -163,7 +191,11 @@ function StaffNavList({
   const meta = PORTAL_META[variant];
   const { t } = useTranslation(["admin", "common"]);
   const messagesPath =
-    variant === "accountant" ? "/accountant/messages" : "/secretary/messages";
+    variant === "accountant"
+      ? "/accountant/messages"
+      : variant === "secretary"
+        ? "/secretary/messages"
+        : "/support-team/messages";
 
   return (
     <nav className="flex flex-col gap-4" aria-label={t("admin:staffLayout.nav.mainNavigationLabel")}>
@@ -228,9 +260,10 @@ export function StaffPortalShell({
   children: ReactNode;
 }) {
   const meta = PORTAL_META[variant];
+  const colorMode = useAppStore((s) => s.data.colorMode);
+  const setColorMode = useAppStore((s) => s.setColorMode);
   const theme = useAppStore((s) => s.data.theme);
   const customThemeColor = useAppStore((s) => s.data.customThemeColor);
-  const mixTheme = useAppStore((s) => s.data.mixTheme);
   const setTheme = useAppStore((s) => s.setTheme);
   const setCustomThemeColor = useAppStore((s) => s.setCustomThemeColor);
   const { logout, user } = useAuthStore();
@@ -241,7 +274,7 @@ export function StaffPortalShell({
   const [searchQuery, setSearchQuery] = useState("");
   const { unreadCount: unreadMessages } = useUnreadMessages();
 
-  const isDarkMode = theme === "dark";
+  const isDarkMode = colorMode === "dark";
 
   const handleLogout = () => {
     logout();
@@ -250,19 +283,15 @@ export function StaffPortalShell({
   };
 
   const toggleDarkMode = () => {
-    const newTheme = isDarkMode ? "light" : "dark";
-    setTheme(newTheme);
-    toast.success(t("admin:staffLayout.menu.switchedToMode", { mode: newTheme }));
+    const next = isDarkMode ? "light" : "dark";
+    setColorMode(next);
+    toast.success(t("admin:staffLayout.menu.switchedToMode", { mode: next }));
   };
 
   const themeLabel = useMemo(
     () => THEMES.find((th) => th.id === theme)?.label ?? t("admin:staffLayout.menu.themeLabelFallback"),
     [theme, t]
   );
-
-  useEffect(() => {
-    applyTheme(theme, customThemeColor, mixTheme);
-  }, [theme, customThemeColor, mixTheme]);
 
   return (
     <div className="relative min-h-dvh bg-background text-foreground">
@@ -329,7 +358,9 @@ export function StaffPortalShell({
                 placeholder={
                   variant === "accountant"
                     ? t("admin:staffLayout.search.placeholderAccountant")
-                    : t("admin:staffLayout.search.placeholderSecretary")
+                    : variant === "secretary"
+                      ? t("admin:staffLayout.search.placeholderSecretary")
+                      : t("admin:staffLayout.search.placeholderSupport")
                 }
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -383,7 +414,7 @@ export function StaffPortalShell({
                   <DropdownMenuRadioGroup
                     value={theme}
                     onValueChange={(v) => {
-                      const next = v as ThemeId;
+                      const next = normalizeAccentTheme(v as ThemeId);
                       if (next === "custom") {
                         if (!customThemeColor) {
                           const computed = getComputedStyle(
@@ -415,7 +446,7 @@ export function StaffPortalShell({
                       }
                     }}
                   >
-                    {THEMES.filter((th) => th.id !== "custom").map((th) => (
+                    {THEMES.filter((th) => th.id !== "custom" && th.id !== "dark").map((th) => (
                       <DropdownMenuRadioItem
                         key={th.id}
                         value={th.id}
@@ -526,7 +557,9 @@ export function StaffPortalShell({
             <DialogDescription>
               {variant === "accountant"
                 ? t("admin:staffLayout.search.descriptionAccountant")
-                : t("admin:staffLayout.search.descriptionSecretary")}
+                : variant === "secretary"
+                  ? t("admin:staffLayout.search.descriptionSecretary")
+                  : t("admin:staffLayout.search.descriptionSupport")}
             </DialogDescription>
           </DialogHeader>
           <form
@@ -538,7 +571,9 @@ export function StaffPortalShell({
               const target =
                 variant === "accountant"
                   ? "/accountant/transactions"
-                  : "/secretary/directory";
+                  : variant === "secretary"
+                    ? "/secretary/directory"
+                    : "/support-team/inbox";
               navigate(q.length > 0 ? `${target}?q=${encodeURIComponent(q)}` : target);
             }}
           >
@@ -603,6 +638,14 @@ export function AccountantLayout() {
 export function SecretaryLayout() {
   return (
     <StaffPortalShell variant="secretary">
+      <Outlet />
+    </StaffPortalShell>
+  );
+}
+
+export function SupportTeamLayout() {
+  return (
+    <StaffPortalShell variant="support">
       <Outlet />
     </StaffPortalShell>
   );

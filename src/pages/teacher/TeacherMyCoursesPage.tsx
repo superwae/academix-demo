@@ -59,6 +59,10 @@ import { enrollmentService } from '../../services/enrollmentService'
 import { ConfirmDialog } from '../../components/ui/confirm-dialog'
 import type { CourseSectionDto, MeetingTimeDto } from '../../services/courseService'
 import { useTranslation } from 'react-i18next'
+import {
+  getMeetingUrlValidationToast,
+  validateMeetingUrlForSave,
+} from '../../lib/trustedMeetingUrl'
 
 /** Active + completed enrollments only — used for class size and average progress. */
 const COUNTABLE_ENROLLMENT_STATUSES = new Set(['Active', 'Completed'])
@@ -259,6 +263,13 @@ export function TeacherMyCoursesPage() {
       }
     }
 
+    const joinUrlResult = validateMeetingUrlForSave(editingSection.joinUrl ?? '')
+    if (!joinUrlResult.ok) {
+      const toastCopy = getMeetingUrlValidationToast(joinUrlResult, t)
+      if (toastCopy) toast.error(toastCopy.title, { description: toastCopy.description })
+      return
+    }
+
     try {
       setSectionsLoading(true)
       const meetingTimes = editingSection.meetingTimes.map((mt) => {
@@ -279,7 +290,7 @@ export function TeacherMyCoursesPage() {
       const requestBody = {
         name: editingSection.name.trim(),
         locationLabel: editingSection.locationLabel.trim(),
-        joinUrl: editingSection.joinUrl?.trim() || undefined,
+        joinUrl: joinUrlResult.url,
         maxSeats: editingSection.maxSeats,
         meetingTimes: meetingTimes,
       }

@@ -30,6 +30,8 @@ import {
   startOfWeek,
   type WeeklySessionEvent,
 } from '../../lib/weeklySessions'
+import { getSafeMeetingJoinUrl } from '../../lib/trustedMeetingUrl'
+import { MeetingJoinButton } from '../../components/meeting/MeetingJoinGate'
 
 const BADGE_STYLES: Record<string, string> = {
   live: 'bg-red-500/10 text-red-700 dark:text-red-300 border-red-500/30 ring-2 ring-red-500/20',
@@ -125,7 +127,7 @@ export function LiveSessionsPage() {
           sectionId: section.id,
           sectionName: section.name,
           locationLabel: section.locationLabel,
-          joinUrl: section.joinUrl?.trim() ?? '',
+          joinUrl: getSafeMeetingJoinUrl(section.joinUrl) ?? '',
           hasScheduledMeetings: (section.meetingTimes?.length ?? 0) > 0,
         }))
         .filter((link) => link.joinUrl.length > 0),
@@ -185,12 +187,10 @@ export function LiveSessionsPage() {
               </div>
             </div>
             {liveNow[0].joinUrl && (
-              <Button asChild variant="default">
-                <a href={liveNow[0].joinUrl} target="_blank" rel="noopener noreferrer">
-                  <PlayCircle className="me-1.5 h-4 w-4" />
-                  {t('student:liveClasses.joinClass', { name: liveNow[0].courseTitle })}
-                </a>
-              </Button>
+              <MeetingJoinButton joinUrl={liveNow[0].joinUrl} variant="default">
+                <PlayCircle className="me-1.5 h-4 w-4" />
+                {t('student:liveClasses.joinClass', { name: liveNow[0].courseTitle })}
+              </MeetingJoinButton>
             )}
           </CardContent>
         </Card>
@@ -270,12 +270,10 @@ export function LiveSessionsPage() {
                     )}
                   </div>
                 </div>
-                <Button size="sm" asChild>
-                  <a href={link.joinUrl} target="_blank" rel="noopener noreferrer">
-                    <ExternalLink className="me-1.5 h-3.5 w-3.5" />
-                    {t('student:shared.viewLink')}
-                  </a>
-                </Button>
+                <MeetingJoinButton joinUrl={link.joinUrl} size="sm">
+                  <ExternalLink className="me-1.5 h-3.5 w-3.5" />
+                  {t('student:shared.viewLink')}
+                </MeetingJoinButton>
               </div>
             ))}
           </CardContent>
@@ -411,17 +409,13 @@ function StudentSessionRow({ event }: { event: WeeklySessionEvent }) {
       <div className="flex items-center gap-2 shrink-0">
         {event.joinUrl ? (
           canJoin ? (
-            <Button size="sm" variant="default" asChild>
-              <a href={event.joinUrl} target="_blank" rel="noopener noreferrer">
-                <PlayCircle className="me-1.5 h-3.5 w-3.5" /> {t('student:shared.join')}
-              </a>
-            </Button>
+            <MeetingJoinButton joinUrl={event.joinUrl} size="sm" variant="default">
+              <PlayCircle className="me-1.5 h-3.5 w-3.5" /> {t('student:shared.join')}
+            </MeetingJoinButton>
           ) : (
-            <Button size="sm" variant="outline" asChild>
-              <a href={event.joinUrl} target="_blank" rel="noopener noreferrer">
-                <ExternalLink className="me-1.5 h-3.5 w-3.5" /> {t('student:shared.viewLink')}
-              </a>
-            </Button>
+            <MeetingJoinButton joinUrl={event.joinUrl} size="sm" variant="outline">
+              <ExternalLink className="me-1.5 h-3.5 w-3.5" /> {t('student:shared.viewLink')}
+            </MeetingJoinButton>
           )
         ) : (
           <Button size="sm" variant="outline" disabled title={t('student:liveClasses.noJoinLinkTitle')}>

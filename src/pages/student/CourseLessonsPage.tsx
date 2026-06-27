@@ -15,6 +15,8 @@ import {
 import { progressService } from '../../services/progressService';
 import { fileService } from '../../services/fileService';
 import { localizeLevel, localizeWeekday } from '../../lib/enumLocalization';
+import { getSafeMeetingJoinUrl } from '../../lib/trustedMeetingUrl';
+import { useMeetingJoin } from '../../components/meeting/MeetingJoinGate';
 import {
   ArrowLeft,
   Play,
@@ -84,7 +86,7 @@ function buildLectureLessonsForScheduledSection(
   for (const mt of cs.meetingTimes || []) {
     order += 1;
     const id = `lecture:${cs.id}:${mt.day}:${mt.startMinutes}`;
-    joinByLessonId[id] = cs.joinUrl?.trim();
+    joinByLessonId[id] = getSafeMeetingJoinUrl(cs.joinUrl) ?? undefined;
     metaByLessonId[id] = {
       day: mt.day,
       startMinutes: mt.startMinutes,
@@ -126,7 +128,7 @@ function buildLiveScheduleFromCourse(
     for (const mt of cs.meetingTimes || []) {
       order += 1;
       const id = `lecture:${cs.id}:${mt.day}:${mt.startMinutes}`;
-      joinByLessonId[id] = cs.joinUrl?.trim();
+      joinByLessonId[id] = getSafeMeetingJoinUrl(cs.joinUrl) ?? undefined;
       metaByLessonId[id] = {
         day: mt.day,
         startMinutes: mt.startMinutes,
@@ -167,6 +169,7 @@ export function CourseLessonsPage() {
   const { t } = useTranslation(['student', 'common', 'errors']);
   const { courseId } = useParams<{ courseId: string }>();
   const navigate = useNavigate();
+  const { requestJoin } = useMeetingJoin();
   const [course, setCourse] = useState<CourseDto | null>(null);
   const [sections, setSections] = useState<CourseSectionDto[]>([]);
   const [lessonsBySection, setLessonsBySection] = useState<Record<string, LessonDto[]>>({});
@@ -417,7 +420,7 @@ export function CourseLessonsPage() {
     if (isLiveLectureLessonId(lesson.id)) {
       const url = lectureJoinByLessonId[lesson.id];
       if (url) {
-        window.open(url, '_blank', 'noopener,noreferrer');
+        requestJoin(url);
       } else {
         toast.message(t('student:courseLessons.liveSession'), {
           description: t('student:courseLessons.instructorNoLink'),

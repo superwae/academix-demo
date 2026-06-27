@@ -20,8 +20,8 @@ public class SupportTicketsController : ControllerBase
         _service = service;
     }
 
-    private bool IsAdmin() =>
-        User.IsInRole("Admin") || User.IsInRole("SuperAdmin");
+    private bool IsSupportStaff() =>
+        User.IsInRole("Admin") || User.IsInRole("SuperAdmin") || User.IsInRole("Support");
 
     /// <summary>Tickets opened by the current user.</summary>
     [HttpGet("mine")]
@@ -33,22 +33,39 @@ public class SupportTicketsController : ControllerBase
         return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
 
-    /// <summary>All tickets. Admin only.</summary>
+    /// <summary>All tickets for support staff. Admin + Support roles.</summary>
     [HttpGet]
-    [Authorize(Policy = "RequireAdmin")]
-    public async Task<IActionResult> GetAll([FromQuery] string? status, CancellationToken cancellationToken)
+    [Authorize(Policy = "RequireSupportStaff")]
+    public async Task<IActionResult> GetAll(
+        [FromQuery] string? status,
+        [FromQuery] bool assignedToMe = false,
+        [FromQuery] bool unassigned = false,
+        CancellationToken cancellationToken = default)
     {
-        var result = await _service.GetAllForAdminAsync(status, cancellationToken);
+        var userId = User.GetUserId();
+        if (userId is null) return Unauthorized();
+
+        Guid? assignedFilter = assignedToMe ? userId : null;
+        var result = await _service.GetAllForStaffAsync(status, assignedFilter, unassigned, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
 
-    /// <summary>Ticket detail (owner or admin).</summary>
+    /// <summary>Support staff members available for ticket assignment.</summary>
+    [HttpGet("staff")]
+    [Authorize(Policy = "RequireSupportStaff")]
+    public async Task<IActionResult> GetStaff(CancellationToken cancellationToken)
+    {
+        var result = await _service.GetSupportStaffAsync(cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+    }
+
+    /// <summary>Ticket detail (owner or support staff).</summary>
     [HttpGet("{ticketId:guid}")]
     public async Task<IActionResult> GetById(Guid ticketId, CancellationToken cancellationToken)
     {
         var userId = User.GetUserId();
         if (userId is null) return Unauthorized();
-        var result = await _service.GetByIdAsync(ticketId, userId.Value, IsAdmin(), cancellationToken);
+        var result = await _service.GetByIdAsync(ticketId, userId.Value, IsSupportStaff(), cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : NotFound(result.Error);
     }
 
@@ -66,12 +83,12 @@ public class SupportTicketsController : ControllerBase
     {
         var userId = User.GetUserId();
         if (userId is null) return Unauthorized();
-        var result = await _service.AddReplyAsync(ticketId, userId.Value, IsAdmin(), request, cancellationToken);
+        var result = await _service.AddReplyAsync(ticketId, userId.Value, IsSupportStaff(), request, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
 
     [HttpPatch("{ticketId:guid}")]
-    [Authorize(Policy = "RequireAdmin")]
+    [Authorize(Policy = "RequireSupportStaff")]
     public async Task<IActionResult> Update(Guid ticketId, [FromBody] UpdateSupportTicketRequest request, CancellationToken cancellationToken)
     {
         var userId = User.GetUserId();

@@ -75,16 +75,24 @@ public static class SubscriptionPlanSeeder
             await context.SaveChangesAsync(cancellationToken);
         }
 
-        // Add prices only when missing. A zero price is a valid free course and must survive restarts.
+        // Backfill catalog prices for courses still at null/0. "Project Management" stays free.
+        var intentionallyFreeTitles = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "Project Management",
+        };
+
         var coursesWithoutPrice = await context.Courses
-            .Where(c => c.Price == null)
+            .Where(c =>
+                !c.IsDeleted &&
+                (c.Price == null || c.Price == 0) &&
+                !intentionallyFreeTitles.Contains(c.Title))
             .OrderBy(c => c.CreatedAt)
-            .Take(20)
+            .Take(50)
             .ToListAsync(cancellationToken);
 
         if (coursesWithoutPrice.Any())
         {
-            var prices = new[] { 49.99m, 79.99m, 99.99m, 149.99m, 29.99m, 59.99m, 0m, 39.99m, 119.99m, 0m };
+            var prices = new[] { 49.99m, 79.99m, 99.99m, 149.99m, 29.99m, 59.99m, 39.99m, 119.99m };
             for (int i = 0; i < coursesWithoutPrice.Count; i++)
             {
                 coursesWithoutPrice[i].Price = prices[i % prices.Length];

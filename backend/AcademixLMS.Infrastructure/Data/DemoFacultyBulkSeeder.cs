@@ -100,6 +100,16 @@ public static class DemoFacultyBulkSeeder
 
     private const string SeedProviderName = "AcademiX Faculty";
 
+    /// <summary>Catalog courses that stay free in demo data (checkout is skipped).</summary>
+    private static readonly HashSet<string> IntentionallyFreeCourseTitles =
+        new(StringComparer.OrdinalIgnoreCase) { "Project Management" };
+
+    private static readonly decimal[] DemoCatalogPrices =
+        [49.99m, 79.99m, 99.99m, 149.99m, 29.99m, 59.99m, 39.99m, 119.99m];
+
+    private static decimal ResolveDemoCatalogPrice(string title, int index) =>
+        IntentionallyFreeCourseTitles.Contains(title) ? 0m : DemoCatalogPrices[index % DemoCatalogPrices.Length];
+
     /// <summary>
     /// Idempotent: sets <see cref="Course.ThumbnailUrl"/> for published seeded courses that were created before thumbnails were added.
     /// Runs every Development startup so existing databases pick up images without wiping data.
@@ -207,6 +217,51 @@ public static class DemoFacultyBulkSeeder
             }
         }
 
+        var sectionsMissingJoinUrl = await context.CourseSections
+            .Include(s => s.MeetingTimes)
+            .Include(s => s.Course)
+            .Where(s =>
+                !s.IsDeleted &&
+                string.IsNullOrWhiteSpace(s.JoinUrl) &&
+                s.MeetingTimes.Any(mt => !mt.IsDeleted) &&
+                s.Course != null &&
+                !s.Course.IsDeleted &&
+                s.Course.ProviderName == SeedProviderName)
+            .ToListAsync(cancellationToken);
+
+        foreach (var section in sectionsMissingJoinUrl)
+        {
+            section.JoinUrl = "https://meet.google.com/academix-demo-live";
+            section.UpdatedAt = DateTime.UtcNow;
+            changed++;
+        }
+
+        if (sectionsMissingJoinUrl.Count > 0)
+        {
+            logger.LogInformation(
+                "DemoFacultyBulkSeeder: backfilled JoinUrl on {Count} section(s) with meeting times.",
+                sectionsMissingJoinUrl.Count);
+        }
+
+        // Demo faculty courses were originally seeded with Price=0 as a placeholder. Assign
+        // realistic paid prices so student checkout + payment history work in local demos.
+        var demoCoursesNeedingPrice = await context.Courses
+            .Where(c =>
+                !c.IsDeleted &&
+                c.ProviderName == SeedProviderName &&
+                (c.Price == null || c.Price == 0) &&
+                c.Title != "Project Management")
+            .OrderBy(c => c.CreatedAt)
+            .ToListAsync(cancellationToken);
+
+        for (var i = 0; i < demoCoursesNeedingPrice.Count; i++)
+        {
+            var course = demoCoursesNeedingPrice[i];
+            course.Price = ResolveDemoCatalogPrice(course.Title, i);
+            course.UpdatedAt = DateTime.UtcNow;
+            changed++;
+        }
+
         if (changed > 0)
         {
             await context.SaveChangesAsync(cancellationToken);
@@ -297,7 +352,7 @@ public static class DemoFacultyBulkSeeder
                     InstructorId = instructor.Id,
                     Status = CourseStatus.Published,
                     IsFeatured = ci == 0,
-                    Price = 0,
+                    Price = ResolveDemoCatalogPrice(title, ti * titles.Length + ci),
                     ThumbnailUrl = GetCourseThumbnailUrl(ti, ci),
                     ExpectedDurationHours = 40,
                     CourseStartDate = courseStart,
@@ -320,6 +375,7 @@ public static class DemoFacultyBulkSeeder
                         CourseId = course.Id,
                         Name = secName,
                         LocationLabel = loc,
+                        JoinUrl = "https://meet.google.com/academix-demo-live",
                         MaxSeats = 40,
                         SeatsRemaining = 25,
                         IsActive = true,

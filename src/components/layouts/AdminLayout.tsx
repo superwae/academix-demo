@@ -1,4 +1,4 @@
-import { Outlet, NavLink, useNavigate } from "react-router-dom";
+import { Outlet, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useMemo, useState, type ComponentType } from "react";
 import { useTranslation } from "react-i18next";
 import { LanguagePicker } from "../LanguagePicker";
@@ -49,7 +49,7 @@ import {
 } from "../ui/dropdown-menu";
 import { Input } from "../ui/input";
 import { THEMES, type ThemeId } from "../../theme/themes";
-import { applyTheme } from "../../theme/applyTheme";
+import { normalizeAccentTheme } from "../../theme/themePresets";
 import { useAppStore } from "../../store/useAppStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import { toast } from "sonner";
@@ -58,6 +58,7 @@ import { ColorPicker } from "../ui/color-picker";
 import { NotificationBell } from "../NotificationBell";
 import { useUnreadMessages } from "../../hooks/useUnreadMessages";
 import { Badge } from "../ui/badge";
+import { isSupportOnlyAccount } from "../../lib/userRoles";
 
 type NavItem = {
   to: string;
@@ -113,21 +114,35 @@ const ADMIN_NAV_SECTIONS: NavSection[] = [
   },
 ];
 
+const SUPPORT_ONLY_NAV_SECTIONS: NavSection[] = [
+  {
+    titleKey: "nav:sectionReportsSystem",
+    items: [
+      { to: "/admin/support-tickets", labelKey: "support:admin.title", icon: Inbox },
+    ],
+  },
+];
+
 export function AdminLayout() {
   const { t } = useTranslation(['nav', 'common', 'auth']);
+  const location = useLocation();
+  const colorMode = useAppStore((s) => s.data.colorMode);
+  const setColorMode = useAppStore((s) => s.setColorMode);
   const theme = useAppStore((s) => s.data.theme);
   const customThemeColor = useAppStore((s) => s.data.customThemeColor);
-  const mixTheme = useAppStore((s) => s.data.mixTheme);
   const setTheme = useAppStore((s) => s.setTheme);
   const setCustomThemeColor = useAppStore((s) => s.setCustomThemeColor);
   const { logout, user } = useAuthStore();
   const navigate = useNavigate();
+  const supportOnly = isSupportOnlyAccount(user?.roles);
+  const navSections = supportOnly ? SUPPORT_ONLY_NAV_SECTIONS : ADMIN_NAV_SECTIONS;
+  const adminHome = supportOnly ? "/admin/support-tickets" : "/admin/dashboard";
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const { unreadCount: unreadMessages } = useUnreadMessages();
 
-  const isDarkMode = theme === 'dark';
+  const isDarkMode = colorMode === 'dark';
 
   const handleLogout = () => {
     logout();
@@ -136,9 +151,9 @@ export function AdminLayout() {
   };
 
   const toggleDarkMode = () => {
-    const newTheme = isDarkMode ? 'light' : 'dark';
-    setTheme(newTheme);
-    toast.success(newTheme === 'dark' ? t('common:switchedToDarkMode') : t('common:switchedToLightMode'));
+    const next = isDarkMode ? 'light' : 'dark';
+    setColorMode(next);
+    toast.success(next === 'dark' ? t('common:switchedToDarkMode') : t('common:switchedToLightMode'));
   };
 
   const themeLabel = useMemo(
@@ -147,8 +162,12 @@ export function AdminLayout() {
   );
 
   useEffect(() => {
-    applyTheme(theme, customThemeColor, mixTheme);
-  }, [theme, customThemeColor, mixTheme]);
+    if (!supportOnly) return;
+    const allowed = location.pathname.startsWith("/admin/support-tickets");
+    if (!allowed) {
+      navigate("/admin/support-tickets", { replace: true });
+    }
+  }, [supportOnly, location.pathname, navigate]);
 
   return (
     <div data-admin-shell className="relative min-h-dvh bg-background text-foreground">
@@ -178,6 +197,7 @@ export function AdminLayout() {
                 </DialogHeader>
                 <div className="max-h-[min(70dvh,560px)] overflow-y-auto px-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))] pt-2">
                   <AdminNavList
+                    sections={navSections}
                     onNavigate={() => setMobileOpen(false)}
                     unreadMessages={unreadMessages}
                   />
@@ -185,7 +205,7 @@ export function AdminLayout() {
               </DialogContent>
             </Dialog>
 
-            <NavLink to="/admin/dashboard" className="flex items-center gap-2.5">
+            <NavLink to={adminHome} className="flex items-center gap-2.5">
               <div className="relative">
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-md">
                   <GraduationCap className="h-5 w-5" />
@@ -270,7 +290,7 @@ export function AdminLayout() {
                   <DropdownMenuRadioGroup
                     value={theme}
                     onValueChange={(v) => {
-                      const next = v as ThemeId;
+                      const next = normalizeAccentTheme(v as ThemeId);
                       if (next === 'custom') {
                         if (!customThemeColor) {
                           const computed = getComputedStyle(document.documentElement)
@@ -300,7 +320,7 @@ export function AdminLayout() {
                       }
                     }}
                   >
-                    {THEMES.filter(th => th.id !== 'custom').map((th) => (
+                    {THEMES.filter(th => th.id !== 'custom' && th.id !== 'dark').map((th) => (
                       <DropdownMenuRadioItem
                         key={th.id}
                         value={th.id}
@@ -468,7 +488,7 @@ export function AdminLayout() {
             transition={{ duration: 0.3 }}
             className="sticky top-[5.5rem] max-h-[calc(100vh-6.5rem)] overflow-y-auto rounded-xl border border-border/60 bg-card/95 p-3 shadow-xl shadow-primary/5"
           >
-            <AdminNavList unreadMessages={unreadMessages} />
+            <AdminNavList sections={navSections} unreadMessages={unreadMessages} />
           </motion.div>
         </aside>
 
@@ -488,16 +508,18 @@ export function AdminLayout() {
 }
 
 function AdminNavList({
+  sections,
   onNavigate,
   unreadMessages = 0,
 }: {
+  sections: NavSection[];
   onNavigate?: () => void;
   unreadMessages?: number;
 }) {
   const { t } = useTranslation(['nav', 'support']);
   return (
     <nav className="flex flex-col gap-4" aria-label="Main navigation">
-      {ADMIN_NAV_SECTIONS.map((section) => (
+      {sections.map((section) => (
         <div key={section.titleKey}>
           <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
             {t(section.titleKey)}

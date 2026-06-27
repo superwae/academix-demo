@@ -1,8 +1,9 @@
 import { useAppStore } from '../store/useAppStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { userService, type UserUiPreferences } from '../services/userService';
-import { applyTheme } from './applyTheme';
+import { applyAppearance } from './applyTheme';
 import { MIX_THEMES, THEMES, type MixThemeId, type ThemeId } from './themes';
+import { normalizeAccentTheme, type ColorMode } from './themePresets';
 
 const THEME_IDS = new Set(THEMES.map((t) => t.id));
 const MIX_IDS = new Set(MIX_THEMES.map((m) => m.id));
@@ -24,32 +25,42 @@ export function applyServerUiPreferencesToStore(prefs: UserUiPreferences | undef
       ? (prefs.mixTheme as MixThemeId)
       : undefined;
 
+  const colorMode: ColorMode =
+    prefs.colorMode === 'dark'
+      ? 'dark'
+      : prefs.theme === 'dark'
+        ? 'dark'
+        : 'light';
+
   if (mix) {
     useAppStore.setState((s) => ({
       data: {
         ...s.data,
+        colorMode,
         theme: 'custom',
         customThemeColor: undefined,
         mixTheme: mix,
       },
     }));
-    applyTheme('custom', undefined, mix);
+    applyAppearance(colorMode, 'custom', undefined, mix);
     return;
   }
 
-  const theme = THEME_IDS.has(prefs.theme as ThemeId) ? (prefs.theme as ThemeId) : 'light';
+  const rawTheme = THEME_IDS.has(prefs.theme as ThemeId) ? (prefs.theme as ThemeId) : 'light';
+  const accent = normalizeAccentTheme(rawTheme);
   const custom =
-    theme === 'custom' && prefs.customThemeColor ? prefs.customThemeColor : undefined;
+    accent === 'custom' && prefs.customThemeColor ? prefs.customThemeColor : undefined;
 
   useAppStore.setState((s) => ({
     data: {
       ...s.data,
-      theme,
-      customThemeColor: theme === 'custom' ? custom ?? s.data.customThemeColor : undefined,
+      colorMode,
+      theme: accent,
+      customThemeColor: accent === 'custom' ? custom ?? s.data.customThemeColor : undefined,
       mixTheme: undefined,
     },
   }));
-  applyTheme(theme, theme === 'custom' ? custom : undefined, null);
+  applyAppearance(colorMode, accent, accent === 'custom' ? custom : undefined, null);
 }
 
 /** Debounced PUT when the user changes theme in the UI. */
@@ -60,10 +71,11 @@ export function scheduleSyncUiPreferencesToServer(): void {
     syncTimer = null;
     void (async () => {
       try {
-        const { theme, customThemeColor, mixTheme } = useAppStore.getState().data;
+        const { colorMode, theme, customThemeColor, mixTheme } = useAppStore.getState().data;
         const currentPreferences = useAuthStore.getState().user?.uiPreferences;
         const body: UserUiPreferences = {
           theme,
+          colorMode,
           customThemeColor: customThemeColor ?? null,
           mixTheme: mixTheme ?? null,
           notificationsEnabled: currentPreferences?.notificationsEnabled ?? null,
